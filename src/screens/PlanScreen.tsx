@@ -5,10 +5,12 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
+import Svg, { Path } from 'react-native-svg';
 import { Colors, Spacing, FontSize, BorderRadius } from '../constants/theme';
 import {
   BottomNavBar,
@@ -51,6 +53,16 @@ const mockPlans: Plan[] = [
     icon: 'fitness-center',
     color: Colors.tertiaryContainer,
   },
+  {
+    id: '3',
+    title: '99天正念冥想',
+    subtitle: '已坚持 98 天',
+    progress: 66,
+    days: 98,
+    totalDays: 99,
+    icon: 'self-improvement',
+    color: Colors.primaryContainer,
+  },
 ];
 
 interface Badge {
@@ -83,6 +95,14 @@ const mockBadges: Badge[] = [
     id: '3',
     title: '初入圈子',
     description: '同行共进，更好生活',
+    icon: 'groups',
+    color: Colors.secondaryContainer,
+    unlocked: true,
+  },
+  {
+    id: '4',
+    title: '初入圈子2',
+    description: '啊啊啊不不不',
     icon: 'groups',
     color: Colors.secondaryContainer,
     unlocked: true,
@@ -141,12 +161,104 @@ const mockNotifications: Notification[] = [
   },
 ];
 
+type RhythmPeriod = 'week' | 'month';
+
+interface RhythmData {
+  label: string;
+  value: number; // 完成率百分比 0-100
+}
+
+// 模拟周数据：周一到周日的完成率
+const mockWeekData: RhythmData[] = [
+  { label: '周一', value: 100 },
+  { label: '周二', value: 85 },
+  { label: '周三', value: 100 },
+  { label: '周四', value: 70 },
+  { label: '周五', value: 95 },
+  { label: '周六', value: 60 },
+  { label: '周日', value: 80 },
+];
+
+// 模拟月数据：1-30号的完成率
+const mockMonthData: RhythmData[] = Array.from({ length: 30 }, (_, i) => ({
+  label: `${i + 1}`,
+  value: Math.max(
+    40,
+    Math.min(100, 65 + Math.sin(i / 4) * 25 + (Math.random() - 0.5) * 15),
+  ),
+}));
+
 const PlanScreen: React.FC = () => {
   const navigation = useNavigation();
   const [notificationVisible, setNotificationVisible] = useState(false);
+  const [isManaging, setIsManaging] = useState(false);
+  const [selectedPlans, setSelectedPlans] = useState<Set<string>>(new Set());
+  const [plans, setPlans] = useState<Plan[]>(mockPlans);
+  const [rhythmPeriod, setRhythmPeriod] = useState<RhythmPeriod>('week');
+
+  // 根据选择的周期获取对应数据
+  const rhythmData = rhythmPeriod === 'week' ? mockWeekData : mockMonthData;
+
+  // 生成SVG曲线路径
+  const generateCurvePath = (
+    data: RhythmData[],
+    width: number,
+    height: number,
+  ) => {
+    if (data.length === 0) return '';
+
+    const points = data.map((item, index) => ({
+      x: (index / (data.length - 1)) * width,
+      y: height - (item.value / 100) * height,
+    }));
+
+    // 使用贝塞尔曲线平滑连接点
+    let path = `M ${points[0].x} ${points[0].y}`;
+
+    for (let i = 0; i < points.length - 1; i++) {
+      const current = points[i];
+      const next = points[i + 1];
+      const controlX = (current.x + next.x) / 2;
+
+      path += ` Q ${controlX} ${current.y}, ${controlX} ${(current.y + next.y) / 2}`;
+      path += ` Q ${controlX} ${next.y}, ${next.x} ${next.y}`;
+    }
+
+    return path;
+  };
 
   const handleCreatePlan = () => {
     navigation.navigate('TemplateSelection' as never);
+  };
+
+  const toggleManageMode = () => {
+    setIsManaging(!isManaging);
+    setSelectedPlans(new Set());
+  };
+
+  const togglePlanSelection = (id: string) => {
+    const newSelected = new Set(selectedPlans);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedPlans(newSelected);
+  };
+
+  const handleDeleteSelected = () => {
+    if (selectedPlans.size === 0) return;
+
+    setPlans(plans.filter(plan => !selectedPlans.has(plan.id)));
+    setSelectedPlans(new Set());
+    setIsManaging(false);
+  };
+
+  const movePlan = (fromIndex: number, toIndex: number) => {
+    const newPlans = [...plans];
+    const [movedPlan] = newPlans.splice(fromIndex, 1);
+    newPlans.splice(toIndex, 0, movedPlan);
+    setPlans(newPlans);
   };
 
   return (
@@ -163,127 +275,360 @@ const PlanScreen: React.FC = () => {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>正在进行</Text>
-            <TouchableOpacity>
-              <Text style={styles.manageText}>管理计划</Text>
+        {plans.length === 0 ? (
+          <View style={styles.emptyState}>
+            <View style={styles.emptyImageContainer}>
+              <View style={styles.emptyImagePlaceholder}>
+                <MaterialIcons
+                  name="spa"
+                  size={120}
+                  color={Colors.primaryContainer}
+                />
+              </View>
+            </View>
+            <Text style={styles.emptyTitle}>还没有计划？</Text>
+            <Text style={styles.emptySubtitle}>
+              开启你的第一个治愈计划，让成长自然发生。
+            </Text>
+            <TouchableOpacity
+              style={styles.createButton}
+              onPress={handleCreatePlan}
+            >
+              <MaterialIcons
+                name="add-circle"
+                size={24}
+                color={Colors.onPrimaryContainer}
+              />
+              <Text style={styles.createButtonText}>创建治愈计划</Text>
             </TouchableOpacity>
-          </View>
 
-          <View style={styles.plansList}>
-            {mockPlans.map(plan => (
-              <Card
-                key={plan.id}
-                style={styles.planCard}
-                gradient
-                gradientColors={[Colors.primary, Colors.primaryContainer]}
-              >
-                <View style={styles.planHeader}>
-                  <View style={styles.planInfo}>
+            <View style={styles.templatesSection}>
+              <Text style={styles.templatesSectionTitle}>从模板开始</Text>
+              <View style={styles.templatesGrid}>
+                <TouchableOpacity
+                  style={styles.templateCardWrapper}
+                  onPress={handleCreatePlan}
+                >
+                  <Card style={styles.templateCard}>
                     <View
-                      style={[styles.planIcon, { backgroundColor: plan.color }]}
+                      style={[
+                        styles.templateIcon,
+                        { backgroundColor: Colors.secondaryContainer },
+                      ]}
                     >
                       <MaterialIcons
-                        name={plan.icon}
+                        name="spa"
                         size={24}
+                        color={Colors.secondary}
+                      />
+                    </View>
+                    <Text style={styles.templateTitle}>晨间唤醒</Text>
+                    <Text style={styles.templateSubtitle}>21天习惯养成</Text>
+                  </Card>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.templateCardWrapper}
+                  onPress={handleCreatePlan}
+                >
+                  <Card style={styles.templateCard}>
+                    <View
+                      style={[
+                        styles.templateIcon,
+                        { backgroundColor: Colors.tertiaryContainer },
+                      ]}
+                    >
+                      <MaterialIcons
+                        name="menu-book"
+                        size={24}
+                        color={Colors.tertiary}
+                      />
+                    </View>
+                    <Text style={styles.templateTitle}>专注阅读</Text>
+                    <Text style={styles.templateSubtitle}>每周一本书</Text>
+                  </Card>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        ) : (
+          <>
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>正在进行</Text>
+                <TouchableOpacity onPress={toggleManageMode}>
+                  <Text style={styles.manageText}>
+                    {isManaging ? '完成' : '管理计划'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              {isManaging && selectedPlans.size > 0 && (
+                <TouchableOpacity
+                  style={styles.deleteButton}
+                  onPress={handleDeleteSelected}
+                >
+                  <MaterialIcons
+                    name="delete"
+                    size={20}
+                    color={Colors.onError}
+                  />
+                  <Text style={styles.deleteButtonText}>
+                    删除 ({selectedPlans.size})
+                  </Text>
+                </TouchableOpacity>
+              )}
+
+              <View style={styles.plansList}>
+                {plans.map((plan, index) => (
+                  <Card
+                    key={plan.id}
+                    style={styles.planCard}
+                    gradient
+                    gradientColors={[Colors.primary, Colors.primaryContainer]}
+                  >
+                    <View style={styles.planHeader}>
+                      <View style={styles.planInfo}>
+                        {isManaging && (
+                          <TouchableOpacity
+                            style={styles.checkbox}
+                            onPress={() => togglePlanSelection(plan.id)}
+                          >
+                            <View
+                              style={[
+                                styles.checkboxInner,
+                                selectedPlans.has(plan.id) &&
+                                  styles.checkboxChecked,
+                              ]}
+                            >
+                              {selectedPlans.has(plan.id) && (
+                                <MaterialIcons
+                                  name="check"
+                                  size={16}
+                                  color={Colors.onPrimary}
+                                />
+                              )}
+                            </View>
+                          </TouchableOpacity>
+                        )}
+                        <View
+                          style={[
+                            styles.planIcon,
+                            { backgroundColor: plan.color },
+                          ]}
+                        >
+                          <MaterialIcons
+                            name={plan.icon}
+                            size={24}
+                            color={Colors.onSurface}
+                          />
+                        </View>
+                        <View style={styles.planText}>
+                          <Text style={styles.planTitle}>{plan.title}</Text>
+                          <Text style={styles.planSubtitle}>
+                            {plan.subtitle}
+                          </Text>
+                        </View>
+                      </View>
+                      <View style={styles.planActions}>
+                        {isManaging && (
+                          <View style={styles.dragHandle}>
+                            <TouchableOpacity
+                              disabled={index === 0}
+                              onPress={() => movePlan(index, index - 1)}
+                            >
+                              <MaterialIcons
+                                name="keyboard-arrow-up"
+                                size={24}
+                                color={
+                                  index === 0
+                                    ? Colors.outlineVariant
+                                    : Colors.onSurface
+                                }
+                              />
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                              disabled={index === plans.length - 1}
+                              onPress={() => movePlan(index, index + 1)}
+                            >
+                              <MaterialIcons
+                                name="keyboard-arrow-down"
+                                size={24}
+                                color={
+                                  index === plans.length - 1
+                                    ? Colors.outlineVariant
+                                    : Colors.onSurface
+                                }
+                              />
+                            </TouchableOpacity>
+                          </View>
+                        )}
+                        <BloomProgress
+                          progress={plan.progress}
+                          size={56}
+                          strokeWidth={6}
+                        />
+                      </View>
+                    </View>
+                    <ProgressBar
+                      progress={plan.progress}
+                      color={
+                        plan.progress === 66 ? Colors.primary : Colors.tertiary
+                      }
+                      height={8}
+                    />
+                  </Card>
+                ))}
+
+                <TouchableOpacity
+                  style={styles.addPlanCard}
+                  onPress={handleCreatePlan}
+                >
+                  <View style={styles.addIconWrapper}>
+                    <MaterialIcons
+                      name="add"
+                      size={24}
+                      color={Colors.outline}
+                    />
+                  </View>
+                  <Text style={styles.addText}>开启新计划</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>坚持节奏</Text>
+                <View style={styles.periodToggle}>
+                  <TouchableOpacity
+                    style={[
+                      styles.periodButton,
+                      rhythmPeriod === 'week' && styles.periodButtonActive,
+                    ]}
+                    onPress={() => setRhythmPeriod('week')}
+                  >
+                    <Text
+                      style={[
+                        styles.periodText,
+                        rhythmPeriod === 'week' && styles.periodTextActive,
+                      ]}
+                    >
+                      周
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      styles.periodButton,
+                      rhythmPeriod === 'month' && styles.periodButtonActive,
+                    ]}
+                    onPress={() => setRhythmPeriod('month')}
+                  >
+                    <Text
+                      style={[
+                        styles.periodText,
+                        rhythmPeriod === 'month' && styles.periodTextActive,
+                      ]}
+                    >
+                      月
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              <Card style={styles.chartCard}>
+                {rhythmPeriod === 'week' ? (
+                  // 周视图：柱状图
+                  <>
+                    <View style={styles.chartContainer}>
+                      {rhythmData.map((item, index) => (
+                        <View
+                          key={index}
+                          style={[
+                            styles.chartBar,
+                            {
+                              height: `${item.value}%`,
+                              backgroundColor:
+                                item.value > 80
+                                  ? Colors.primaryFixed
+                                  : item.value > 0
+                                    ? Colors.secondaryFixedDim
+                                    : Colors.surfaceContainerHigh,
+                            },
+                          ]}
+                        />
+                      ))}
+                    </View>
+                    <View style={styles.chartLabels}>
+                      {rhythmData.map((item, index) => (
+                        <Text key={index} style={styles.chartLabel}>
+                          {item.label}
+                        </Text>
+                      ))}
+                    </View>
+                  </>
+                ) : (
+                  // 月视图：SVG曲线图
+                  <>
+                    <View style={styles.svgChartContainer}>
+                      <Svg
+                        width="100%"
+                        height={160}
+                        viewBox={`0 0 ${Dimensions.get('window').width - Spacing.md * 2 - Spacing.lg * 2} 160`}
+                      >
+                        <Path
+                          d={generateCurvePath(
+                            rhythmData,
+                            Dimensions.get('window').width -
+                              Spacing.md * 2 -
+                              Spacing.lg * 2,
+                            160,
+                          )}
+                          stroke={Colors.primary}
+                          strokeWidth="3"
+                          fill="none"
+                        />
+                      </Svg>
+                    </View>
+                    <View style={styles.monthLabels}>
+                      <Text style={styles.monthLabel}>1</Text>
+                      <Text style={styles.monthLabel}>10</Text>
+                      <Text style={styles.monthLabel}>15</Text>
+                      <Text style={styles.monthLabel}>20</Text>
+                      <Text style={styles.monthLabel}>25</Text>
+                      <Text style={styles.monthLabel}>30</Text>
+                    </View>
+                  </>
+                )}
+              </Card>
+            </View>
+
+            <View style={styles.section}>
+              <Text style={[styles.sectionTitle, { marginBottom: Spacing.lg }]}>
+                已获成就
+              </Text>
+              <View style={styles.badgesGrid}>
+                {mockBadges.slice(0, 6).map(badge => (
+                  <Card key={badge.id} style={styles.badgeCard}>
+                    <View
+                      style={[
+                        styles.badgeIcon,
+                        { backgroundColor: badge.color },
+                      ]}
+                    >
+                      <MaterialIcons
+                        name={badge.icon}
+                        size={32}
                         color={Colors.onSurface}
                       />
                     </View>
-                    <View style={styles.planText}>
-                      <Text style={styles.planTitle}>{plan.title}</Text>
-                      <Text style={styles.planSubtitle}>{plan.subtitle}</Text>
-                    </View>
-                  </View>
-                  <BloomProgress
-                    progress={plan.progress}
-                    size={56}
-                    strokeWidth={6}
-                  />
-                </View>
-                <ProgressBar
-                  progress={plan.progress}
-                  color={
-                    plan.progress === 66 ? Colors.primary : Colors.tertiary
-                  }
-                  height={8}
-                />
-              </Card>
-            ))}
-
-            <TouchableOpacity
-              style={styles.addPlanCard}
-              onPress={handleCreatePlan}
-            >
-              <View style={styles.addIconWrapper}>
-                <MaterialIcons name="add" size={24} color={Colors.outline} />
+                    <Text style={styles.badgeTitle}>{badge.title}</Text>
+                    <Text style={styles.badgeDesc}>{badge.description}</Text>
+                  </Card>
+                ))}
               </View>
-              <Text style={styles.addText}>开启新计划</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>坚持节奏</Text>
-            <View style={styles.periodToggle}>
-              <TouchableOpacity style={styles.periodButton}>
-                <Text style={styles.periodTextActive}>周</Text>
-              </TouchableOpacity>
-              <TouchableOpacity>
-                <Text style={styles.periodText}>月</Text>
-              </TouchableOpacity>
             </View>
-          </View>
-
-          <Card style={styles.chartCard}>
-            <View style={styles.chartContainer}>
-              {[40, 65, 55, 95, 70, 45, 80].map((height, index) => (
-                <View
-                  key={index}
-                  style={[
-                    styles.chartBar,
-                    {
-                      height: `${height}%`,
-                      backgroundColor:
-                        index === 3
-                          ? Colors.primaryFixed
-                          : Colors.secondaryFixedDim,
-                    },
-                  ]}
-                />
-              ))}
-            </View>
-            <View style={styles.chartLabels}>
-              {['一', '二', '三', '四', '五', '六', '日'].map((day, index) => (
-                <Text key={index} style={styles.chartLabel}>
-                  {day}
-                </Text>
-              ))}
-            </View>
-          </Card>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>已获成就</Text>
-          <View style={styles.badgesGrid}>
-            {mockBadges.map(badge => (
-              <Card key={badge.id} style={styles.badgeCard}>
-                <View
-                  style={[styles.badgeIcon, { backgroundColor: badge.color }]}
-                >
-                  <MaterialIcons
-                    name={badge.icon}
-                    size={32}
-                    color={Colors.onSurface}
-                  />
-                </View>
-                <Text style={styles.badgeTitle}>{badge.title}</Text>
-                <Text style={styles.badgeDesc}>{badge.description}</Text>
-              </Card>
-            ))}
-          </View>
-        </View>
+          </>
+        )}
       </ScrollView>
 
       <NotificationDrawer
@@ -292,7 +637,6 @@ const PlanScreen: React.FC = () => {
         notifications={mockNotifications}
         onNotificationPress={id => {
           console.log('Notification pressed:', id);
-          setNotificationVisible(false);
         }}
       />
 
@@ -312,16 +656,16 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: Spacing.md,
     paddingTop: 32,
-    paddingBottom: 140,
+    paddingBottom: 100,
   },
   section: {
-    marginBottom: Spacing.xl,
+    marginBottom: Spacing.xl * 1.5,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.lg,
   },
   sectionTitle: {
     fontSize: FontSize.xxl,
@@ -414,10 +758,12 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   periodButton: {
-    backgroundColor: Colors.primary,
     borderRadius: BorderRadius.full,
     paddingVertical: Spacing.xs,
     paddingHorizontal: Spacing.md,
+  },
+  periodButtonActive: {
+    backgroundColor: Colors.primary,
   },
   periodTextActive: {
     fontSize: FontSize.sm,
@@ -428,12 +774,10 @@ const styles = StyleSheet.create({
     fontSize: FontSize.sm,
     fontWeight: '600',
     color: Colors.onSurfaceVariant,
-    paddingVertical: Spacing.xs,
-    paddingHorizontal: Spacing.md,
   },
   chartCard: {
     padding: Spacing.lg,
-    height: 200,
+    minHeight: 220,
   },
   chartContainer: {
     flex: 1,
@@ -441,17 +785,16 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     justifyContent: 'space-between',
     paddingBottom: Spacing.md,
+    gap: 2,
   },
   chartBar: {
     flex: 1,
-    marginHorizontal: 4,
     borderTopLeftRadius: 4,
     borderTopRightRadius: 4,
   },
   chartLabels: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: Spacing.xs,
   },
   chartLabel: {
     flex: 1,
@@ -459,7 +802,9 @@ const styles = StyleSheet.create({
     fontSize: FontSize.xs,
     fontWeight: '600',
     color: Colors.onSurfaceVariant,
-    textTransform: 'uppercase',
+  },
+  chartLabelHidden: {
+    opacity: 0,
   },
   badgesGrid: {
     flexDirection: 'row',
@@ -495,6 +840,168 @@ const styles = StyleSheet.create({
     fontSize: FontSize.xs,
     color: Colors.onSurfaceVariant,
     textAlign: 'center',
+  },
+  deleteButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.error,
+    borderRadius: BorderRadius.md,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    marginBottom: Spacing.md,
+    gap: Spacing.xs,
+  },
+  deleteButtonText: {
+    fontSize: FontSize.md,
+    fontWeight: '600',
+    color: Colors.onError,
+  },
+  checkbox: {
+    marginRight: Spacing.sm,
+  },
+  checkboxInner: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: Colors.outline,
+    backgroundColor: Colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkboxChecked: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  planActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+  },
+  dragHandle: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: Spacing.xs,
+  },
+  emptyState: {
+    flex: 1,
+    alignItems: 'center',
+    paddingTop: Spacing.md,
+  },
+  emptyImageContainer: {
+    position: 'relative',
+    marginBottom: Spacing.xl,
+  },
+  emptyImagePlaceholder: {
+    width: 256,
+    height: 256,
+    borderRadius: 128,
+    backgroundColor: `${Colors.primaryContainer}20`,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyImage: {
+    width: 256,
+    height: 256,
+  },
+  emptyTitle: {
+    fontSize: FontSize.xxl,
+    fontWeight: '800',
+    color: Colors.onSurface,
+    marginBottom: Spacing.md,
+    textAlign: 'center',
+  },
+  emptySubtitle: {
+    fontSize: FontSize.lg,
+    color: Colors.onSurfaceVariant,
+    textAlign: 'center',
+    maxWidth: 280,
+    lineHeight: 24,
+    marginBottom: Spacing.xl,
+  },
+  createButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.primaryContainer,
+    paddingVertical: Spacing.lg,
+    paddingHorizontal: Spacing.xl,
+    borderRadius: BorderRadius.md,
+    gap: Spacing.sm,
+    marginBottom: Spacing.xl * 2,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.08,
+    shadowRadius: 32,
+    elevation: 8,
+  },
+  createButtonText: {
+    fontSize: FontSize.lg,
+    fontWeight: '700',
+    color: Colors.onPrimaryContainer,
+  },
+  templatesSection: {
+    width: '100%',
+    paddingHorizontal: Spacing.md,
+  },
+  templatesSectionTitle: {
+    fontSize: FontSize.xl,
+    fontWeight: '700',
+    color: Colors.onSurface,
+    marginBottom: Spacing.md,
+    paddingHorizontal: Spacing.xs,
+  },
+  templatesGrid: {
+    flexDirection: 'row',
+    gap: Spacing.md,
+  },
+  templateCardWrapper: {
+    flex: 1,
+  },
+  templateCard: {
+    flex: 1,
+    padding: Spacing.lg,
+    gap: Spacing.md,
+  },
+  templateIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  templateTitle: {
+    fontSize: FontSize.md,
+    fontWeight: '700',
+    color: Colors.onSurface,
+  },
+  templateSubtitle: {
+    fontSize: FontSize.sm,
+    color: Colors.onSurfaceVariant,
+  },
+  lineChartWrapper: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  lineChartStyle: {
+    marginVertical: 0,
+    borderRadius: BorderRadius.md,
+  },
+  svgChartContainer: {
+    width: '100%',
+    height: 160,
+    marginBottom: Spacing.sm,
+  },
+  monthLabels: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.xs,
+  },
+  monthLabel: {
+    fontSize: FontSize.xs,
+    fontWeight: '600',
+    color: Colors.onSurfaceVariant,
   },
 });
 

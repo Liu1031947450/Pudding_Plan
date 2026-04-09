@@ -6,17 +6,46 @@ import {
   ScrollView,
   TouchableOpacity,
   TextInput,
+  Modal,
+  Switch,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { Colors, Spacing, FontSize, BorderRadius } from '../constants/theme';
 import { TopAppBar, Card, Button } from '../components';
+import { getTemplateById, TemplateDetail } from '../data/templateData';
+
+type CreatePlanRouteProp = RouteProp<{ CreatePlan: { templateId?: string } }, 'CreatePlan'>;
+
+interface Reminder {
+  id: string;
+  time: Date;
+  label: string;
+  enabled: boolean;
+}
 
 const CreatePlanScreen: React.FC = () => {
   const navigation = useNavigation();
-  const [planName, setPlanName] = useState('晨间瑜伽与冥想');
-  const [planDays, setPlanDays] = useState('21');
+  const route = useRoute<CreatePlanRouteProp>();
+  const templateId = route.params?.templateId;
+
+  // 获取模板数据
+  const templateData: TemplateDetail | undefined = templateId ? getTemplateById(templateId) : undefined;
+
+  const [planName, setPlanName] = useState(templateData?.title || '');
+  const [planDays, setPlanDays] = useState(templateData?.duration.toString() || '');
+  const planIcon = templateData?.icon || '✨';
+  const planColor = templateData?.color || Colors.primaryContainer;
+
+  const [checkInMethod, setCheckInMethod] = useState<'stamp' | 'number' | 'diary'>('stamp');
+  const [reminders, setReminders] = useState<Reminder[]>([
+    { id: '1', time: new Date(2024, 0, 1, 7, 30), label: '每日', enabled: true },
+    { id: '2', time: new Date(2024, 0, 1, 22, 0), label: '复盘', enabled: false },
+  ]);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [selectedTime, setSelectedTime] = useState(new Date());
 
   const handleBack = () => {
     navigation.goBack();
@@ -24,6 +53,39 @@ const CreatePlanScreen: React.FC = () => {
 
   const handleComplete = () => {
     navigation.goBack();
+  };
+
+  const handleAddReminder = () => {
+    setShowTimePicker(true);
+  };
+
+  const handleTimeChange = (_event: any, date?: Date) => {
+    if (date) {
+      setSelectedTime(date);
+    }
+  };
+
+  const handleConfirmTime = () => {
+    const newReminder: Reminder = {
+      id: Date.now().toString(),
+      time: selectedTime,
+      label: '每日',
+      enabled: true,
+    };
+    setReminders([...reminders, newReminder]);
+    setShowTimePicker(false);
+  };
+
+  const toggleReminder = (id: string) => {
+    setReminders(reminders.map(r =>
+      r.id === id ? { ...r, enabled: !r.enabled } : r
+    ));
+  };
+
+  const formatTime = (date: Date) => {
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
   };
 
   return (
@@ -41,15 +103,39 @@ const CreatePlanScreen: React.FC = () => {
       >
         <View style={styles.heroSection}>
           <View style={styles.heroImage}>
-            <View style={styles.heroImagePlaceholder}>
-              <Text style={styles.heroImageText}>🧘</Text>
+            <View style={[styles.heroImagePlaceholder, { backgroundColor: `${planColor}20` }]}>
+              <Text style={styles.heroImageText}>{planIcon}</Text>
             </View>
           </View>
           <View style={styles.heroContent}>
-            <Text style={styles.heroLabel}>开始新的旅程</Text>
-            <Text style={styles.heroTitle}>晨间瑜伽与冥想</Text>
+            <Text style={styles.heroLabel}>
+              {templateData ? templateData.category : '开始新的旅程'}
+            </Text>
+            <Text style={styles.heroTitle}>
+              {planName || '自定义计划'}
+            </Text>
+            {templateData && (
+              <Text style={styles.heroDescription}>{templateData.description}</Text>
+            )}
           </View>
         </View>
+
+        {templateData && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <MaterialIcons name="flag" size={20} color={Colors.primary} />
+              <Text style={styles.sectionTitle}>计划目标</Text>
+            </View>
+            <View style={styles.goalsList}>
+              {templateData.goals.map((goal, index) => (
+                <View key={index} style={styles.goalItem}>
+                  <MaterialIcons name="check-circle" size={20} color={Colors.primary} />
+                  <Text style={styles.goalText}>{goal}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
@@ -94,64 +180,117 @@ const CreatePlanScreen: React.FC = () => {
 
           <View style={styles.methodGrid}>
             <TouchableOpacity
-              style={[styles.methodButton, styles.methodButtonActive]}
+              style={[
+                styles.methodButton,
+                checkInMethod === 'stamp' && styles.methodButtonActive,
+              ]}
+              onPress={() => setCheckInMethod('stamp')}
             >
-              <MaterialIcons name="verified" size={24} color={Colors.primary} />
-              <Text style={[styles.methodText, styles.methodTextActive]}>
+              <MaterialIcons
+                name="verified"
+                size={24}
+                color={checkInMethod === 'stamp' ? Colors.primary : Colors.onSurfaceVariant}
+              />
+              <Text
+                style={[
+                  styles.methodText,
+                  checkInMethod === 'stamp' && styles.methodTextActive,
+                ]}
+              >
                 盖章打卡
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.methodButton}>
-              <MaterialIcons name="show-chart" size={24} color={Colors.onSurfaceVariant} />
-              <Text style={styles.methodText}>数值记录</Text>
+            <TouchableOpacity
+              style={[
+                styles.methodButton,
+                checkInMethod === 'number' && styles.methodButtonActive,
+              ]}
+              onPress={() => setCheckInMethod('number')}
+            >
+              <MaterialIcons
+                name="show-chart"
+                size={24}
+                color={checkInMethod === 'number' ? Colors.primary : Colors.onSurfaceVariant}
+              />
+              <Text
+                style={[
+                  styles.methodText,
+                  checkInMethod === 'number' && styles.methodTextActive,
+                ]}
+              >
+                数值记录
+              </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.methodButton}>
-              <MaterialIcons name="edit-note" size={24} color={Colors.onSurfaceVariant} />
-              <Text style={styles.methodText}>文字日记</Text>
+            <TouchableOpacity
+              style={[
+                styles.methodButton,
+                checkInMethod === 'diary' && styles.methodButtonActive,
+              ]}
+              onPress={() => setCheckInMethod('diary')}
+            >
+              <MaterialIcons
+                name="edit-note"
+                size={24}
+                color={checkInMethod === 'diary' ? Colors.primary : Colors.onSurfaceVariant}
+              />
+              <Text
+                style={[
+                  styles.methodText,
+                  checkInMethod === 'diary' && styles.methodTextActive,
+                ]}
+              >
+                文字日记
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <View>
-              <MaterialIcons name="notifications" size={20} color={Colors.primary} />
-            </View>
+            <MaterialIcons name="notifications" size={20} color={Colors.primary} />
             <Text style={styles.sectionTitle}>提醒设置</Text>
-            <TouchableOpacity style={styles.addButton}>
-              <MaterialIcons name="add" size={16} color={Colors.primary} />
+            <TouchableOpacity style={styles.addButton} onPress={handleAddReminder}>
+              <MaterialIcons name="add" size={16} color={Colors.tertiary} />
               <Text style={styles.addButtonText}>添加</Text>
             </TouchableOpacity>
           </View>
 
           <View style={styles.remindersList}>
-            <Card style={styles.reminderCard}>
-              <View style={styles.reminderLeft}>
-                <MaterialIcons name="alarm" size={20} color={Colors.primary} />
-                <Text style={styles.reminderTime}>07:30</Text>
-                <View style={styles.reminderBadge}>
-                  <Text style={styles.reminderBadgeText}>每日</Text>
+            {reminders.map(reminder => (
+              <Card key={reminder.id} style={styles.reminderCard}>
+                <View style={styles.reminderLeft}>
+                  <MaterialIcons
+                    name="alarm"
+                    size={20}
+                    color={reminder.enabled ? Colors.primary : Colors.onSurfaceVariant}
+                  />
+                  <Text style={styles.reminderTime}>{formatTime(reminder.time)}</Text>
+                  <View
+                    style={[
+                      styles.reminderBadge,
+                      !reminder.enabled && styles.reminderBadgeGray,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.reminderBadgeText,
+                        !reminder.enabled && styles.reminderBadgeTextGray,
+                      ]}
+                    >
+                      {reminder.label}
+                    </Text>
+                  </View>
                 </View>
-              </View>
-              <View style={styles.reminderToggle}>
-                <View style={styles.toggleActive} />
-              </View>
-            </Card>
-
-            <Card style={styles.reminderCard}>
-              <View style={styles.reminderLeft}>
-                <MaterialIcons name="alarm" size={20} color={Colors.onSurfaceVariant} />
-                <Text style={styles.reminderTime}>22:00</Text>
-                <View style={[styles.reminderBadge, styles.reminderBadgeGray]}>
-                  <Text style={styles.reminderBadgeTextGray}>复盘</Text>
-                </View>
-              </View>
-              <View style={styles.reminderToggle}>
-                <View style={styles.toggleInactive} />
-              </View>
-            </Card>
+                <Switch
+                  value={reminder.enabled}
+                  onValueChange={() => toggleReminder(reminder.id)}
+                  trackColor={{ false: Colors.surfaceContainerHigh, true: Colors.primaryContainer }}
+                  thumbColor={reminder.enabled ? Colors.primary : Colors.outline}
+                />
+              </Card>
+            ))}
           </View>
         </View>
 
@@ -203,6 +342,45 @@ const CreatePlanScreen: React.FC = () => {
           </View>
         </View>
       </ScrollView>
+
+      <Modal
+        visible={showTimePicker}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowTimePicker(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.timePickerModal}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>选择提醒时间</Text>
+              <TouchableOpacity onPress={() => setShowTimePicker(false)}>
+                <MaterialIcons name="close" size={24} color={Colors.onSurface} />
+              </TouchableOpacity>
+            </View>
+            <DateTimePicker
+              value={selectedTime}
+              mode="time"
+              display="spinner"
+              onChange={handleTimeChange}
+              textColor={Colors.onSurface}
+            />
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={styles.modalCancelButton}
+                onPress={() => setShowTimePicker(false)}
+              >
+                <Text style={styles.modalCancelText}>取消</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.modalConfirmButton}
+                onPress={handleConfirmTime}
+              >
+                <Text style={styles.modalConfirmText}>确定</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       <View style={styles.bottomBar}>
         <Button
@@ -260,6 +438,12 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: Colors.onSurface,
   },
+  heroDescription: {
+    fontSize: FontSize.md,
+    color: Colors.onSurfaceVariant,
+    marginTop: Spacing.sm,
+    lineHeight: 22,
+  },
   section: {
     marginBottom: Spacing.xl,
   },
@@ -268,6 +452,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: Spacing.md,
     gap: Spacing.xs,
+  },
+  goalsList: {
+    gap: Spacing.sm,
+  },
+  goalItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    paddingVertical: Spacing.xs,
+  },
+  goalText: {
+    fontSize: FontSize.md,
+    color: Colors.onSurface,
+    flex: 1,
   },
   sectionIcon: {
     fontSize: 20,
@@ -280,10 +478,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   addButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: `${Colors.tertiaryContainer}20`,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.xs,
     borderRadius: BorderRadius.full,
+    gap: 4,
   },
   addButtonText: {
     fontSize: FontSize.sm,
@@ -494,6 +695,60 @@ const styles = StyleSheet.create({
   },
   completeButton: {
     width: '100%',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  timePickerModal: {
+    backgroundColor: Colors.surface,
+    borderTopLeftRadius: BorderRadius.xl,
+    borderTopRightRadius: BorderRadius.xl,
+    paddingBottom: Spacing.xl,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: Spacing.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.outlineVariant,
+  },
+  modalTitle: {
+    fontSize: FontSize.xl,
+    fontWeight: '700',
+    color: Colors.onSurface,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    gap: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.lg,
+  },
+  modalCancelButton: {
+    flex: 1,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.md,
+    backgroundColor: Colors.surfaceContainerHigh,
+    alignItems: 'center',
+  },
+  modalCancelText: {
+    fontSize: FontSize.md,
+    fontWeight: '600',
+    color: Colors.onSurfaceVariant,
+  },
+  modalConfirmButton: {
+    flex: 1,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.md,
+    backgroundColor: Colors.primary,
+    alignItems: 'center',
+  },
+  modalConfirmText: {
+    fontSize: FontSize.md,
+    fontWeight: '600',
+    color: Colors.onPrimary,
   },
 });
 

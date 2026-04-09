@@ -3,5 +3,8 @@
     "allow": [
       "Bash(wc -l /Users/liuhongyan/PuddingPlan\\\\\\(布丁计划\\\\\\)/pudding_plan/Pudding_Plan/src/screens/*.tsx)"
     ]
-  }
+  },
+  "useWorktrees": false,
+  "autoCreateWorktree": false,
+  "cleanupWorktreesOnExit": true
 }

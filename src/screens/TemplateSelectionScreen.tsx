@@ -7,10 +7,14 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize, BorderRadius } from '../constants/theme';
 import { TopAppBar, Card } from '../components';
+
+type RootStackParamList = {
+  CreatePlan: { templateId?: string } | undefined;
+};
 
 interface Template {
   id: string;
@@ -80,27 +84,23 @@ const mockTemplates: Template[] = [
 ];
 
 const TemplateSelectionScreen: React.FC = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
   const handleBack = () => {
     navigation.goBack();
   };
 
   const handleTemplateSelect = (templateId: string) => {
-    navigation.navigate('CreatePlan' as never, { templateId } as never);
+    navigation.navigate('CreatePlan', { templateId });
   };
 
   const handleCustomPlan = () => {
-    navigation.navigate('CreatePlan' as never);
+    navigation.navigate('CreatePlan');
   };
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <TopAppBar
-        title="选择模板"
-        showBackButton
-        onBackPress={handleBack}
-      />
+      <TopAppBar title="选择模板" showBackButton onBackPress={handleBack} />
 
       <ScrollView
         style={styles.scrollView}
@@ -115,7 +115,7 @@ const TemplateSelectionScreen: React.FC = () => {
         </View>
 
         <View style={styles.templatesGrid}>
-          {mockTemplates.map((template) => (
+          {mockTemplates.map(template => (
             <TouchableOpacity
               key={template.id}
               style={styles.templateCard}
@@ -135,17 +135,23 @@ const TemplateSelectionScreen: React.FC = () => {
                   <View style={styles.templateHeader}>
                     <Text style={styles.templateTitle}>{template.title}</Text>
                     <View style={styles.categoryBadge}>
-                      <Text style={styles.categoryText}>{template.category}</Text>
+                      <Text style={styles.categoryText}>
+                        {template.category}
+                      </Text>
                     </View>
                   </View>
-                  <Text style={styles.templateSubtitle}>{template.subtitle}</Text>
+                  <Text style={styles.templateSubtitle}>
+                    {template.subtitle}
+                  </Text>
                   <View style={styles.templateFooter}>
                     <MaterialIcons
                       name="schedule"
                       size={16}
                       color={Colors.onSurfaceVariant}
                     />
-                    <Text style={styles.templateDuration}>{template.duration}</Text>
+                    <Text style={styles.templateDuration}>
+                      {template.duration}
+                    </Text>
                   </View>
                 </View>
               </Card>
@@ -160,13 +166,23 @@ const TemplateSelectionScreen: React.FC = () => {
         >
           <Card style={styles.customCard}>
             <View style={styles.customIconWrapper}>
-              <MaterialIcons name="add-circle" size={32} color={Colors.primary} />
+              <MaterialIcons
+                name="add-circle"
+                size={32}
+                color={Colors.primary}
+              />
             </View>
             <View style={styles.customContent}>
               <Text style={styles.customTitle}>自定义计划</Text>
-              <Text style={styles.customSubtitle}>从零开始，完全按你的想法定制</Text>
+              <Text style={styles.customSubtitle}>
+                从零开始，完全按你的想法定制
+              </Text>
             </View>
-            <MaterialIcons name="arrow-forward" size={24} color={Colors.primary} />
+            <MaterialIcons
+              name="arrow-forward"
+              size={24}
+              color={Colors.primary}
+            />
           </Card>
         </TouchableOpacity>
       </ScrollView>

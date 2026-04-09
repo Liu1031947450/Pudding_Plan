@@ -9,4 +9,3 @@ export { BloomProgress } from './BloomProgress';
 export { EmptyState } from './EmptyState';
 export { BentoGrid, BentoItem } from './BentoGrid';
 export { NotificationDrawer } from './NotificationDrawer';
-export { NotificationDrawer } from './NotificationDrawer';
