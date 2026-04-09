@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize, BorderRadius } from '../constants/theme';
-import { BottomNavBar, TopAppBar, Avatar, Card } from '../components';
+import { BottomNavBar, TopAppBar, Avatar, Card, NotificationDrawer } from '../components';
 
 interface Badge {
   id: string;
@@ -50,7 +50,7 @@ const ProfileScreen: React.FC = () => {
               />
             </View>
             <View style={styles.avatarBadge}>
-              <Text style={styles.avatarBadgeText}>{'\uE885'}</Text>
+              <MaterialIcons name="verified" size={16} color={Colors.onSecondary} />
             </View>
           </View>
 
@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: Spacing.md,
-    paddingTop: 72,
+    paddingTop: 32,
     paddingBottom: 140,
   },
   profileSection: {

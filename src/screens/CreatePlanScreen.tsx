@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -9,11 +9,14 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize, BorderRadius } from '../constants/theme';
 import { TopAppBar, Card, Button } from '../components';
 
 const CreatePlanScreen: React.FC = () => {
   const navigation = useNavigation();
+  const [planName, setPlanName] = useState('晨间瑜伽与冥想');
+  const [planDays, setPlanDays] = useState('21');
 
   const handleBack = () => {
     navigation.goBack();
@@ -29,7 +32,6 @@ const CreatePlanScreen: React.FC = () => {
         title="定制我的计划"
         showBackButton
         onBackPress={handleBack}
-        rightIcon="check"
       />
 
       <ScrollView
@@ -51,7 +53,7 @@ const CreatePlanScreen: React.FC = () => {
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionIcon}>{'\uE8FF'}</Text>
+            <MaterialIcons name="info" size={20} color={Colors.primary} />
             <Text style={styles.sectionTitle}>基础信息</Text>
           </View>
 
@@ -61,7 +63,8 @@ const CreatePlanScreen: React.FC = () => {
               <View style={styles.inputWrapper}>
                 <TextInput
                   style={styles.input}
-                  value="晨间瑜伽与冥想"
+                  value={planName}
+                  onChangeText={setPlanName}
                   placeholderTextColor={Colors.outline}
                 />
               </View>
@@ -72,7 +75,8 @@ const CreatePlanScreen: React.FC = () => {
               <View style={styles.inputWrapper}>
                 <TextInput
                   style={styles.input}
-                  value="21"
+                  value={planDays}
+                  onChangeText={setPlanDays}
                   keyboardType="number-pad"
                   placeholderTextColor={Colors.outline}
                 />
@@ -84,7 +88,7 @@ const CreatePlanScreen: React.FC = () => {
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionIcon}>{'\uE8E8'}</Text>
+            <MaterialIcons name="check-circle" size={20} color={Colors.primary} />
             <Text style={styles.sectionTitle}>打卡方式</Text>
           </View>
 
@@ -92,19 +96,19 @@ const CreatePlanScreen: React.FC = () => {
             <TouchableOpacity
               style={[styles.methodButton, styles.methodButtonActive]}
             >
-              <Text style={styles.methodIcon}>{'\uE8E4'}</Text>
+              <MaterialIcons name="verified" size={24} color={Colors.primary} />
               <Text style={[styles.methodText, styles.methodTextActive]}>
                 盖章打卡
               </Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.methodButton}>
-              <Text style={styles.methodIcon}>{'\uE2C9'}</Text>
+              <MaterialIcons name="show-chart" size={24} color={Colors.onSurfaceVariant} />
               <Text style={styles.methodText}>数值记录</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.methodButton}>
-              <Text style={styles.methodIcon}>{'\uE431'}</Text>
+              <MaterialIcons name="edit-note" size={24} color={Colors.onSurfaceVariant} />
               <Text style={styles.methodText}>文字日记</Text>
             </TouchableOpacity>
           </View>
@@ -113,18 +117,19 @@ const CreatePlanScreen: React.FC = () => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <View>
-              <Text style={styles.sectionIcon}>{'\uE7F4'}</Text>
+              <MaterialIcons name="notifications" size={20} color={Colors.primary} />
             </View>
             <Text style={styles.sectionTitle}>提醒设置</Text>
             <TouchableOpacity style={styles.addButton}>
-              <Text style={styles.addButtonText}>{'\uE145'} 添加</Text>
+              <MaterialIcons name="add" size={16} color={Colors.primary} />
+              <Text style={styles.addButtonText}>添加</Text>
             </TouchableOpacity>
           </View>
 
           <View style={styles.remindersList}>
             <Card style={styles.reminderCard}>
               <View style={styles.reminderLeft}>
-                <Text style={styles.reminderIcon}>{'\uE8B5'}</Text>
+                <MaterialIcons name="alarm" size={20} color={Colors.primary} />
                 <Text style={styles.reminderTime}>07:30</Text>
                 <View style={styles.reminderBadge}>
                   <Text style={styles.reminderBadgeText}>每日</Text>
@@ -137,7 +142,7 @@ const CreatePlanScreen: React.FC = () => {
 
             <Card style={styles.reminderCard}>
               <View style={styles.reminderLeft}>
-                <Text style={styles.reminderIcon}>{'\uE8B5'}</Text>
+                <MaterialIcons name="alarm" size={20} color={Colors.onSurfaceVariant} />
                 <Text style={styles.reminderTime}>22:00</Text>
                 <View style={[styles.reminderBadge, styles.reminderBadgeGray]}>
                   <Text style={styles.reminderBadgeTextGray}>复盘</Text>
@@ -152,7 +157,7 @@ const CreatePlanScreen: React.FC = () => {
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionIcon}>{'\uE885'}</Text>
+            <MaterialIcons name="emoji-events" size={20} color={Colors.primary} />
             <Text style={styles.sectionTitle}>阶段里程碑</Text>
           </View>
 
@@ -192,7 +197,7 @@ const CreatePlanScreen: React.FC = () => {
             </Card>
 
             <TouchableOpacity style={styles.addMilestoneButton}>
-              <Text style={styles.addMilestoneIcon}>{'\uE145'}</Text>
+              <MaterialIcons name="add" size={20} color={Colors.onSurfaceVariant} />
               <Text style={styles.addMilestoneText}>添加里程碑阶段</Text>
             </TouchableOpacity>
           </View>
@@ -222,7 +227,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: Spacing.md,
-    paddingTop: 80,
+    paddingTop: 32,
     paddingBottom: 120,
   },
   heroSection: {
@@ -262,6 +267,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: Spacing.md,
+    gap: Spacing.xs,
   },
   sectionIcon: {
     fontSize: 20,

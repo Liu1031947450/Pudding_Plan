@@ -10,12 +10,14 @@ import {
   SettingsScreen,
   CreatePlanScreen,
   PostMomentScreen,
+  TemplateSelectionScreen,
 } from '../screens';
 
 export type RootStackParamList = {
   Main: undefined;
   Settings: undefined;
-  CreatePlan: undefined;
+  TemplateSelection: undefined;
+  CreatePlan: { templateId?: string } | undefined;
   PostMoment: undefined;
 };
 
@@ -72,6 +74,13 @@ const AppNavigator: React.FC = () => {
           component={SettingsScreen}
           options={{
             presentation: 'card',
+          }}
+        />
+        <Stack.Screen
+          name="TemplateSelection"
+          component={TemplateSelectionScreen}
+          options={{
+            presentation: 'modal',
           }}
         />
         <Stack.Screen

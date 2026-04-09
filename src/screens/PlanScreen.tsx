@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -16,6 +16,7 @@ import {
   Card,
   ProgressBar,
   BloomProgress,
+  NotificationDrawer,
 } from '../components';
 
 interface Plan {
@@ -88,16 +89,74 @@ const mockBadges: Badge[] = [
   },
 ];
 
+interface Notification {
+  id: string;
+  type: 'reminder' | 'achievement' | 'social' | 'system';
+  title: string;
+  message: string;
+  time: string;
+  read: boolean;
+}
+
+const mockNotifications: Notification[] = [
+  {
+    id: '1',
+    type: 'reminder',
+    title: '每日打卡提醒',
+    message: '别忘了完成今天的冥想打卡哦，坚持就是胜利！',
+    time: '2分钟前',
+    read: false,
+  },
+  {
+    id: '2',
+    type: 'achievement',
+    title: '恭喜解锁新成就',
+    message: '你已连续打卡7天，获得"7天星火"勋章！',
+    time: '1小时前',
+    read: false,
+  },
+  {
+    id: '3',
+    type: 'social',
+    title: '好友互动',
+    message: 'Elena R. 给你的计划点赞并留言：加油，一起进步！',
+    time: '3小时前',
+    read: true,
+  },
+  {
+    id: '4',
+    type: 'system',
+    title: '系统更新',
+    message: 'PuddingPlan v2.4.0 已发布，新增圈子功能和更多主题。',
+    time: '昨天',
+    read: true,
+  },
+  {
+    id: '5',
+    type: 'system',
+    title: '系统更新2',
+    message: 'PuddingPlan v2.4.0 已发布，新增圈子功能和更多主题2。',
+    time: '昨天',
+    read: true,
+  },
+];
+
 const PlanScreen: React.FC = () => {
   const navigation = useNavigation();
+  const [notificationVisible, setNotificationVisible] = useState(false);
 
   const handleCreatePlan = () => {
-    navigation.navigate('CreatePlan' as never);
+    navigation.navigate('TemplateSelection' as never);
   };
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <TopAppBar title="我的计划" leftIcon="spa" rightIcon="notifications" />
+      <TopAppBar
+        title="我的计划"
+        leftIcon="spa"
+        rightIcon="notifications"
+        onRightPress={() => setNotificationVisible(true)}
+      />
 
       <ScrollView
         style={styles.scrollView}
@@ -227,6 +286,16 @@ const PlanScreen: React.FC = () => {
         </View>
       </ScrollView>
 
+      <NotificationDrawer
+        visible={notificationVisible}
+        onClose={() => setNotificationVisible(false)}
+        notifications={mockNotifications}
+        onNotificationPress={id => {
+          console.log('Notification pressed:', id);
+          setNotificationVisible(false);
+        }}
+      />
+
       <BottomNavBar />
     </SafeAreaView>
   );
@@ -242,7 +311,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: Spacing.md,
-    paddingTop: 80,
+    paddingTop: 32,
     paddingBottom: 140,
   },
   section: {
@@ -278,8 +347,10 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   planInfo: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    marginRight: Spacing.sm,
   },
   planIcon: {
     width: 48,
@@ -339,10 +410,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: Colors.surfaceContainerHigh,
     borderRadius: BorderRadius.full,
-    padding: 2,
+    padding: 4,
+    gap: 4,
   },
   periodButton: {
-    backgroundColor: Colors.surfaceContainerHigh,
+    backgroundColor: Colors.primary,
     borderRadius: BorderRadius.full,
     paddingVertical: Spacing.xs,
     paddingHorizontal: Spacing.md,
@@ -350,12 +422,14 @@ const styles = StyleSheet.create({
   periodTextActive: {
     fontSize: FontSize.sm,
     fontWeight: '600',
-    color: Colors.onSurface,
+    color: Colors.onPrimary,
   },
   periodText: {
     fontSize: FontSize.sm,
     fontWeight: '600',
     color: Colors.onSurfaceVariant,
+    paddingVertical: Spacing.xs,
+    paddingHorizontal: Spacing.md,
   },
   chartCard: {
     padding: Spacing.lg,

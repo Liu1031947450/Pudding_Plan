@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize, BorderRadius } from '../constants/theme';
-import { BottomNavBar, TopAppBar, Card, Button } from '../components';
+import { BottomNavBar, TopAppBar, Card, Button, NotificationDrawer } from '../components';
 
 interface DayData {
   day: number;
@@ -125,7 +125,7 @@ const CalendarScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <TopAppBar leftIcon="spa" title="PuddingPlan" rightIcon="notifications" />
+      <TopAppBar leftIcon="spa" title="日历" rightIcon="notifications" />
 
       <ScrollView
         style={styles.scrollView}
@@ -262,7 +262,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: Spacing.md,
-    paddingTop: 80,
+    paddingTop: 32,
     paddingBottom: 140,
   },
   calendarSection: {

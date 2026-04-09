@@ -79,7 +79,7 @@ const mockCircles: Circle[] = [
 const CirclesScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <TopAppBar leftIcon="spa" title="PuddingPlan" rightIcon="notifications" />
+      <TopAppBar leftIcon="spa" title="圈子" rightIcon="notifications" />
 
       <ScrollView
         style={styles.scrollView}
@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: Spacing.md,
-    paddingTop: 80,
+    paddingTop: 32,
     paddingBottom: 140,
   },
   heroSection: {
