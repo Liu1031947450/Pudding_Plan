@@ -116,14 +116,17 @@ const ProfileScreen: React.FC = () => {
                 <View
                   style={[
                     styles.badgeIcon,
-                    { backgroundColor: badge.color, opacity: badge.unlocked ? 1 : 0.4 },
+                    {
+                      backgroundColor: badge.color,
+                      opacity: badge.unlocked ? 1 : 0.4,
+                    },
                   ]}
                 >
                   <MaterialIcons
                     name={badge.icon}
                     size={28}
                     color={Colors.onSurface}
-                    style={{ opacity: badge.unlocked ? 1 : 0.4 }}
+                    style={[{ opacity: badge.unlocked ? 1 : 0.4 }]}
                   />
                 </View>
                 <Text

@@ -185,7 +185,7 @@ const CirclesScreen: React.FC = () => {
               </View>
             </Card>
 
-            <View style={{ flexDirection: 'row', gap: Spacing.sm, flexWrap: 'wrap' }}>
+            <View style={styles.smallCirclesRow}>
               {mockCircles.slice(1, 3).map(circle => (
                 <Card
                   key={circle.id}
@@ -409,6 +409,11 @@ const styles = StyleSheet.create({
   circleCardSmall: {
     width: '48%',
     minWidth: 140,
+  },
+  smallCirclesRow: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+    flexWrap: 'wrap',
   },
   circleImageContainer: {
     flex: 1,

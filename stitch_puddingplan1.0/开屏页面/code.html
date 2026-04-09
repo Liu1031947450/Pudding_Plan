@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-primary-fixed-variant": "#675200",
+                    "on-background": "#303333",
+                    "on-tertiary-container": "#0a476d",
+                    "surface-container-low": "#f4f3f2",
+                    "secondary-fixed-dim": "#ccebc2",
+                    "background": "#faf9f8",
+                    "secondary": "#4b6646",
+                    "inverse-primary": "#f9d461",
+                    "primary-dim": "#665100",
+                    "tertiary-container": "#a1d1fe",
+                    "on-primary-fixed": "#463600",
+                    "error-container": "#fa7150",
+                    "primary-fixed-dim": "#eac655",
+                    "on-surface-variant": "#5d605f",
+                    "on-error-container": "#671200",
+                    "surface-container-highest": "#e1e3e2",
+                    "on-secondary-fixed-variant": "#506b4a",
+                    "on-secondary-fixed": "#354e30",
+                    "outline-variant": "#b0b2b1",
+                    "error": "#aa371c",
+                    "primary": "#745c00",
+                    "secondary-container": "#dafad0",
+                    "on-tertiary-fixed-variant": "#1a5177",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary-dim": "#22577e",
+                    "secondary-fixed": "#dafad0",
+                    "secondary-dim": "#3f5a3a",
+                    "on-tertiary": "#f6f9ff",
+                    "tertiary-fixed-dim": "#93c3ef",
+                    "error-dim": "#821a01",
+                    "on-primary-container": "#5c4900",
+                    "on-error": "#fff7f6",
+                    "on-secondary-container": "#466141",
+                    "surface-container-high": "#e7e8e7",
+                    "on-secondary": "#eaffe1",
+                    "surface-dim": "#d8dad9",
+                    "surface-tint": "#745c00",
+                    "surface": "#faf9f8",
+                    "inverse-on-surface": "#9d9d9c",
+                    "tertiary-fixed": "#a1d1fe",
+                    "on-surface": "#303333",
+                    "inverse-surface": "#0d0e0e",
+                    "tertiary": "#31638a",
+                    "on-primary": "#fff8ee",
+                    "on-tertiary-fixed": "#003351",
+                    "primary-container": "#f9d461",
+                    "surface-bright": "#faf9f8",
+                    "primary-fixed": "#f9d461",
+                    "outline": "#797b7a",
+                    "surface-variant": "#e1e3e2",
+                    "surface-container": "#eeeeed"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Plus Jakarta Sans"],
+                    "label": ["Plus Jakarta Sans"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .pudding-blob {
+            border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background overflow-hidden h-screen w-screen flex flex-col justify-center items-center">
+<!-- Splash Screen Gradient Layer -->
+<div class="absolute inset-0 z-0 bg-gradient-to-tr from-primary-container/20 via-background to-secondary-container/10"></div>
+<!-- Main Content Container -->
+<div class="relative z-10 flex flex-col items-center justify-between h-full py-20 px-8 w-full max-w-md">
+<!-- Top Empty Space for Balance -->
+<div class="w-1"></div>
+<!-- Central Identity Cluster -->
+<div class="flex flex-col items-center gap-10">
+<!-- Character Illustration Wrapper -->
+<div class="relative group">
+<!-- Abstract Organic Shape Background -->
+<div class="absolute -inset-4 bg-primary-container/30 blur-3xl rounded-full scale-110"></div>
+<!-- The Pudding Character -->
+<div class="relative flex flex-col items-center">
+<div class="w-48 h-40 bg-primary-container pudding-blob relative shadow-[0_20px_50px_rgba(116,92,0,0.1)] flex flex-col items-center justify-center border-b-8 border-primary-dim/10">
+<!-- Caramel Top -->
+<div class="absolute top-0 w-[85%] h-10 bg-[#8b6e00]/20 rounded-[40%_40%_20%_20%] blur-sm"></div>
+<!-- Eyes and Mouth (Simplified Smiley) -->
+<div class="flex gap-8 mb-2">
+<div class="w-3 h-3 bg-on-primary-container rounded-full"></div>
+<div class="w-3 h-3 bg-on-primary-container rounded-full"></div>
+</div>
+<div class="w-6 h-3 border-b-4 border-on-primary-container rounded-full"></div>
+</div>
+<!-- Separate Stamp Element (Pudding Stamp) -->
+<div class="absolute -bottom-6 -right-4 w-16 h-16 bg-surface-container-lowest rounded-full shadow-[0_12px_32px_rgba(116,92,0,0.12)] flex items-center justify-center border-4 border-primary-container">
+<span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">
+                            verified
+                        </span>
+</div>
+</div>
+</div>
+<!-- Brand Typography -->
+<div class="text-center space-y-2">
+<h1 class="text-[2.75rem] font-extrabold text-primary tracking-tighter leading-none">
+                    PuddingPlan
+                </h1>
+<div class="flex items-center justify-center gap-2">
+<div class="h-1 w-8 bg-primary-container rounded-full"></div>
+<div class="h-1 w-2 bg-primary-container rounded-full"></div>
+</div>
+</div>
+</div>
+<!-- Bottom Tagline Cluster -->
+<div class="flex flex-col items-center space-y-6">
+<p class="text-on-surface-variant font-medium tracking-[0.2em] text-sm opacity-80">
+                让成长，像布丁一样轻盈自愈
+            </p>
+<!-- Minimal Loading/Patience Indicator -->
+<div class="flex gap-1.5">
+<div class="w-1.5 h-1.5 rounded-full bg-primary/20"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-primary/40"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-primary/20"></div>
+</div>
+</div>
+</div>
+<!-- Background Decorative Elements (Soft Organic Blobs) -->
+<div class="absolute -top-20 -left-20 w-64 h-64 bg-secondary-container/30 blur-3xl rounded-full"></div>
+<div class="absolute bottom-1/4 -right-10 w-48 h-48 bg-tertiary-container/20 blur-3xl rounded-full"></div>
+</body></html>

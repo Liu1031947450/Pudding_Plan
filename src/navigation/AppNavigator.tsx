@@ -1,5 +1,4 @@
 import React from 'react';
-import { Text, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -12,7 +11,6 @@ import {
   CreatePlanScreen,
   PostMomentScreen,
 } from '../screens';
-import { Colors, FontSize } from '../constants/theme';
 
 export type RootStackParamList = {
   Main: undefined;
@@ -30,33 +28,6 @@ export type MainTabParamList = {
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
-
-const TabIcon: React.FC<{ icon: string; focused: boolean }> = ({
-  icon,
-  focused,
-}) => (
-  <Text
-    style={[
-      styles.tabIcon,
-      { color: focused ? Colors.primary : Colors.onSurfaceVariant },
-    ]}
-  >
-    {icon}
-  </Text>
-);
-
-const PlanIcon = ({ focused }: { focused: boolean }) => (
-  <TabIcon icon={'\uE8FF'} focused={focused} />
-);
-const CalendarIcon = ({ focused }: { focused: boolean }) => (
-  <TabIcon icon={'\uE935'} focused={focused} />
-);
-const CirclesIcon = ({ focused }: { focused: boolean }) => (
-  <TabIcon icon={'\uE7EF'} focused={focused} />
-);
-const ProfileIcon = ({ focused }: { focused: boolean }) => (
-  <TabIcon icon={'\uE7FD'} focused={focused} />
-);
 
 const MainNavigator: React.FC = () => {
   return (
@@ -121,33 +92,5 @@ const AppNavigator: React.FC = () => {
     </NavigationContainer>
   );
 };
-
-const styles = StyleSheet.create({
-  tabBar: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 80,
-    paddingBottom: 24,
-    paddingTop: 8,
-    backgroundColor: 'rgba(250, 249, 248, 0.95)',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: -12 },
-    shadowOpacity: 0.08,
-    shadowRadius: 32,
-    elevation: 10,
-  },
-  tabBarLabel: {
-    fontSize: FontSize.xs,
-    fontWeight: '600',
-  },
-  tabIcon: {
-    fontSize: 24,
-    marginBottom: -4,
-  },
-});
 
 export default AppNavigator;

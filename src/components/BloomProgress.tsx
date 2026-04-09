@@ -40,7 +40,7 @@ export const BloomProgress: React.FC<BloomProgressProps> = ({
       duration: 300,
       useNativeDriver: false,
     }).start();
-  }, [progress]);
+  }, [progress, scaleAnim, colorAnim]);
 
   // Interpolate color from tertiaryContainer to secondaryContainer
   const strokeColor = colorAnim.interpolate({

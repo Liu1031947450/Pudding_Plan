@@ -29,7 +29,7 @@ const CreatePlanScreen: React.FC = () => {
         title="定制我的计划"
         showBackButton
         onBackPress={handleBack}
-        rightIcon="\uE876"
+        rightIcon="check"
       />
 
       <ScrollView

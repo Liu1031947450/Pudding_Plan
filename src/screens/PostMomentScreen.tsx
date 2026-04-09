@@ -25,7 +25,7 @@ const PostMomentScreen: React.FC = () => {
         title="发布动态"
         showBackButton
         onBackPress={handleClose}
-        rightIcon="\uE8B5"
+        rightIcon="send"
       />
 
       <ScrollView
@@ -38,17 +38,17 @@ const PostMomentScreen: React.FC = () => {
           <View style={styles.chipsContainer}>
             <Chip
               label="饮水达标"
-              icon="\uE798"
+              icon="local-drink"
               variant="secondary"
               size="small"
             />
             <Chip
               label="冥想 45min"
-              icon="\uEAF4"
+              icon="self-improvement"
               variant="tertiary"
               size="small"
             />
-            <Chip label="早起" icon="\uE813" variant="surface" size="small" />
+            <Chip label="早起" icon="wb-sunny" variant="surface" size="small" />
             <TouchableOpacity style={styles.addChip}>
               <Text style={styles.addChipIcon}>{'\uE145'}</Text>
             </TouchableOpacity>

@@ -8,4 +8,3 @@ export { ProgressBar } from './ProgressBar';
 export { BloomProgress } from './BloomProgress';
 export { EmptyState } from './EmptyState';
 export { BentoGrid, BentoItem } from './BentoGrid';
-export { MaterialIcon } from './MaterialIcon';

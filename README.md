@@ -1,6 +1,6 @@
-# PuddingPlan
+# PuddingPlan (布丁计划)
 
-一个使用 [**React Native**](https://reactnative.dev) 构建的跨平台移动应用，基于 [`@react-native-community/cli`](https://github.com/react-native-community/cli) 初始化。
+一个使用 [**React Native**](https://reactnative.dev) + [**Expo**](https://expo.dev) 构建的跨平台移动应用，专注于习惯养成和自律打卡。
 
 ## 📁 项目结构
 
@@ -44,11 +44,23 @@ Pudding_Plan/
 
 ## 🚀 快速开始
 
-> **注意**: 在开始之前，请确保已完成 [环境配置指南](https://reactnative.dev/docs/set-up-your-environment)。
+> **注意**: 在开始之前，请确保已安装 Node.js (>= 22.11.0) 和 npm/yarn。
 
-### 第一步：启动 Metro
+### 第一步：安装依赖
 
-在项目根目录运行以下命令启动 Metro 开发服务器：
+在项目根目录运行以下命令安装项目依赖：
+
+```sh
+# 使用 npm
+npm install
+
+# 或使用 Yarn
+yarn install
+```
+
+### 第二步：启动 Expo Go 服务
+
+运行以下命令启动 Expo 开发服务器：
 
 ```sh
 # 使用 npm
@@ -58,87 +70,320 @@ npm start
 yarn start
 ```
 
-### 第二步：运行应用
+启动后会自动打开 Expo 开发工具界面，显示二维码和多个运行选项。
 
-Metro 运行时，打开新的终端窗口，使用以下命令构建并运行 Android 或 iOS 应用：
+### 第三步：在设备上运行应用
 
-#### Android
+#### 方式一：使用 Expo Go App（推荐用于快速预览）
 
+1. 在手机上安装 Expo Go App：
+   - iOS: 从 App Store 下载 "Expo Go"
+   - Android: 从 Google Play 或应用商店下载 "Expo Go"
+
+2. 打开 Expo Go App，扫描终端中显示的二维码
+
+3. 应用会自动加载并运行在你的手机上
+
+#### 方式二：使用模拟器/模拟器
+
+在 Expo 开发工具界面中，按下对应的快捷键：
+
+- **Android 模拟器**: 按 `a` 键（需要先启动 Android 模拟器）
+- **iOS 模拟器**: 按 `i` 键（仅限 macOS，需要安装 Xcode）
+- **Web 浏览器**: 按 `w` 键
+
+#### 方式三：构建原生应用
+
+如果需要构建原生 Android/iOS 应用：
+
+**Android:**
 ```sh
-# 使用 npm
 npm run android
-
-# 或使用 Yarn
+# 或
 yarn android
 ```
 
-#### iOS
-
-首次克隆项目或更新原生依赖后，需要安装 CocoaPods 依赖：
-
+**iOS (仅限 macOS):**
 ```sh
-bundle install
-bundle exec pod install
-```
+# 首次运行需要安装 CocoaPods 依赖
+cd ios
+pod install
+cd ..
 
-然后运行应用：
-
-```sh
-# 使用 npm
+# 运行应用
 npm run ios
-
-# 或使用 Yarn
+# 或
 yarn ios
 ```
 
-如果配置正确，你应该能在 Android 模拟器、iOS 模拟器或真机上看到应用运行。
+### 常用命令
+
+```sh
+# 启动开发服务器
+npm start
+
+# 清除缓存并启动
+npm start -- --clear
+
+# 运行 Android 应用
+npm run android
+
+# 运行 iOS 应用
+npm run ios
+
+# 代码检查
+npm run lint
+
+# 运行测试
+npm test
+```
+
+### 关闭 Expo Go 服务
+
+在运行 `npm start` 的终端窗口中：
+- 按 `Ctrl + C` 停止开发服务器
+
+如果端口被占用，可以手动清理：
+```sh
+# 查找占用 8081 端口的进程并终止
+lsof -ti:8081 | xargs kill -9
+
+# 或查找占用 19000/19001 端口的进程（Expo 默认端口）
+lsof -ti:19000 | xargs kill -9
+lsof -ti:19001 | xargs kill -9
+```
 
 ## 🔧 技术栈
 
-- **框架**: React Native 0.85.0
-- **语言**: TypeScript
-- **导航**: React Navigation
+- **框架**: React Native 0.85.0 + Expo 55.0.12
+- **语言**: TypeScript 5.8.3
+- **导航**: React Navigation 7.x
+  - @react-navigation/native
+  - @react-navigation/native-stack
+  - @react-navigation/bottom-tabs
+- **UI 组件**: 
+  - @expo/vector-icons (Material Icons)
+  - expo-blur (毛玻璃效果)
+  - expo-linear-gradient (渐变效果)
+  - react-native-svg (矢量图形)
 - **状态管理**: React Hooks
-- **构建工具**: Metro
+- **构建工具**: Metro + Expo
+- **设计系统**: Material Design 3
 
 ## 📝 开发指南
 
 ### 添加新页面
 
 1. 在 `src/screens/` 目录下创建新的页面组件
-2. 在 `src/navigation/AppNavigator.tsx` 中注册路由
+2. 在 `src/screens/index.ts` 中导出组件
+3. 在 `src/navigation/AppNavigator.tsx` 中注册路由
+
+示例：
+```typescript
+// src/screens/NewScreen.tsx
+import React from 'react';
+import { View, Text } from 'react-native';
+
+const NewScreen: React.FC = () => {
+  return (
+    <View>
+      <Text>New Screen</Text>
+    </View>
+  );
+};
+
+export default NewScreen;
+
+// src/screens/index.ts
+export { default as NewScreen } from './NewScreen';
+
+// src/navigation/AppNavigator.tsx
+import { NewScreen } from '../screens';
+// 在 Stack.Navigator 中添加
+<Stack.Screen name="NewScreen" component={NewScreen} />
+```
 
 ### 添加新组件
 
 1. 在 `src/components/` 目录下创建组件文件
-2. 组件应使用主题常量（`src/constants/theme.ts`）保持样式一致
+2. 在 `src/components/index.ts` 中导出组件
+3. 组件应使用主题常量（`src/constants/theme.ts`）保持样式一致
+
+示例：
+```typescript
+// src/components/MyComponent.tsx
+import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import { Colors, Spacing, FontSize, BorderRadius } from '../constants/theme';
+
+export const MyComponent: React.FC = () => {
+  return (
+    <View style={styles.container}>
+      <Text style={styles.text}>My Component</Text>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: Colors.surface,
+    padding: Spacing.md,
+    borderRadius: BorderRadius.lg,
+  },
+  text: {
+    fontSize: FontSize.md,
+    color: Colors.onSurface,
+  },
+});
+
+// src/components/index.ts
+export { MyComponent } from './MyComponent';
+```
+
+### 使用图标
+
+项目使用 `@expo/vector-icons` 中的 Material Icons：
+
+```typescript
+import { MaterialIcons } from '@expo/vector-icons';
+import { Colors } from '../constants/theme';
+
+<MaterialIcons name="home" size={24} color={Colors.primary} />
+```
+
+查看所有可用图标：https://icons.expo.fyi/Index/MaterialIcons
 
 ### 主题配置
 
 主题相关配置位于 `src/constants/theme.ts`，包括：
-- `Colors`: 颜色配置
-- `Spacing`: 间距配置
-- `FontSize`: 字体大小配置
+
+- **Colors**: Material Design 3 颜色系统
+  - `primary`, `secondary`, `tertiary` - 主题色
+  - `surface`, `background` - 背景色
+  - `onPrimary`, `onSurface` - 文字颜色
+  
+- **Spacing**: 间距配置
+  - `xs: 4`, `sm: 8`, `md: 16`, `lg: 24`, `xl: 32`, `xxl: 48`
+  
+- **FontSize**: 字体大小配置
+  - `xs: 12`, `sm: 14`, `md: 16`, `lg: 18`, `xl: 24`, `xxl: 32`
+  
+- **BorderRadius**: 圆角配置
+  - `sm: 8`, `md: 16`, `lg: 32`, `xl: 48`, `full: 9999`
+
+### 响应式布局
+
+使用 flexWrap 和百分比宽度实现响应式布局：
+
+```typescript
+const styles = StyleSheet.create({
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.sm,
+  },
+  item: {
+    width: '48%',  // 两列布局
+    minWidth: 140, // 最小宽度
+  },
+});
+```
 
 ## 🎉 恭喜！
 
-你已经成功运行了 React Native 应用！
+你已经成功运行了 PuddingPlan 应用！
 
 ### 接下来可以做什么？
 
-- 想将 React Native 代码集成到现有应用中？查看 [集成指南](https://reactnative.dev/docs/integration-with-existing-apps)
-- 想深入学习 React Native？查看 [官方文档](https://reactnative.dev/docs/getting-started)
+- 探索应用的各个页面：计划、日历、圈子、个人中心
+- 查看源代码了解项目结构和实现细节
+- 根据需求添加新功能或修改现有功能
+- 阅读开发指南学习如何添加新页面和组件
 
 ## 🔍 故障排除
 
-如果遇到问题，请查看 [故障排除页面](https://reactnative.dev/docs/troubleshooting)。
+### 端口被占用
+
+如果启动时提示端口被占用：
+
+```sh
+# 清理 Expo 默认端口
+lsof -ti:19000 | xargs kill -9
+lsof -ti:19001 | xargs kill -9
+
+# 清理 Metro 端口
+lsof -ti:8081 | xargs kill -9
+```
+
+### 缓存问题
+
+如果遇到奇怪的错误或更新不生效，尝试清除缓存：
+
+```sh
+# 清除 Expo 缓存并重启
+npm start -- --clear
+
+# 或手动清除
+rm -rf node_modules
+rm -rf .expo
+npm install
+```
+
+### TypeScript 错误
+
+如果 IDE 显示 TypeScript 错误但代码能正常运行：
+
+1. 重启 TypeScript 服务器（VS Code: `Cmd+Shift+P` → "TypeScript: Restart TS Server"）
+2. 检查 `tsconfig.json` 配置是否正确
+3. 运行 `npx tsc --noEmit` 检查类型错误
+
+### iOS 模拟器问题
+
+如果 iOS 模拟器无法启动：
+
+```sh
+# 重新安装 pods
+cd ios
+rm -rf Pods Podfile.lock
+pod install
+cd ..
+```
+
+### Android 模拟器问题
+
+1. 确保 Android Studio 已安装并配置好 Android SDK
+2. 确保至少有一个 Android 虚拟设备（AVD）已创建
+3. 在 Android Studio 中手动启动模拟器后再运行 `npm run android`
+
+### 依赖安装问题
+
+如果 `npm install` 失败：
+
+```sh
+# 清理并重新安装
+rm -rf node_modules package-lock.json
+npm cache clean --force
+npm install
+```
+
+更多问题请查看：
+- [Expo 故障排除](https://docs.expo.dev/troubleshooting/overview/)
+- [React Native 故障排除](https://reactnative.dev/docs/troubleshooting)
 
 ## 📚 了解更多
 
-想了解更多关于 React Native 的知识，请查看以下资源：
+想了解更多关于项目使用的技术，请查看以下资源：
 
 - [React Native 官网](https://reactnative.dev) - 了解 React Native
-- [环境配置](https://reactnative.dev/docs/environment-setup) - React Native 环境配置概述
-- [入门指南](https://reactnative.dev/docs/getting-started) - React Native 基础知识
-- [官方博客](https://reactnative.dev/blog) - 阅读最新的官方博客文章
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - React Native 开源仓库
+- [Expo 官方文档](https://docs.expo.dev) - Expo 开发指南
+- [React Navigation 文档](https://reactnavigation.org/docs/getting-started) - 导航库使用指南
+- [Material Design 3](https://m3.material.io) - Material Design 设计规范
+- [TypeScript 官方文档](https://www.typescriptlang.org/docs/) - TypeScript 学习资源
+
+## 📄 许可证
+
+本项目仅供学习和个人使用。
+
+## 👥 贡献
+
+欢迎提交 Issue 和 Pull Request！

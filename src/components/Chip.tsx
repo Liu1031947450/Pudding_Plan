@@ -1,10 +1,11 @@
 import React, { useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ViewStyle, Animated } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize, BorderRadius } from '../constants/theme';
 
 interface ChipProps {
   label: string;
-  icon?: string;
+  icon?: keyof typeof MaterialIcons.glyphMap;
   variant?: 'primary' | 'secondary' | 'tertiary' | 'surface';
   size?: 'small' | 'medium';
   selected?: boolean;
@@ -55,7 +56,7 @@ export const Chip: React.FC<ChipProps> = ({
 
   const content = (
     <>
-      {icon && <Text style={styles.icon}>{icon}</Text>}
+      {icon && <MaterialIcons name={icon} size={16} color={selected ? Colors.onSecondary : Colors.onSurfaceVariant} />}
       <Text style={textStyles}>{label}</Text>
     </>
   );
