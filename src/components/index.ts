@@ -1,11 +1,9 @@
-export { BottomNavBar } from './BottomNavBar';
-export { TopAppBar } from './TopAppBar';
-export { Card } from './Card';
-export { Button } from './Button';
-export { Chip } from './Chip';
-export { Avatar } from './Avatar';
-export { ProgressBar } from './ProgressBar';
-export { BloomProgress } from './BloomProgress';
-export { EmptyState } from './EmptyState';
-export { BentoGrid, BentoItem } from './BentoGrid';
-export { NotificationDrawer } from './NotificationDrawer';
+// Re-export all components from subdirectories
+export * from './layout';
+export * from './common';
+export * from './progress';
+export * from './specialized';
+export * from './plan';
+export * from './circle';
+export * from './circle';
+

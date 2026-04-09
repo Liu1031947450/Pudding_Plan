@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, Platform } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
-import { Colors, Typography } from '../constants/theme';
+import { Colors, Typography } from '../../constants/theme';
 
 interface BloomProgressProps {
   progress: number; // 0-100

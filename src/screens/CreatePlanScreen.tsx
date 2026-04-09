@@ -15,16 +15,10 @@ import { MaterialIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Colors, Spacing, FontSize, BorderRadius } from '../constants/theme';
 import { TopAppBar, Card, Button } from '../components';
-import { getTemplateById, TemplateDetail } from '../data/templateData';
+import { templateDetails } from '../data/templates';
+import type { TemplateDetail, Reminder } from '../types/domain';
 
 type CreatePlanRouteProp = RouteProp<{ CreatePlan: { templateId?: string } }, 'CreatePlan'>;
-
-interface Reminder {
-  id: string;
-  time: Date;
-  label: string;
-  enabled: boolean;
-}
 
 const CreatePlanScreen: React.FC = () => {
   const navigation = useNavigation();
@@ -32,7 +26,7 @@ const CreatePlanScreen: React.FC = () => {
   const templateId = route.params?.templateId;
 
   // 获取模板数据
-  const templateData: TemplateDetail | undefined = templateId ? getTemplateById(templateId) : undefined;
+  const templateData: TemplateDetail | undefined = templateId ? templateDetails[templateId] : undefined;
 
   const [planName, setPlanName] = useState(templateData?.title || '');
   const [planDays, setPlanDays] = useState(templateData?.duration.toString() || '');

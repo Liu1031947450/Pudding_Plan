@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
-import { Spacing } from '../constants/theme';
+import { Spacing } from '../../constants/theme';
 
 interface BentoGridProps {
   children: React.ReactNode;

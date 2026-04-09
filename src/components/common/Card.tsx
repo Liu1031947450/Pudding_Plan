@@ -8,7 +8,7 @@ import {
   Animated,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Colors, Spacing, BorderRadius } from '../constants/theme';
+import { Colors, Spacing, BorderRadius } from '../../constants/theme';
 
 interface CardProps {
   children: React.ReactNode;
