@@ -6,7 +6,7 @@ const HomeScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>PuddingPlan</Text>
-      <Text style={styles.subtitle}>Welcome!</Text>
+      <Text style={styles.subtitle}>Welcome!1111</Text>
     </View>
   );
 };
@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: FontSize.lg,
-    color: Colors.textSecondary,
+    color: Colors.onSurfaceVariant,
     marginTop: Spacing.sm,
   },
 });
