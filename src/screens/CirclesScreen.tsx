@@ -7,7 +7,9 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize, BorderRadius } from '../constants/theme';
 import { BottomNavBar, TopAppBar, Card, Avatar } from '../components';
 
@@ -75,15 +77,9 @@ const mockCircles: Circle[] = [
 ];
 
 const CirclesScreen: React.FC = () => {
-  const [activeTab, setActiveTab] = React.useState('circles');
-
-  const handleTabPress = (tab: string) => {
-    setActiveTab(tab);
-  };
-
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <TopAppBar leftIcon="\uE3E3" title="PuddingPlan" rightIcon="\uE7F4" />
+      <TopAppBar leftIcon="spa" title="PuddingPlan" rightIcon="notifications" />
 
       <ScrollView
         style={styles.scrollView}
@@ -91,10 +87,17 @@ const CirclesScreen: React.FC = () => {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.heroSection}>
-          <Text style={styles.heroTitle}>社交净土</Text>
-          <Text style={styles.heroSubtitle}>
-            在他人陪伴下寻找你的从容节奏。没有压力，只有共在。
-          </Text>
+          <LinearGradient
+            colors={[Colors.primary, Colors.primaryContainer]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0.26, y: 1 }}
+            style={styles.heroGradient}
+          >
+            <Text style={styles.heroTitle}>社交净土</Text>
+            <Text style={styles.heroSubtitle}>
+              在他人陪伴下寻找你的从容节奏。没有压力，只有共在。
+            </Text>
+          </LinearGradient>
         </View>
 
         <View style={styles.section}>
@@ -158,78 +161,82 @@ const CirclesScreen: React.FC = () => {
           </View>
 
           <View style={styles.circlesGrid}>
-            {mockCircles.map(circle => (
-              <Card
-                key={circle.id}
-                style={[
-                  styles.circleCard,
-                  circle.type === 'large' && styles.circleCardLarge,
-                  circle.type === 'medium' && styles.circleCardMedium,
-                  circle.type === 'small' && styles.circleCardSmall,
-                ]}
-              >
-                {circle.type === 'large' && (
-                  <View style={styles.circleImageContainer}>
-                    <Image
-                      source={{ uri: circle.imageUri }}
-                      style={styles.circleImage}
-                      resizeMode="cover"
-                    />
-                    <View style={styles.circleImageOverlay} />
-                    <View style={styles.circleContent}>
-                      <View style={styles.circleTag}>
-                        <Text style={styles.circleTagText}>
-                          {circle.category}
-                        </Text>
-                      </View>
-                      <Text style={styles.circleTitleLarge}>
-                        {circle.title}
-                      </Text>
-                      <Text style={styles.circleMembers}>{circle.members}</Text>
-                    </View>
-                  </View>
-                )}
-
-                {circle.type === 'small' && (
-                  <View style={styles.smallCircleContent}>
-                    <Text style={styles.smallCircleIcon}>
-                      {circle.id === '2' ? '\uE40A' : '\uEAF4'}
+            <Card
+              style={[styles.circleCard, styles.circleCardLarge]}
+            >
+              <View style={styles.circleImageContainer}>
+                <Image
+                  source={{ uri: mockCircles[0].imageUri }}
+                  style={styles.circleImage}
+                  resizeMode="cover"
+                />
+                <View style={styles.circleImageOverlay} />
+                <View style={styles.circleContent}>
+                  <View style={styles.circleTag}>
+                    <Text style={styles.circleTagText}>
+                      {mockCircles[0].category}
                     </Text>
+                  </View>
+                  <Text style={styles.circleTitleLarge}>
+                    {mockCircles[0].title}
+                  </Text>
+                  <Text style={styles.circleMembers}>{mockCircles[0].members}</Text>
+                </View>
+              </View>
+            </Card>
+
+            <View style={{ flexDirection: 'row', gap: Spacing.sm, flexWrap: 'wrap' }}>
+              {mockCircles.slice(1, 3).map(circle => (
+                <Card
+                  key={circle.id}
+                  style={[styles.circleCard, styles.circleCardSmall]}
+                >
+                  <View style={styles.smallCircleContent}>
+                    <MaterialIcons
+                      name={circle.id === '2' ? 'palette' : 'self-improvement'}
+                      size={32}
+                      color={Colors.primary}
+                    />
                     <Text style={styles.smallCircleTitle}>{circle.title}</Text>
                     <View style={styles.smallCircleArrow}>
                       <Text style={styles.arrowText}>加入</Text>
-                      <Text style={styles.arrowIcon}>{'\uE5C1'}</Text>
+                      <MaterialIcons name="arrow-forward" size={16} color={Colors.primary} />
                     </View>
                   </View>
-                )}
+                </Card>
+              ))}
+            </View>
 
-                {circle.type === 'medium' && (
-                  <View style={styles.mediumCircleContent}>
-                    <View style={styles.mediumCircleAvatars}>
-                      <Avatar
-                        name="User 1"
-                        size="small"
-                        style={styles.miniAvatar}
-                      />
-                      <Avatar
-                        name="User 2"
-                        size="small"
-                        style={styles.miniAvatarOffset}
-                      />
-                      <View style={[styles.miniAvatar, styles.moreAvatar]}>
-                        <Text style={styles.moreAvatarText}>+42</Text>
-                      </View>
-                    </View>
-                    <View style={styles.mediumCircleInfo}>
-                      <Text style={styles.mediumCircleTitle}>
-                        {circle.title}
-                      </Text>
-                      <Text style={styles.mediumCircleMembers}>
-                        {circle.members}
-                      </Text>
+            {mockCircles.slice(3).map(circle => (
+              <Card
+                key={circle.id}
+                style={[styles.circleCard, styles.circleCardMedium]}
+              >
+                <View style={styles.mediumCircleContent}>
+                  <View style={styles.mediumCircleAvatars}>
+                    <Avatar
+                      name="User 1"
+                      size="small"
+                      style={styles.miniAvatar}
+                    />
+                    <Avatar
+                      name="User 2"
+                      size="small"
+                      style={styles.miniAvatarOffset}
+                    />
+                    <View style={[styles.miniAvatar, styles.moreAvatar]}>
+                      <Text style={styles.moreAvatarText}>+42</Text>
                     </View>
                   </View>
-                )}
+                  <View style={styles.mediumCircleInfo}>
+                    <Text style={styles.mediumCircleTitle}>
+                      {circle.title}
+                    </Text>
+                    <Text style={styles.mediumCircleMembers}>
+                      {circle.members}
+                    </Text>
+                  </View>
+                </View>
               </Card>
             ))}
           </View>
@@ -239,7 +246,7 @@ const CirclesScreen: React.FC = () => {
           <Card style={styles.encouragementCard}>
             <View style={styles.encouragementHeader}>
               <View style={styles.encouragementIcon}>
-                <Text style={styles.encouragementIconText}>{'\uE87E'}</Text>
+                <MaterialIcons name="favorite" size={20} color={Colors.onPrimaryContainer} />
               </View>
               <View>
                 <Text style={styles.encouragementTitle}>最近的鼓励</Text>
@@ -269,7 +276,7 @@ const CirclesScreen: React.FC = () => {
         </View>
       </ScrollView>
 
-      <BottomNavBar activeTab={activeTab} onTabPress={handleTabPress} />
+      <BottomNavBar />
     </SafeAreaView>
   );
 };
@@ -290,16 +297,20 @@ const styles = StyleSheet.create({
   heroSection: {
     marginBottom: Spacing.xl,
   },
+  heroGradient: {
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.lg,
+  },
   heroTitle: {
     fontSize: 56,
     fontWeight: '800',
-    color: Colors.onSurface,
+    color: Colors.onPrimary,
     letterSpacing: -1,
     marginBottom: Spacing.sm,
   },
   heroSubtitle: {
     fontSize: FontSize.lg,
-    color: Colors.onSurfaceVariant,
+    color: Colors.onPrimary,
     lineHeight: 24,
   },
   section: {
@@ -329,9 +340,11 @@ const styles = StyleSheet.create({
   buddiesGrid: {
     flexDirection: 'row',
     gap: Spacing.sm,
+    flexWrap: 'wrap',
   },
   buddyCard: {
     flex: 1,
+    minWidth: 150,
     alignItems: 'center',
     padding: Spacing.md,
     paddingTop: Spacing.lg,
@@ -377,20 +390,26 @@ const styles = StyleSheet.create({
   },
   circlesGrid: {
     gap: Spacing.sm,
+    flexWrap: 'wrap',
   },
   circleCard: {
     padding: 0,
     overflow: 'hidden',
   },
   circleCardLarge: {
+    width: '100%',
     height: 192,
   },
   circleCardMedium: {
+    width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
     padding: Spacing.md,
   },
-  circleCardSmall: {},
+  circleCardSmall: {
+    width: '48%',
+    minWidth: 140,
+  },
   circleImageContainer: {
     flex: 1,
     height: '100%',

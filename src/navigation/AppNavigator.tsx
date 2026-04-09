@@ -63,44 +63,25 @@ const MainNavigator: React.FC = () => {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarStyle: styles.tabBar,
-        tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: Colors.onSurfaceVariant,
-        tabBarLabelStyle: styles.tabBarLabel,
+        tabBarStyle: { display: 'none' }, // Hide default tab bar
       }}
       initialRouteName="Plan"
     >
       <Tab.Screen
         name="Plan"
         component={PlanScreen}
-        options={{
-          tabBarLabel: 'Plan',
-          tabBarIcon: PlanIcon,
-        }}
       />
       <Tab.Screen
         name="Calendar"
         component={CalendarScreen}
-        options={{
-          tabBarLabel: 'Calendar',
-          tabBarIcon: CalendarIcon,
-        }}
       />
       <Tab.Screen
         name="Circles"
         component={CirclesScreen}
-        options={{
-          tabBarLabel: 'Circles',
-          tabBarIcon: CirclesIcon,
-        }}
       />
       <Tab.Screen
         name="Profile"
         component={ProfileScreen}
-        options={{
-          tabBarLabel: 'Profile',
-          tabBarIcon: ProfileIcon,
-        }}
       />
     </Tab.Navigator>
   );

@@ -1,72 +1,65 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import { BlurView } from 'expo-blur';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize, BorderRadius } from '../constants/theme';
 
 interface NavItem {
   key: string;
   label: string;
-  icon: string;
-  isActive?: boolean;
+  icon: keyof typeof MaterialIcons.glyphMap;
+  routeName: string;
 }
 
-interface BottomNavBarProps {
-  activeTab: string;
-  onTabPress: (key: string) => void;
-}
+export const BottomNavBar: React.FC = () => {
+  const navigation = useNavigation();
+  const route = useRoute();
 
-const icons: Record<string, string> = {
-  edit_note: '\uE8FF',
-  calendar_today: '\uE935',
-  group: '\uE7EF',
-  person: '\uE7FD',
-  local_florist: '\uE313',
-  auto_awesome: '\uE885',
-  self_improvement: '\uEAF4',
-  spa: '\uE3E3',
-};
-
-export const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeTab, onTabPress }) => {
   const items: NavItem[] = [
-    { key: 'plan', label: 'Plan', icon: 'edit_note' },
-    { key: 'calendar', label: 'Calendar', icon: 'calendar_today' },
-    { key: 'circles', label: 'Circles', icon: 'group' },
-    { key: 'profile', label: 'Profile', icon: 'person' },
+    { key: 'plan', label: '计划', icon: 'edit-note', routeName: 'Plan' },
+    { key: 'calendar', label: '日历', icon: 'calendar-today', routeName: 'Calendar' },
+    { key: 'circles', label: '圈子', icon: 'group', routeName: 'Circles' },
+    { key: 'profile', label: '我的', icon: 'person', routeName: 'Profile' },
   ];
 
+  const handleTabPress = (routeName: string) => {
+    navigation.navigate(routeName as never);
+  };
+
   return (
-    <View style={styles.container}>
-      <View style={styles.navContainer}>
-        {items.map((item) => {
-          const isActive = activeTab === item.key;
-          return (
-            <TouchableOpacity
-              key={item.key}
-              style={[styles.navItem, isActive && styles.activeNavItem]}
-              onPress={() => onTabPress(item.key)}
-              activeOpacity={0.7}
-            >
-              <Text
-                style={[
-                  styles.icon,
-                  { color: isActive ? Colors.primary : Colors.onSurfaceVariant },
-                ]}
+    <BlurView intensity={20} tint="light" style={styles.container}>
+      <View style={styles.content}>
+        <View style={styles.navContainer}>
+          {items.map((item) => {
+            const isActive = route.name === item.routeName;
+            return (
+              <TouchableOpacity
+                key={item.key}
+                style={[styles.navItem, isActive && styles.activeNavItem]}
+                onPress={() => handleTabPress(item.routeName)}
+                activeOpacity={0.7}
               >
-                {icons[item.icon]}
-              </Text>
-              <Text
-                style={[
-                  styles.label,
-                  { color: isActive ? Colors.primary : Colors.onSurfaceVariant },
-                  isActive && styles.activeLabel,
-                ]}
-              >
-                {item.label}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
+                <MaterialIcons
+                  name={item.icon}
+                  size={24}
+                  color={isActive ? Colors.primary : Colors.onSurfaceVariant}
+                />
+                <Text
+                  style={[
+                    styles.label,
+                    { color: isActive ? Colors.primary : Colors.onSurfaceVariant },
+                    isActive && styles.activeLabel,
+                  ]}
+                >
+                  {item.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
       </View>
-    </View>
+    </BlurView>
   );
 };
 
@@ -76,17 +69,20 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    paddingBottom: Platform.OS === 'ios' ? 34 : 24,
-    paddingTop: Spacing.sm,
-    paddingHorizontal: Spacing.md,
-    backgroundColor: 'rgba(250, 249, 248, 0.95)',
     borderTopLeftRadius: BorderRadius.xl,
     borderTopRightRadius: BorderRadius.xl,
+    overflow: 'hidden',
     shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: -12 },
     shadowOpacity: 0.08,
     shadowRadius: 32,
     elevation: 10,
+  },
+  content: {
+    paddingBottom: Platform.OS === 'ios' ? 34 : 24,
+    paddingTop: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    backgroundColor: 'rgba(250, 249, 248, 0.7)',
   },
   navContainer: {
     flexDirection: 'row',
@@ -103,14 +99,11 @@ const styles = StyleSheet.create({
   activeNavItem: {
     backgroundColor: Colors.primaryContainer,
   },
-  icon: {
-    fontSize: 24,
-    marginBottom: 2,
-  },
   label: {
     fontSize: FontSize.xs,
     fontWeight: '500',
     letterSpacing: 0.5,
+    marginTop: 2,
   },
   activeLabel: {
     fontWeight: '600',

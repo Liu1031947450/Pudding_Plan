@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
+import React, { useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ViewStyle, Animated } from 'react-native';
 import { Colors, Spacing, FontSize, BorderRadius } from '../constants/theme';
 
 interface ChipProps {
@@ -21,6 +21,26 @@ export const Chip: React.FC<ChipProps> = ({
   onPress,
   style,
 }) => {
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  const handlePressIn = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 0.95,
+      useNativeDriver: true,
+      speed: 50,
+      bounciness: 0,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      useNativeDriver: true,
+      speed: 50,
+      bounciness: 4,
+    }).start();
+  };
+
   const chipStyles = [
     styles.chip,
     styles[size],
@@ -42,9 +62,17 @@ export const Chip: React.FC<ChipProps> = ({
 
   if (onPress) {
     return (
-      <TouchableOpacity style={chipStyles} onPress={onPress} activeOpacity={0.7}>
-        {content}
-      </TouchableOpacity>
+      <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+        <TouchableOpacity
+          style={chipStyles}
+          onPress={onPress}
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
+          activeOpacity={1}
+        >
+          {content}
+        </TouchableOpacity>
+      </Animated.View>
     );
   }
 

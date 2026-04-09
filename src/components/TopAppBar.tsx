@@ -1,14 +1,16 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { BlurView } from 'expo-blur';
+import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize, BorderRadius } from '../constants/theme';
 
 interface TopAppBarProps {
   title?: string;
   showBackButton?: boolean;
   onBackPress?: () => void;
-  rightIcon?: string;
+  rightIcon?: keyof typeof MaterialIcons.glyphMap;
   onRightPress?: () => void;
-  leftIcon?: string;
+  leftIcon?: keyof typeof MaterialIcons.glyphMap;
   onLeftPress?: () => void;
 }
 
@@ -22,54 +24,59 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({
   onLeftPress,
 }) => {
   return (
-    <View style={styles.container}>
-      <View style={styles.leftSection}>
-        {showBackButton && (
-          <TouchableOpacity
-            style={styles.iconButton}
-            onPress={onBackPress}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.iconText}>{'\uE5E4'}</Text>
-          </TouchableOpacity>
-        )}
-        {leftIcon && !showBackButton && (
-          <TouchableOpacity
-            style={styles.iconButton}
-            onPress={onLeftPress}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.iconText}>{leftIcon}</Text>
-          </TouchableOpacity>
-        )}
+    <BlurView intensity={20} tint="light" style={styles.container}>
+      <View style={styles.content}>
+        <View style={styles.leftSection}>
+          {showBackButton && (
+            <TouchableOpacity
+              style={styles.iconButton}
+              onPress={onBackPress}
+              activeOpacity={0.7}
+            >
+              <MaterialIcons name="arrow-back" size={24} color={Colors.primary} />
+            </TouchableOpacity>
+          )}
+          {leftIcon && !showBackButton && (
+            <TouchableOpacity
+              style={styles.iconButton}
+              onPress={onLeftPress}
+              activeOpacity={0.7}
+            >
+              <MaterialIcons name={leftIcon} size={24} color={Colors.primary} />
+            </TouchableOpacity>
+          )}
+        </View>
+        <Text style={styles.title} numberOfLines={1}>
+          {title}
+        </Text>
+        <View style={styles.rightSection}>
+          {rightIcon && (
+            <TouchableOpacity
+              style={styles.iconButton}
+              onPress={onRightPress}
+              activeOpacity={0.7}
+            >
+              <MaterialIcons name={rightIcon} size={24} color={Colors.primary} />
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
-      <Text style={styles.title} numberOfLines={1}>
-        {title}
-      </Text>
-      <View style={styles.rightSection}>
-        {rightIcon && (
-          <TouchableOpacity
-            style={styles.iconButton}
-            onPress={onRightPress}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.iconText}>{rightIcon}</Text>
-          </TouchableOpacity>
-        )}
-      </View>
-    </View>
+    </BlurView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     height: 64,
+    overflow: 'hidden',
+  },
+  content: {
+    flex: 1,
     paddingHorizontal: Spacing.md,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: 'rgba(250, 249, 248, 0.95)',
-    borderBottomWidth: 0,
+    backgroundColor: 'rgba(250, 249, 248, 0.7)',
   },
   leftSection: {
     flexDirection: 'row',
@@ -97,9 +104,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'transparent',
-  },
-  iconText: {
-    fontSize: 24,
-    color: Colors.primary,
   },
 });

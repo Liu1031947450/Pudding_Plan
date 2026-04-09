@@ -1,5 +1,5 @@
-import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle, ActivityIndicator } from 'react-native';
+import React, { useRef } from 'react';
+import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle, ActivityIndicator, Animated } from 'react-native';
 import { Colors, Spacing, FontSize, BorderRadius } from '../constants/theme';
 
 interface ButtonProps {
@@ -27,6 +27,26 @@ export const Button: React.FC<ButtonProps> = ({
   style,
   textStyle,
 }) => {
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  const handlePressIn = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 0.96,
+      useNativeDriver: true,
+      speed: 50,
+      bounciness: 0,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      useNativeDriver: true,
+      speed: 50,
+      bounciness: 4,
+    }).start();
+  };
+
   const buttonStyles = [
     styles.button,
     styles[variant],
@@ -44,29 +64,33 @@ export const Button: React.FC<ButtonProps> = ({
   ];
 
   return (
-    <TouchableOpacity
-      style={buttonStyles}
-      onPress={onPress}
-      disabled={disabled || loading}
-      activeOpacity={0.8}
-    >
-      {loading ? (
-        <ActivityIndicator
-          color={variant === 'primary' ? Colors.onPrimaryContainer : Colors.primary}
-          size="small"
-        />
-      ) : (
-        <>
-          {icon && iconPosition === 'left' && (
-            <Text style={[styles.icon, textStyles]}>{icon}</Text>
-          )}
-          <Text style={textStyles}>{title}</Text>
-          {icon && iconPosition === 'right' && (
-            <Text style={[styles.icon, textStyles]}>{icon}</Text>
-          )}
-        </>
-      )}
-    </TouchableOpacity>
+    <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+      <TouchableOpacity
+        style={buttonStyles}
+        onPress={onPress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        disabled={disabled || loading}
+        activeOpacity={1}
+      >
+        {loading ? (
+          <ActivityIndicator
+            color={variant === 'primary' ? Colors.onPrimaryContainer : Colors.primary}
+            size="small"
+          />
+        ) : (
+          <>
+            {icon && iconPosition === 'left' && (
+              <Text style={[styles.icon, textStyles]}>{icon}</Text>
+            )}
+            <Text style={textStyles}>{title}</Text>
+            {icon && iconPosition === 'right' && (
+              <Text style={[styles.icon, textStyles]}>{icon}</Text>
+            )}
+          </>
+        )}
+      </TouchableOpacity>
+    </Animated.View>
   );
 };
 

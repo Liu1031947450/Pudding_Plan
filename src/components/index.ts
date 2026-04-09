@@ -5,3 +5,7 @@ export { Button } from './Button';
 export { Chip } from './Chip';
 export { Avatar } from './Avatar';
 export { ProgressBar } from './ProgressBar';
+export { BloomProgress } from './BloomProgress';
+export { EmptyState } from './EmptyState';
+export { BentoGrid, BentoItem } from './BentoGrid';
+export { MaterialIcon } from './MaterialIcon';

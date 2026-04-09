@@ -77,18 +77,102 @@ export const FontSize = {
   xxl: 24,
   xxxl: 32,
   display: 56,
+  displayLg: 56,
+  displaySm: 36,
+  titleLg: 22,
+  titleMd: 16,
+  bodyLg: 16,
+  bodyMd: 14,
+  labelLg: 14,
+  labelMd: 12,
+};
+
+export const LineHeight = {
+  display: 1.2,
+  headline: 1.2,
+  title: 1.4,
+  body: 1.6,
+  label: 1.4,
+};
+
+export const LetterSpacing = {
+  display: -0.02, // -0.02em for display text
+  headline: -0.5, // -0.5px for headlines
+  title: -0.5, // -0.5px for titles
+  body: 0,
+  label: 0.1,
 };
 
 export const BorderRadius = {
-  sm: '0.5rem',
-  DEFAULT: '1rem',
-  lg: '2rem',
-  xl: '3rem',
-  full: '9999px',
+  sm: 8,      // 0.5rem = 8px
+  md: 16,     // 1rem = 16px
+  lg: 32,     // 2rem = 32px
+  xl: 48,     // 3rem = 48px
+  full: 9999,
 };
 
 export const FontFamily = {
   headline: 'Plus Jakarta Sans',
   body: 'Plus Jakarta Sans',
   label: 'Plus Jakarta Sans',
+};
+
+// Typography presets combining fontSize, lineHeight, letterSpacing
+export const Typography = {
+  displayLg: {
+    fontFamily: FontFamily.headline,
+    fontSize: FontSize.displayLg,
+    lineHeight: FontSize.displayLg * LineHeight.display,
+    letterSpacing: FontSize.displayLg * LetterSpacing.display,
+    fontWeight: '700' as const,
+  },
+  displaySm: {
+    fontFamily: FontFamily.headline,
+    fontSize: FontSize.displaySm,
+    lineHeight: FontSize.displaySm * LineHeight.display,
+    letterSpacing: FontSize.displaySm * LetterSpacing.display,
+    fontWeight: '700' as const,
+  },
+  titleLg: {
+    fontFamily: FontFamily.headline,
+    fontSize: FontSize.titleLg,
+    lineHeight: FontSize.titleLg * LineHeight.title,
+    letterSpacing: LetterSpacing.title,
+    fontWeight: '700' as const,
+  },
+  titleMd: {
+    fontFamily: FontFamily.headline,
+    fontSize: FontSize.titleMd,
+    lineHeight: FontSize.titleMd * LineHeight.title,
+    letterSpacing: LetterSpacing.title,
+    fontWeight: '600' as const,
+  },
+  bodyLg: {
+    fontFamily: FontFamily.body,
+    fontSize: FontSize.bodyLg,
+    lineHeight: FontSize.bodyLg * LineHeight.body,
+    letterSpacing: LetterSpacing.body,
+    fontWeight: '400' as const,
+  },
+  bodyMd: {
+    fontFamily: FontFamily.body,
+    fontSize: FontSize.bodyMd,
+    lineHeight: FontSize.bodyMd * LineHeight.body,
+    letterSpacing: LetterSpacing.body,
+    fontWeight: '400' as const,
+  },
+  labelLg: {
+    fontFamily: FontFamily.label,
+    fontSize: FontSize.labelLg,
+    lineHeight: FontSize.labelLg * LineHeight.label,
+    letterSpacing: LetterSpacing.label,
+    fontWeight: '500' as const,
+  },
+  labelMd: {
+    fontFamily: FontFamily.label,
+    fontSize: FontSize.labelMd,
+    lineHeight: FontSize.labelMd * LineHeight.label,
+    letterSpacing: LetterSpacing.label,
+    fontWeight: '500' as const,
+  },
 };

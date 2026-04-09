@@ -8,8 +8,15 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize, BorderRadius } from '../constants/theme';
-import { BottomNavBar, TopAppBar, Card, ProgressBar } from '../components';
+import {
+  BottomNavBar,
+  TopAppBar,
+  Card,
+  ProgressBar,
+  BloomProgress,
+} from '../components';
 
 interface Plan {
   id: string;
@@ -18,7 +25,7 @@ interface Plan {
   progress: number;
   days: number;
   totalDays: number;
-  icon: string;
+  icon: keyof typeof MaterialIcons.glyphMap;
   color: string;
 }
 
@@ -30,7 +37,7 @@ const mockPlans: Plan[] = [
     progress: 66,
     days: 14,
     totalDays: 21,
-    icon: '\uEAF4',
+    icon: 'self-improvement',
     color: Colors.primaryContainer,
   },
   {
@@ -40,7 +47,7 @@ const mockPlans: Plan[] = [
     progress: 20,
     days: 12,
     totalDays: 60,
-    icon: '\uE3E3',
+    icon: 'fitness-center',
     color: Colors.tertiaryContainer,
   },
 ];
@@ -49,7 +56,7 @@ interface Badge {
   id: string;
   title: string;
   description: string;
-  icon: string;
+  icon: keyof typeof MaterialIcons.glyphMap;
   color: string;
   unlocked: boolean;
 }
@@ -59,7 +66,7 @@ const mockBadges: Badge[] = [
     id: '1',
     title: '7天星火',
     description: '完成第一周',
-    icon: '\uE81C',
+    icon: 'local-fire-department',
     color: Colors.secondaryContainer,
     unlocked: true,
   },
@@ -67,7 +74,7 @@ const mockBadges: Badge[] = [
     id: '2',
     title: '自律达人',
     description: '维持 14 天连续纪录',
-    icon: '\uE8E8',
+    icon: 'workspace-premium',
     color: Colors.secondaryContainer,
     unlocked: true,
   },
@@ -75,7 +82,7 @@ const mockBadges: Badge[] = [
     id: '3',
     title: '初入圈子',
     description: '同行共进，更好生活',
-    icon: '\uE7EF',
+    icon: 'groups',
     color: Colors.secondaryContainer,
     unlocked: true,
   },
@@ -83,11 +90,6 @@ const mockBadges: Badge[] = [
 
 const PlanScreen: React.FC = () => {
   const navigation = useNavigation();
-  const [activeTab, setActiveTab] = React.useState('plan');
-
-  const handleTabPress = (tab: string) => {
-    setActiveTab(tab);
-  };
 
   const handleCreatePlan = () => {
     navigation.navigate('CreatePlan' as never);
@@ -95,7 +97,7 @@ const PlanScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <TopAppBar title="我的计划" leftIcon="\uE3E3" rightIcon="\uE7F4" />
+      <TopAppBar title="我的计划" leftIcon="spa" rightIcon="notifications" />
 
       <ScrollView
         style={styles.scrollView}
@@ -112,20 +114,33 @@ const PlanScreen: React.FC = () => {
 
           <View style={styles.plansList}>
             {mockPlans.map(plan => (
-              <Card key={plan.id} style={styles.planCard}>
+              <Card
+                key={plan.id}
+                style={styles.planCard}
+                gradient
+                gradientColors={[Colors.primary, Colors.primaryContainer]}
+              >
                 <View style={styles.planHeader}>
                   <View style={styles.planInfo}>
                     <View
                       style={[styles.planIcon, { backgroundColor: plan.color }]}
                     >
-                      <Text style={styles.planIconText}>{plan.icon}</Text>
+                      <MaterialIcons
+                        name={plan.icon}
+                        size={24}
+                        color={Colors.onSurface}
+                      />
                     </View>
                     <View style={styles.planText}>
                       <Text style={styles.planTitle}>{plan.title}</Text>
                       <Text style={styles.planSubtitle}>{plan.subtitle}</Text>
                     </View>
                   </View>
-                  <Text style={styles.progressText}>{plan.progress}%</Text>
+                  <BloomProgress
+                    progress={plan.progress}
+                    size={56}
+                    strokeWidth={6}
+                  />
                 </View>
                 <ProgressBar
                   progress={plan.progress}
@@ -142,7 +157,7 @@ const PlanScreen: React.FC = () => {
               onPress={handleCreatePlan}
             >
               <View style={styles.addIconWrapper}>
-                <Text style={styles.addIcon}>{'\uE145'}</Text>
+                <MaterialIcons name="add" size={24} color={Colors.outline} />
               </View>
               <Text style={styles.addText}>开启新计划</Text>
             </TouchableOpacity>
@@ -191,14 +206,18 @@ const PlanScreen: React.FC = () => {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>已获成就1</Text>
+          <Text style={styles.sectionTitle}>已获成就</Text>
           <View style={styles.badgesGrid}>
             {mockBadges.map(badge => (
               <Card key={badge.id} style={styles.badgeCard}>
                 <View
                   style={[styles.badgeIcon, { backgroundColor: badge.color }]}
                 >
-                  <Text style={styles.badgeIconText}>{badge.icon}</Text>
+                  <MaterialIcons
+                    name={badge.icon}
+                    size={32}
+                    color={Colors.onSurface}
+                  />
                 </View>
                 <Text style={styles.badgeTitle}>{badge.title}</Text>
                 <Text style={styles.badgeDesc}>{badge.description}</Text>
@@ -208,7 +227,7 @@ const PlanScreen: React.FC = () => {
         </View>
       </ScrollView>
 
-      <BottomNavBar activeTab={activeTab} onTabPress={handleTabPress} />
+      <BottomNavBar />
     </SafeAreaView>
   );
 };
@@ -269,9 +288,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: Spacing.md,
-  },
-  planIconText: {
-    fontSize: 24,
   },
   planText: {
     flex: 1,
@@ -373,10 +389,12 @@ const styles = StyleSheet.create({
   },
   badgesGrid: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: Spacing.sm,
   },
   badgeCard: {
-    flex: 1,
+    width: '30%',
+    minWidth: 100,
     alignItems: 'center',
     padding: Spacing.md,
   },

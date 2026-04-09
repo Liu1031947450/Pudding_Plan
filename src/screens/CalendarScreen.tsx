@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize, BorderRadius } from '../constants/theme';
 import { BottomNavBar, TopAppBar, Card, Button } from '../components';
 
@@ -82,7 +83,7 @@ interface Habit {
   id: string;
   title: string;
   subtitle: string;
-  icon: string;
+  icon: keyof typeof MaterialIcons.glyphMap;
   completed: boolean;
   category: string;
 }
@@ -92,7 +93,7 @@ const mockHabits: Habit[] = [
     id: '1',
     title: '晨间补水',
     subtitle: '250ml goal',
-    icon: '\uE798',
+    icon: 'local-drink',
     completed: true,
     category: 'Morning Ritual',
   },
@@ -100,19 +101,14 @@ const mockHabits: Habit[] = [
     id: '2',
     title: '数字脱毒',
     subtitle: '30 min focus',
-    icon: '\uE1BA',
+    icon: 'phone-disabled',
     completed: false,
     category: 'Focus',
   },
 ];
 
 const CalendarScreen: React.FC = () => {
-  const [activeTab, setActiveTab] = React.useState('calendar');
   const [, setSelectedDay] = React.useState(11);
-
-  const handleTabPress = (tab: string) => {
-    setActiveTab(tab);
-  };
 
   const getActivityColor = (type?: 'primary' | 'secondary' | 'tertiary') => {
     switch (type) {
@@ -129,7 +125,7 @@ const CalendarScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <TopAppBar leftIcon="\uE3E3" title="PuddingPlan" rightIcon="\uE7F4" />
+      <TopAppBar leftIcon="spa" title="PuddingPlan" rightIcon="notifications" />
 
       <ScrollView
         style={styles.scrollView}
@@ -144,10 +140,10 @@ const CalendarScreen: React.FC = () => {
             </View>
             <View style={styles.monthNav}>
               <TouchableOpacity style={styles.navButton}>
-                <Text style={styles.navIcon}>{'\uE5E0'}</Text>
+                <MaterialIcons name="chevron-left" size={24} color={Colors.onSurface} />
               </TouchableOpacity>
               <TouchableOpacity style={styles.navButton}>
-                <Text style={styles.navIcon}>{'\uE5E1'}</Text>
+                <MaterialIcons name="chevron-right" size={24} color={Colors.onSurface} />
               </TouchableOpacity>
             </View>
           </View>
@@ -201,7 +197,7 @@ const CalendarScreen: React.FC = () => {
           <View style={styles.sectionHeader}>
             <View style={styles.sectionTitleRow}>
               <View style={styles.sectionIcon}>
-                <Text style={styles.sectionIconText}>{'\uE2E6'}</Text>
+                <MaterialIcons name="check-circle" size={20} color={Colors.secondary} />
               </View>
               <Text style={styles.sectionTitle}>今日重点</Text>
             </View>
@@ -221,18 +217,11 @@ const CalendarScreen: React.FC = () => {
                       },
                     ]}
                   >
-                    <Text
-                      style={[
-                        styles.habitIconText,
-                        {
-                          color: habit.completed
-                            ? Colors.tertiary
-                            : Colors.onSurfaceVariant,
-                        },
-                      ]}
-                    >
-                      {habit.icon}
-                    </Text>
+                    <MaterialIcons
+                      name={habit.icon}
+                      size={28}
+                      color={habit.completed ? Colors.tertiary : Colors.onSurfaceVariant}
+                    />
                   </View>
                   <View style={styles.habitInfo}>
                     <Text style={styles.habitTitle}>{habit.title}</Text>
@@ -249,8 +238,8 @@ const CalendarScreen: React.FC = () => {
             ))}
           </View>
 
-          <Card style={styles.quoteCard}>
-            <Text style={styles.quoteIcon}>{'\uE244'}</Text>
+          <Card style={styles.quoteCard} gradient gradientColors={[Colors.primary, Colors.primaryContainer]}>
+            <MaterialIcons name="format-quote" size={32} color={Colors.onPrimaryContainer} />
             <Text style={styles.quoteText}>
               "Taking a deep breath is the first step towards clarity."
             </Text>
@@ -258,7 +247,7 @@ const CalendarScreen: React.FC = () => {
         </View>
       </ScrollView>
 
-      <BottomNavBar activeTab={activeTab} onTabPress={handleTabPress} />
+      <BottomNavBar />
     </SafeAreaView>
   );
 };
