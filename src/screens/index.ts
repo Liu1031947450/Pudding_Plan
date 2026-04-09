@@ -1,3 +1,4 @@
+export { default as SplashScreen } from './SplashScreen';
 export { default as PlanScreen } from './PlanScreen';
 export { default as CalendarScreen } from './CalendarScreen';
 export { default as CirclesScreen } from './CirclesScreen';
