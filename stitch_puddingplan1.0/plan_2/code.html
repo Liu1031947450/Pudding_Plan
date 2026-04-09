@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PuddingPlan - 计划</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-effect {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-high": "#e7e8e7",
+                        "secondary-container": "#dafad0",
+                        "surface-container-low": "#f4f3f2",
+                        "tertiary-fixed-dim": "#93c3ef",
+                        "primary-container": "#f9d461",
+                        "surface-tint": "#745c00",
+                        "primary": "#745c00",
+                        "on-secondary-fixed-variant": "#506b4a",
+                        "on-primary-container": "#5c4900",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-bright": "#faf9f8",
+                        "on-secondary": "#eaffe1",
+                        "inverse-surface": "#0d0e0e",
+                        "on-background": "#303333",
+                        "background": "#faf9f8",
+                        "on-error-container": "#671200",
+                        "surface-container-highest": "#e1e3e2",
+                        "surface-container": "#eeeeed",
+                        "on-primary-fixed": "#463600",
+                        "primary-fixed": "#f9d461",
+                        "error-container": "#fa7150",
+                        "secondary-fixed": "#dafad0",
+                        "on-primary": "#fff8ee",
+                        "on-tertiary-container": "#0a476d",
+                        "secondary": "#4b6646",
+                        "surface": "#faf9f8",
+                        "on-surface": "#303333",
+                        "inverse-on-surface": "#9d9d9c",
+                        "tertiary": "#31638a",
+                        "tertiary-fixed": "#a1d1fe",
+                        "inverse-primary": "#f9d461",
+                        "on-primary-fixed-variant": "#675200",
+                        "error-dim": "#821a01",
+                        "surface-variant": "#e1e3e2",
+                        "secondary-fixed-dim": "#ccebc2",
+                        "tertiary-dim": "#22577e",
+                        "primary-fixed-dim": "#eac655",
+                        "surface-dim": "#d8dad9",
+                        "tertiary-container": "#a1d1fe",
+                        "on-secondary-container": "#466141",
+                        "on-tertiary-fixed-variant": "#1a5177",
+                        "outline": "#797b7a",
+                        "primary-dim": "#665100",
+                        "on-error": "#fff7f6",
+                        "secondary-dim": "#3f5a3a",
+                        "on-tertiary-fixed": "#003351",
+                        "on-surface-variant": "#5d605f",
+                        "on-secondary-fixed": "#354e30",
+                        "on-tertiary": "#f6f9ff",
+                        "error": "#aa371c",
+                        "outline-variant": "#b0b2b1"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex items-center justify-between px-6 py-4 bg-[#faf9f8]/80 dark:bg-stone-900/80 backdrop-blur-xl">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#745c00] dark:text-[#f9d461] text-2xl" data-icon="bubble_chart">bubble_chart</span>
+<span class="text-2xl font-extrabold text-[#745c00] dark:text-[#f9d461] tracking-tighter">PuddingPlan</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-full hover:bg-[#f4f3f2] dark:hover:bg-stone-800 transition-colors">
+<span class="material-symbols-outlined text-[#5d605f] dark:text-stone-400" data-icon="notifications">notifications</span>
+</button>
+</div>
+</header>
+<main class="pt-24 px-6 max-w-2xl mx-auto">
+<!-- Hero Empty State Section -->
+<section class="flex flex-col items-center text-center mt-12 mb-16">
+<div class="relative mb-8">
+<div class="absolute inset-0 bg-primary-container/20 blur-3xl rounded-full"></div>
+<img alt="Empty State Illustration" class="relative w-64 h-64 object-contain" data-alt="a minimalist 3D clay illustration of a cute soft pudding character sitting peacefully on a fluffy cloud with a gentle sunrise background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAS07d-t74HIlQU77Q-WAN-e74WaapcEm4PTcGCz4YgKIwiU0Y1v7N9BxPPxnJK9HPt41eoC03vx4vWVTh3aBogyjGGMsQ0wleY0ITzla8en_Y4ApiTIu_kW8BpaHBUUNzir1tFPtSVi2bOvFcxnmHgxh0NTNTPz49-QwY1Xx22ulAzxxzU7H3yaPb1NTREDSLQ132UgHbmqNW_5ha7jg_zV-X0CS7xYs-pA1k7TbiIfzPuRm5Br4Ov1hgEPJUXcr55EakEI7VYNtbJ"/>
+</div>
+<h1 class="text-[2.5rem] font-extrabold text-on-surface tracking-tight leading-tight mb-4">还没有计划？</h1>
+<p class="text-on-surface-variant text-lg max-w-xs leading-relaxed mb-10">
+                开启你的第一个治愈计划，让成长自然发生。
+            </p>
+<!-- Primary Action -->
+<button class="group relative px-10 py-5 bg-primary-container rounded-xl text-on-primary-container font-bold text-lg flex items-center gap-3 transition-transform active:scale-95 shadow-[0_12px_32px_rgba(116,92,0,0.08)]">
+<span class="material-symbols-outlined text-2xl" data-icon="add_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;">add_circle</span>
+                创建治愈计划
+            </button>
+</section>
+<!-- Template Selection (Bento Style) -->
+<section class="grid grid-cols-2 gap-4 mb-12">
+<div class="col-span-2 text-left mb-2">
+<h2 class="text-xl font-bold px-2">从模板开始</h2>
+</div>
+<!-- Template Card 1 -->
+<div class="bg-surface-container-lowest p-6 rounded-lg flex flex-col gap-4 group cursor-pointer transition-colors hover:bg-surface-container-low">
+<div class="w-12 h-12 bg-secondary-container rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary" data-icon="spa" data-weight="fill" style="font-variation-settings: 'FILL' 1;">spa</span>
+</div>
+<div>
+<h3 class="font-bold text-on-surface">晨间唤醒</h3>
+<p class="text-sm text-on-surface-variant">21天习惯养成</p>
+</div>
+</div>
+<!-- Template Card 2 -->
+<div class="bg-surface-container-lowest p-6 rounded-lg flex flex-col gap-4 group cursor-pointer transition-colors hover:bg-surface-container-low">
+<div class="w-12 h-12 bg-tertiary-container rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary" data-icon="menu_book" data-weight="fill" style="font-variation-settings: 'FILL' 1;">menu_book</span>
+</div>
+<div>
+<h3 class="font-bold text-on-surface">专注阅读</h3>
+<p class="text-sm text-on-surface-variant">每周一本书</p>
+</div>
+</div>
+</section>
+<!-- AI Goal Architect Card (SCREEN_11 Anchor) -->
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-8 pt-4 bg-[#faf9f8]/80 dark:bg-stone-900/80 backdrop-blur-xl z-50 rounded-t-[3rem] shadow-[0_-12px_32px_rgba(116,92,0,0.08)]">
+<!-- Plan (ACTIVE) -->
+<a class="flex flex-col items-center justify-center bg-[#f9d461] dark:bg-[#745c00] text-[#745c00] dark:text-[#f9d461] rounded-[2rem] px-5 py-2 scale-105 active:scale-90 duration-150 ease-out" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="edit_note" data-weight="fill" style="font-variation-settings: 'FILL' 1;">edit_note</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-semibold tracking-wide">Plan</span>
+</a>
+<!-- Calendar -->
+<a class="flex flex-col items-center justify-center text-[#5d605f] dark:text-stone-400 px-4 py-2 hover:bg-[#f4f3f2] dark:hover:bg-stone-800 rounded-full transition-colors" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="calendar_today">calendar_today</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-semibold tracking-wide">Calendar</span>
+</a>
+<!-- Circles -->
+<a class="flex flex-col items-center justify-center text-[#5d605f] dark:text-stone-400 px-4 py-2 hover:bg-[#f4f3f2] dark:hover:bg-stone-800 rounded-full transition-colors" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="group">group</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-semibold tracking-wide">Circles</span>
+</a>
+<!-- Profile -->
+<a class="flex flex-col items-center justify-center text-[#5d605f] dark:text-stone-400 px-4 py-2 hover:bg-[#f4f3f2] dark:hover:bg-stone-800 rounded-full transition-colors" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="person">person</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-semibold tracking-wide">Profile</span>
+</a>
+</nav>
+</body></html>

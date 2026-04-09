@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-high": "#e7e8e7",
+                    "background": "#faf9f8",
+                    "on-tertiary": "#f6f9ff",
+                    "on-error": "#fff7f6",
+                    "on-primary": "#fff8ee",
+                    "error": "#aa371c",
+                    "tertiary": "#31638a",
+                    "surface-container-lowest": "#ffffff",
+                    "on-secondary": "#eaffe1",
+                    "on-surface-variant": "#5d605f",
+                    "error-dim": "#821a01",
+                    "primary-dim": "#665100",
+                    "on-primary-container": "#5c4900",
+                    "surface": "#faf9f8",
+                    "on-primary-fixed": "#463600",
+                    "outline": "#797b7a",
+                    "primary": "#745c00",
+                    "on-secondary-container": "#466141",
+                    "outline-variant": "#b0b2b1",
+                    "secondary-container": "#dafad0",
+                    "surface-tint": "#745c00",
+                    "on-secondary-fixed": "#354e30",
+                    "secondary-fixed-dim": "#ccebc2",
+                    "on-tertiary-fixed": "#003351",
+                    "surface-variant": "#e1e3e2",
+                    "on-background": "#303333",
+                    "tertiary-fixed": "#a1d1fe",
+                    "inverse-primary": "#f9d461",
+                    "on-tertiary-fixed-variant": "#1a5177",
+                    "on-primary-fixed-variant": "#675200",
+                    "surface-container-low": "#f4f3f2",
+                    "tertiary-fixed-dim": "#93c3ef",
+                    "tertiary-dim": "#22577e",
+                    "primary-fixed-dim": "#eac655",
+                    "on-surface": "#303333",
+                    "on-secondary-fixed-variant": "#506b4a",
+                    "secondary": "#4b6646",
+                    "tertiary-container": "#a1d1fe",
+                    "on-error-container": "#671200",
+                    "inverse-surface": "#0d0e0e",
+                    "surface-container": "#eeeeed",
+                    "primary-container": "#f9d461",
+                    "secondary-dim": "#3f5a3a",
+                    "surface-dim": "#d8dad9",
+                    "secondary-fixed": "#dafad0",
+                    "inverse-on-surface": "#9d9d9c",
+                    "surface-container-highest": "#e1e3e2",
+                    "on-tertiary-container": "#0a476d",
+                    "primary-fixed": "#f9d461",
+                    "surface-bright": "#faf9f8",
+                    "error-container": "#fa7150"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Plus Jakarta Sans"],
+                    "label": ["Plus Jakarta Sans"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface antialiased min-h-screen flex items-center justify-center p-0 md:p-8">
+<!-- Background Screen Simulation (System Settings) -->
+<div class="relative w-full max-w-[430px] h-[932px] bg-background shadow-2xl overflow-hidden rounded-[3rem] border-[8px] border-on-surface/5">
+<!-- Top App Bar -->
+<header class="fixed top-0 w-full z-50 bg-[#faf9f8]/80 backdrop-blur-xl flex items-center h-16 px-6 max-w-[414px]">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#745c00]">arrow_back</span>
+<h1 class="font-headline text-[1.375rem] font-semibold leading-tight text-[#745c00]">Settings</h1>
+</div>
+</header>
+<!-- Mock Settings Content (Dimmed) -->
+<main class="pt-20 px-6 space-y-6 opacity-40 grayscale-[20%]">
+<section class="space-y-4">
+<h2 class="text-on-surface-variant font-semibold px-2 uppercase tracking-widest text-xs">Account</h2>
+<div class="bg-surface-container-lowest rounded-lg p-4 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-secondary">person</span>
+<div>
+<p class="font-medium">Profile Information</p>
+<p class="text-sm text-on-surface-variant">Update your details</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+</div>
+<div class="bg-surface-container-lowest rounded-lg p-4 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary">phone_iphone</span>
+<div>
+<p class="font-medium">Phone Number</p>
+<p class="text-sm text-on-surface-variant">Not linked</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+</div>
+</section>
+<section class="space-y-4">
+<h2 class="text-on-surface-variant font-semibold px-2 uppercase tracking-widest text-xs">Security</h2>
+<div class="bg-surface-container-lowest rounded-lg p-4 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-tertiary">lock</span>
+<div>
+<p class="font-medium">Password</p>
+<p class="text-sm text-on-surface-variant">Last changed 3 months ago</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+</div>
+</section>
+<div class="aspect-video w-full rounded-lg overflow-hidden relative">
+<img alt="Garden View" class="w-full h-full object-cover" data-alt="Dreamy blurred background of a botanical garden with soft morning light filtering through leaves" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAAYkIrlG9UbKLoPuaQP5nzpdY8G3IZoTMe2wcie5jw1-vwYaNsP0MkQND7oD9ZfvFe_1aDN_1r3kwLhbP4rkUKTBCN1VH8QJFa2tCHAcX5lxQDv0oi6teEwcLn3w79DDx3kBW6_jud1v1EpbEl3IiBrwvrgqKxVqTDlN6byMCxtsxum12ll9zFNge0pj4EC9v2Cf_aBXS3d_0R4wzjVu-foL3PZHxiq7vuIz7361NOd2JcC8ep3S2F93naSA-9PvGRnv5juCklWapy"/>
+<div class="absolute inset-0 bg-primary/10 backdrop-blur-[2px]"></div>
+</div>
+</main>
+<!-- Dark Overlay for Bottom Sheet -->
+<div class="absolute inset-0 bg-on-surface/40 z-[60] backdrop-blur-[2px]"></div>
+<!-- Bottom Sheet -->
+<div class="absolute bottom-0 left-0 w-full z-[70] animate-in slide-in-from-bottom duration-500">
+<!-- Sheet Handle Bar -->
+<div class="flex justify-center mb-2">
+<div class="w-12 h-1.5 bg-surface-container-lowest/50 rounded-full"></div>
+</div>
+<!-- Sheet Canvas -->
+<div class="bg-background rounded-t-[3rem] px-8 pt-10 pb-12 shadow-[0_-12px_48px_rgba(0,0,0,0.15)] flex flex-col gap-8">
+<!-- Header -->
+<div class="text-center space-y-2">
+<h2 class="font-headline text-2xl font-bold text-on-surface tracking-tight">手机号绑定</h2>
+<p class="text-on-surface-variant text-sm px-4">为了您的账号安全，请完成手机号验证</p>
+</div>
+<!-- Form -->
+<div class="space-y-4">
+<!-- Phone Input Group -->
+<div class="relative">
+<div class="absolute left-5 top-1/2 -translate-y-1/2 flex items-center gap-2 border-r border-outline-variant/30 pr-3">
+<span class="text-on-surface-variant font-medium">+86</span>
+</div>
+<input class="w-full h-16 pl-20 pr-6 bg-surface-container-high border-none rounded-xl text-on-surface placeholder:text-on-surface-variant/50 focus:ring-2 focus:ring-primary-fixed-dim focus:bg-surface-container-lowest transition-all" placeholder="请输入手机号" type="tel"/>
+</div>
+<!-- Code Input Group -->
+<div class="flex gap-3">
+<div class="relative flex-1">
+<input class="w-full h-16 px-6 bg-surface-container-high border-none rounded-xl text-on-surface placeholder:text-on-surface-variant/50 focus:ring-2 focus:ring-primary-fixed-dim focus:bg-surface-container-lowest transition-all" placeholder="验证码" type="text"/>
+</div>
+<button class="h-16 px-6 bg-secondary-container text-on-secondary-container font-medium rounded-xl hover:bg-secondary-fixed transition-colors whitespace-nowrap active:scale-95 duration-200">
+                            获取验证码
+                        </button>
+</div>
+</div>
+<!-- Action Button -->
+<div class="pt-4">
+<button class="w-full h-16 bg-gradient-to-r from-primary to-primary-dim text-on-primary font-bold text-lg rounded-xl shadow-[0_8px_24px_rgba(116,92,0,0.2)] active:scale-95 transition-transform">
+                        确认绑定
+                    </button>
+<button class="w-full mt-4 text-on-surface-variant font-medium text-sm py-2 hover:text-on-surface transition-colors">
+                        稍后进行
+                    </button>
+</div>
+<!-- Policy Footer -->
+<p class="text-[10px] text-center text-on-surface-variant/60 leading-relaxed px-4">
+                    绑定即表示您同意 <span class="underline decoration-secondary">用户服务协议</span> 和 <span class="underline decoration-secondary">隐私政策</span>
+</p>
+</div>
+</div>
+<!-- Bottom Navigation (Hidden by sheet usually, but present in shell) -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-3 bg-[#faf9f8]/80 backdrop-blur-xl z-40 rounded-t-[2rem] max-w-[430px]">
+<div class="flex flex-col items-center justify-center text-[#5d605f] px-5 py-2">
+<span class="material-symbols-outlined">local_florist</span>
+<span class="text-xs font-medium tracking-wide">Garden</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#5d605f] px-5 py-2">
+<span class="material-symbols-outlined">analytics</span>
+<span class="text-xs font-medium tracking-wide">Insights</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#5d605f] px-5 py-2">
+<span class="material-symbols-outlined">self_improvement</span>
+<span class="text-xs font-medium tracking-wide">Sanctuary</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-[#f9d461] text-[#5c4900] rounded-[3rem] px-5 py-2 scale-105">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-xs font-medium tracking-wide">Settings</span>
+</div>
+</nav>
+</div>
+</body></html>

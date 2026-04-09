@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary-container": "#466141",
+                    "outline": "#797b7a",
+                    "inverse-primary": "#f9d461",
+                    "on-surface-variant": "#5d605f",
+                    "tertiary-fixed-dim": "#93c3ef",
+                    "secondary-dim": "#3f5a3a",
+                    "secondary-container": "#dafad0",
+                    "error": "#aa371c",
+                    "inverse-surface": "#0d0e0e",
+                    "surface-container-low": "#f4f3f2",
+                    "error-container": "#fa7150",
+                    "on-primary-fixed": "#463600",
+                    "on-secondary-fixed": "#354e30",
+                    "on-surface": "#303333",
+                    "surface-dim": "#d8dad9",
+                    "surface-bright": "#faf9f8",
+                    "on-background": "#303333",
+                    "tertiary-dim": "#22577e",
+                    "secondary": "#4b6646",
+                    "on-secondary-fixed-variant": "#506b4a",
+                    "surface-container-highest": "#e1e3e2",
+                    "on-primary-fixed-variant": "#675200",
+                    "tertiary": "#31638a",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary-fixed": "#003351",
+                    "on-tertiary-container": "#0a476d",
+                    "error-dim": "#821a01",
+                    "surface-container-high": "#e7e8e7",
+                    "surface-container": "#eeeeed",
+                    "on-secondary": "#eaffe1",
+                    "on-tertiary": "#f6f9ff",
+                    "surface-tint": "#745c00",
+                    "on-error-container": "#671200",
+                    "background": "#faf9f8",
+                    "surface-variant": "#e1e3e2",
+                    "on-primary-container": "#5c4900",
+                    "secondary-fixed-dim": "#ccebc2",
+                    "primary-fixed": "#f9d461",
+                    "surface": "#faf9f8",
+                    "inverse-on-surface": "#9d9d9c",
+                    "on-tertiary-fixed-variant": "#1a5177",
+                    "on-error": "#fff7f6",
+                    "primary-container": "#f9d461",
+                    "secondary-fixed": "#dafad0",
+                    "primary-fixed-dim": "#eac655",
+                    "primary-dim": "#665100",
+                    "tertiary-fixed": "#a1d1fe",
+                    "outline-variant": "#b0b2b1",
+                    "primary": "#745c00",
+                    "on-primary": "#fff8ee",
+                    "tertiary-container": "#a1d1fe"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Plus Jakarta Sans"],
+                    "label": ["Plus Jakarta Sans"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass-nav { backdrop-filter: blur(20px); }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface selection:bg-primary-container selection:text-on-primary-container min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex items-center justify-between px-6 py-4 bg-[#faf9f8]/80 dark:bg-stone-900/80 backdrop-blur-xl">
+<div class="flex items-center gap-4">
+<button class="p-2 hover:bg-[#f4f3f2] dark:hover:bg-stone-800 transition-colors rounded-full active:scale-95 duration-200">
+<span class="material-symbols-outlined text-[#745c00] dark:text-[#f9d461]">arrow_back</span>
+</button>
+<h1 class="font-['Plus_Jakarta_Sans'] text-lg font-bold tracking-tight text-[#745c00] dark:text-[#f9d461]">定制我的计划</h1>
+</div>
+<button class="px-6 py-2 bg-primary-container text-on-primary-container rounded-full font-bold text-sm active:scale-95 transition-all shadow-[0_12px_32px_rgba(116,92,0,0.08)]">
+            完成
+        </button>
+</header>
+<main class="pt-24 px-6 max-w-2xl mx-auto">
+<!-- Hero Concept Card -->
+<div class="relative overflow-hidden rounded-xl mb-8 group h-48 bg-primary-container/20">
+<img class="w-full h-full object-cover mix-blend-overlay opacity-60" data-alt="Soft aesthetic yoga studio with morning sunlight streaming through windows and a single plant for a healing mood" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6XECpJylDJQSFUy6FNWpTXYIhp6Pj66klqo8kwKeOjkwsBM_ygS4Pd9zZHFEjDfh7FRbDI00QUbVKV7wCqfsXObSNVt2qj9AAwYnjMoLq7ORu7T2Mkmii4iK9e3l_uqJhGASprps86HSHS_sHnQG6dVXTz9PWUpcJf6opgDrEViSyeCh1sVUS-FnEk5JpBkhAz7MMlkigBb52eXeoPO40bvHjJRYxAuLd4cPxvRNhf-ZEt9LFIrSuMF4L9kyO1KKYvs6N191pTmvX"/>
+<div class="absolute inset-0 p-8 flex flex-col justify-end">
+<p class="text-on-surface-variant text-sm font-medium mb-1">开始新的旅程</p>
+<h2 class="text-3xl font-bold tracking-tight text-on-surface">晨间瑜伽与冥想</h2>
+</div>
+</div>
+<!-- Section: Basic Info -->
+<section class="space-y-6 mb-10">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary">edit_note</span>
+<h3 class="text-on-surface font-bold text-lg">基础信息</h3>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="space-y-2">
+<label class="text-xs font-bold text-on-surface-variant ml-4 tracking-wider uppercase">计划名称</label>
+<div class="bg-surface-container-high rounded-lg px-6 py-4 transition-focus">
+<input class="bg-transparent border-none focus:ring-0 w-full p-0 font-semibold text-on-surface" type="text" value="晨间瑜伽与冥想"/>
+</div>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-bold text-on-surface-variant ml-4 tracking-wider uppercase">打卡周期</label>
+<div class="bg-surface-container-high rounded-lg px-6 py-4 flex items-center justify-between">
+<input class="bg-transparent border-none focus:ring-0 w-16 p-0 font-semibold text-on-surface" type="number" value="21"/>
+<span class="text-on-surface-variant text-sm font-medium">天</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Section: Check-in Method -->
+<section class="mb-10">
+<div class="flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-secondary">verified</span>
+<h3 class="text-on-surface font-bold text-lg">打卡方式</h3>
+</div>
+<div class="grid grid-cols-3 gap-3">
+<button class="bg-primary text-on-primary rounded-lg p-4 flex flex-col items-center gap-2 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-3xl">approval</span>
+<span class="text-xs font-bold">盖章打卡</span>
+</button>
+<button class="bg-surface-container-lowest text-on-surface-variant rounded-lg p-4 flex flex-col items-center gap-2 active:scale-95 transition-all shadow-sm">
+<span class="material-symbols-outlined text-3xl">analytics</span>
+<span class="text-xs font-bold">数值记录</span>
+</button>
+<button class="bg-surface-container-lowest text-on-surface-variant rounded-lg p-4 flex flex-col items-center gap-2 active:scale-95 transition-all shadow-sm">
+<span class="material-symbols-outlined text-3xl">auto_stories</span>
+<span class="text-xs font-bold">文字日记</span>
+</button>
+</div>
+</section>
+<!-- Section: Reminders -->
+<section class="mb-10">
+<div class="flex items-center justify-between mb-6">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary">notifications_active</span>
+<h3 class="text-on-surface font-bold text-lg">提醒设置</h3>
+</div>
+<button class="text-tertiary font-bold text-sm flex items-center gap-1 bg-tertiary-container/20 px-4 py-1.5 rounded-full">
+<span class="material-symbols-outlined text-sm">add</span> 添加
+                </button>
+</div>
+<div class="space-y-3">
+<!-- Reminder Row 1 -->
+<div class="bg-surface-container-lowest rounded-lg p-5 flex items-center justify-between shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant">schedule</span>
+<span class="text-xl font-bold tracking-tight text-on-surface">07:30</span>
+<span class="text-xs px-2 py-0.5 bg-secondary-container text-on-secondary-container rounded font-bold">每日</span>
+</div>
+<div class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-secondary after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+</div>
+</div>
+<!-- Reminder Row 2 -->
+<div class="bg-surface-container-lowest rounded-lg p-5 flex items-center justify-between shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant">schedule</span>
+<span class="text-xl font-bold tracking-tight text-on-surface">22:00</span>
+<span class="text-xs px-2 py-0.5 bg-surface-container-highest text-on-surface-variant rounded font-bold">复盘</span>
+</div>
+<div class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-secondary after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Section: Milestones -->
+<section class="mb-10">
+<div class="flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-primary">emoji_events</span>
+<h3 class="text-on-surface font-bold text-lg">阶段里程碑</h3>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+<div class="bg-surface-container-lowest p-6 rounded-lg border-2 border-dashed border-outline-variant/30 flex flex-col items-center justify-center gap-4 aspect-square md:aspect-auto">
+<div class="w-12 h-12 bg-primary-container rounded-full flex items-center justify-center">
+<span class="text-on-primary-container font-black text-xl">07</span>
+</div>
+<div class="text-center">
+<p class="font-bold text-on-surface">小有所成</p>
+<p class="text-xs text-on-surface-variant">奖励：奖励一顿丰盛早餐</p>
+</div>
+<button class="text-xs font-bold text-primary underline">修改奖励</button>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-lg border-2 border-dashed border-outline-variant/30 flex flex-col items-center justify-center gap-4 aspect-square md:aspect-auto">
+<div class="w-12 h-12 bg-secondary-container rounded-full flex items-center justify-center">
+<span class="text-on-secondary-container font-black text-xl">21</span>
+</div>
+<div class="text-center">
+<p class="font-bold text-on-surface">完美收官</p>
+<p class="text-xs text-on-surface-variant">奖励：购买一套新瑜伽服</p>
+</div>
+<button class="text-xs font-bold text-primary underline">修改奖励</button>
+</div>
+<button class="col-span-full py-6 border-2 border-dashed border-outline-variant/20 rounded-lg flex flex-col items-center justify-center gap-2 text-on-surface-variant hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined">add_circle</span>
+<span class="text-sm font-bold">添加里程碑阶段</span>
+</button>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-8 pt-4 bg-[#faf9f8]/80 dark:bg-stone-900/80 backdrop-blur-xl z-50 rounded-t-[3rem] shadow-[0_-12px_32px_rgba(116,92,0,0.08)]"><!-- Plan (ACTIVE) -->
+<a class="flex flex-col items-center justify-center bg-[#f9d461] dark:bg-[#745c00] text-[#745c00] dark:text-[#f9d461] rounded-[2rem] px-5 py-2 scale-105 active:scale-90 duration-150 ease-out" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="edit_note" data-weight="fill" style="font-variation-settings: 'FILL' 1;">edit_note</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-semibold tracking-wide">Plan</span>
+</a>
+<!-- Calendar -->
+<a class="flex flex-col items-center justify-center text-[#5d605f] dark:text-stone-400 px-4 py-2 hover:bg-[#f4f3f2] dark:hover:bg-stone-800 rounded-full transition-colors" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="calendar_today">calendar_today</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-semibold tracking-wide">Calendar</span>
+</a>
+<!-- Circles -->
+<a class="flex flex-col items-center justify-center text-[#5d605f] dark:text-stone-400 px-4 py-2 hover:bg-[#f4f3f2] dark:hover:bg-stone-800 rounded-full transition-colors" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="group">group</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-semibold tracking-wide">Circles</span>
+</a>
+<!-- Profile -->
+<a class="flex flex-col items-center justify-center text-[#5d605f] dark:text-stone-400 px-4 py-2 hover:bg-[#f4f3f2] dark:hover:bg-stone-800 rounded-full transition-colors" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="person">person</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-semibold tracking-wide">Profile</span>
+</a></nav>
+</body></html>

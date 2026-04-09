@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-dim": "#3f5a3a",
+                    "surface-container-low": "#f4f3f2",
+                    "inverse-surface": "#0d0e0e",
+                    "tertiary-fixed-dim": "#93c3ef",
+                    "on-tertiary-fixed": "#003351",
+                    "on-secondary": "#eaffe1",
+                    "surface-container-highest": "#e1e3e2",
+                    "secondary": "#4b6646",
+                    "tertiary-container": "#a1d1fe",
+                    "on-surface": "#303333",
+                    "error-dim": "#821a01",
+                    "tertiary-fixed": "#a1d1fe",
+                    "on-primary-fixed": "#463600",
+                    "surface-variant": "#e1e3e2",
+                    "surface-bright": "#faf9f8",
+                    "primary-fixed-dim": "#eac655",
+                    "surface-tint": "#745c00",
+                    "surface-container-high": "#e7e8e7",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary-dim": "#22577e",
+                    "on-tertiary-container": "#0a476d",
+                    "error-container": "#fa7150",
+                    "secondary-fixed": "#dafad0",
+                    "surface-dim": "#d8dad9",
+                    "outline-variant": "#b0b2b1",
+                    "primary-fixed": "#f9d461",
+                    "surface": "#faf9f8",
+                    "on-secondary-fixed-variant": "#506b4a",
+                    "on-error-container": "#671200",
+                    "secondary-container": "#dafad0",
+                    "on-tertiary-fixed-variant": "#1a5177",
+                    "outline": "#797b7a",
+                    "background": "#faf9f8",
+                    "on-secondary-fixed": "#354e30",
+                    "on-secondary-container": "#466141",
+                    "surface-container": "#eeeeed",
+                    "on-primary-fixed-variant": "#675200",
+                    "primary": "#745c00",
+                    "on-background": "#303333",
+                    "primary-container": "#f9d461",
+                    "inverse-on-surface": "#9d9d9c",
+                    "inverse-primary": "#f9d461",
+                    "primary-dim": "#665100",
+                    "on-surface-variant": "#5d605f",
+                    "on-error": "#fff7f6",
+                    "on-primary": "#fff8ee",
+                    "error": "#aa371c",
+                    "secondary-fixed-dim": "#ccebc2",
+                    "on-tertiary": "#f6f9ff",
+                    "on-primary-container": "#5c4900",
+                    "tertiary": "#31638a"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Plus Jakarta Sans"],
+                    "label": ["Plus Jakarta Sans"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex items-center justify-between px-6 py-4 bg-[#faf9f8]/80 dark:bg-stone-900/80 backdrop-blur-xl">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#745c00] dark:text-[#f9d461]" style="font-size: 28px;">bubble_chart</span>
+<span class="text-2xl font-extrabold text-[#745c00] dark:text-[#f9d461] tracking-tighter">PuddingPlan</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-full hover:bg-[#f4f3f2] dark:hover:bg-stone-800 transition-colors active:scale-95 duration-200">
+<span class="material-symbols-outlined text-[#5d605f] dark:text-stone-400">notifications</span>
+</button>
+</div>
+</header>
+<main class="pt-24 px-6 max-w-2xl mx-auto">
+<!-- Monthly Calendar Section -->
+<section class="mb-10">
+<div class="flex justify-between items-end mb-6">
+<div>
+<h2 class="text-on-surface-variant text-sm font-semibold tracking-widest uppercase">March 2024</h2>
+<h1 class="text-4xl font-extrabold tracking-tight text-on-surface">Calendar</h1>
+</div>
+<div class="flex gap-2">
+<button class="p-2 rounded-full bg-surface-container-low hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="p-2 rounded-full bg-surface-container-low hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- Calendar Grid -->
+<div class="bg-surface-container-lowest rounded-lg p-6 shadow-[0_12px_32px_rgba(116,92,0,0.04)]">
+<div class="grid grid-cols-7 gap-y-4 text-center">
+<!-- Days Header -->
+<span class="text-[10px] font-bold text-on-surface-variant/50 uppercase tracking-widest">Mo</span>
+<span class="text-[10px] font-bold text-on-surface-variant/50 uppercase tracking-widest">Tu</span>
+<span class="text-[10px] font-bold text-on-surface-variant/50 uppercase tracking-widest">We</span>
+<span class="text-[10px] font-bold text-on-surface-variant/50 uppercase tracking-widest">Th</span>
+<span class="text-[10px] font-bold text-on-surface-variant/50 uppercase tracking-widest">Fr</span>
+<span class="text-[10px] font-bold text-on-surface-variant/50 uppercase tracking-widest">Sa</span>
+<span class="text-[10px] font-bold text-on-surface-variant/50 uppercase tracking-widest">Su</span>
+<!-- Calendar Days -->
+<div class="flex flex-col items-center py-2 text-on-surface-variant/30 font-medium">26</div>
+<div class="flex flex-col items-center py-2 text-on-surface-variant/30 font-medium">27</div>
+<div class="flex flex-col items-center py-2 text-on-surface-variant/30 font-medium">28</div>
+<div class="flex flex-col items-center py-2 text-on-surface-variant/30 font-medium">29</div>
+<div class="flex flex-col items-center py-2 font-medium">1</div>
+<div class="flex flex-col items-center py-2 font-medium">2</div>
+<div class="flex flex-col items-center py-2 font-medium relative">
+                        3
+                        <span class="absolute -bottom-1 w-1.5 h-1.5 rounded-full bg-secondary"></span>
+</div>
+<div class="flex flex-col items-center py-2 font-medium relative">
+                        4
+                        <span class="absolute -bottom-1 w-1.5 h-1.5 rounded-full bg-secondary"></span>
+</div>
+<div class="flex flex-col items-center py-2 font-medium">5</div>
+<div class="flex flex-col items-center py-2 font-medium relative">
+                        6
+                        <span class="absolute -bottom-1 w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+</div>
+<div class="flex flex-col items-center py-2 font-medium">7</div>
+<div class="flex flex-col items-center py-2 font-medium relative">
+                        8
+                        <span class="absolute -bottom-1 w-1.5 h-1.5 rounded-full bg-secondary"></span>
+</div>
+<div class="flex flex-col items-center py-2 font-medium">9</div>
+<div class="flex flex-col items-center py-2 font-medium relative">
+                        10
+                        <span class="absolute -bottom-1 w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+</div>
+<div class="flex flex-col items-center py-2 font-medium relative bg-primary-container/20 rounded-full">
+                        11
+                        <span class="absolute -bottom-1 w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+</div>
+<div class="flex flex-col items-center py-2 font-medium">12</div>
+<div class="flex flex-col items-center py-2 font-medium">13</div>
+<div class="flex flex-col items-center py-2 font-medium">14</div>
+<div class="flex flex-col items-center py-2 font-medium">15</div>
+<div class="flex flex-col items-center py-2 font-medium">16</div>
+<div class="flex flex-col items-center py-2 font-medium">17</div>
+</div>
+</div>
+</section>
+<!-- Today's Focus Section -->
+<section class="space-y-6">
+<div class="flex items-center gap-3">
+<span class="w-10 h-10 flex items-center justify-center rounded-full bg-secondary-container">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">eco</span>
+</span>
+<h3 class="text-xl font-bold text-on-surface">今日重点</h3>
+</div>
+<div class="grid gap-4">
+<!-- Morning Hydration Card -->
+<div class="bg-surface-container-lowest rounded-lg p-6 flex items-center justify-between shadow-[0_12px_32px_rgba(116,92,0,0.04)] border border-outline-variant/10">
+<div class="flex items-center gap-5">
+<div class="w-14 h-14 bg-tertiary-container/30 rounded-2xl flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary text-3xl" style="font-variation-settings: 'FILL' 1;">water_drop</span>
+</div>
+<div>
+<h4 class="text-lg font-bold text-on-surface">晨间补水</h4>
+<p class="text-on-surface-variant text-sm">250ml goal</p>
+</div>
+</div>
+<button class="bg-primary-container text-on-primary-container px-6 py-3 rounded-xl font-bold text-sm shadow-[0_8px_16px_rgba(116,92,0,0.12)] active:scale-95 transition-all">
+                        点击盖章
+                    </button>
+</div>
+<!-- Digital Detox Card -->
+<div class="bg-surface-container-lowest rounded-lg p-6 flex items-center justify-between shadow-[0_12px_32px_rgba(116,92,0,0.04)] border border-outline-variant/10">
+<div class="flex items-center gap-5">
+<div class="w-14 h-14 bg-secondary-container/30 rounded-2xl flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary text-3xl">screen_lock_portrait</span>
+</div>
+<div>
+<h4 class="text-lg font-bold text-on-surface">数字脱毒</h4>
+<p class="text-on-surface-variant text-sm">30 min focus</p>
+</div>
+</div>
+<button class="bg-primary-container text-on-primary-container px-6 py-3 rounded-xl font-bold text-sm shadow-[0_8px_16px_rgba(116,92,0,0.12)] active:scale-95 transition-all">
+                        点击盖章
+                    </button>
+</div>
+</div>
+<!-- Bento Quote Section -->
+<div class="relative overflow-hidden bg-gradient-to-br from-primary-container to-[#fbe6a2] rounded-lg p-8 mt-8">
+<div class="relative z-10">
+<span class="material-symbols-outlined text-on-primary-container mb-4" style="font-size: 32px;">format_quote</span>
+<p class="text-on-primary-container font-headline text-xl font-bold leading-snug max-w-xs">
+                        "Taking a deep breath is the first step towards clarity."
+                    </p>
+</div>
+<div class="absolute top-0 right-0 w-32 h-32 opacity-20 transform translate-x-8 -translate-y-8">
+<span class="material-symbols-outlined text-[120px]">filter_vintage</span>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-8 pt-4 bg-[#faf9f8]/80 dark:bg-stone-900/80 backdrop-blur-xl z-50 rounded-t-[3rem] shadow-[0_-12px_32px_rgba(116,92,0,0.08)]">
+<!-- Plan (Inactive) -->
+<a class="flex flex-col items-center justify-center text-[#5d605f] dark:text-stone-400 px-4 py-2 hover:bg-[#f4f3f2] dark:hover:bg-stone-800 rounded-full transition-colors" href="#">
+<span class="material-symbols-outlined">explore</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-semibold tracking-wide">Plan</span>
+</a>
+<!-- Calendar (Active) -->
+<a class="flex flex-col items-center justify-center bg-[#f9d461] dark:bg-[#745c00] text-[#745c00] dark:text-[#f9d461] rounded-[2rem] px-5 py-2 scale-105 active:scale-90 duration-150 ease-out" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">calendar_today</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-semibold tracking-wide">Calendar</span>
+</a>
+<!-- Circles (Inactive) -->
+<a class="flex flex-col items-center justify-center text-[#5d605f] dark:text-stone-400 px-4 py-2 hover:bg-[#f4f3f2] dark:hover:bg-stone-800 rounded-full transition-colors" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-semibold tracking-wide">Circles</span>
+</a>
+<!-- Profile (Inactive) -->
+<a class="flex flex-col items-center justify-center text-[#5d605f] dark:text-stone-400 px-4 py-2 hover:bg-[#f4f3f2] dark:hover:bg-stone-800 rounded-full transition-colors" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-semibold tracking-wide">Profile</span>
+</a>
+</nav>
+</body></html>

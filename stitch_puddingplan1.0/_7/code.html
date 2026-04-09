@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-high": "#e7e8e7",
+                    "on-primary-container": "#5c4900",
+                    "background": "#faf9f8",
+                    "inverse-primary": "#f9d461",
+                    "error-dim": "#821a01",
+                    "on-primary": "#fff8ee",
+                    "secondary-dim": "#3f5a3a",
+                    "surface-dim": "#d8dad9",
+                    "tertiary-fixed-dim": "#93c3ef",
+                    "surface": "#faf9f8",
+                    "on-surface-variant": "#5d605f",
+                    "primary": "#745c00",
+                    "on-primary-fixed-variant": "#675200",
+                    "on-surface": "#303333",
+                    "primary-fixed": "#f9d461",
+                    "tertiary-fixed": "#a1d1fe",
+                    "error-container": "#fa7150",
+                    "on-error-container": "#671200",
+                    "surface-variant": "#e1e3e2",
+                    "surface-bright": "#faf9f8",
+                    "on-primary-fixed": "#463600",
+                    "on-secondary-fixed": "#354e30",
+                    "on-secondary-container": "#466141",
+                    "secondary-fixed": "#dafad0",
+                    "inverse-on-surface": "#9d9d9c",
+                    "primary-fixed-dim": "#eac655",
+                    "outline-variant": "#b0b2b1",
+                    "tertiary": "#31638a",
+                    "secondary": "#4b6646",
+                    "surface-container": "#eeeeed",
+                    "surface-container-low": "#f4f3f2",
+                    "tertiary-dim": "#22577e",
+                    "secondary-fixed-dim": "#ccebc2",
+                    "secondary-container": "#dafad0",
+                    "surface-tint": "#745c00",
+                    "on-tertiary": "#f6f9ff",
+                    "on-tertiary-fixed-variant": "#1a5177",
+                    "on-secondary": "#eaffe1",
+                    "error": "#aa371c",
+                    "surface-container-highest": "#e1e3e2",
+                    "on-tertiary-fixed": "#003351",
+                    "inverse-surface": "#0d0e0e",
+                    "tertiary-container": "#a1d1fe",
+                    "on-tertiary-container": "#0a476d",
+                    "outline": "#797b7a",
+                    "on-secondary-fixed-variant": "#506b4a",
+                    "on-error": "#fff7f6",
+                    "primary-dim": "#665100",
+                    "surface-container-lowest": "#ffffff",
+                    "primary-container": "#f9d461",
+                    "on-background": "#303333"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Plus Jakarta Sans"],
+                    "label": ["Plus Jakarta Sans"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            min-height: 100dvh;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body">
+<!-- TopAppBar Header -->
+<header class="fixed top-0 w-full z-50 bg-[#faf9f8]/80 backdrop-blur-xl flex items-center justify-between px-6 py-4">
+<button class="text-on-surface-variant flex items-center gap-1 active:scale-95 duration-200">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+<span class="text-label-lg font-medium">取消</span>
+</button>
+<h1 class="font-headline text-title-lg font-semibold text-primary">发布动态</h1>
+<button class="bg-primary-container text-on-primary-container px-6 py-2 rounded-full font-semibold text-label-lg shadow-sm active:scale-95 duration-200">
+            发布
+        </button>
+</header>
+<main class="pt-24 pb-24 px-6 max-w-2xl mx-auto space-y-8">
+<!-- Today's Checked-in Items (New Section) -->
+<section class="space-y-3">
+<h3 class="text-on-surface-variant text-sm font-medium px-1 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                今日打卡成就
+            </h3>
+<div class="flex flex-wrap gap-2">
+<div class="flex items-center gap-1.5 bg-secondary-container/50 text-on-secondary-container px-3 py-1.5 rounded-full text-sm font-medium">
+<span class="material-symbols-outlined text-[16px]" data-icon="water_drop">water_drop</span>
+                    饮水达标
+                </div>
+<div class="flex items-center gap-1.5 bg-tertiary-container/50 text-on-tertiary-container px-3 py-1.5 rounded-full text-sm font-medium">
+<span class="material-symbols-outlined text-[16px]" data-icon="self_improvement">self_improvement</span>
+                    冥想 45min
+                </div>
+<div class="flex items-center gap-1.5 bg-surface-container-high text-on-surface-variant px-3 py-1.5 rounded-full text-sm font-medium">
+<span class="material-symbols-outlined text-[16px]" data-icon="light_mode">light_mode</span>
+                    早起
+                </div>
+<button class="flex items-center justify-center w-8 h-8 rounded-full border border-outline-variant/30 text-outline text-sm">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+</div>
+</section>
+<!-- Thoughts Input Area -->
+<section>
+<div class="bg-surface-container-low rounded-2xl p-6 transition-all border border-transparent focus-within:border-primary/20">
+<textarea class="w-full bg-transparent border-none focus:ring-0 text-on-surface text-lg leading-relaxed placeholder:text-outline-variant p-0 resize-none" id="thoughts" placeholder="今日心语：分享这一刻的宁静..." rows="8"></textarea>
+</div>
+</section>
+<!-- Image Upload Section -->
+<section class="space-y-4">
+<h3 class="text-on-surface-variant text-sm font-medium px-1">记录瞬间 (可选)</h3>
+<div class="grid grid-cols-3 gap-3">
+<!-- Large Placeholder for Upload -->
+<div class="aspect-square bg-surface-container-high rounded-xl flex flex-col items-center justify-center border-2 border-dashed border-outline-variant/30 hover:bg-surface-container-highest transition-colors cursor-pointer group">
+<span class="material-symbols-outlined text-3xl text-on-surface-variant group-hover:scale-110 duration-200" data-icon="add_a_photo">add_a_photo</span>
+</div>
+<!-- Empty slots for visual consistency if desired, or just the one button -->
+<div class="aspect-square bg-surface-container-low/50 rounded-xl border border-outline-variant/10"></div>
+<div class="aspect-square bg-surface-container-low/50 rounded-xl border border-outline-variant/10"></div>
+</div>
+</section>
+<!-- Privacy & Tags -->
+<section class="flex flex-wrap items-center gap-3 pt-4">
+<button class="flex items-center gap-2 bg-surface-container-lowest px-4 py-2 rounded-full border border-outline-variant/10 text-on-surface-variant text-xs font-medium hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="public">public</span>
+                所有人可见
+            </button>
+<button class="flex items-center gap-2 bg-surface-container-lowest px-4 py-2 rounded-full border border-outline-variant/10 text-on-surface-variant text-xs font-medium hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="tag">tag</span>
+                添加话题
+            </button>
+<button class="flex items-center gap-2 bg-surface-container-lowest px-4 py-2 rounded-full border border-outline-variant/10 text-on-surface-variant text-xs font-medium hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="location_on">location_on</span>
+                添加地点
+            </button>
+</section>
+</main>
+<!-- Bottom Action (Floating Send Button) -->
+<div class="fixed bottom-8 right-8">
+<button class="bg-primary text-on-primary w-14 h-14 rounded-full flex items-center justify-center shadow-xl hover:scale-105 active:scale-95 transition-all">
+<span class="material-symbols-outlined" data-icon="send" style="font-variation-settings: 'FILL' 1;">send</span>
+</button>
+</div>
+<!-- Background Decorative "Bloom" elements -->
+<div class="fixed top-[20%] -left-20 w-64 h-64 bg-primary-container/10 rounded-full blur-[100px] pointer-events-none"></div>
+<div class="fixed bottom-[10%] -right-20 w-80 h-80 bg-secondary-container/20 rounded-full blur-[120px] pointer-events-none"></div>
+</body></html>

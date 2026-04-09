@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PuddingPlan - Profile</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed": "#003351",
+                        "tertiary": "#31638a",
+                        "on-primary": "#fff8ee",
+                        "inverse-surface": "#0d0e0e",
+                        "primary-container": "#f9d461",
+                        "surface-variant": "#e1e3e2",
+                        "surface-container": "#eeeeed",
+                        "primary-fixed": "#f9d461",
+                        "outline": "#797b7a",
+                        "surface-bright": "#faf9f8",
+                        "on-secondary": "#eaffe1",
+                        "surface": "#faf9f8",
+                        "surface-tint": "#745c00",
+                        "surface-dim": "#d8dad9",
+                        "tertiary-fixed": "#a1d1fe",
+                        "on-surface": "#303333",
+                        "inverse-on-surface": "#9d9d9c",
+                        "error-dim": "#821a01",
+                        "on-secondary-container": "#466141",
+                        "on-error": "#fff7f6",
+                        "on-primary-container": "#5c4900",
+                        "surface-container-high": "#e7e8e7",
+                        "tertiary-dim": "#22577e",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-fixed": "#dafad0",
+                        "on-tertiary": "#f6f9ff",
+                        "secondary-dim": "#3f5a3a",
+                        "tertiary-fixed-dim": "#93c3ef",
+                        "secondary-container": "#dafad0",
+                        "on-tertiary-fixed-variant": "#1a5177",
+                        "tertiary-container": "#a1d1fe",
+                        "on-primary-fixed": "#463600",
+                        "error-container": "#fa7150",
+                        "surface-container-highest": "#e1e3e2",
+                        "on-secondary-fixed-variant": "#506b4a",
+                        "on-secondary-fixed": "#354e30",
+                        "primary-fixed-dim": "#eac655",
+                        "on-surface-variant": "#5d605f",
+                        "on-error-container": "#671200",
+                        "outline-variant": "#b0b2b1",
+                        "primary": "#745c00",
+                        "error": "#aa371c",
+                        "secondary": "#4b6646",
+                        "primary-dim": "#665100",
+                        "inverse-primary": "#f9d461",
+                        "on-background": "#303333",
+                        "on-primary-fixed-variant": "#675200",
+                        "on-tertiary-container": "#0a476d",
+                        "surface-container-low": "#f4f3f2",
+                        "background": "#faf9f8",
+                        "secondary-fixed-dim": "#ccebc2"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Plus Jakarta Sans"],
+                        "label": ["Plus Jakarta Sans"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen pb-32">
+<!-- TopAppBar: Small center aligned as per COMPONENTS_17 -->
+<header class="fixed top-0 w-full z-50 bg-[#faf9f8]/80 dark:bg-stone-900/80 backdrop-blur-xl flex justify-between items-center px-6 py-4 w-full">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#745c00] dark:text-[#f9d461] hover:bg-[#f4f3f2] dark:hover:bg-stone-800 transition-colors p-2 rounded-full cursor-pointer active:scale-95 duration-200 ease-in-out" data-icon="settings">settings</span>
+</div>
+<h1 class="font-['Plus_Jakarta_Sans'] text-lg font-semibold tracking-tight text-[#745c00] dark:text-[#f9d461]">Profile</h1>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#745c00] dark:text-[#f9d461] hover:bg-[#f4f3f2] dark:hover:bg-stone-800 transition-colors p-2 rounded-full cursor-pointer active:scale-95 duration-200 ease-in-out" data-icon="more_vert">more_vert</span>
+</div>
+</header>
+<main class="pt-24 px-6 space-y-8 max-w-2xl mx-auto">
+<!-- User Profile Header -->
+<section class="flex flex-col items-center text-center space-y-4">
+<div class="relative">
+<div class="w-24 h-24 rounded-full p-1 bg-gradient-to-tr from-primary to-primary-container shadow-lg">
+<img alt="User Avatar" class="w-full h-full rounded-full object-cover border-4 border-surface" data-alt="Soft portrait of a young woman with a gentle expression, natural lighting, clean studio background, warm tones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAKIKxyrX9s0nJefVvjBGd8CSyhpbf9-v4EJyrcIkNMFxfgFQvwGfb-MuYUo-s1RtWbMfIJZf3eR0OMoCXhwL9HvS20JQ3p9C0wxr2afcRx7raAEJnh2TysPvjzILk3vrRyYcZAlEJcqrJCLc9i4mkDOJSXA_iRvV4tZK1Y9DPscuYLSxN1_oYrkozPgdrg9A4VzKMRFdNVMCc8hdnTCVhZXQP0zN1OxWtTwZWa1NqK0QWGuuFW-VToLvMZ0wtrbgySHgiRL1-RIFQI"/>
+</div>
+<div class="absolute bottom-0 right-0 bg-secondary p-1.5 rounded-full border-2 border-surface">
+<span class="material-symbols-outlined text-white text-[14px]" data-icon="auto_awesome" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+</div>
+</div>
+<div>
+<h2 class="text-2xl font-bold tracking-tight text-on-surface">林小布</h2>
+<p class="text-on-surface-variant mt-1 italic text-sm">“在自律中遇见更好的自己”</p>
+</div>
+</section>
+<!-- Statistics Cards: Asymmetric Bento Style -->
+<section class="grid grid-cols-2 gap-4">
+<div class="bg-surface-container-lowest rounded-lg p-6 flex flex-col justify-between h-40 shadow-[0_12px_32px_rgba(116,92,0,0.04)]">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="calendar_today">calendar_today</span>
+<div>
+<p class="text-3xl font-extrabold text-on-surface">128</p>
+<p class="text-xs font-medium text-on-surface-variant uppercase tracking-widest mt-1">坚持天数</p>
+</div>
+</div>
+<div class="space-y-4">
+<div class="bg-primary-container/30 rounded-lg p-4 flex items-center gap-4 h-[76px]">
+<div class="bg-primary-container p-2 rounded-full">
+<span class="material-symbols-outlined text-on-primary-container text-xl" data-icon="verified" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+<div>
+<p class="text-xl font-bold text-on-surface">452</p>
+<p class="text-[10px] font-semibold text-on-surface-variant">累计盖章</p>
+</div>
+</div>
+<div class="bg-secondary-container/30 rounded-lg p-4 flex items-center gap-4 h-[76px]">
+<div class="bg-secondary-container p-2 rounded-full">
+<span class="material-symbols-outlined text-on-secondary-container text-xl" data-icon="spa" style="font-variation-settings: 'FILL' 1;">spa</span>
+</div>
+<div>
+<p class="text-xl font-bold text-on-surface">12</p>
+<p class="text-[10px] font-semibold text-on-surface-variant">治愈计划</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Achievement/Medal Wall -->
+<section>
+<div class="flex justify-between items-center mb-4">
+<h3 class="text-lg font-bold text-on-surface px-1">勋章墙</h3>
+<span class="text-sm font-medium text-primary">全部</span>
+</div>
+<div class="flex gap-4 overflow-x-auto pb-4 no-scrollbar">
+<div class="flex-shrink-0 w-24 flex flex-col items-center gap-2">
+<div class="w-16 h-16 rounded-full bg-secondary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary text-3xl" data-icon="sunny" style="font-variation-settings: 'FILL' 1;">sunny</span>
+</div>
+<span class="text-xs font-medium text-on-surface-variant">早起达人</span>
+</div>
+<div class="flex-shrink-0 w-24 flex flex-col items-center gap-2">
+<div class="w-16 h-16 rounded-full bg-tertiary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary text-3xl" data-icon="self_improvement" style="font-variation-settings: 'FILL' 1;">self_improvement</span>
+</div>
+<span class="text-xs font-medium text-on-surface-variant">冥想大师</span>
+</div>
+<div class="flex-shrink-0 w-24 flex flex-col items-center gap-2">
+<div class="w-16 h-16 rounded-full bg-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary-container text-3xl" data-icon="menu_book" style="font-variation-settings: 'FILL' 1;">menu_book</span>
+</div>
+<span class="text-xs font-medium text-on-surface-variant">书海拾贝</span>
+</div>
+<div class="flex-shrink-0 w-24 flex flex-col items-center gap-2">
+<div class="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined text-outline text-3xl opacity-40" data-icon="fitness_center">fitness_center</span>
+</div>
+<span class="text-xs font-medium text-on-surface-variant opacity-40">运动健将</span>
+</div>
+</div>
+</section>
+<!-- Content List (System settings moved to top-left icon) -->
+<section class="bg-surface-container-low rounded-lg p-2 space-y-1">
+<div class="flex items-center justify-between p-4 bg-surface-container-lowest rounded-lg hover:bg-surface-container transition-colors cursor-pointer group">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="history">history</span>
+</div>
+<span class="font-medium text-on-surface">打卡记录</span>
+</div>
+<span class="material-symbols-outlined text-outline-variant group-hover:translate-x-1 transition-transform" data-icon="chevron_right">chevron_right</span>
+</div>
+<div class="flex items-center justify-between p-4 bg-surface-container-lowest rounded-lg hover:bg-surface-container transition-colors cursor-pointer group">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary" data-icon="favorite">favorite</span>
+</div>
+<span class="font-medium text-on-surface">我的收藏</span>
+</div>
+<span class="material-symbols-outlined text-outline-variant group-hover:translate-x-1 transition-transform" data-icon="chevron_right">chevron_right</span>
+</div>
+<div class="flex items-center justify-between p-4 bg-surface-container-lowest rounded-lg hover:bg-surface-container transition-colors cursor-pointer group">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-tertiary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary" data-icon="help">help</span>
+</div>
+<span class="font-medium text-on-surface">帮助与反馈</span>
+</div>
+<span class="material-symbols-outlined text-outline-variant group-hover:translate-x-1 transition-transform" data-icon="chevron_right">chevron_right</span>
+</div>
+</section>
+</main>
+<!-- BottomNavBar: Updated to match SCREEN_13/14 style -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-8 pt-4 bg-[#faf9f8]/80 dark:bg-stone-900/80 backdrop-blur-xl z-50 rounded-t-[3rem] shadow-[0_-12px_32px_rgba(116,92,0,0.08)]">
+<a class="flex flex-col items-center justify-center text-[#5d605f] dark:text-stone-400 px-4 py-2 hover:bg-[#f4f3f2] dark:hover:bg-stone-800 rounded-full transition-colors active:scale-90 duration-150 ease-out" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="edit_note">edit_note</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-semibold tracking-wide">Plan</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#5d605f] dark:text-stone-400 px-4 py-2 hover:bg-[#f4f3f2] dark:hover:bg-stone-800 rounded-full transition-colors active:scale-90 duration-150 ease-out" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="calendar_today">calendar_today</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-semibold tracking-wide">Calendar</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#5d605f] dark:text-stone-400 px-4 py-2 hover:bg-[#f4f3f2] dark:hover:bg-stone-800 rounded-full transition-colors active:scale-90 duration-150 ease-out" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="group">group</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-semibold tracking-wide">Circles</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-[#f9d461] dark:bg-[#745c00] text-[#745c00] dark:text-[#f9d461] rounded-[2rem] px-5 py-2 scale-105 active:scale-90 duration-150 ease-out" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="person" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-semibold tracking-wide">Profile</span>
+</a>
+</nav>
+<style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</body></html>

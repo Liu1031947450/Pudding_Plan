@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Edit Profile - The Tactile Sanctuary</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-high": "#e7e8e7",
+                        "background": "#faf9f8",
+                        "on-tertiary": "#f6f9ff",
+                        "on-error": "#fff7f6",
+                        "on-primary": "#fff8ee",
+                        "error": "#aa371c",
+                        "tertiary": "#31638a",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary": "#eaffe1",
+                        "on-surface-variant": "#5d605f",
+                        "error-dim": "#821a01",
+                        "primary-dim": "#665100",
+                        "on-primary-container": "#5c4900",
+                        "surface": "#faf9f8",
+                        "on-primary-fixed": "#463600",
+                        "outline": "#797b7a",
+                        "primary": "#745c00",
+                        "on-secondary-container": "#466141",
+                        "outline-variant": "#b0b2b1",
+                        "secondary-container": "#dafad0",
+                        "surface-tint": "#745c00",
+                        "on-secondary-fixed": "#354e30",
+                        "secondary-fixed-dim": "#ccebc2",
+                        "on-tertiary-fixed": "#003351",
+                        "surface-variant": "#e1e3e2",
+                        "on-background": "#303333",
+                        "tertiary-fixed": "#a1d1fe",
+                        "inverse-primary": "#f9d461",
+                        "on-tertiary-fixed-variant": "#1a5177",
+                        "on-primary-fixed-variant": "#675200",
+                        "surface-container-low": "#f4f3f2",
+                        "tertiary-fixed-dim": "#93c3ef",
+                        "tertiary-dim": "#22577e",
+                        "primary-fixed-dim": "#eac655",
+                        "on-surface": "#303333",
+                        "on-secondary-fixed-variant": "#506b4a",
+                        "secondary": "#4b6646",
+                        "tertiary-container": "#a1d1fe",
+                        "on-error-container": "#671200",
+                        "inverse-surface": "#0d0e0e",
+                        "surface-container": "#eeeeed",
+                        "primary-container": "#f9d461",
+                        "secondary-dim": "#3f5a3a",
+                        "surface-dim": "#d8dad9",
+                        "secondary-fixed": "#dafad0",
+                        "inverse-on-surface": "#9d9d9c",
+                        "surface-container-highest": "#e1e3e2",
+                        "on-tertiary-container": "#0a476d",
+                        "primary-fixed": "#f9d461",
+                        "surface-bright": "#faf9f8",
+                        "error-container": "#fa7150"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Plus Jakarta Sans"],
+                        "label": ["Plus Jakarta Sans"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .bottom-sheet-gradient {
+            background: linear-gradient(15deg, #745c00 0%, #f9d461 100%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen overflow-hidden">
+<!-- Background Layer: Dimmed Settings Screen -->
+<div class="fixed inset-0 z-0 brightness-[0.4] bg-surface">
+<!-- Mock TopAppBar -->
+<header class="flex items-center h-16 px-6 w-full max-w-screen-xl mx-auto fixed top-0 w-full z-50 bg-[#faf9f8]/80 backdrop-blur-xl">
+<span class="material-symbols-outlined text-[#745c00] mr-4">arrow_back</span>
+<h1 class="font-['Plus_Jakarta_Sans'] text-[1.375rem] font-semibold leading-tight text-[#745c00]">Settings</h1>
+</header>
+<main class="pt-20 px-6 space-y-6">
+<div class="bg-surface-container-low rounded-lg p-6 space-y-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-primary-container"></div>
+<div>
+<p class="font-bold">User Account</p>
+<p class="text-on-surface-variant text-sm">Security and privacy</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</div>
+</div>
+<div class="bg-surface-container-low rounded-lg p-6 space-y-4">
+<div class="flex items-center justify-between">
+<p>Notifications</p>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</div>
+<div class="flex items-center justify-between">
+<p>Display &amp; Brightness</p>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</div>
+</div>
+</main>
+<!-- Mock BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-3 bg-[#faf9f8]/80 backdrop-blur-xl rounded-t-[2rem] shadow-[0_-12px_32px_rgba(116,92,0,0.08)]">
+<div class="flex flex-col items-center justify-center text-[#5d605f] px-5 py-2"><span class="material-symbols-outlined">local_florist</span><span class="text-xs font-medium">Garden</span></div>
+<div class="flex flex-col items-center justify-center text-[#5d605f] px-5 py-2"><span class="material-symbols-outlined">analytics</span><span class="text-xs font-medium">Insights</span></div>
+<div class="flex flex-col items-center justify-center text-[#5d605f] px-5 py-2"><span class="material-symbols-outlined">self_improvement</span><span class="text-xs font-medium">Sanctuary</span></div>
+<div class="flex flex-col items-center justify-center bg-[#f9d461] text-[#745c00] rounded-[3rem] px-5 py-2 scale-105"><span class="material-symbols-outlined">settings</span><span class="text-xs font-medium">Settings</span></div>
+</nav>
+</div>
+<!-- Bottom Sheet UI -->
+<div class="fixed inset-x-0 bottom-0 z-[60] bg-surface-container-lowest rounded-t-xl shadow-[0_-20px_48px_rgba(0,0,0,0.2)] animate-slide-up h-[751px] flex flex-col">
+<!-- Drag Handle -->
+<div class="w-full flex justify-center py-4">
+<div class="w-12 h-1.5 bg-outline-variant/30 rounded-full"></div>
+</div>
+<!-- Header -->
+<div class="px-8 pb-4">
+<h2 class="text-[1.375rem] font-semibold text-on-surface leading-tight font-headline">个人资料修改</h2>
+<p class="text-on-surface-variant text-sm mt-1">定制您的个人避风港身份</p>
+</div>
+<!-- Scrollable Content -->
+<div class="flex-1 overflow-y-auto px-8 pb-24 space-y-8">
+<!-- Profile Photo Upload -->
+<div class="flex flex-col items-center justify-center py-4">
+<div class="relative group">
+<div class="w-32 h-32 rounded-full overflow-hidden bg-surface-container-high flex items-center justify-center ring-4 ring-primary-container/30">
+<img class="w-full h-full object-cover" data-alt="Close-up portrait of a serene woman with natural lighting and soft warm tones, professional photography style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA7rEenS8g-6v6rgomfL1lggKJ1iFiorFtPZjXB4lKPtDzCG1hQLtYU3_vcNzPzf37y5AdPir-XKEZ_7dGEAyC0I77IFG8YOTR3IghwAKfOzzd4cjZ8AiDc-bAwvhys4f5VskgikoS3K4yEBm-UeEo4Pe3grbZTOBnY3Hwzhv5HNUUWTYwRC4jqmlCuAW8mwiBk4BlSNwc4-jRH0nIfmlUQz5zT1vRKeieSAvOv-kJl5q2wtoIQh_vBqetXSoA5MfLakTOshyIEwjs1"/>
+</div>
+<button class="absolute bottom-0 right-0 w-10 h-10 bg-primary text-on-primary rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[1.25rem]">photo_camera</span>
+</button>
+</div>
+<p class="text-xs text-on-surface-variant mt-4 font-medium tracking-wide">点击图标更换头像</p>
+</div>
+<!-- Input Fields -->
+<div class="space-y-6">
+<!-- Nickname -->
+<div class="space-y-2">
+<label class="text-sm font-semibold text-primary ml-1">昵称</label>
+<div class="relative">
+<input class="w-full bg-surface-container-high border-none rounded-lg px-5 py-4 focus:ring-2 focus:ring-primary-fixed-dim text-on-surface placeholder:text-outline transition-all" placeholder="输入您的昵称..." type="text" value="林间微风"/>
+</div>
+</div>
+<!-- Personal Signature -->
+<div class="space-y-2">
+<label class="text-sm font-semibold text-primary ml-1">个性签名</label>
+<div class="relative">
+<textarea class="w-full bg-surface-container-high border-none rounded-lg px-5 py-4 focus:ring-2 focus:ring-primary-fixed-dim text-on-surface placeholder:text-outline transition-all resize-none" placeholder="写下您的今日心语..." rows="4">在这里，每一株植物都在诉说着生长的宁静。</textarea>
+</div>
+<p class="text-[0.7rem] text-outline text-right pr-2">32 / 100</p>
+</div>
+</div>
+<!-- Visual Decoration / Bento Style Element -->
+<div class="bg-secondary-container rounded-lg p-5 flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-secondary flex items-center justify-center text-on-secondary">
+<span class="material-symbols-outlined">auto_awesome</span>
+</div>
+<div class="flex-1">
+<p class="text-sm font-bold text-on-secondary-container">视觉风格：静谧丛林</p>
+<p class="text-xs text-on-secondary-fixed-variant opacity-80">您的个人主页将自动适配此配色方案</p>
+</div>
+</div>
+</div>
+<!-- Footer Actions -->
+<div class="absolute bottom-0 inset-x-0 p-8 bg-surface-container-lowest/80 backdrop-blur-md">
+<button class="w-full h-16 rounded-xl bg-primary-container text-on-primary-container font-bold text-lg flex items-center justify-center gap-2 shadow-[0_12px_32px_rgba(116,92,0,0.12)] active:scale-[0.96] transition-all overflow-hidden relative">
+<span class="relative z-10">保存</span>
+<span class="material-symbols-outlined relative z-10" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<!-- Subtle Gradient Overlay -->
+<div class="absolute inset-0 bottom-sheet-gradient opacity-10"></div>
+</button>
+</div>
+</div>
+</body></html>

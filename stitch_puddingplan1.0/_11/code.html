@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-dim": "#22577e",
+                        "secondary-fixed-dim": "#ccebc2",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-fixed": "#dafad0",
+                        "on-primary-fixed": "#463600",
+                        "on-secondary-fixed": "#354e30",
+                        "tertiary-container": "#a1d1fe",
+                        "tertiary-fixed": "#a1d1fe",
+                        "primary": "#745c00",
+                        "on-primary": "#fff8ee",
+                        "primary-fixed": "#f9d461",
+                        "primary-container": "#f9d461",
+                        "secondary-dim": "#3f5a3a",
+                        "on-background": "#303333",
+                        "surface-container": "#eeeeed",
+                        "secondary-container": "#dafad0",
+                        "error": "#aa371c",
+                        "inverse-primary": "#f9d461",
+                        "secondary": "#4b6646",
+                        "on-secondary-fixed-variant": "#506b4a",
+                        "on-primary-container": "#5c4900",
+                        "tertiary-fixed-dim": "#93c3ef",
+                        "surface": "#faf9f8",
+                        "on-surface-variant": "#5d605f",
+                        "primary-fixed-dim": "#eac655",
+                        "surface-dim": "#d8dad9",
+                        "on-surface": "#303333",
+                        "inverse-on-surface": "#9d9d9c",
+                        "surface-variant": "#e1e3e2",
+                        "on-tertiary-fixed": "#003351",
+                        "on-error": "#fff7f6",
+                        "error-container": "#fa7150",
+                        "surface-bright": "#faf9f8",
+                        "on-secondary-container": "#466141",
+                        "tertiary": "#31638a",
+                        "surface-container-high": "#e7e8e7",
+                        "on-tertiary-fixed-variant": "#1a5177",
+                        "on-primary-fixed-variant": "#675200",
+                        "error-dim": "#821a01",
+                        "primary-dim": "#665100",
+                        "outline-variant": "#b0b2b1",
+                        "background": "#faf9f8",
+                        "inverse-surface": "#0d0e0e",
+                        "on-tertiary-container": "#0a476d",
+                        "surface-container-highest": "#e1e3e2",
+                        "surface-tint": "#745c00",
+                        "outline": "#797b7a",
+                        "on-error-container": "#671200",
+                        "on-tertiary": "#f6f9ff",
+                        "surface-container-low": "#f4f3f2",
+                        "on-secondary": "#eaffe1"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Plus Jakarta Sans"],
+                        "label": ["Plus Jakarta Sans"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .stamp-texture {
+            background-image: radial-gradient(circle at 2px 2px, rgba(116, 92, 0, 0.05) 1px, transparent 0);
+            background-size: 12px 12px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-surface min-h-screen flex flex-col">
+<!-- Top Navigation Anchor (Based on JSON) -->
+<header class="fixed top-0 w-full z-50 bg-[#faf9f8]/80 backdrop-blur-xl flex justify-between items-center px-6 h-16 w-full">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#745c00]" data-icon="spa">spa</span>
+<span class="text-2xl font-bold text-[#745c00] tracking-tight font-['Plus_Jakarta_Sans']">PuddingPlan</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 hover:bg-[#f4f3f2] rounded-full transition-colors duration-200">
+<span class="material-symbols-outlined text-[#5d605f]" data-icon="notifications">notifications</span>
+</button>
+</div>
+</header>
+<main class="flex-grow pt-24 pb-32 px-6 max-w-lg mx-auto w-full flex flex-col items-center justify-center">
+<!-- Hero: The Stamp Visual -->
+<div class="relative w-full aspect-square max-w-[320px] mb-8 group">
+<!-- Decorative Background Blob -->
+<div class="absolute inset-0 bg-primary-container/20 rounded-full blur-3xl -z-10 animate-pulse"></div>
+<!-- The Card -->
+<div class="w-full h-full bg-surface-container-lowest rounded-lg p-8 shadow-[0_12px_32px_rgba(116,92,0,0.06)] stamp-texture flex flex-col items-center justify-center border-4 border-surface-container-low overflow-hidden relative">
+<!-- Stamped Seal Effect -->
+<div class="w-48 h-48 rounded-full bg-primary-container flex items-center justify-center relative shadow-inner overflow-hidden border-8 border-primary/5">
+<div class="absolute inset-0 bg-gradient-to-br from-white/30 to-transparent"></div>
+<span class="material-symbols-outlined text-primary text-8xl" data-icon="verified" style="font-variation-settings: 'FILL' 1;">verified</span>
+<!-- Concentric circles for the seal look -->
+<div class="absolute inset-2 border-2 border-primary/20 rounded-full"></div>
+<div class="absolute inset-4 border border-primary/10 rounded-full"></div>
+</div>
+<!-- Text inside the "stamped" area -->
+<div class="mt-6 text-center">
+<p class="text-primary font-bold text-lg tracking-widest uppercase">SUCCESSFULLY STAMPED</p>
+<p class="text-on-surface-variant text-sm mt-1">October 24, 2023</p>
+</div>
+<!-- Floating Confetti Elements (Visual fillers) -->
+<div class="absolute top-10 right-10 w-3 h-3 bg-secondary-container rounded-full"></div>
+<div class="absolute bottom-12 left-8 w-4 h-4 bg-tertiary-container rounded-sm rotate-12"></div>
+</div>
+<!-- Overlay Image (Physical Stamp Handle Representation) -->
+<div class="absolute -top-12 -right-4 w-40 h-40 opacity-20 pointer-events-none group-hover:scale-110 transition-transform duration-700">
+<img alt="Vintage wooden stamp handle" class="w-full h-full object-contain filter grayscale brightness-50" data-alt="vintage wooden wax seal stamp handle leaning against a light beige background with soft cinematic lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwEiwjmEyFZMP5N1XzKhgZNb1wPUQaU0AbjmO1Nktcfo6PV_EnrFsUNlweVv7z8VrarDtqBly6TF_kMOH-nsBdRF5O3qu-JTshkOZ4unjggWH9W3i5wp5lKhlZkWOH3eRPqpYzymaVne5lpMiveaGd5m2lcESWzvY0xeX4Xf35A95KoplT6nO44EIiL_h6GLK3b44PKNRRbGCDMxTYBkw-CZtdjwXPvAw81y0l4aUqtjTj-Qo6TzsmHPhEt1iPkDsy_iIbX1zQ8pyF"/>
+</div>
+</div>
+<!-- Feedback Content -->
+<div class="text-center space-y-6">
+<div class="space-y-2">
+<h1 class="text-4xl font-extrabold text-on-surface tracking-tight leading-tight">
+                    又是一个闪闪发光的坚持！
+                </h1>
+<p class="text-on-surface-variant text-lg px-8 leading-relaxed">
+                    Small steps are the stars that light up your path. Your consistency is your superpower.
+                </p>
+</div>
+<!-- Action Buttons -->
+<div class="flex flex-col gap-4 w-full pt-4">
+<!-- Primary Action: Sharing (Bento-style wide card) -->
+<button class="bg-primary-container text-on-primary-container font-bold py-5 px-8 rounded-xl flex items-center justify-center gap-3 transition-transform active:scale-95 duration-200 shadow-[0_8px_20px_rgba(116,92,0,0.12)]">
+<span class="material-symbols-outlined" data-icon="share">share</span>
+                    Share Achievement
+                </button>
+<!-- Secondary Action: Return -->
+<button class="bg-surface-container-low text-primary font-semibold py-4 px-8 rounded-xl hover:bg-surface-container transition-colors duration-200">
+                    Return to Calendar
+                </button>
+</div>
+</div>
+<!-- Mindfulness Quote Card (Tactile Sanctuary aesthetic) -->
+<div class="mt-12 p-6 bg-secondary-fixed rounded-lg border border-secondary/10 flex items-start gap-4">
+<span class="material-symbols-outlined text-secondary text-2xl" data-icon="energy_savings_leaf">energy_savings_leaf</span>
+<div class="text-left">
+<p class="text-on-secondary-fixed font-bold text-sm">PRO TIP</p>
+<p class="text-on-secondary-fixed-variant text-sm mt-1">Tracking a habit is like planting a seed. Today, you watered your digital garden. Take a deep breath.</p>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Shell (Based on JSON) -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-3 bg-[#faf9f8]/80 backdrop-blur-xl rounded-t-[3rem] shadow-[0_-12px_32px_rgba(116,92,0,0.08)] z-50">
+<!-- Plan -->
+<a class="flex flex-col items-center justify-center text-[#5d605f] px-5 py-2 hover:text-[#745c00] transition-transform scale-90 duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="assignment">assignment</span>
+<span class="font-['Plus_Jakarta_Sans'] text-xs font-medium">Plan</span>
+</a>
+<!-- Calendar (ACTIVE) -->
+<a class="flex flex-col items-center justify-center bg-[#f9d461] text-[#745c00] rounded-full px-5 py-2 transition-transform scale-90 duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_today" style="font-variation-settings: 'FILL' 1;">calendar_today</span>
+<span class="font-['Plus_Jakarta_Sans'] text-xs font-medium">Calendar</span>
+</a>
+<!-- Circles -->
+<a class="flex flex-col items-center justify-center text-[#5d605f] px-5 py-2 hover:text-[#745c00] transition-transform scale-90 duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="group_work">group_work</span>
+<span class="font-['Plus_Jakarta_Sans'] text-xs font-medium">Circles</span>
+</a>
+<!-- Profile -->
+<a class="flex flex-col items-center justify-center text-[#5d605f] px-5 py-2 hover:text-[#745c00] transition-transform scale-90 duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-['Plus_Jakarta_Sans'] text-xs font-medium">Profile</span>
+</a>
+</nav>
+</body></html>

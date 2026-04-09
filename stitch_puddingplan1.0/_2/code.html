@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-high": "#e7e8e7",
+                    "on-primary-container": "#5c4900",
+                    "background": "#faf9f8",
+                    "inverse-primary": "#f9d461",
+                    "error-dim": "#821a01",
+                    "on-primary": "#fff8ee",
+                    "secondary-dim": "#3f5a3a",
+                    "surface-dim": "#d8dad9",
+                    "tertiary-fixed-dim": "#93c3ef",
+                    "surface": "#faf9f8",
+                    "on-surface-variant": "#5d605f",
+                    "primary": "#745c00",
+                    "on-primary-fixed-variant": "#675200",
+                    "on-surface": "#303333",
+                    "primary-fixed": "#f9d461",
+                    "tertiary-fixed": "#a1d1fe",
+                    "error-container": "#fa7150",
+                    "on-error-container": "#671200",
+                    "surface-variant": "#e1e3e2",
+                    "surface-bright": "#faf9f8",
+                    "on-primary-fixed": "#463600",
+                    "on-secondary-fixed": "#354e30",
+                    "on-secondary-container": "#466141",
+                    "secondary-fixed": "#dafad0",
+                    "inverse-on-surface": "#9d9d9c",
+                    "primary-fixed-dim": "#eac655",
+                    "outline-variant": "#b0b2b1",
+                    "tertiary": "#31638a",
+                    "secondary": "#4b6646",
+                    "surface-container": "#eeeeed",
+                    "surface-container-low": "#f4f3f2",
+                    "tertiary-dim": "#22577e",
+                    "secondary-fixed-dim": "#ccebc2",
+                    "secondary-container": "#dafad0",
+                    "surface-tint": "#745c00",
+                    "on-tertiary": "#f6f9ff",
+                    "on-tertiary-fixed-variant": "#1a5177",
+                    "on-secondary": "#eaffe1",
+                    "error": "#aa371c",
+                    "surface-container-highest": "#e1e3e2",
+                    "on-tertiary-fixed": "#003351",
+                    "inverse-surface": "#0d0e0e",
+                    "tertiary-container": "#a1d1fe",
+                    "on-tertiary-container": "#0a476d",
+                    "outline": "#797b7a",
+                    "on-secondary-fixed-variant": "#506b4a",
+                    "on-error": "#fff7f6",
+                    "primary-dim": "#665100",
+                    "surface-container-lowest": "#ffffff",
+                    "primary-container": "#f9d461",
+                    "on-background": "#303333"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Plus Jakarta Sans"],
+                    "label": ["Plus Jakarta Sans"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .tonal-shift {
+            transition: background-color 0.3s ease;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #faf9f8;
+            color: #303333;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface min-h-screen pb-32">
+<!-- TopAppBar Navigation -->
+<header class="fixed top-0 w-full z-50 bg-[#faf9f8]/80 dark:bg-[#1a1c1c]/80 backdrop-blur-xl">
+<div class="flex items-center justify-between px-6 py-4 w-full">
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[#f4f3f2]/50 active:scale-95 duration-200">
+<span class="material-symbols-outlined text-[#745c00]" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="text-xl font-bold text-[#745c00] tracking-tight">PuddingPlan</h1>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[#f4f3f2]/50">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="share">share</span>
+</button>
+</div>
+</header>
+<main class="pt-24 px-6 max-w-2xl mx-auto">
+<!-- Profile Header Section (Asymmetrical Layout) -->
+<section class="flex flex-col md:flex-row items-center md:items-end gap-8 mb-12">
+<div class="relative">
+<div class="w-32 h-32 md:w-40 md:h-40 rounded-xl overflow-hidden border-4 border-surface-container-lowest shadow-lg">
+<img alt="User Avatar" class="w-full h-full object-crop" data-alt="portrait of a young woman with a calm expression, natural lighting, soft outdoor background, ethereal aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsOtKA9VYsaGDGjnhUCPxEa2npeNI0ATYa0owxw_rfhUlmDWmlfGz42BN4Ao4w32l463c5WJbgUU85gNdWUdJ4Bgxe_jQrchxIwJYA0mqJ_bkVcXdsEOiO3UFqQGXWSNEX23QKk_2ngPZbFp5QlHArvoSZXDYSzBBLzSceoIEtD5JKpSaPfNoVMOuHCPtH2vBqh-YV11s_eT3-DNgbTMjscK_y5npNQ6aKrIaiRsAU9i0Syg1ouTi-k5rMltZmfLF54rcFtMIy6Me1"/>
+</div>
+<div class="absolute -bottom-2 -right-2 bg-secondary text-on-secondary px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="verified" style="font-variation-settings: 'FILL' 1;">verified</span>
+<span>高能愈友</span>
+</div>
+</div>
+<div class="flex-1 text-center md:text-left">
+<h2 class="text-[2.5rem] font-extrabold text-on-surface leading-tight -tracking-[0.02em] mb-2">林深见鹿</h2>
+<p class="text-on-surface-variant text-lg leading-relaxed mb-4">在清晨的雾气中寻找内心的宁静。🌱</p>
+<div class="flex flex-wrap justify-center md:justify-start gap-3">
+<button class="bg-primary-container text-on-primary-container px-8 py-3 rounded-xl font-bold flex items-center gap-2 hover:scale-105 active:scale-95 transition-all shadow-[0_12px_32px_rgba(116,92,0,0.08)]">
+<span class="material-symbols-outlined" data-icon="favorite" style="font-variation-settings: 'FILL' 1;">favorite</span>
+                        为她喝彩
+                    </button>
+<button class="bg-surface-container-low text-on-surface px-8 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-surface-container-high active:scale-95 transition-all">
+                        关注
+                    </button>
+</div>
+</div>
+</section>
+<!-- Stats Bento Grid -->
+<div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-12">
+<!-- Journey Days -->
+<div class="col-span-2 bg-primary-container/30 p-8 rounded-lg flex flex-col justify-between aspect-[2/1] md:aspect-auto">
+<span class="text-on-primary-fixed-variant font-semibold">治愈旅程</span>
+<div>
+<span class="text-[3.5rem] font-extrabold text-primary leading-none tracking-tighter">42</span>
+<span class="text-lg font-medium text-primary ml-1">天</span>
+</div>
+</div>
+<!-- Total Mindfulness -->
+<div class="bg-tertiary-container/30 p-6 rounded-lg flex flex-col justify-between">
+<span class="text-on-tertiary-container font-semibold">正念时长</span>
+<div class="text-3xl font-bold text-tertiary">1,280<span class="text-sm ml-1 font-normal">min</span></div>
+</div>
+<!-- Circles Count -->
+<div class="bg-secondary-container p-6 rounded-lg flex flex-col justify-between">
+<span class="text-on-secondary-container font-semibold">加入圈子</span>
+<div class="text-3xl font-bold text-secondary">8<span class="text-sm ml-1 font-normal">个</span></div>
+</div>
+<!-- Achievement Badges Summary -->
+<div class="col-span-2 bg-surface-container-low p-6 rounded-lg flex items-center justify-between">
+<div class="flex -space-x-3">
+<div class="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm border-2 border-surface-container-low">
+<span class="material-symbols-outlined text-primary" data-icon="potted_plant" style="font-variation-settings: 'FILL' 1;">potted_plant</span>
+</div>
+<div class="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm border-2 border-surface-container-low">
+<span class="material-symbols-outlined text-secondary" data-icon="wb_sunny" style="font-variation-settings: 'FILL' 1;">wb_sunny</span>
+</div>
+<div class="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm border-2 border-surface-container-low">
+<span class="material-symbols-outlined text-tertiary" data-icon="nights_stay" style="font-variation-settings: 'FILL' 1;">nights_stay</span>
+</div>
+<div class="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center border-2 border-surface-container-low text-xs font-bold text-on-surface-variant">
+                        +12
+                    </div>
+</div>
+<span class="text-sm font-bold text-on-surface-variant flex items-center gap-1">
+                    成就墙 <span class="material-symbols-outlined text-sm" data-icon="chevron_right">chevron_right</span>
+</span>
+</div>
+</div>
+<!-- Badges Wall (Horizontal Scroll) -->
+<section class="mb-12">
+<h3 class="text-xl font-bold text-on-surface mb-6 px-2">荣耀勋章</h3>
+<div class="flex gap-4 overflow-x-auto pb-4 px-2 no-scrollbar">
+<div class="flex-shrink-0 w-32 h-44 bg-surface-container-lowest rounded-lg p-4 flex flex-col items-center justify-center text-center shadow-sm hover:translate-y-[-4px] transition-transform">
+<div class="w-16 h-16 rounded-full bg-secondary-container flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-secondary text-3xl" data-icon="park">park</span>
+</div>
+<span class="text-sm font-bold block">晨间呼吸</span>
+<span class="text-[10px] text-on-surface-variant mt-1">连续7天打卡</span>
+</div>
+<div class="flex-shrink-0 w-32 h-44 bg-surface-container-lowest rounded-lg p-4 flex flex-col items-center justify-center text-center shadow-sm hover:translate-y-[-4px] transition-transform border border-outline-variant/10">
+<div class="w-16 h-16 rounded-full bg-primary-container flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="energy_savings_leaf">energy_savings_leaf</span>
+</div>
+<span class="text-sm font-bold block">能量使者</span>
+<span class="text-[10px] text-on-surface-variant mt-1">收获100个赞</span>
+</div>
+<div class="flex-shrink-0 w-32 h-44 bg-surface-container-lowest rounded-lg p-4 flex flex-col items-center justify-center text-center shadow-sm hover:translate-y-[-4px] transition-transform border border-outline-variant/10">
+<div class="w-16 h-16 rounded-full bg-tertiary-container flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-tertiary text-3xl" data-icon="self_improvement">self_improvement</span>
+</div>
+<span class="text-sm font-bold block">深度正念</span>
+<span class="text-[10px] text-on-surface-variant mt-1">冥想超过10小时</span>
+</div>
+<div class="flex-shrink-0 w-32 h-44 bg-surface-container-lowest rounded-lg p-4 flex flex-col items-center justify-center text-center shadow-sm hover:translate-y-[-4px] transition-transform border border-outline-variant/10">
+<div class="w-16 h-16 rounded-full bg-surface-container-high flex items-center justify-center mb-4 grayscale">
+<span class="material-symbols-outlined text-outline text-3xl" data-icon="auto_awesome">auto_awesome</span>
+</div>
+<span class="text-sm font-bold block text-outline">万物有灵</span>
+<span class="text-[10px] text-outline mt-1">尚未解锁</span>
+</div>
+</div>
+</section>
+<!-- Circles Joined Section -->
+<section class="mb-12">
+<div class="flex items-center justify-between mb-6 px-2">
+<h3 class="text-xl font-bold text-on-surface">加入的圈子</h3>
+<span class="text-sm font-medium text-primary">全部圈子</span>
+</div>
+<div class="space-y-4">
+<div class="group bg-surface-container-lowest p-5 rounded-lg flex items-center gap-4 hover:bg-white transition-all shadow-sm">
+<div class="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
+<img alt="Circle Image" class="w-full h-full object-cover" data-alt="lush green indoor plants in sunlight, aesthetic lifestyle shot, soft focus, calming nature vibes" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAsLdmAANhNUXymmGWz0cALJw85CAvXFKQBWgVBkY9srKUls5KpUcoXnwgChFaSoSl56hyCcWBikqouQieISNu7nh60_WHxEaJsS-wsweuvLmmwe9D8-_9wWKvIrL15dn_RFIIaRcAhk4lE-UPEw68rErOD1YYbr7uvjCBlEtUzdJv78vcgIAYZOMdPKW8KXREBjec4vG6mQGqXYvZTfE2ql1xtDM5bp21VWLeLeopqGHBNQkLZv0DGeY9m76_deUcTdnt4YNgTm4oX"/>
+</div>
+<div class="flex-1">
+<h4 class="font-bold text-on-surface group-hover:text-primary transition-colors">绿植呼吸社</h4>
+<p class="text-xs text-on-surface-variant mt-1">分享窗台上的每一寸绿意</p>
+</div>
+<div class="text-right">
+<span class="text-[10px] font-bold bg-secondary-container text-on-secondary-container px-2 py-1 rounded-full">圈主</span>
+</div>
+</div>
+<div class="group bg-surface-container-lowest p-5 rounded-lg flex items-center gap-4 hover:bg-white transition-all shadow-sm">
+<div class="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
+<img alt="Circle Image" class="w-full h-full object-cover" data-alt="warm sunrise through a window, soft curtains, peaceful morning aesthetic, golden light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9aJIJ6xBz06ev0BVnU2xkAKbdCnLNsFzJwE8rdLtubcilL7ogq7_eWKk6AzmfzSDiBNKlev1C_QWsrHjni6sG8tYGkXLkD3ChLrfQKWHpTGV_1XJHgumMpQvKmt2iaSOM_Ho6e4WO8KugYaFTaBM_-d16OptGiy_WdAnDBpREJxdsKy_gmowXj16Nh00TQYoEZmRH1CF5-uC0S_OY4YG6j51NhpRovZoLbuBdRSEa4Bb78FxPsCxH-AHIGbycmBN3RLcKwpHlKiE4"/>
+</div>
+<div class="flex-1">
+<h4 class="font-bold text-on-surface group-hover:text-primary transition-colors">早起捕光者</h4>
+<p class="text-xs text-on-surface-variant mt-1">在这个城市还没醒来时出发</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant" data-icon="chevron_right">chevron_right</span>
+</div>
+<div class="group bg-surface-container-lowest p-5 rounded-lg flex items-center gap-4 hover:bg-white transition-all shadow-sm">
+<div class="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
+<img alt="Circle Image" class="w-full h-full object-cover" data-alt="minimalist yoga studio with wooden floor and soft shadows, zen atmosphere, meditative space" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAx3YZIXD_d7kcGpDCnD1PsnH0XG9e79XG3YmQH9T_WpnGCZS3EEI2D73VgCMz6U75Ate88sVn10nAaroZb1m-cGr2FeAHJUhWkEWp3rJgGonMcuANOat-JnsFwPWa2zXbI5yIey7B2wm3jFeCY5qCsKwq_ZO2Q3lOyPotjlUrXvgh5b7D7X7GeCitsRzgTevgbEqyUAzvu5_y11LP6VqhHOYkKRg-DAwL80UN0_NQyzYRlet4CbjvX9HwxAatJI2I8dhcWxvx2M_jX"/>
+</div>
+<div class="flex-1">
+<h4 class="font-bold text-on-surface group-hover:text-primary transition-colors">晚安冥想室</h4>
+<p class="text-xs text-on-surface-variant mt-1">卸下一天的疲惫，与自己对话</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+</section>
+<!-- Recent Activity Asymmetric Card -->
+<section class="mb-8">
+<h3 class="text-xl font-bold text-on-surface mb-6 px-2">最近动态</h3>
+<div class="relative bg-surface-container-lowest p-8 rounded-lg shadow-sm">
+<div class="absolute top-4 right-4 text-xs font-bold text-outline-variant">2小时前</div>
+<p class="text-lg leading-relaxed text-on-surface mb-6">“今天的冥想感觉特别通透，听着窗外的雨声，仿佛自己也变成了一滴水，融入了大地。#雨天正念 #治愈时刻”</p>
+<div class="grid grid-cols-2 gap-3 mb-6">
+<img alt="Activity Image" class="rounded-lg w-full h-40 object-cover" data-alt="rain droplets on a window with blurred garden background, moody tranquil atmosphere, macro shot" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDU68IUdgjg9C2owgH37ELjvR0Fcj6mGticibaBFZ2eS8UTBQ3bTgtk4EhuMw2Y4QgErhaxXjTG959MdC0Gco283gJPNoTITxCudFJaMPTjgVT207WAZjgL3p8vHT5prlXd-E2dRQ-_sRuG3_LUZjG5OL1Ng6FxG-Z5nAEYmM2JXFtZdE1b-Sma2KnQ5BPRDV4YH3rrV7rh42i4bqo5-uP4syxTxN91LIrh5uh46kWwZVaQibolEFMALalBnHEOsbDVq7LddRITMmWh"/>
+<img alt="Activity Image" class="rounded-lg w-full h-40 object-cover" data-alt="person doing yoga in a bright minimal room, silhouette against a window, soft morning light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCkKsz14osiJCZV4OnLKZ67V6J2vIl7XrHQEXWaU09ksF2Ik662yOckrWwe8VmaScoofLSnXbqbY1B4HyCoTh4D3-yptm6cBILFM9BEIJbNjci7kLHWXqxPHGzM2xv9FCqKplaWpmck9s9wzWD79JE0dOuYxxt7B6K-svvLn43sWXC6AMHp0MFDNV439ueDb9HLzRbQbLuNYhK70Zn28r-O-x36RoCQA_qYSp67MGZFjB62ivxGrTEO6GPp3seNqOZJ1gX2jWhv5ZSc"/>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-xl" data-icon="favorite">favorite</span>
+<span class="text-sm font-bold">24</span>
+</div>
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-xl" data-icon="chat_bubble">chat_bubble</span>
+<span class="text-sm font-bold">8</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-3 bg-[#faf9f8]/80 dark:bg-[#1a1c1c]/80 backdrop-blur-xl z-50 rounded-t-[3rem] shadow-[0_-12px_32px_rgba(116,92,0,0.05)]">
+<div class="flex flex-col items-center justify-center text-[#5d605f] px-5 py-2 hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="local_florist">local_florist</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-medium tracking-wide">Sanctuary</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-[#f9d461] text-[#745c00] rounded-full px-5 py-2 transition-all hover:scale-110">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-medium tracking-wide">Circles</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#5d605f] px-5 py-2 hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="auto_awesome">auto_awesome</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-medium tracking-wide">Growth</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#5d605f] px-5 py-2 hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="self_improvement">self_improvement</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-medium tracking-wide">Peace</span>
+</div>
+</nav>
+</body></html>

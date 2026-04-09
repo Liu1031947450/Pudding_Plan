@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PuddingPlan - Date Detail Expansion</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-dim": "#22577e",
+                        "secondary-fixed-dim": "#ccebc2",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-fixed": "#dafad0",
+                        "on-primary-fixed": "#463600",
+                        "on-secondary-fixed": "#354e30",
+                        "tertiary-container": "#a1d1fe",
+                        "tertiary-fixed": "#a1d1fe",
+                        "primary": "#745c00",
+                        "on-primary": "#fff8ee",
+                        "primary-fixed": "#f9d461",
+                        "primary-container": "#f9d461",
+                        "secondary-dim": "#3f5a3a",
+                        "on-background": "#303333",
+                        "surface-container": "#eeeeed",
+                        "secondary-container": "#dafad0",
+                        "error": "#aa371c",
+                        "inverse-primary": "#f9d461",
+                        "secondary": "#4b6646",
+                        "on-secondary-fixed-variant": "#506b4a",
+                        "on-primary-container": "#5c4900",
+                        "tertiary-fixed-dim": "#93c3ef",
+                        "surface": "#faf9f8",
+                        "on-surface-variant": "#5d605f",
+                        "primary-fixed-dim": "#eac655",
+                        "surface-dim": "#d8dad9",
+                        "on-surface": "#303333",
+                        "inverse-on-surface": "#9d9d9c",
+                        "surface-variant": "#e1e3e2",
+                        "on-tertiary-fixed": "#003351",
+                        "on-error": "#fff7f6",
+                        "error-container": "#fa7150",
+                        "surface-bright": "#faf9f8",
+                        "on-secondary-container": "#466141",
+                        "tertiary": "#31638a",
+                        "surface-container-high": "#e7e8e7",
+                        "on-tertiary-fixed-variant": "#1a5177",
+                        "on-primary-fixed-variant": "#675200",
+                        "error-dim": "#821a01",
+                        "primary-dim": "#665100",
+                        "outline-variant": "#b0b2b1",
+                        "background": "#faf9f8",
+                        "inverse-surface": "#0d0e0e",
+                        "on-tertiary-container": "#0a476d",
+                        "surface-container-highest": "#e1e3e2",
+                        "surface-tint": "#745c00",
+                        "outline": "#797b7a",
+                        "on-error-container": "#671200",
+                        "on-tertiary": "#f6f9ff",
+                        "surface-container-low": "#f4f3f2",
+                        "on-secondary": "#eaffe1"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Plus Jakarta Sans"],
+                        "label": ["Plus Jakarta Sans"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .bloom-indicator {
+            background: radial-gradient(circle at center, var(--tw-tertiary-container) 0%, transparent 70%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col">
+<!-- Top App Bar (Shared Component) -->
+<header class="bg-[#faf9f8]/80 dark:bg-stone-900/80 backdrop-blur-xl fixed top-0 w-full z-50 flex justify-between items-center px-6 h-16 w-full">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#745c00] dark:text-[#f9d461]" data-icon="spa">spa</span>
+<h1 class="text-2xl font-bold text-[#745c00] dark:text-[#f9d461] font-['Plus_Jakarta_Sans'] tracking-tight">PuddingPlan</h1>
+</div>
+<button class="hover:bg-[#f4f3f2] dark:hover:bg-stone-800 transition-colors p-2 rounded-full scale-95 duration-200 ease-in-out">
+<span class="material-symbols-outlined text-[#5d605f] dark:text-stone-400" data-icon="notifications">notifications</span>
+</button>
+</header>
+<!-- Background Content: The Calendar Screen (Dimmed) -->
+<main class="flex-1 mt-16 pb-24 px-6 opacity-40 blur-[2px] transition-all duration-500">
+<div class="max-w-md mx-auto">
+<div class="py-8">
+<h2 class="text-display-sm font-bold tracking-tight mb-6">March 2024</h2>
+<!-- Calendar Grid Mockup -->
+<div class="grid grid-cols-7 gap-4 text-center">
+<span class="text-xs text-on-surface-variant font-medium">M</span>
+<span class="text-xs text-on-surface-variant font-medium">T</span>
+<span class="text-xs text-on-surface-variant font-medium">W</span>
+<span class="text-xs text-on-surface-variant font-medium">T</span>
+<span class="text-xs text-on-surface-variant font-medium">F</span>
+<span class="text-xs text-on-surface-variant font-medium">S</span>
+<span class="text-xs text-on-surface-variant font-medium">S</span>
+<div class="h-10 w-10 flex items-center justify-center rounded-full text-on-surface-variant">26</div>
+<div class="h-10 w-10 flex items-center justify-center rounded-full text-on-surface-variant">27</div>
+<div class="h-10 w-10 flex items-center justify-center rounded-full text-on-surface-variant">28</div>
+<div class="h-10 w-10 flex items-center justify-center rounded-full text-on-surface-variant">29</div>
+<div class="h-10 w-10 flex items-center justify-center rounded-full text-on-surface">1</div>
+<div class="h-10 w-10 flex items-center justify-center rounded-full text-on-surface">2</div>
+<div class="h-10 w-10 flex items-center justify-center rounded-full text-on-surface">3</div>
+<div class="h-10 w-10 flex items-center justify-center rounded-full text-on-surface">4</div>
+<div class="h-10 w-10 flex items-center justify-center rounded-full text-on-surface">5</div>
+<div class="h-10 w-10 flex items-center justify-center rounded-full text-on-surface">6</div>
+<div class="h-10 w-10 flex items-center justify-center rounded-full text-on-surface">7</div>
+<div class="h-10 w-10 flex items-center justify-center rounded-full text-on-surface">8</div>
+<div class="h-10 w-10 flex items-center justify-center rounded-full text-on-surface">9</div>
+<div class="h-10 w-10 flex items-center justify-center rounded-full text-on-surface">10</div>
+<!-- Selected Day 11 -->
+<div class="h-10 w-10 flex items-center justify-center rounded-full bg-primary-container text-on-primary-container font-bold ring-4 ring-primary/10">11</div>
+</div>
+</div>
+<!-- Bloom Indicator Mockup in background -->
+<div class="mt-12 bg-surface-container-low p-8 rounded-xl flex items-center justify-center">
+<div class="w-48 h-48 rounded-full bloom-indicator border-2 border-white/50 flex items-center justify-center text-center">
+<p class="text-xs text-on-surface-variant leading-relaxed">Daily Growth<br/><span class="text-xl font-bold text-primary">65%</span></p>
+</div>
+</div>
+</div>
+</main>
+<!-- Backdrop Overlay -->
+<div class="fixed inset-0 bg-on-surface/10 backdrop-blur-sm z-50"></div>
+<!-- Date Detail Bottom Sheet -->
+<div class="fixed bottom-0 left-0 w-full z-[60] transform transition-transform duration-300 translate-y-0 max-w-2xl mx-auto inset-x-0">
+<div class="bg-surface-container-lowest rounded-t-xl shadow-[0_-20px_48px_rgba(116,92,0,0.12)] p-6 pb-28 min-h-[618px]">
+<!-- Sheet Handle -->
+<div class="w-12 h-1.5 bg-outline-variant/30 rounded-full mx-auto mb-8"></div>
+<div class="flex justify-between items-start mb-8">
+<div>
+<h2 class="text-2xl font-bold tracking-tight text-on-surface">3月11日 任务清单</h2>
+<p class="text-sm text-on-surface-variant mt-1">周一 • 充满希望的开始</p>
+</div>
+<button class="bg-surface-container-low p-3 rounded-full hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="close">close</span>
+</button>
+</div>
+<!-- Habits List -->
+<div class="space-y-4">
+<!-- COMPLETED Habit Card -->
+<div class="bg-surface-container-low rounded-lg p-5 flex items-center justify-between border border-white/40">
+<div class="flex items-center gap-4">
+<div class="w-14 h-14 rounded-full bg-secondary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary text-3xl" data-icon="water_drop">water_drop</span>
+</div>
+<div>
+<h3 class="font-bold text-lg text-on-surface">晨间补水 - 已完成</h3>
+<p class="text-xs text-on-surface-variant uppercase tracking-widest font-semibold">Morning Ritual</p>
+</div>
+</div>
+<div class="relative group">
+<div class="absolute inset-0 bg-primary-container/20 rounded-full blur-lg"></div>
+<div class="relative w-12 h-12 bg-primary-container rounded-full flex items-center justify-center shadow-md transform group-active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-on-primary-container" data-icon="verified" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+</div>
+</div>
+<!-- COMPLETED Habit Card -->
+<div class="bg-surface-container-low rounded-lg p-5 flex items-center justify-between border border-white/40">
+<div class="flex items-center gap-4">
+<div class="w-14 h-14 rounded-full bg-tertiary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary text-3xl" data-icon="meditation">self_improvement</span>
+</div>
+<div>
+<h3 class="font-bold text-lg text-on-surface">冥想呼吸 - 已完成</h3>
+<p class="text-xs text-on-surface-variant uppercase tracking-widest font-semibold">Mindfulness</p>
+</div>
+</div>
+<div class="relative w-12 h-12 bg-primary-container rounded-full flex items-center justify-center shadow-md">
+<span class="material-symbols-outlined text-on-primary-container" data-icon="verified" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+</div>
+<!-- PENDING Habit Card -->
+<div class="bg-white rounded-lg p-5 flex items-center justify-between shadow-sm border border-surface-container-high">
+<div class="flex items-center gap-4">
+<div class="w-14 h-14 rounded-full bg-surface-container-high flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant text-3xl" data-icon="phonelink_off">phonelink_off</span>
+</div>
+<div>
+<h3 class="font-bold text-lg text-on-surface">数字脱毒 - 待完成</h3>
+<p class="text-xs text-on-surface-variant uppercase tracking-widest font-semibold">Focus</p>
+</div>
+</div>
+<div class="w-12 h-12 border-2 border-dashed border-outline-variant/50 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-outline-variant text-xl" data-icon="add">add</span>
+</div>
+</div>
+<!-- PENDING Habit Card -->
+<div class="bg-white rounded-lg p-5 flex items-center justify-between shadow-sm border border-surface-container-high">
+<div class="flex items-center gap-4">
+<div class="w-14 h-14 rounded-full bg-surface-container-high flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant text-3xl" data-icon="auto_stories">auto_stories</span>
+</div>
+<div>
+<h3 class="font-bold text-lg text-on-surface">睡前阅读 - 待完成</h3>
+<p class="text-xs text-on-surface-variant uppercase tracking-widest font-semibold">Rest</p>
+</div>
+</div>
+<div class="w-12 h-12 border-2 border-dashed border-outline-variant/50 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-outline-variant text-xl" data-icon="add">add</span>
+</div>
+</div>
+</div>
+<!-- Asymmetric Accent Quote -->
+<div class="mt-12 pl-4 border-l-2 border-primary/20">
+<p class="italic text-on-surface-variant text-sm leading-relaxed">
+                    "Every habit is a seed. Today you are watering your future garden."
+                </p>
+</div>
+</div>
+</div>
+<!-- Bottom Navigation Bar (Shared Component) -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-3 bg-[#faf9f8]/80 dark:bg-stone-900/80 backdrop-blur-xl z-[70] rounded-t-[3rem] shadow-[0_-12px_32px_rgba(116,92,0,0.08)]">
+<a class="flex flex-col items-center justify-center text-[#5d605f] dark:text-stone-400 px-5 py-2 hover:text-[#745c00] dark:hover:text-[#f9d461] scale-90 duration-300 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="assignment">assignment</span>
+<span class="font-['Plus_Jakarta_Sans'] text-xs font-medium">Plan</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-[#f9d461] dark:bg-[#745c00] text-[#745c00] dark:text-[#f9d461] rounded-full px-5 py-2 scale-90 duration-300 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+<span class="font-['Plus_Jakarta_Sans'] text-xs font-medium">Calendar</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#5d605f] dark:text-stone-400 px-5 py-2 hover:text-[#745c00] dark:hover:text-[#f9d461] scale-90 duration-300 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="group_work">group_work</span>
+<span class="font-['Plus_Jakarta_Sans'] text-xs font-medium">Circles</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#5d605f] dark:text-stone-400 px-5 py-2 hover:text-[#745c00] dark:hover:text-[#f9d461] scale-90 duration-300 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-['Plus_Jakarta_Sans'] text-xs font-medium">Profile</span>
+</a>
+</nav>
+</body></html>

@@ -1,0 +1,238 @@
+<html lang="zh"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'Plus_Jakarta_Sans', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .tonal-shift {
+            transition: background-color 0.3s ease;
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-high": "#e7e8e7",
+                    "on-primary-container": "#5c4900",
+                    "background": "#faf9f8",
+                    "inverse-primary": "#f9d461",
+                    "error-dim": "#821a01",
+                    "on-primary": "#fff8ee",
+                    "secondary-dim": "#3f5a3a",
+                    "surface-dim": "#d8dad9",
+                    "tertiary-fixed-dim": "#93c3ef",
+                    "surface": "#faf9f8",
+                    "on-surface-variant": "#5d605f",
+                    "primary": "#745c00",
+                    "on-primary-fixed-variant": "#675200",
+                    "on-surface": "#303333",
+                    "primary-fixed": "#f9d461",
+                    "tertiary-fixed": "#a1d1fe",
+                    "error-container": "#fa7150",
+                    "on-error-container": "#671200",
+                    "surface-variant": "#e1e3e2",
+                    "surface-bright": "#faf9f8",
+                    "on-primary-fixed": "#463600",
+                    "on-secondary-fixed": "#354e30",
+                    "on-secondary-container": "#466141",
+                    "secondary-fixed": "#dafad0",
+                    "inverse-on-surface": "#9d9d9c",
+                    "primary-fixed-dim": "#eac655",
+                    "outline-variant": "#b0b2b1",
+                    "tertiary": "#31638a",
+                    "secondary": "#4b6646",
+                    "surface-container": "#eeeeed",
+                    "surface-container-low": "#f4f3f2",
+                    "tertiary-dim": "#22577e",
+                    "secondary-fixed-dim": "#ccebc2",
+                    "secondary-container": "#dafad0",
+                    "surface-tint": "#745c00",
+                    "on-tertiary": "#f6f9ff",
+                    "on-tertiary-fixed-variant": "#1a5177",
+                    "on-secondary": "#eaffe1",
+                    "error": "#aa371c",
+                    "surface-container-highest": "#e1e3e2",
+                    "on-tertiary-fixed": "#003351",
+                    "inverse-surface": "#0d0e0e",
+                    "tertiary-container": "#a1d1fe",
+                    "on-tertiary-container": "#0a476d",
+                    "outline": "#797b7a",
+                    "on-secondary-fixed-variant": "#506b4a",
+                    "on-error": "#fff7f6",
+                    "primary-dim": "#665100",
+                    "surface-container-lowest": "#ffffff",
+                    "primary-container": "#f9d461",
+                    "on-background": "#303333"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            }
+          },
+        },
+      }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#faf9f8]/80 backdrop-blur-xl flex items-center justify-between px-6 py-4 w-full">
+<div class="flex items-center gap-4">
+<button class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-[#f4f3f2]/50 active:scale-95 duration-200 ease-in-out">
+<span class="material-symbols-outlined text-[#745c00]">arrow_back</span>
+</button>
+<h1 class="font-['Plus_Jakarta_Sans'] text-xl font-bold tracking-tight text-[#745c00]">晨读小组</h1>
+</div>
+<div class="flex items-center gap-2">
+<button class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-[#f4f3f2]/50 active:scale-95 duration-200 ease-in-out">
+<span class="material-symbols-outlined text-[#5d605f]">share</span>
+</button>
+</div>
+</header>
+<main class="pt-24 px-6 max-w-2xl mx-auto space-y-8">
+<!-- Circle Header Info -->
+<section class="relative p-8 rounded-lg bg-surface-container-low overflow-hidden">
+<div class="absolute top-0 right-0 p-8 opacity-10">
+<span class="material-symbols-outlined text-[120px]">local_library</span>
+</div>
+<div class="relative z-10">
+<span class="inline-flex items-center px-4 py-1 rounded-full bg-primary-container text-on-primary-container text-xs font-semibold mb-4">
+                    小组动态
+                </span>
+<h2 class="text-3xl font-bold text-on-surface mb-2">清晨的宁静书香</h2>
+<p class="text-on-surface-variant leading-relaxed">在这里，我们用阅读开启新的一天。分享你的晨读感悟，与 1,280 位书友共同成长。</p>
+</div>
+</section>
+<!-- Feed List -->
+<div class="space-y-6">
+<!-- Post Card 1 -->
+<article class="bg-surface-container-lowest rounded-lg p-6 flex flex-col gap-4 shadow-[0_12px_32px_rgba(116,92,0,0.05)]">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<img class="w-12 h-12 rounded-full object-cover" data-alt="portrait of a young woman with a gentle expression in natural soft daylight" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCjr9Jl7I6d8SJg2Pg_86mdrfCTji79ZKlciWLIdkbQdOnCQryBHebwspx9HxzYcTnME5_rsMg5v2J5BAkKqTrFjp-x-BehrwcRTAc-cRvxx1d_K8L2MG0BT0g_QunGqOOo5I3sc0vK5kbeLHcVd10GUVUPuqkMWzBsLm79wbj9ZMpyCYSqg_ALrJuJ-F-nL9i558wVhBuJ-_0yyiAVkpcxAXLGo8QD1h-AahShI1aB-QB2eqF0EtOrrpP7PDRFzT1UyGhiyaalYCEK"/>
+<div>
+<h3 class="font-bold text-on-surface">林小雨</h3>
+<p class="text-xs text-on-surface-variant">20 分钟前</p>
+</div>
+</div>
+<div class="bg-secondary-container px-4 py-1.5 rounded-full flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-sm" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span class="text-xs font-semibold text-on-secondary-container">坚持阅读 45 分钟</span>
+</div>
+</div>
+<p class="text-on-surface leading-relaxed font-medium">
+                    今天读完了《瓦尔登湖》的最后一章。在这喧嚣的时代，我们需要这样一片内心的湖泊。
+                </p>
+<div class="rounded-lg overflow-hidden">
+<img class="w-full h-64 object-cover" data-alt="minimal aesthetic scene with a book lying open on a wooden table next to a cup of steaming tea and morning sunlight casting shadows" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvu2GpqgDKA5dOi8QL5WR_HF5lV0TY0Ba-7OrrkjcRQ4L74HY3RJQVU-GuInZzuquwMa98OpZEVB-T10FxKX7XdQAB-LyipV2H_mAuMH8Uaey6w224sjct3KDVx7xr-KxREBFSq6TLap1yEtsAYk04UJNxO-rvow7JtepwlIr_3FipBRs8b7KPNk5Uq7cWnCdG8mkhBJMJP1znsNYuxxEFI5Lx1mrbR4eNwQs1QZgUC0QW5mNDWWV0Mxcmi4XoTGriVvQfphnTGegj"/>
+</div>
+<div class="flex items-center justify-between pt-2">
+<div class="flex -space-x-2">
+<img class="w-6 h-6 rounded-full border-2 border-white" data-alt="avatar of a person" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4bzkLdzbjW3XZtjLF6wx13qj2fx6GjaJlrMoXtwqkbHBPyuyGBJnhefTNuf-bT5J0IMFO32_q-y-0vzy5CoSHUOPFkKDCA3QLEs9cxy_YkPniLa3qJ_f03z_OqPnhzdb2meU2vldFvUhKsX49w_MfmPUv9_VjTZwCIY0qunipkKhF7BlIkfZWBPVt934AIB9bHsCd-XBLXP1KPKU8BbSjS4QyNpkJkLbjCERidshIJkvptc3I9xf0iJf1l0js4kd4wOOQB9ntEqDz"/>
+<img class="w-6 h-6 rounded-full border-2 border-white" data-alt="avatar of a person" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3I1wBAaBLr6oaIxi-AWNX0wFB82QAwXg577ChaJSC_AgVUBy74ejX3R0_3Zr0f9502ODxVG9tVJfn_fluvkLtJUFIYomcFjCaTVGAbJmDXcnKcIDBrzgOF5rk2TlfYF2_TaVtBL2cDkjcXFBxZh3u8ipMFsY8cpisEtTeGBqT02gMccAl75VqkvOlHKoPMz2SNQQTtiio5HkecGD1JDbiddZ4eVHrbVHdjeBEQ0RXj3L2E0LQv9A3e5Z0_mHYtqpR-51OGUcfX5_x"/>
+<div class="w-6 h-6 rounded-full bg-surface-container-high border-2 border-white flex items-center justify-center text-[8px] font-bold text-on-surface-variant">+12</div>
+</div>
+<button class="flex items-center gap-2 px-5 py-2 bg-primary-container/20 text-primary rounded-full hover:bg-primary-container/40 transition-colors">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">favorite</span>
+<span class="text-sm font-bold">24</span>
+</button>
+</div>
+</article>
+<!-- Post Card 2 -->
+<article class="bg-surface-container-lowest rounded-lg p-6 flex flex-col gap-4 shadow-[0_12px_32px_rgba(116,92,0,0.05)]">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<img class="w-12 h-12 rounded-full object-cover" data-alt="portrait of a thoughtful young man in a minimalist workspace" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3UrD8owqBJqUOFfOhQL4GN9bvatB4ctMouLZ76P2kuVUxLd3tZgKGl_81SlI-v2tOfezPh8TJXC9lEIXzlCkVjvvsx7WiYTI5lcYQFIVeefDXrYdYsV5TRMqS18ubs8wO_72x0UgNrCXs3w-v1IwGxasdFBtYeWdJzAcwo88n9ukGs_t4Lp-NiqOxCMLf1xH6gLP4SjOnXR6E14m-Ls1zOEkFywjbC18TARLfadyRu2iaL_Vvt_47lTgG15vEc8BwX6zxyOAvKvum"/>
+<div>
+<h3 class="font-bold text-on-surface">陈默</h3>
+<p class="text-xs text-on-surface-variant">1 小时前</p>
+</div>
+</div>
+<div class="bg-tertiary-container px-4 py-1.5 rounded-full flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary text-sm" style="font-variation-settings: 'FILL' 1;">history_edu</span>
+<span class="text-xs font-semibold text-on-tertiary-container">完成今日摘录</span>
+</div>
+</div>
+<p class="text-on-surface leading-relaxed">
+                    “生活不是为了赶路，而是为了感受路。” 早安，各位书友。
+                </p>
+<div class="grid grid-cols-2 gap-3 rounded-lg overflow-hidden">
+<img class="w-full h-40 object-cover" data-alt="close up of handwritten calligraphy notes in a notebook next to a fountain pen" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCh4Rp83LIKiJoYC7iQ9qD3gRoPc6NNyqBncC3MTp0f8MrQq_Kf6Opppr81cbepHmM-O2CxlyYAQTxwCUyfCZffu_fcgf5ICvVusQ4bW0cw3N0-r9g-WwXZQFA3uHt5v9L7ihRtvmppaQkT-qhTHRQkLL9az3v5WdEWNmyASYSZfmStOT5y4hv9QhOO9cjK-t44l4Wqre-3yQ8VPUSL4rPeq65FaPQOJpW8PbitHMkCHHyseT5jK4mO2VCh2XeSuWJI8YrqSWjL0FhJ"/>
+<img class="w-full h-40 object-cover" data-alt="bright modern library interior with natural light and tall bookshelves" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_Ltzc_CHwxh35F4Z4RkEli8z5D5GDrtseDTPdleBDtdVL-1HVWljRn3kGOJTfvHGCdQHezHmUOucExcFGlUtI1ZagrMqbJ8bkTm8ozOb1Nm70zfc9vSyQ5PSVoFtaBwFoggQkgAKE5Myr0r_TM5Q5x4fzw4xtdHvLSEjqJbH82AweB3EFe5tdjRtuXAhwMtRRLWuKXAyMizxDwGpxXhHGi9m6LzTsdcDWpkxIZKtrDFUrSVokKAiWm64IK-2mdr8e0UX7g1_3xZia"/>
+</div>
+<div class="flex items-center justify-between pt-2">
+<div class="flex -space-x-2">
+<img class="w-6 h-6 rounded-full border-2 border-white" data-alt="avatar of a person" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsYfeZIZ0vxUSCcfFM9pEm57rAderawFd-dCxR9vxvfhUa2egVB_7Nf7wtPtXu4fAHNCG2SbOp0fDVWCNJ6ck3MWNxzDdk-NYiC1jeDPnMCEaPnX8XvfjD5Z88bIRnBQjjKhFt1bfD5Fl9bn_CKzQmPe2wqD9WzGIHXJ5VUYEzOsoQ2zwjDRo9ez9VA3Ki1Z7cxcBYdKtB1YIqq67FVErrAKzr4Cvy_gvPvVaJLopj1vxk6yXLWk3fQ0gVxnNpR5StNNUavNlANltK"/>
+<div class="w-6 h-6 rounded-full bg-surface-container-high border-2 border-white flex items-center justify-center text-[8px] font-bold text-on-surface-variant">+5</div>
+</div>
+<button class="flex items-center gap-2 px-5 py-2 hover:bg-surface-container-high rounded-full transition-colors">
+<span class="material-symbols-outlined text-[20px] text-on-surface-variant">favorite</span>
+<span class="text-sm font-bold text-on-surface-variant">8</span>
+</button>
+</div>
+</article>
+<!-- Post Card 3 (Simple achievement style) -->
+<article class="bg-surface-container-lowest rounded-lg p-6 flex items-start gap-4 shadow-[0_12px_32px_rgba(116,92,0,0.05)] border-l-4 border-secondary">
+<div class="flex-shrink-0">
+<img class="w-10 h-10 rounded-full object-cover" data-alt="avatar of a smiling man" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAuzu3BL-jfpmaz5_MNBRX0QhlZyHt2tG9pMYyMddLOCluqAblK8kKfwlUVwFAar1_1VfSLesdshl2q6BJX7nbOkdfzs99tsvl54dAliKfXGI1YzV6_DSWbfF_hx2gYn11diI43lC5jr8NUmMI2d31zjWtS3UD_eKbtP4Czc8tcdycqvRqckMnyz-guD7YYNlqfRkHm1g_T3jIuoX1YY_9MbtX2BVNfcyihlPYUBhu4tPEi99A4G8b7ABh49GCbBfqjakOFSxcZEqkQ"/>
+</div>
+<div class="flex-grow">
+<div class="flex items-center justify-between mb-1">
+<h3 class="font-bold text-on-surface text-sm">王凯</h3>
+<span class="text-[10px] text-on-surface-variant uppercase tracking-wider">3 小时前</span>
+</div>
+<p class="text-sm text-on-surface mb-3 italic">“又是充满力量的一天。”</p>
+<div class="bg-secondary-container/30 p-4 rounded-lg flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-secondary text-on-secondary flex items-center justify-center">
+<span class="material-symbols-outlined">military_tech</span>
+</div>
+<div>
+<p class="text-xs font-bold text-on-secondary-container">达成：早起阅读 7 天达人</p>
+<p class="text-[10px] text-on-secondary-fixed-variant">坚持就是最美的风景</p>
+</div>
+</div>
+</div>
+</article>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 rounded-t-[3rem] bg-[#faf9f8]/80 backdrop-blur-xl flex justify-around items-center px-4 pb-6 pt-3 shadow-[0_-12px_32px_rgba(116,92,0,0.05)]">
+<a class="flex flex-col items-center justify-center text-[#5d605f] px-5 py-2 hover:scale-110 transition-transform" href="#">
+<span class="material-symbols-outlined">local_florist</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-medium tracking-wide">Sanctuary</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-[#f9d461] text-[#745c00] rounded-full px-5 py-2 transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">group</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-medium tracking-wide">Circles</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#5d605f] px-5 py-2 hover:scale-110 transition-transform" href="#">
+<span class="material-symbols-outlined">auto_awesome</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-medium tracking-wide">Growth</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#5d605f] px-5 py-2 hover:scale-110 transition-transform" href="#">
+<span class="material-symbols-outlined">self_improvement</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-medium tracking-wide">Peace</span>
+</a>
+</nav>
+<!-- FAB for new post -->
+<button class="fixed bottom-28 right-6 w-16 h-16 rounded-full bg-primary text-on-primary shadow-xl flex items-center justify-center active:scale-90 transition-transform z-40">
+<span class="material-symbols-outlined text-3xl">add</span>
+</button>
+</body></html>
