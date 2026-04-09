@@ -189,7 +189,7 @@ const CreatePlanScreen: React.FC = () => {
               <MaterialIcons
                 name="verified"
                 size={24}
-                color={checkInMethod === 'stamp' ? Colors.primary : Colors.onSurfaceVariant}
+                color={checkInMethod === 'stamp' ? Colors.onPrimary : Colors.onSurfaceVariant}
               />
               <Text
                 style={[
@@ -211,7 +211,7 @@ const CreatePlanScreen: React.FC = () => {
               <MaterialIcons
                 name="show-chart"
                 size={24}
-                color={checkInMethod === 'number' ? Colors.primary : Colors.onSurfaceVariant}
+                color={checkInMethod === 'number' ? Colors.onPrimary : Colors.onSurfaceVariant}
               />
               <Text
                 style={[
@@ -233,7 +233,7 @@ const CreatePlanScreen: React.FC = () => {
               <MaterialIcons
                 name="edit-note"
                 size={24}
-                color={checkInMethod === 'diary' ? Colors.primary : Colors.onSurfaceVariant}
+                color={checkInMethod === 'diary' ? Colors.onPrimary : Colors.onSurfaceVariant}
               />
               <Text
                 style={[
@@ -343,44 +343,56 @@ const CreatePlanScreen: React.FC = () => {
         </View>
       </ScrollView>
 
-      <Modal
-        visible={showTimePicker}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setShowTimePicker(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.timePickerModal}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>选择提醒时间</Text>
-              <TouchableOpacity onPress={() => setShowTimePicker(false)}>
-                <MaterialIcons name="close" size={24} color={Colors.onSurface} />
-              </TouchableOpacity>
-            </View>
-            <DateTimePicker
-              value={selectedTime}
-              mode="time"
-              display="spinner"
-              onChange={handleTimeChange}
-              textColor={Colors.onSurface}
-            />
-            <View style={styles.modalActions}>
-              <TouchableOpacity
-                style={styles.modalCancelButton}
-                onPress={() => setShowTimePicker(false)}
-              >
-                <Text style={styles.modalCancelText}>取消</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.modalConfirmButton}
-                onPress={handleConfirmTime}
-              >
-                <Text style={styles.modalConfirmText}>确定</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+{showTimePicker && (
+        <Modal
+          visible={showTimePicker}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setShowTimePicker(false)}
+        >
+          <TouchableOpacity
+            style={styles.modalOverlay}
+            activeOpacity={1}
+            onPress={() => setShowTimePicker(false)}
+          >
+            <TouchableOpacity
+              style={styles.timePickerModal}
+              activeOpacity={1}
+              onPress={(e) => e.stopPropagation()}
+            >
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>选择提醒时间</Text>
+                <TouchableOpacity onPress={() => setShowTimePicker(false)}>
+                  <MaterialIcons name="close" size={24} color={Colors.onSurface} />
+                </TouchableOpacity>
+              </View>
+              <View style={styles.pickerContainer}>
+                <DateTimePicker
+                  value={selectedTime}
+                  mode="time"
+                  display="spinner"
+                  onChange={handleTimeChange}
+                  locale="zh-CN"
+                />
+              </View>
+              <View style={styles.modalActions}>
+                <TouchableOpacity
+                  style={styles.modalCancelButton}
+                  onPress={() => setShowTimePicker(false)}
+                >
+                  <Text style={styles.modalCancelText}>取消</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.modalConfirmButton}
+                  onPress={handleConfirmTime}
+                >
+                  <Text style={styles.modalConfirmText}>确定</Text>
+                </TouchableOpacity>
+              </View>
+            </TouchableOpacity>
+          </TouchableOpacity>
+        </Modal>
+      )}
 
       <View style={styles.bottomBar}>
         <Button
@@ -566,6 +578,7 @@ const styles = StyleSheet.create({
   reminderLeft: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: Spacing.md,
   },
   reminderIcon: {
     fontSize: 20,
@@ -576,7 +589,6 @@ const styles = StyleSheet.create({
     fontSize: FontSize.xxl,
     fontWeight: '700',
     color: Colors.onSurface,
-    marginRight: Spacing.sm,
   },
   reminderBadge: {
     backgroundColor: Colors.secondaryContainer,
@@ -749,6 +761,10 @@ const styles = StyleSheet.create({
     fontSize: FontSize.md,
     fontWeight: '600',
     color: Colors.onPrimary,
+  },
+  pickerContainer: {
+    paddingVertical: Spacing.lg,
+    minHeight: 200,
   },
 });
 

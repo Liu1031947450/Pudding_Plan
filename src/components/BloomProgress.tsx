@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import { View, Text, StyleSheet, Animated, Platform } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import { Colors, Typography } from '../constants/theme';
 
@@ -49,7 +49,10 @@ export const BloomProgress: React.FC<BloomProgressProps> = ({
   });
 
   return (
-    <Animated.View style={[styles.container, { transform: [{ scale: scaleAnim }] }]}>
+    <Animated.View
+      style={[styles.container, { transform: [{ scale: scaleAnim }] }]}
+      {...(Platform.OS !== 'web' && { collapsable: false })}
+    >
       <Svg width={size} height={size}>
         {/* Background circle */}
         <Circle
