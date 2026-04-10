@@ -7,4 +7,4 @@ export * from './circles';
 export * from './calendar';
 export * from './notifications';
 export * from './badges';
-export * from './badges';
+export * from './rhythm';

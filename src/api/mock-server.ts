@@ -50,49 +50,54 @@ class MockDatabase {
     return MockDatabase.instance;
   }
 
-  getPlans() {
+  getPlans(): Plan[] {
     return this.plansDB;
   }
-  getBadges() {
+  getBadges(): Badge[] {
     return this.badgesDB;
   }
-  getNotifications() {
+  getNotifications(): Notification[] {
     return this.notificationsDB;
   }
-  getBuddies() {
+  getBuddies(): Buddy[] {
     return this.buddiesDB;
   }
-  getCircles() {
+  getCircles(): Circle[] {
     return this.circlesDB;
   }
-  getCalendar() {
+  getCalendar(): DayData[] {
     return this.calendarDB;
   }
-  getHabits() {
+  getHabits(): Habit[] {
     return this.habitsDB;
   }
 }
 
 const db = MockDatabase.getInstance();
 
-// Simulate network delay
-const delay = (ms: number = 300) =>
+// 模拟网络延迟
+const delay = (ms: number = 300): Promise<void> =>
   new Promise(resolve => setTimeout(resolve, ms));
 
 // Mock API Server
 export const mockApiServer = {
-  // Plans API
+  // Plans API - 计划相关接口
   plans: {
+    // 获取所有计划列表
     getAll: async (): Promise<Plan[]> => {
       await delay();
-      return [...db.getPlans()];
+      const data = [...db.getPlans()];
+      return data;
     },
 
+    // 获取单个计划详情
     getById: async (id: string): Promise<Plan | null> => {
       await delay();
-      return db.getPlans().find(p => p.id === id) || null;
+      const data = db.getPlans().find(p => p.id === id) || null;
+      return data;
     },
 
+    // 创建新计划
     create: async (plan: Omit<Plan, 'id'>): Promise<Plan> => {
       await delay();
       const newPlan: Plan = {
@@ -103,6 +108,7 @@ export const mockApiServer = {
       return newPlan;
     },
 
+    // 更新计划
     update: async (
       id: string,
       updates: Partial<Plan>,
@@ -115,6 +121,7 @@ export const mockApiServer = {
       return plans[index];
     },
 
+    // 删除计划
     delete: async (id: string): Promise<boolean> => {
       await delay();
       const plans = db.getPlans();
@@ -124,49 +131,61 @@ export const mockApiServer = {
       return true;
     },
 
+    // 计划打卡
     checkIn: async (id: string): Promise<Plan | null> => {
       await delay();
       const plan = db.getPlans().find(p => p.id === id);
       if (!plan) return null;
 
-      plan.days += 1;
-      plan.progress = Math.round((plan.days / plan.totalDays) * 100);
+      plan.days = (plan.days || 0) + 1;
+      plan.progress = Math.round(((plan.days || 0) / plan.totalDays) * 100);
       return plan;
     },
   },
 
-  // Templates API
+  // Templates API - 模板相关接口
   templates: {
+    // 获取所有模板列表
     getAll: async (): Promise<TemplateDetail[]> => {
       await delay();
-      return Object.values(templateDetails);
+      const data = Object.values(templateDetails);
+      return data;
     },
 
+    // 获取单个模板详情
     getById: async (id: string): Promise<TemplateDetail | null> => {
       await delay();
-      return templateDetails[id] || null;
+      const data = templateDetails[id] || null;
+      return data;
     },
 
+    // 获取模板分类
     getByCategory: async (category: string): Promise<TemplateDetail[]> => {
       await delay();
-      return Object.values(templateDetails).filter(
+      const data = Object.values(templateDetails).filter(
         t => t.category === category,
       );
+      return data;
     },
   },
 
-  // Circles API
+  // Circles API - 圈子相关接口
   circles: {
+    // 获取所有圈子列表
     getAll: async (): Promise<Circle[]> => {
       await delay();
-      return [...db.getCircles()];
+      const data = [...db.getCircles()];
+      return data;
     },
 
+    // 获取单个圈子详情
     getById: async (id: string): Promise<Circle | null> => {
       await delay();
-      return db.getCircles().find(c => c.id === id) || null;
+      const data = db.getCircles().find(c => c.id === id) || null;
+      return data;
     },
 
+    // 加入圈子
     join: async (id: string): Promise<boolean> => {
       await delay();
       const circle = db.getCircles().find(c => c.id === id);
@@ -174,21 +193,26 @@ export const mockApiServer = {
     },
   },
 
-  // Buddies API
+  // Buddies API - 伙伴相关接口
   buddies: {
+    // 获取所有伙伴列表
     getAll: async (): Promise<Buddy[]> => {
       await delay();
-      return [...db.getBuddies()];
+      const data = [...db.getBuddies()];
+      return data;
     },
   },
 
-  // Calendar API
+  // Calendar API - 日历相关接口
   calendar: {
+    // 获取日历数据
     getData: async (): Promise<DayData[]> => {
       await delay();
-      return [...db.getCalendar()];
+      const data = [...db.getCalendar()];
+      return data;
     },
 
+    // 更新日历活动
     updateDay: async (
       day: number,
       hasActivity: boolean,
@@ -203,13 +227,16 @@ export const mockApiServer = {
     },
   },
 
-  // Habits API
+  // Habits API - 习惯相关接口
   habits: {
+    // 获取所有习惯列表
     getAll: async (): Promise<Habit[]> => {
       await delay();
-      return [...db.getHabits()];
+      const data = [...db.getHabits()];
+      return data;
     },
 
+    // 切换习惯状态
     toggle: async (id: string): Promise<Habit | null> => {
       await delay();
       const habit = db.getHabits().find(h => h.id === id);
@@ -219,13 +246,16 @@ export const mockApiServer = {
     },
   },
 
-  // Notifications API
+  // Notifications API - 通知相关接口
   notifications: {
+    // 获取所有通知列表
     getAll: async (): Promise<Notification[]> => {
       await delay();
-      return [...db.getNotifications()];
+      const data = [...db.getNotifications()];
+      return data;
     },
 
+    // 标记通知为已读
     markAsRead: async (id: string): Promise<boolean> => {
       await delay();
       const notification = db.getNotifications().find(n => n.id === id);
@@ -235,21 +265,25 @@ export const mockApiServer = {
     },
   },
 
-  // Badges API
+  // Badges API - 成就相关接口
   badges: {
+    // 获取所有成就列表
     getAll: async (): Promise<Badge[]> => {
       await delay();
-      return [...db.getBadges()];
+      const data = [...db.getBadges()];
+      return data;
     },
   },
 
-  // Rhythm Data API
+  // Rhythm Data API - 节奏数据相关接口
   rhythm: {
+    // 获取周节奏数据
     getWeek: async (): Promise<RhythmData[]> => {
       await delay();
       return [...mockWeekRhythmData];
     },
 
+    // 获取月节奏数据
     getMonth: async (): Promise<RhythmData[]> => {
       await delay();
       return [...mockMonthRhythmData];

@@ -7,8 +7,7 @@ import { mockBadges } from '../data/mockData';
 export const fetchBadges = async (): Promise<Badge[]> => {
   // 模拟网络延迟
   await new Promise<void>(resolve => setTimeout(resolve, 300));
-  console.log('获取用户成就列表', mockBadges);
-
-  // TODO: 替换为真实 API 调用
-  return mockBadges;
+  const data = mockBadges;
+  console.log('[Mock API] fetchBadges - 获取用户成就列表', data);
+  return data;
 };

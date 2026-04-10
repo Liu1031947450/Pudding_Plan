@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize, BorderRadius } from '../../constants/theme';
@@ -12,6 +12,7 @@ interface TopAppBarProps {
   onRightPress?: () => void;
   leftIcon?: keyof typeof MaterialIcons.glyphMap;
   onLeftPress?: () => void;
+  rightIconShake?: boolean;
 }
 
 export const TopAppBar: React.FC<TopAppBarProps> = ({
@@ -22,7 +23,49 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({
   onRightPress,
   leftIcon,
   onLeftPress,
+  rightIconShake = false,
 }) => {
+  const shakeAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (rightIconShake) {
+      const shake = Animated.loop(
+        Animated.sequence([
+          Animated.timing(shakeAnim, {
+            toValue: -8,
+            duration: 100,
+            useNativeDriver: true,
+          }),
+          Animated.timing(shakeAnim, {
+            toValue: 8,
+            duration: 100,
+            useNativeDriver: true,
+          }),
+          Animated.timing(shakeAnim, {
+            toValue: -8,
+            duration: 100,
+            useNativeDriver: true,
+          }),
+          Animated.timing(shakeAnim, {
+            toValue: 8,
+            duration: 100,
+            useNativeDriver: true,
+          }),
+          Animated.timing(shakeAnim, {
+            toValue: 0,
+            duration: 100,
+            useNativeDriver: true,
+          }),
+          Animated.delay(2000),
+        ]),
+      );
+      shake.start();
+      return () => shake.stop();
+    } else {
+      shakeAnim.setValue(0);
+    }
+  }, [rightIconShake, shakeAnim]);
+
   return (
     <BlurView intensity={20} tint="light" style={styles.container}>
       <View style={styles.content}>
@@ -60,11 +103,20 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({
               onPress={onRightPress}
               activeOpacity={0.7}
             >
-              <MaterialIcons
-                name={rightIcon}
-                size={24}
-                color={Colors.primary}
-              />
+              <Animated.View
+                style={{
+                  transform: [{ rotate: shakeAnim.interpolate({
+                    inputRange: [-8, 8],
+                    outputRange: ['-8deg', '8deg'],
+                  }) }],
+                }}
+              >
+                <MaterialIcons
+                  name={rightIcon}
+                  size={24}
+                  color={Colors.primary}
+                />
+              </Animated.View>
             </TouchableOpacity>
           )}
         </View>

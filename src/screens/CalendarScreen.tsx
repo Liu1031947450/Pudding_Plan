@@ -118,7 +118,16 @@ const CalendarScreen: React.FC = () => {
   const [, setSelectedDay] = React.useState(11);
   const [notificationDrawerVisible, setNotificationDrawerVisible] =
     useState(false);
-  const { notifications, markAsRead } = useNotificationState();
+  const { notifications, markAsRead, refreshNotifications, unreadCount } = useNotificationState();
+
+  const handleOpenNotifications = () => {
+    setNotificationDrawerVisible(true);
+  };
+
+  // 页面初始化时加载通知
+  React.useEffect(() => {
+    refreshNotifications();
+  }, [refreshNotifications]);
 
   const getActivityColor = (type?: 'primary' | 'secondary' | 'tertiary') => {
     switch (type) {
@@ -139,7 +148,8 @@ const CalendarScreen: React.FC = () => {
         leftIcon="spa"
         title="日历"
         rightIcon="notifications"
-        onRightPress={() => setNotificationDrawerVisible(true)}
+        rightIconShake={unreadCount > 0}
+        onRightPress={handleOpenNotifications}
       />
 
       <ScrollView

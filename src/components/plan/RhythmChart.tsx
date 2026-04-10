@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Dimensions,
+  ActivityIndicator,
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { Colors, Spacing, FontSize } from '../../constants/theme';
@@ -16,12 +17,14 @@ type RhythmPeriod = 'week' | 'month';
 interface RhythmChartProps {
   data: RhythmData[];
   period: RhythmPeriod;
+  loading?: boolean;
   onPeriodChange: (period: RhythmPeriod) => void;
 }
 
 export const RhythmChart: React.FC<RhythmChartProps> = ({
   data,
   period,
+  loading = false,
   onPeriodChange,
 }) => {
   // Generate SVG curve path for smooth line chart
@@ -94,71 +97,80 @@ export const RhythmChart: React.FC<RhythmChartProps> = ({
       </View>
 
       <Card style={styles.chartCard}>
-        {period === 'week' ? (
-          <>
-            <View style={styles.chartContainer}>
-              {data.map((item, index) => (
-                <View
-                  key={index}
-                  style={[
-                    styles.chartBar,
-                    {
-                      height: `${item.value}%`,
-                      backgroundColor:
-                        item.value > 80
-                          ? Colors.primaryFixed
-                          : item.value > 0
-                          ? Colors.secondaryFixedDim
-                          : Colors.surfaceContainerHigh,
-                    },
-                  ]}
-                />
-              ))}
-            </View>
-            <View style={styles.chartLabels}>
-              {data.map((item, index) => (
-                <Text key={index} style={styles.chartLabel}>
-                  {item.date}
-                </Text>
-              ))}
-            </View>
-          </>
-        ) : (
-          <>
-            <View style={styles.svgChartContainer}>
-              <Svg
-                width="100%"
-                height={160}
-                viewBox={`0 0 ${
-                  Dimensions.get('window').width -
-                  Spacing.md * 2 -
-                  Spacing.lg * 2
-                } 160`}
-              >
-                <Path
-                  d={generateCurvePath(
-                    data,
+        <View style={styles.chartContent}>
+          {period === 'week' ? (
+            <>
+              <View style={styles.chartContainer}>
+                {data.map((item, index) => (
+                  <View
+                    key={index}
+                    style={[
+                      styles.chartBar,
+                      {
+                        height: `${item.value}%`,
+                        backgroundColor:
+                          item.value > 80
+                            ? Colors.primaryFixed
+                            : item.value > 0
+                            ? Colors.secondaryFixedDim
+                            : Colors.surfaceContainerHigh,
+                      },
+                    ]}
+                  />
+                ))}
+              </View>
+              <View style={styles.chartLabels}>
+                {data.map((item, index) => (
+                  <Text key={index} style={styles.chartLabel}>
+                    {item.date}
+                  </Text>
+                ))}
+              </View>
+            </>
+          ) : (
+            <>
+              <View style={styles.svgChartContainer}>
+                <Svg
+                  width="100%"
+                  height={160}
+                  viewBox={`0 0 ${
                     Dimensions.get('window').width -
-                      Spacing.md * 2 -
-                      Spacing.lg * 2,
-                    160,
-                  )}
-                  stroke={Colors.primary}
-                  strokeWidth="3"
-                  fill="none"
-                />
-              </Svg>
+                    Spacing.md * 2 -
+                    Spacing.lg * 2
+                  } 160`}
+                >
+                  <Path
+                    d={generateCurvePath(
+                      data,
+                      Dimensions.get('window').width -
+                        Spacing.md * 2 -
+                        Spacing.lg * 2,
+                      160,
+                    )}
+                    stroke={Colors.primary}
+                    strokeWidth="3"
+                    fill="none"
+                  />
+                </Svg>
+              </View>
+              <View style={styles.monthLabels}>
+                <Text style={styles.monthLabel}>1</Text>
+                <Text style={styles.monthLabel}>10</Text>
+                <Text style={styles.monthLabel}>15</Text>
+                <Text style={styles.monthLabel}>20</Text>
+                <Text style={styles.monthLabel}>25</Text>
+                <Text style={styles.monthLabel}>30</Text>
+              </View>
+            </>
+          )}
+
+          {loading ? (
+            <View style={styles.loadingOverlay}>
+              <ActivityIndicator size="small" color={Colors.primary} />
+              <Text style={styles.loadingText}>加载中...</Text>
             </View>
-            <View style={styles.monthLabels}>
-              <Text style={styles.monthLabel}>1</Text>
-              <Text style={styles.monthLabel}>10</Text>
-              <Text style={styles.monthLabel}>15</Text>
-              <Text style={styles.monthLabel}>20</Text>
-              <Text style={styles.monthLabel}>25</Text>
-              <Text style={styles.monthLabel}>30</Text>
-            </View>
-          </>
-        )}
+          ) : null}
+        </View>
       </Card>
     </View>
   );
@@ -205,6 +217,9 @@ const styles = StyleSheet.create({
   chartCard: {
     padding: Spacing.lg,
   },
+  chartContent: {
+    position: 'relative',
+  },
   chartContainer: {
     flexDirection: 'row',
     alignItems: 'flex-end',
@@ -240,5 +255,18 @@ const styles = StyleSheet.create({
   monthLabel: {
     fontSize: FontSize.xs,
     color: Colors.onSurfaceVariant,
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(255, 255, 255, 0.75)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    borderRadius: 16,
+  },
+  loadingText: {
+    fontSize: FontSize.sm,
+    color: Colors.onSurfaceVariant,
+    fontWeight: '500',
   },
 });

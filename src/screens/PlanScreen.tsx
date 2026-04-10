@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   ScrollView,
@@ -9,14 +9,13 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Colors, Spacing } from '../constants/theme';
-import type { Plan, Badge } from '../types/domain';
+import type { Plan, Badge, RhythmData } from '../types/domain';
 import { BottomNavBar, TopAppBar, NotificationDrawer } from '../components';
 import { PlanList, PlanEmptyState, RhythmChart } from '../components/plan';
 import { AchievementDrawer } from '../components/specialized/AchievementDrawer';
 import { usePlanManagement } from '../hooks';
 import { useNotificationState } from '../hooks/useNotificationState';
-import { mockWeekRhythmData, mockMonthRhythmData } from '../data/mockData';
-import { fetchBadges } from '../api';
+import { fetchBadges, rhythmApi } from '../api';
 
 type RhythmPeriod = 'week' | 'month';
 
@@ -34,23 +33,45 @@ const PlanScreen: React.FC = () => {
     refreshPlans,
   } = usePlanManagement();
 
-  const { notifications, markAsRead } = useNotificationState();
+  const { notifications, markAsRead, refreshNotifications, unreadCount } = useNotificationState();
   const [notificationVisible, setNotificationVisible] = useState(false);
   const [achievementVisible, setAchievementVisible] = useState(false);
   const [badges, setBadges] = useState<Badge[]>([]);
   const [badgesLoading, setBadgesLoading] = useState(false);
 
   const [rhythmPeriod, setRhythmPeriod] = useState<RhythmPeriod>('week');
+  const [rhythmData, setRhythmData] = useState<RhythmData[]>([]);
+  const [rhythmLoading, setRhythmLoading] = useState(false);
 
   // 当页面获得焦点时刷新数据
   useFocusEffect(
     React.useCallback(() => {
       refreshPlans();
-    }, [refreshPlans]),
+      refreshNotifications();
+    }, [refreshPlans, refreshNotifications]),
   );
 
-  const rhythmData =
-    rhythmPeriod === 'week' ? mockWeekRhythmData : mockMonthRhythmData;
+  // 根据周期获取节奏数据
+  const fetchRhythmData = async (period: RhythmPeriod) => {
+    setRhythmLoading(true);
+    try {
+      const response = period === 'week'
+        ? await rhythmApi.getWeek()
+        : await rhythmApi.getMonth();
+      if (response.success && response.data) {
+        setRhythmData(response.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch rhythm data:', error);
+    } finally {
+      setRhythmLoading(false);
+    }
+  };
+
+  // 监听周期变化，自动请求对应数据
+  useEffect(() => {
+    fetchRhythmData(rhythmPeriod);
+  }, [rhythmPeriod]);
 
   const handleOpenAchievements = async () => {
     setBadgesLoading(true);
@@ -63,6 +84,10 @@ const PlanScreen: React.FC = () => {
       setBadgesLoading(false);
       setAchievementVisible(true);
     }
+  };
+
+  const handleOpenNotifications = () => {
+    setNotificationVisible(true);
   };
 
   const handleCreatePlan = () => {
@@ -86,8 +111,9 @@ const PlanScreen: React.FC = () => {
         title="我的计划"
         leftIcon="emoji-events"
         rightIcon="notifications"
+        rightIconShake={unreadCount > 0}
         onLeftPress={handleOpenAchievements}
-        onRightPress={() => setNotificationVisible(true)}
+        onRightPress={handleOpenNotifications}
       />
 
       <ScrollView
@@ -119,6 +145,7 @@ const PlanScreen: React.FC = () => {
             <RhythmChart
               data={rhythmData}
               period={rhythmPeriod}
+              loading={rhythmLoading}
               onPeriodChange={setRhythmPeriod}
             />
           </>

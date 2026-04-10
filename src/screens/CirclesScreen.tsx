@@ -18,7 +18,16 @@ const CirclesScreen: React.FC = () => {
   const { buddies, circles } = useCircleData();
   const [notificationDrawerVisible, setNotificationDrawerVisible] =
     useState(false);
-  const { notifications, markAsRead } = useNotificationState();
+  const { notifications, markAsRead, refreshNotifications, unreadCount } = useNotificationState();
+
+  const handleOpenNotifications = () => {
+    setNotificationDrawerVisible(true);
+  };
+
+  // 页面初始化时加载通知
+  React.useEffect(() => {
+    refreshNotifications();
+  }, [refreshNotifications]);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -26,7 +35,8 @@ const CirclesScreen: React.FC = () => {
         leftIcon="spa"
         title="圈子"
         rightIcon="notifications"
-        onRightPress={() => setNotificationDrawerVisible(true)}
+        rightIconShake={unreadCount > 0}
+        onRightPress={handleOpenNotifications}
       />
 
       <ScrollView

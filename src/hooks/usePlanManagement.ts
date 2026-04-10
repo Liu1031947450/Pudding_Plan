@@ -20,10 +20,6 @@ export const usePlanManagement = () => {
     }
   }, []);
 
-  useEffect(() => {
-    loadPlans();
-  }, [loadPlans]);
-
   const handleCreatePlan = useCallback(
     async (planData: Omit<Plan, 'id'>) => {
       const newPlan = await planService.createPlan(planData);
