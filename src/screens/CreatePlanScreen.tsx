@@ -121,6 +121,13 @@ const CreatePlanScreen: React.FC = () => {
   const [toastType, setToastType] = useState<'success' | 'error' | 'info'>(
     'success',
   );
+  const [showMilestoneDrawer, setShowMilestoneDrawer] = useState(false);
+  const [editingMilestoneIndex, setEditingMilestoneIndex] = useState<
+    number | null
+  >(null);
+  const [milestoneDay, setMilestoneDay] = useState('');
+  const [milestoneTitle, setMilestoneTitle] = useState('');
+  const [milestoneReward, setMilestoneReward] = useState('');
 
   // 当 existingPlan 数据加载完成后，更新表单数据
   useEffect(() => {
@@ -268,9 +275,75 @@ const CreatePlanScreen: React.FC = () => {
   const handleAddReminder = () => {
     if (reminders.length >= 5) return; // 最多5个提醒
     setEditingReminderId(null); // 新增模式
-    setSelectedHour(9);
-    setSelectedMinute(0);
+    const now = new Date();
+    setSelectedHour(now.getHours());
+    setSelectedMinute(now.getMinutes());
     setShowTimePicker(true);
+  };
+
+  const handleAddMilestone = () => {
+    setEditingMilestoneIndex(null);
+    setMilestoneDay('');
+    setMilestoneTitle('');
+    setMilestoneReward('');
+    setShowMilestoneDrawer(true);
+  };
+
+  const handleEditMilestone = (index: number) => {
+    const milestone = _milestones[index];
+    setEditingMilestoneIndex(index);
+    setMilestoneDay(milestone.times.toString());
+    setMilestoneTitle(milestone.title);
+    setMilestoneReward(milestone.description);
+    setShowMilestoneDrawer(true);
+  };
+
+  const handleSaveMilestone = () => {
+    const day = parseInt(milestoneDay, 10);
+    if (!day || day <= 0) {
+      setToastMessage('请输入有效的天数');
+      setToastType('error');
+      setToastVisible(true);
+      return;
+    }
+    if (!milestoneTitle.trim()) {
+      setToastMessage('请输入里程碑名称');
+      setToastType('error');
+      setToastVisible(true);
+      return;
+    }
+    if (!milestoneReward.trim()) {
+      setToastMessage('请输入奖励内容');
+      setToastType('error');
+      setToastVisible(true);
+      return;
+    }
+
+    const newMilestone = {
+      times: day,
+      title: milestoneTitle,
+      description: milestoneReward,
+      status: false,
+    };
+
+    if (editingMilestoneIndex !== null) {
+      // 编辑模式
+      const updated = [..._milestones];
+      updated[editingMilestoneIndex] = newMilestone;
+      _setMilestones(updated);
+    } else {
+      // 新增模式
+      _setMilestones([..._milestones, newMilestone]);
+    }
+
+    setShowMilestoneDrawer(false);
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+  };
+
+  const handleDeleteMilestone = (index: number) => {
+    const updated = _milestones.filter((_, i) => i !== index);
+    _setMilestones(updated);
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
   };
 
   const handleEditReminder = (reminder: Reminder) => {
@@ -664,41 +737,38 @@ const CreatePlanScreen: React.FC = () => {
           </View>
 
           <View style={styles.milestonesGrid}>
-            <Card style={styles.milestoneCard}>
-              <View style={styles.milestoneNumber}>
-                <Text style={styles.milestoneNumberText}>07</Text>
-              </View>
-              <Text style={styles.milestoneTitle}>小有所成</Text>
-              <Text style={styles.milestoneReward}>奖励：奖励一顿丰盛早餐</Text>
-              <TouchableOpacity>
-                <Text style={styles.milestoneEdit}>修改奖励</Text>
-              </TouchableOpacity>
-            </Card>
-
-            <Card style={styles.milestoneCard}>
-              <View
-                style={[
-                  styles.milestoneNumber,
-                  styles.milestoneNumberSecondary,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.milestoneNumberText,
-                    styles.milestoneNumberTextSecondary,
-                  ]}
-                >
-                  21
+            {_milestones.map((milestone, index) => (
+              <Card key={index} style={styles.milestoneCard}>
+                <View style={styles.milestoneNumber}>
+                  <Text style={styles.milestoneNumberText}>
+                    {milestone.times.toString().padStart(2, '0')}
+                  </Text>
+                </View>
+                <Text style={styles.milestoneTitle}>{milestone.title}</Text>
+                <Text style={styles.milestoneReward}>
+                  奖励：{milestone.description}
                 </Text>
-              </View>
-              <Text style={styles.milestoneTitle}>完美收官</Text>
-              <Text style={styles.milestoneReward}>奖励：购买一套新瑜伽服</Text>
-              <TouchableOpacity>
-                <Text style={styles.milestoneEdit}>修改奖励</Text>
-              </TouchableOpacity>
-            </Card>
+                <View style={styles.milestoneActions}>
+                  <TouchableOpacity onPress={() => handleEditMilestone(index)}>
+                    <Text style={styles.milestoneEdit}>修改奖励</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => handleDeleteMilestone(index)}
+                  >
+                    <MaterialIcons
+                      name="delete-outline"
+                      size={18}
+                      color={Colors.error}
+                    />
+                  </TouchableOpacity>
+                </View>
+              </Card>
+            ))}
 
-            <TouchableOpacity style={styles.addMilestoneButton}>
+            <TouchableOpacity
+              style={styles.addMilestoneButton}
+              onPress={handleAddMilestone}
+            >
               <MaterialIcons
                 name="add"
                 size={20}
@@ -823,6 +893,192 @@ const CreatePlanScreen: React.FC = () => {
         </Modal>
       )}
 
+      {showMilestoneDrawer && (
+        <Modal
+          visible={showMilestoneDrawer}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setShowMilestoneDrawer(false)}
+        >
+          <TouchableOpacity
+            style={styles.modalOverlay}
+            activeOpacity={1}
+            onPress={() => setShowMilestoneDrawer(false)}
+          >
+            <TouchableOpacity
+              style={styles.timePickerModal}
+              activeOpacity={1}
+              onPress={e => e.stopPropagation()}
+            >
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>
+                  {editingMilestoneIndex !== null ? '编辑里程碑' : '添加里程碑'}
+                </Text>
+                <TouchableOpacity onPress={() => setShowMilestoneDrawer(false)}>
+                  <MaterialIcons
+                    name="close"
+                    size={24}
+                    color={Colors.onSurface}
+                  />
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.drawerContent}>
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>天数</Text>
+                  <View style={styles.inputWrapper}>
+                    <TextInput
+                      style={styles.input}
+                      value={milestoneDay}
+                      onChangeText={setMilestoneDay}
+                      placeholder="输入天数"
+                      placeholderTextColor={Colors.onSurfaceVariant}
+                      keyboardType="number-pad"
+                    />
+                    <Text style={styles.inputSuffix}>天</Text>
+                  </View>
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>里程碑名称</Text>
+                  <View style={styles.inputWrapper}>
+                    <TextInput
+                      style={styles.input}
+                      value={milestoneTitle}
+                      onChangeText={setMilestoneTitle}
+                      placeholder="例如：小有所成"
+                      placeholderTextColor={Colors.onSurfaceVariant}
+                    />
+                  </View>
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>奖励内容</Text>
+                  <View style={styles.inputWrapper}>
+                    <TextInput
+                      style={styles.input}
+                      value={milestoneReward}
+                      onChangeText={setMilestoneReward}
+                      placeholder="例如：奖励一顿丰盛早餐"
+                      placeholderTextColor={Colors.onSurfaceVariant}
+                      multiline
+                    />
+                  </View>
+                </View>
+              </View>
+
+              <View style={styles.modalActions}>
+                <TouchableOpacity
+                  style={styles.modalCancelButton}
+                  onPress={() => setShowMilestoneDrawer(false)}
+                >
+                  <Text style={styles.modalCancelText}>取消</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.modalConfirmButton}
+                  onPress={handleSaveMilestone}
+                >
+                  <Text style={styles.modalConfirmText}>保存</Text>
+                </TouchableOpacity>
+              </View>
+            </TouchableOpacity>
+          </TouchableOpacity>
+        </Modal>
+      )}
+
+      {showMilestoneDrawer && (
+        <Modal
+          visible={showMilestoneDrawer}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setShowMilestoneDrawer(false)}
+        >
+          <TouchableOpacity
+            style={styles.modalOverlay}
+            activeOpacity={1}
+            onPress={() => setShowMilestoneDrawer(false)}
+          >
+            <TouchableOpacity
+              style={styles.timePickerModal}
+              activeOpacity={1}
+              onPress={e => e.stopPropagation()}
+            >
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>
+                  {editingMilestoneIndex !== null ? '编辑里程碑' : '添加里程碑'}
+                </Text>
+                <TouchableOpacity onPress={() => setShowMilestoneDrawer(false)}>
+                  <MaterialIcons
+                    name="close"
+                    size={24}
+                    color={Colors.onSurface}
+                  />
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.drawerContent}>
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>天数</Text>
+                  <View style={styles.inputWrapper}>
+                    <TextInput
+                      style={styles.input}
+                      value={milestoneDay}
+                      onChangeText={setMilestoneDay}
+                      placeholder="输入天数"
+                      placeholderTextColor={Colors.onSurfaceVariant}
+                      keyboardType="number-pad"
+                    />
+                    <Text style={styles.inputSuffix}>天</Text>
+                  </View>
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>里程碑名称</Text>
+                  <View style={styles.inputWrapper}>
+                    <TextInput
+                      style={styles.input}
+                      value={milestoneTitle}
+                      onChangeText={setMilestoneTitle}
+                      placeholder="例如：小有所成"
+                      placeholderTextColor={Colors.onSurfaceVariant}
+                    />
+                  </View>
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>奖励内容</Text>
+                  <View style={styles.inputWrapper}>
+                    <TextInput
+                      style={styles.input}
+                      value={milestoneReward}
+                      onChangeText={setMilestoneReward}
+                      placeholder="例如：奖励一顿丰盛早餐"
+                      placeholderTextColor={Colors.onSurfaceVariant}
+                      multiline
+                    />
+                  </View>
+                </View>
+              </View>
+
+              <View style={styles.modalActions}>
+                <TouchableOpacity
+                  style={styles.modalCancelButton}
+                  onPress={() => setShowMilestoneDrawer(false)}
+                >
+                  <Text style={styles.modalCancelText}>取消</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.modalConfirmButton}
+                  onPress={handleSaveMilestone}
+                >
+                  <Text style={styles.modalConfirmText}>保存</Text>
+                </TouchableOpacity>
+              </View>
+            </TouchableOpacity>
+          </TouchableOpacity>
+        </Modal>
+      )}
+
       <View style={styles.bottomBar}>
         <Button
           title={isCreating ? '创建中...' : '完成'}
@@ -939,6 +1195,12 @@ const styles = StyleSheet.create({
     fontSize: FontSize.sm,
     fontWeight: '700',
     color: Colors.tertiary,
+  },
+  addButtonDisabled: {
+    backgroundColor: `${Colors.outlineVariant}10`,
+  },
+  addButtonTextDisabled: {
+    color: Colors.outlineVariant,
   },
   inputGrid: {
     gap: Spacing.md,
@@ -1113,6 +1375,12 @@ const styles = StyleSheet.create({
     color: Colors.primary,
     textDecorationLine: 'underline',
   },
+  milestoneActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+    marginTop: Spacing.xs,
+  },
   addMilestoneButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1241,6 +1509,10 @@ const styles = StyleSheet.create({
     fontSize: FontSize.xxl,
     fontWeight: '700',
     color: Colors.onSurface,
+  },
+  drawerContent: {
+    padding: Spacing.lg,
+    gap: Spacing.md,
   },
 });
 
