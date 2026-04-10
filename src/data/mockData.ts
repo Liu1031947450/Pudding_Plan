@@ -15,8 +15,8 @@ export const mockPlans: Plan[] = [
   {
     id: '99',
     title: '测试数据01', // 计划名称
-    totalDays: 21, // 打卡周期（总天数）
-    currentDays: 10, // 当前打卡天数
+    totalDays: 20, // 打卡周期（总天数）
+    // currentDays 无需硬编码，由 MockDatabase 初始化时从 completedDate.length 自动派生
     type: 0, // 打卡方式：0-盖章打卡, 1-数值记录, 2-文字日记
     remindSetting: [
       {
@@ -31,8 +31,19 @@ export const mockPlans: Plan[] = [
         description: '吃一顿大餐', // 成就奖励
         status: true, // 成就状态：true-已解锁, false-未解锁
       },
-    ], // 阶段里程碑,
+    ], // 阶段里程碑
     icon: '', // 计划图标
+    completedDate: [
+      '2026-04-01',
+      '2026-04-02',
+      '2026-04-03',
+      '2026-04-04',
+      '2026-04-05',
+      '2026-04-06',
+      '2026-04-07',
+      '2026-04-08',
+      '2026-04-09',
+    ], // 已打卡日期列表（唯一事实源，currentDays/progress 均由此派生）
   },
 ];
 

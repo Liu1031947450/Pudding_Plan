@@ -6,6 +6,7 @@ import { Card } from '../common/Card';
 import { ProgressBar } from '../progress/ProgressBar';
 import { BloomProgress } from '../progress/BloomProgress';
 import type { Plan } from '../../types/domain';
+import { getPlanDisplayData } from '../../utils/planUtils';
 
 interface PlanCardProps {
   plan: Plan;
@@ -30,12 +31,10 @@ export const PlanCard: React.FC<PlanCardProps> = ({
   canMoveUp = true,
   canMoveDown = true,
 }) => {
-  // 计算展示数据
-  const days = plan.currentDays ?? plan.days ?? 0;
-  const progress = plan.progress ?? Math.round((days / plan.totalDays) * 100);
-  const subtitle = plan.subtitle ?? `已坚持 ${days} 天`;
+  // 从 completedDate 派生所有展示数据（completedDate 是唯一事实源）
+  const { days, progress, streakBroken, subtitle } = getPlanDisplayData(plan);
   const color = plan.color ?? Colors.primaryContainer;
-  const icon = plan.icon || '✨'; // 如果没有 icon，使用默认星星
+  const icon = plan.icon || '✨';
 
   return (
     <Card
@@ -107,7 +106,7 @@ export const PlanCard: React.FC<PlanCardProps> = ({
       </View>
       <ProgressBar
         progress={progress}
-        color={progress === 66 ? Colors.primary : Colors.tertiary}
+        color={streakBroken ? Colors.error : progress >= 100 ? Colors.primary : Colors.tertiary}
         height={8}
       />
     </Card>

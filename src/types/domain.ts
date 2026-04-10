@@ -5,7 +5,7 @@ export interface Plan {
   id: string;
   title: string; // 计划名称
   totalDays: number; // 打卡周期（总天数）
-  currentDays?: number; // 当前打卡天数
+  completedDate: string[]; // 已打卡日期列表（'YYYY-MM-DD'），唯一事实源头
   type: 0 | 1 | 2; // 打卡方式：0-盖章打卡, 1-数值记录, 2-文字日记
   remindSetting: {
     time: string; // 提醒时间（HH:mm）
@@ -18,8 +18,8 @@ export interface Plan {
     status: boolean; // 成就状态：true-已解锁, false-未解锁
   }[];
   icon: keyof typeof MaterialIcons.glyphMap | string; // 计划图标
-  // 以下字段用于展示，可以从其他数据计算得出
-  subtitle?: string; // 副标题（如"已坚持 X 天"）
+  // 以下字段为派生/兼容字段，优先从 completedDate 计算
+  currentDays?: number; // 当前打卡天数（= completedDate.length）
   progress?: number; // 进度百分比
   days?: number; // 已打卡天数（兼容旧字段）
   color?: string; // 卡片颜色

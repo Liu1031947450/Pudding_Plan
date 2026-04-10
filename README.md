@@ -106,7 +106,8 @@ Pudding_Plan/
 │   │   └── navigation.ts       # 导航类型
 │   │
 │   └── utils/                  # 工具函数
-│       └── index.ts            # 通用工具函数
+│       ├── index.ts            # 通用工具函数入口
+│       └── planUtils.ts        # 计划逻辑工具和统计 (核心)
 │
 ├── App.tsx                     # 应用入口组件
 ├── index.js                    # React Native 入口文件
@@ -305,6 +306,14 @@ lsof -ti:19001 | xargs kill -9
 - 优化后: 72 个 TypeScript 文件
 - 删除: 3 个文件
 - 清理: 9 处 console.log，2 处 Alert
+
+### 2026-04-10 数据架构升级
+
+**核心变更**:
+- **事实源统一**: 引入 `completedDate: string[]` 作为计划打卡的唯一事实源，废弃了分散在 `currentDays` 和 `checkInsDB` 中的状态数据。
+- **派生逻辑抽离**: 新建 `src/utils/planUtils.ts`，统一负责计算连续天数 (Streak)、历史最长天数、打卡进度及中断检测。
+- **UI 逻辑优化**: `PlanCard` 等组件现在完全基于 `completedDate` 派生展示数据，确保了数据的一致性和逻辑的健壮性。
+- **Mock 服务重构**: `mock-server.ts` 移除冗余的打卡数据库，所有日历和进度逻辑均实时基于计划内的日期列表生成。
 
 **目录结构优化**:
 

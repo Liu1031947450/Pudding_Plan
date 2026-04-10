@@ -192,7 +192,8 @@ const CreatePlanScreen: React.FC = () => {
       const newPlanData: Omit<Plan, 'id'> = {
         title: planName,
         totalDays: days,
-        currentDays: existingPlan?.currentDays ?? 0, // 保留已完成天数
+        // completedDate 是唯一事实源：编辑模式继承原有打卡记录，新建时为空数组
+        completedDate: existingPlan?.completedDate ?? [],
         type: checkInMethod,
         remindSetting: reminders.map(r => ({
           time: typeof r.time === 'string' ? r.time : formatTime(r.time),
@@ -212,7 +213,6 @@ const CreatePlanScreen: React.FC = () => {
           }),
         ),
         icon: planIcon,
-        // 可选的展示字段
         color: planColor,
       };
 

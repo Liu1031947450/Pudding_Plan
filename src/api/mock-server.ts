@@ -9,6 +9,7 @@ import {
   mockWeekRhythmData,
   mockMonthRhythmData,
 } from '../data/mockData';
+import { getCompletedDays, getProgress } from '../utils/planUtils';
 import { templateDetails } from '../data/templates';
 import type {
   Plan,
@@ -33,36 +34,24 @@ class MockDatabase {
   private calendarDB: DayData[];
   private habitsDB: Habit[];
 
-  private checkInsDB: { planId: string; date: string; userId: string }[];
-
   private constructor() {
-    this.plansDB = [...mockPlans];
+    // 深拷贝计划数组，避免污染原始 mockData
+    this.plansDB = mockPlans.map(p => ({
+      ...p,
+      completedDate: [...p.completedDate],
+    }));
     this.badgesDB = [...mockBadges];
     this.notificationsDB = [...mockNotifications];
     this.buddiesDB = [...mockBuddies];
     this.circlesDB = [...mockCircles];
     this.calendarDB = [...mockCalendarData];
     this.habitsDB = [...mockHabits];
-    
-    // 初始化时，模拟本月 1-9 号的打卡数据
-    this.checkInsDB = [];
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    
-    if (this.plansDB.length > 0) {
-      // 为了直观，取第一个计划作为模拟体
-      const mockPlan = this.plansDB[0];
-      for (let i = 1; i <= 9; i++) {
-        this.checkInsDB.push({
-          planId: mockPlan.id,
-          date: `${year}-${month}-${String(i).padStart(2, '0')}`,
-          userId: '1234567890',
-        });
-      }
-      // 顺便更新一下进度数据
-      mockPlan.days = (mockPlan.days || 0) + 9;
-      mockPlan.progress = Math.round(((mockPlan.days || 0) / mockPlan.totalDays) * 100);
+
+    // 初始化时，从 completedDate 派生 currentDays / progress（保持字段同步）
+    for (const plan of this.plansDB) {
+      plan.currentDays = getCompletedDays(plan);
+      plan.days = plan.currentDays;
+      plan.progress = getProgress(plan);
     }
   }
 
@@ -93,9 +82,6 @@ class MockDatabase {
   }
   getHabits(): Habit[] {
     return this.habitsDB;
-  }
-  getCheckIns(): { planId: string; date: string; userId: string }[] {
-    return this.checkInsDB;
   }
 }
 
@@ -187,18 +173,22 @@ export const mockApiServer = {
       const plan = db.getPlans().find(p => p.id === id);
       if (!plan) return null;
 
-      const exists = db
-        .getCheckIns()
-        .some(c => c.planId === id && c.date === date && c.userId === userId);
-      if (!exists) {
-        db.getCheckIns().push({ planId: id, date, userId });
-        plan.days = (plan.days || 0) + 1;
-        plan.progress = Math.round(((plan.days || 0) / plan.totalDays) * 100);
+      // completedDate 是唯一事实源，直接检查是否已包含该日期
+      if (!plan.completedDate.includes(date)) {
+        plan.completedDate.push(date);
+        // 保持派生字段与 completedDate 同步
+        plan.currentDays = getCompletedDays(plan);
+        plan.days = plan.currentDays;
+        plan.progress = getProgress(plan);
+        console.log(
+          `[Mock API] plans.checkIn - 打卡成功 -> planId: ${id}, date: ${date}, userId: ${userId}, 累计: ${plan.currentDays} 天`,
+        );
+      } else {
+        console.log(
+          `[Mock API] plans.checkIn - 已打卡，跳过 -> planId: ${id}, date: ${date}`,
+        );
       }
 
-      console.log(
-        `[Mock API] plans.checkIn - 发生真实打卡行为 -> planId: ${id}, date: ${date}, userId: ${userId}`,
-      );
       return plan;
     },
   },
@@ -279,20 +269,20 @@ export const mockApiServer = {
       const now = new Date();
       const isCurrentMonth =
         now.getFullYear() === year && now.getMonth() + 1 === month;
-      const effectiveUserId = userId || '1234567890';
-      const userCheckIns = db
-        .getCheckIns()
-        .filter(c => c.userId === effectiveUserId);
+
+      // 从所有计划的 completedDate 直接派生日历打卡数据（completedDate 是唯一事实源）
+      const plans = db.getPlans();
 
       for (let i = 1; i <= daysInMonth; i++) {
         const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(
           i,
         ).padStart(2, '0')}`;
 
-        // 只要当天的 checkIns 里有记录，就算有打卡点
-        const dayCheckIns = userCheckIns.filter(c => c.date === dateStr);
-        const hasActivity = dayCheckIns.length > 0;
-        // 为了视觉美观我们可以给不同计划分配不同类型的点，如果需要的话。
+        // 收集当天有打卡记录的计划
+        const completedPlanIds = plans
+          .filter(p => p.completedDate.includes(dateStr))
+          .map(p => p.id);
+        const hasActivity = completedPlanIds.length > 0;
         const activityType = hasActivity ? 'primary' : undefined;
 
         mockedMonthData.push({
@@ -301,15 +291,13 @@ export const mockApiServer = {
           isToday: isCurrentMonth && now.getDate() === i,
           isSelected: false,
           activityType: activityType as any,
-          completedPlanIds: dayCheckIns.map(c => c.planId),
+          completedPlanIds,
         });
       }
 
-      if (userId) {
-        console.log(
-          `[Mock API] calendar.getData - 提取当月真实打卡记录 -> year: ${year}, month: ${month}, userId: ${userId}`,
-        );
-      }
+      console.log(
+        `[Mock API] calendar.getData - 从 completedDate 派生日历 -> year: ${year}, month: ${month}`,
+      );
       return mockedMonthData;
     },
 
