@@ -231,22 +231,11 @@ const CreatePlanScreen: React.FC = () => {
         setTimeout(() => {
           setIsCreating(false);
 
-          // 获取导航状态，判断是否需要返回多层
-          const navState = navigation.getState();
-          const routes = navState?.routes || [];
-          const currentIndex = navState?.index || 0;
-
-          // 如果当前路由栈中有 TemplateSelection，需要返回两层
-          const hasTemplateSelection = routes.some(
-            r => r.name === 'TemplateSelection',
-          );
-
-          if (hasTemplateSelection && currentIndex >= 2) {
-            // 返回到 Main（Plan 页面），跳过 TemplateSelection
-            navigation.navigate('Main' as never);
-          } else {
-            // 直接返回上一页
+          if (isEditMode) {
             navigation.goBack();
+          } else {
+            // 新建计划完成后，统一跳转到“计划”页面
+            navigation.navigate('Main' as never, { screen: 'Plan' } as never);
           }
         }, 1500);
       } else {

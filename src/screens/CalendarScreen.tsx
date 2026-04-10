@@ -111,7 +111,7 @@ const CalendarScreen: React.FC = () => {
           setQuote(quoteRes.data);
         }
       } finally {
-        if (!silent) setLoading(false);
+        setLoading(false);
       }
     },
     [year, month],
@@ -123,12 +123,12 @@ const CalendarScreen: React.FC = () => {
       const userId = '1234567890';
       refreshNotifications(userId);
       refreshPlans(userId);
-      fetchCalendarData(); // 每次切回来都触发包含 loading 的刷新
+      fetchCalendarData(true); // 每次切回来静默刷新
     }, [refreshNotifications, refreshPlans, fetchCalendarData]),
   );
 
   React.useEffect(() => {
-    fetchCalendarData();
+    fetchCalendarData(true); // 切换日历静默刷新
   }, [fetchCalendarData]);
 
   const onCheckIn = async (planId: string) => {
