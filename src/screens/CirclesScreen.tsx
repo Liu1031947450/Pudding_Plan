@@ -3,7 +3,12 @@ import { StyleSheet, ScrollView, View, Text } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors, Spacing, FontSize } from '../constants/theme';
-import { BottomNavBar, TopAppBar, Card, NotificationDrawer } from '../components';
+import {
+  BottomNavBar,
+  TopAppBar,
+  Card,
+  NotificationDrawer,
+} from '../components';
 import { BuddyList, CircleGrid } from '../components/circle';
 import { useCircleData } from '../hooks';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -11,7 +16,8 @@ import { useNotificationState } from '../hooks/useNotificationState';
 
 const CirclesScreen: React.FC = () => {
   const { buddies, circles } = useCircleData();
-  const [notificationDrawerVisible, setNotificationDrawerVisible] = useState(false);
+  const [notificationDrawerVisible, setNotificationDrawerVisible] =
+    useState(false);
   const { notifications, markAsRead } = useNotificationState();
 
   return (

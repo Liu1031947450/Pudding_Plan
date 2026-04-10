@@ -116,7 +116,8 @@ const mockHabits: Habit[] = [
 
 const CalendarScreen: React.FC = () => {
   const [, setSelectedDay] = React.useState(11);
-  const [notificationDrawerVisible, setNotificationDrawerVisible] = useState(false);
+  const [notificationDrawerVisible, setNotificationDrawerVisible] =
+    useState(false);
   const { notifications, markAsRead } = useNotificationState();
 
   const getActivityColor = (type?: 'primary' | 'secondary' | 'tertiary') => {

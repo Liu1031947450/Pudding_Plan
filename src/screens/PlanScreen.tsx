@@ -11,11 +11,7 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Colors, Spacing } from '../constants/theme';
 import type { Plan } from '../types/domain';
 import { BottomNavBar, TopAppBar, NotificationDrawer } from '../components';
-import {
-  PlanList,
-  PlanEmptyState,
-  RhythmChart,
-} from '../components/plan';
+import { PlanList, PlanEmptyState, RhythmChart } from '../components/plan';
 import { AchievementDrawer } from '../components/specialized/AchievementDrawer';
 import { usePlanManagement } from '../hooks';
 import { useNotificationState } from '../hooks/useNotificationState';

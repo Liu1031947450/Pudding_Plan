@@ -11,7 +11,8 @@ const notifyListeners = () => {
 };
 
 export const useNotificationState = () => {
-  const [notifications, setNotifications] = useState<Notification[]>(globalNotifications);
+  const [notifications, setNotifications] =
+    useState<Notification[]>(globalNotifications);
 
   useEffect(() => {
     const listener = (newNotifications: Notification[]) => {
@@ -27,7 +28,7 @@ export const useNotificationState = () => {
 
   const markAsRead = (id: string) => {
     globalNotifications = globalNotifications.map(notif =>
-      notif.id === id ? { ...notif, read: true } : notif
+      notif.id === id ? { ...notif, read: true } : notif,
     );
     notifyListeners();
   };

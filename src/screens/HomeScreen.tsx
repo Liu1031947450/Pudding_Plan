@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+} from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, FontSize, Spacing } from '../constants/theme';
 import { AchievementDrawer } from '../components/specialized/AchievementDrawer';
@@ -36,9 +43,15 @@ const HomeScreen: React.FC = () => {
         {/* 临时测试按钮 */}
         <TouchableOpacity
           onPress={handleOpenDrawer}
-          style={{ marginTop: 20, padding: 15, backgroundColor: Colors.primary }}
+          style={{
+            marginTop: 20,
+            padding: 15,
+            backgroundColor: Colors.primary,
+          }}
         >
-          <Text style={{ color: 'white', textAlign: 'center' }}>测试打开抽屉</Text>
+          <Text style={{ color: 'white', textAlign: 'center' }}>
+            测试打开抽屉
+          </Text>
         </TouchableOpacity>
       </ScrollView>
 
