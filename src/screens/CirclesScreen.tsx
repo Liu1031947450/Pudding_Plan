@@ -18,7 +18,8 @@ const CirclesScreen: React.FC = () => {
   const { buddies, circles } = useCircleData();
   const [notificationDrawerVisible, setNotificationDrawerVisible] =
     useState(false);
-  const { notifications, markAsRead, refreshNotifications, unreadCount } = useNotificationState();
+  const { notifications, markAsRead, refreshNotifications, unreadCount } =
+    useNotificationState();
 
   const handleOpenNotifications = () => {
     setNotificationDrawerVisible(true);

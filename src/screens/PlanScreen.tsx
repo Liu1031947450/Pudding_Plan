@@ -33,7 +33,8 @@ const PlanScreen: React.FC = () => {
     refreshPlans,
   } = usePlanManagement();
 
-  const { notifications, markAsRead, refreshNotifications, unreadCount } = useNotificationState();
+  const { notifications, markAsRead, refreshNotifications, unreadCount } =
+    useNotificationState();
   const [notificationVisible, setNotificationVisible] = useState(false);
   const [achievementVisible, setAchievementVisible] = useState(false);
   const [badges, setBadges] = useState<Badge[]>([]);
@@ -57,9 +58,10 @@ const PlanScreen: React.FC = () => {
     setRhythmLoading(true);
     try {
       const userId = '1234567890';
-      const response = period === 'week'
-        ? await rhythmApi.getWeek(userId)
-        : await rhythmApi.getMonth(userId);
+      const response =
+        period === 'week'
+          ? await rhythmApi.getWeek(userId)
+          : await rhythmApi.getMonth(userId);
       if (response.success && response.data) {
         setRhythmData(response.data);
       }
@@ -159,7 +161,7 @@ const PlanScreen: React.FC = () => {
         visible={notificationVisible}
         onClose={() => setNotificationVisible(false)}
         notifications={notifications}
-        onNotificationPress={(id) => markAsRead(id, '1234567890')}
+        onNotificationPress={id => markAsRead(id, '1234567890')}
       />
 
       <AchievementDrawer

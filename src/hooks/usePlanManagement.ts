@@ -53,19 +53,33 @@ export const usePlanManagement = () => {
     [loadPlans],
   );
 
-  const handleDeleteSelected = useCallback(async (userId?: string) => {
-    let deletedCount = 0;
-    for (const id of selectedPlans) {
-      const success = await planService.deletePlan(id, userId);
-      if (success) deletedCount++;
-    }
-    if (deletedCount > 0) {
-      await loadPlans(userId);
-      setSelectedPlans(new Set());
-      setIsManaging(false);
-    }
-    return deletedCount;
-  }, [selectedPlans, loadPlans]);
+  const handleDeleteSelected = useCallback(
+    async (userId?: string) => {
+      let deletedCount = 0;
+      for (const id of selectedPlans) {
+        const success = await planService.deletePlan(id, userId);
+        if (success) deletedCount++;
+      }
+      if (deletedCount > 0) {
+        await loadPlans(userId);
+        setSelectedPlans(new Set());
+        setIsManaging(false);
+      }
+      return deletedCount;
+    },
+    [selectedPlans, loadPlans],
+  );
+
+  const handleCheckIn = useCallback(
+    async (id: string, date: string, userId?: string) => {
+      const plan = await planService.checkInPlan(id, date, userId);
+      if (plan) {
+        await loadPlans(userId);
+      }
+      return plan;
+    },
+    [loadPlans],
+  );
 
   const handleReorderPlans = useCallback((newOrder: Plan[]) => {
     setPlans(newOrder);
@@ -101,5 +115,6 @@ export const usePlanManagement = () => {
     toggleManageMode,
     togglePlanSelection,
     refreshPlans: loadPlans,
+    handleCheckIn,
   };
 };

@@ -28,6 +28,7 @@ export const API_ENDPOINTS = {
 
   // Calendar & Habits
   CALENDAR: '/calendar',
+  CALENDAR_QUOTE: '/calendar/quote',
   HABITS: '/habits',
   HABIT_TOGGLE: (id: string) => `/habits/${id}/toggle`,
 

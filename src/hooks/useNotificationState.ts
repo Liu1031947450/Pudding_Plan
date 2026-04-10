@@ -35,18 +35,21 @@ export const useNotificationState = () => {
     }
   }, []);
 
-  const markAllAsRead = useCallback(async (userId?: string) => {
-    try {
-      // 批量标记所有未读通知
-      const unreadIds = notifications.filter(n => !n.read).map(n => n.id);
-      await Promise.all(unreadIds.map(id => notificationsApi.markAsRead(id, userId)));
-      setNotifications(prev =>
-        prev.map(notif => ({ ...notif, read: true })),
-      );
-    } catch (error) {
-      console.error('Failed to mark all notifications as read:', error);
-    }
-  }, [notifications]);
+  const markAllAsRead = useCallback(
+    async (userId?: string) => {
+      try {
+        // 批量标记所有未读通知
+        const unreadIds = notifications.filter(n => !n.read).map(n => n.id);
+        await Promise.all(
+          unreadIds.map(id => notificationsApi.markAsRead(id, userId)),
+        );
+        setNotifications(prev => prev.map(notif => ({ ...notif, read: true })));
+      } catch (error) {
+        console.error('Failed to mark all notifications as read:', error);
+      }
+    },
+    [notifications],
+  );
 
   const unreadCount = notifications.filter(n => !n.read).length;
 

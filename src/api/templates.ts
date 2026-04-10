@@ -44,7 +44,11 @@ export const templatesApi = {
     if (USE_MOCK) {
       try {
         const data = await mockApiServer.templates.getByCategory(category);
-        console.log('[Mock API] templatesApi.getByCategory - 获取模板分类', category, data);
+        console.log(
+          '[Mock API] templatesApi.getByCategory - 获取模板分类',
+          category,
+          data,
+        );
         return { success: true, data };
       } catch (error: any) {
         return { success: false, error: error.message };

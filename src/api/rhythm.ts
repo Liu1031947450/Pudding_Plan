@@ -32,7 +32,9 @@ export const rhythmApi = {
         return { success: false, error: error.message };
       }
     }
-    const endpoint = userId ? `/rhythm/month?userId=${userId}` : '/rhythm/month';
+    const endpoint = userId
+      ? `/rhythm/month?userId=${userId}`
+      : '/rhythm/month';
     return apiClient.get<RhythmData[]>(endpoint);
   },
 };

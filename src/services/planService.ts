@@ -16,7 +16,10 @@ class PlanService {
   }
 
   // Create new plan
-  async createPlan(plan: Omit<Plan, 'id'>, userId?: string): Promise<Plan | undefined> {
+  async createPlan(
+    plan: Omit<Plan, 'id'>,
+    userId?: string,
+  ): Promise<Plan | undefined> {
     const response = await plansApi.create(plan, userId);
     return response.data;
   }
@@ -38,8 +41,12 @@ class PlanService {
   }
 
   // Check in plan
-  async checkInPlan(id: string): Promise<Plan | undefined> {
-    const response = await plansApi.checkIn(id);
+  async checkInPlan(
+    id: string,
+    date: string,
+    userId?: string,
+  ): Promise<Plan | undefined> {
+    const response = await plansApi.checkIn(id, date, userId);
     return response.data;
   }
 }

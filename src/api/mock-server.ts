@@ -33,6 +33,8 @@ class MockDatabase {
   private calendarDB: DayData[];
   private habitsDB: Habit[];
 
+  private checkInsDB: { planId: string; date: string; userId: string }[];
+
   private constructor() {
     this.plansDB = [...mockPlans];
     this.badgesDB = [...mockBadges];
@@ -41,6 +43,27 @@ class MockDatabase {
     this.circlesDB = [...mockCircles];
     this.calendarDB = [...mockCalendarData];
     this.habitsDB = [...mockHabits];
+    
+    // 初始化时，模拟本月 1-9 号的打卡数据
+    this.checkInsDB = [];
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    
+    if (this.plansDB.length > 0) {
+      // 为了直观，取第一个计划作为模拟体
+      const mockPlan = this.plansDB[0];
+      for (let i = 1; i <= 9; i++) {
+        this.checkInsDB.push({
+          planId: mockPlan.id,
+          date: `${year}-${month}-${String(i).padStart(2, '0')}`,
+          userId: '1234567890',
+        });
+      }
+      // 顺便更新一下进度数据
+      mockPlan.days = (mockPlan.days || 0) + 9;
+      mockPlan.progress = Math.round(((mockPlan.days || 0) / mockPlan.totalDays) * 100);
+    }
   }
 
   static getInstance(): MockDatabase {
@@ -70,6 +93,9 @@ class MockDatabase {
   }
   getHabits(): Habit[] {
     return this.habitsDB;
+  }
+  getCheckIns(): { planId: string; date: string; userId: string }[] {
+    return this.checkInsDB;
   }
 }
 
@@ -112,7 +138,9 @@ export const mockApiServer = {
       };
       db.getPlans().push(newPlan);
       if (userId) {
-        console.log(`[Mock API] create - planId: ${newPlan.id}, userId: ${userId}`);
+        console.log(
+          `[Mock API] create - planId: ${newPlan.id}, userId: ${userId}`,
+        );
       }
       return newPlan;
     },
@@ -142,19 +170,35 @@ export const mockApiServer = {
       if (index === -1) return false;
       plans.splice(index, 1);
       if (userId) {
-        console.log(`[Mock API] plans.delete - planId: ${id}, userId: ${userId}`);
+        console.log(
+          `[Mock API] plans.delete - planId: ${id}, userId: ${userId}`,
+        );
       }
       return true;
     },
 
     // 计划打卡
-    checkIn: async (id: string): Promise<Plan | null> => {
+    checkIn: async (
+      id: string,
+      date: string,
+      userId: string = '1234567890',
+    ): Promise<Plan | null> => {
       await delay();
       const plan = db.getPlans().find(p => p.id === id);
       if (!plan) return null;
 
-      plan.days = (plan.days || 0) + 1;
-      plan.progress = Math.round(((plan.days || 0) / plan.totalDays) * 100);
+      const exists = db
+        .getCheckIns()
+        .some(c => c.planId === id && c.date === date && c.userId === userId);
+      if (!exists) {
+        db.getCheckIns().push({ planId: id, date, userId });
+        plan.days = (plan.days || 0) + 1;
+        plan.progress = Math.round(((plan.days || 0) / plan.totalDays) * 100);
+      }
+
+      console.log(
+        `[Mock API] plans.checkIn - 发生真实打卡行为 -> planId: ${id}, date: ${date}, userId: ${userId}`,
+      );
       return plan;
     },
   },
@@ -222,32 +266,72 @@ export const mockApiServer = {
   // Calendar API - 日历相关接口
   calendar: {
     // 获取日历数据
-    getData: async (year: number, month: number, userId?: string): Promise<DayData[]> => {
+    getData: async (
+      year: number,
+      month: number,
+      userId?: string,
+    ): Promise<DayData[]> => {
       await delay();
-      
+
       const daysInMonth = new Date(year, month, 0).getDate();
       const mockedMonthData: DayData[] = [];
-      
+
       const now = new Date();
-      const isCurrentMonth = now.getFullYear() === year && (now.getMonth() + 1) === month;
-      
+      const isCurrentMonth =
+        now.getFullYear() === year && now.getMonth() + 1 === month;
+      const effectiveUserId = userId || '1234567890';
+      const userCheckIns = db
+        .getCheckIns()
+        .filter(c => c.userId === effectiveUserId);
+
       for (let i = 1; i <= daysInMonth; i++) {
-        const hasActivity = Math.random() > 0.7;
-        const activityTypes: Array<'primary' | 'secondary' | 'tertiary'> = ['primary', 'secondary', 'tertiary'];
-        
+        const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(
+          i,
+        ).padStart(2, '0')}`;
+
+        // 只要当天的 checkIns 里有记录，就算有打卡点
+        const dayCheckIns = userCheckIns.filter(c => c.date === dateStr);
+        const hasActivity = dayCheckIns.length > 0;
+        // 为了视觉美观我们可以给不同计划分配不同类型的点，如果需要的话。
+        const activityType = hasActivity ? 'primary' : undefined;
+
         mockedMonthData.push({
           day: i,
           hasActivity,
           isToday: isCurrentMonth && now.getDate() === i,
           isSelected: false,
-          activityType: hasActivity ? activityTypes[Math.floor(Math.random() * activityTypes.length)] : undefined,
+          activityType: activityType as any,
+          completedPlanIds: dayCheckIns.map(c => c.planId),
         });
       }
 
       if (userId) {
-        console.log(`[Mock API] calendar.getData - year: ${year}, month: ${month}, userId: ${userId}`);
+        console.log(
+          `[Mock API] calendar.getData - 提取当月真实打卡记录 -> year: ${year}, month: ${month}, userId: ${userId}`,
+        );
       }
       return mockedMonthData;
+    },
+
+    // 获取每日金句
+    getDailyQuote: async (): Promise<{ text: string; author: string }> => {
+      await delay();
+      const quotes = [
+        {
+          text: '生活就像海洋，只有意志坚强的人，才能到达彼岸。',
+          author: '马原',
+        },
+        { text: '不要等待机会，而要创造机会。', author: '无名' },
+        { text: '成功的秘诀在于对目标的执着追求。', author: '本杰明·富兰克林' },
+        {
+          text: '行动是治愈恐惧的良药，而犹豫拖延将不断滋养恐惧。',
+          author: '无名氏',
+        },
+        { text: '真正的高贵应该是优于过去的自己。', author: '海明威' },
+      ];
+      const today = new Date().getDate();
+      console.log(`[Mock API] calendar.getDailyQuote - 获取今日金句`);
+      return quotes[today % quotes.length];
     },
 
     // 更新日历活动
@@ -303,7 +387,9 @@ export const mockApiServer = {
       if (!notification) return false;
       notification.read = true;
       if (userId) {
-        console.log(`[Mock API] notifications.markAsRead - id: ${id}, userId: ${userId}`);
+        console.log(
+          `[Mock API] notifications.markAsRead - id: ${id}, userId: ${userId}`,
+        );
       }
       return true;
     },

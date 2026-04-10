@@ -10,8 +10,12 @@ export const useCalendarData = () => {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth() + 1;
+
       const [calendar, habitsData] = await Promise.all([
-        calendarService.getCalendarData(),
+        calendarService.getCalendarData(year, month),
         calendarService.getHabits(),
       ]);
       setCalendarData(calendar);

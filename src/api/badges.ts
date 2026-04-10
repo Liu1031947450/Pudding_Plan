@@ -9,7 +9,10 @@ export const fetchBadges = async (userId?: string): Promise<Badge[]> => {
   await new Promise<void>(resolve => setTimeout(resolve, 300));
   const data = mockBadges;
   if (userId) {
-    console.log(`[Mock API] fetchBadges - 获取用户成就列表, userId: ${userId}`, data);
+    console.log(
+      `[Mock API] fetchBadges - 获取用户成就列表, userId: ${userId}`,
+      data,
+    );
   } else {
     console.log('[Mock API] fetchBadges - 获取用户成就列表', data);
   }

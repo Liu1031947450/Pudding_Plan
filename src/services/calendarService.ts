@@ -4,8 +4,12 @@ import { calendarApi, habitsApi } from '../api';
 // Calendar Service - handles calendar and habit operations
 class CalendarService {
   // Get calendar data
-  async getCalendarData(): Promise<DayData[]> {
-    const response = await calendarApi.getData();
+  async getCalendarData(
+    year: number,
+    month: number,
+    userId?: string,
+  ): Promise<DayData[]> {
+    const response = await calendarApi.getData(year, month, userId);
     return response.data || [];
   }
 

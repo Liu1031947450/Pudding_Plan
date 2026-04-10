@@ -83,6 +83,7 @@ export interface DayData {
   isToday: boolean;
   isSelected: boolean;
   activityType?: 'primary' | 'secondary' | 'tertiary';
+  completedPlanIds?: string[];
 }
 
 export interface Habit {

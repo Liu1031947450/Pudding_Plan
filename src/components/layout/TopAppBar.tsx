@@ -1,5 +1,11 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Animated,
+} from 'react-native';
 import { BlurView } from 'expo-blur';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize, BorderRadius } from '../../constants/theme';
@@ -105,10 +111,14 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({
             >
               <Animated.View
                 style={{
-                  transform: [{ rotate: shakeAnim.interpolate({
-                    inputRange: [-8, 8],
-                    outputRange: ['-8deg', '8deg'],
-                  }) }],
+                  transform: [
+                    {
+                      rotate: shakeAnim.interpolate({
+                        inputRange: [-8, 8],
+                        outputRange: ['-8deg', '8deg'],
+                      }),
+                    },
+                  ],
                 }}
               >
                 <MaterialIcons

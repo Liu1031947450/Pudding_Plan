@@ -31,8 +31,7 @@ const CreatePlanScreen: React.FC = () => {
   const route = useRoute<CreatePlanRouteProp>();
   const templateId = route.params?.templateId;
   const planId = route.params?.planId;
-  const { handleCreatePlan, handleUpdatePlan, plans } =
-    usePlanManagement();
+  const { handleCreatePlan, handleUpdatePlan, plans } = usePlanManagement();
 
   const [existingPlan, setExistingPlan] = useState<Plan | undefined>(undefined);
   const isEditMode = !!planId;

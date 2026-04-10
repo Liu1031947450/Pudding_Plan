@@ -5,6 +5,7 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -17,86 +18,125 @@ import {
   NotificationDrawer,
 } from '../components';
 import { useNotificationState } from '../hooks/useNotificationState';
-
-interface DayData {
-  day: number;
-  hasActivity: boolean;
-  isToday: boolean;
-  isSelected: boolean;
-  activityType?: 'primary' | 'secondary' | 'tertiary';
-}
+import type { DayData } from '../types/domain';
+import { usePlanManagement } from '../hooks';
 
 import { calendarApi } from '../api/calendar';
-
-interface Habit {
-  id: string;
-  title: string;
-  subtitle: string;
-  icon: keyof typeof MaterialIcons.glyphMap;
-  completed: boolean;
-  category: string;
-}
-
-const mockHabits: Habit[] = [
-  {
-    id: '1',
-    title: '晨间补水',
-    subtitle: '250ml goal',
-    icon: 'local-drink',
-    completed: true,
-    category: 'Morning Ritual',
-  },
-  {
-    id: '2',
-    title: '数字脱毒',
-    subtitle: '30 min focus',
-    icon: 'phone-disabled',
-    completed: false,
-    category: 'Focus',
-  },
-];
 
 const CalendarScreen: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState(new Date().getDate());
   const [calendarDays, setCalendarDays] = useState<DayData[]>([]);
+  const [quote, setQuote] = useState<{ text: string; author: string }>({
+    text: '每一个不曾起舞的日子，都是对生命的辜负。',
+    author: '尼采',
+  });
+  const { plans, refreshPlans, handleCheckIn } = usePlanManagement();
 
-  const [notificationDrawerVisible, setNotificationDrawerVisible] = useState(false);
-  const { notifications, markAsRead, refreshNotifications, unreadCount } = useNotificationState();
+  // 盖章动画状态
+  const stampAnim = React.useRef(new Animated.Value(0)).current;
+
+  // 播放印章砸下动画
+  const playStampAnimation = () => {
+    stampAnim.setValue(0);
+
+    Animated.spring(stampAnim, {
+      toValue: 1,
+      friction: 4,
+      tension: 60,
+      useNativeDriver: true,
+    }).start();
+
+    // 2秒后逐渐消失
+    setTimeout(() => {
+      Animated.timing(stampAnim, {
+        toValue: 2,
+        duration: 400,
+        useNativeDriver: true,
+      }).start();
+    }, 2000);
+  };
+
+  const stampScale = stampAnim.interpolate({
+    inputRange: [0, 1, 2],
+    outputRange: [3, 1, 1], // 从很大(3)缩小到正常(1)
+  });
+
+  const stampOpacity = stampAnim.interpolate({
+    inputRange: [0, 1, 2],
+    outputRange: [0, 1, 0], // 淡入，保持，然后淡出
+  });
+
+  const [notificationDrawerVisible, setNotificationDrawerVisible] =
+    useState(false);
+  const { notifications, markAsRead, refreshNotifications, unreadCount } =
+    useNotificationState();
 
   const handleOpenNotifications = () => {
     setNotificationDrawerVisible(true);
   };
 
-  // 页面初始化时加载通知
+  // 页面初始化时加载通知和计划列表
   React.useEffect(() => {
     refreshNotifications('1234567890');
-  }, [refreshNotifications]);
+    refreshPlans('1234567890');
+  }, [refreshNotifications, refreshPlans]);
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth() + 1;
-  const CHINESE_MONTHS = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'];
+  const CHINESE_MONTHS = [
+    '一月',
+    '二月',
+    '三月',
+    '四月',
+    '五月',
+    '六月',
+    '七月',
+    '八月',
+    '九月',
+    '十月',
+    '十一月',
+    '十二月',
+  ];
+
+  const fetchCalendarData = React.useCallback(async () => {
+    const res = await calendarApi.getData(year, month, '1234567890');
+    if (res.success && res.data) {
+      setCalendarDays(res.data);
+    }
+
+    // 获取当天的金句
+    const quoteRes = await calendarApi.getDailyQuote();
+    if (quoteRes.success && quoteRes.data) {
+      setQuote(quoteRes.data);
+    }
+  }, [year, month]);
 
   React.useEffect(() => {
-    const fetchCalendarData = async () => {
-      const res = await calendarApi.getData(year, month, '1234567890');
-      if (res.success && res.data) {
-        setCalendarDays(res.data);
-      }
-    };
     fetchCalendarData();
-  }, [year, month]);
+  }, [fetchCalendarData]);
+
+  const onCheckIn = async (planId: string) => {
+    const selectedDateStr = `${year}-${String(month).padStart(2, '0')}-${String(
+      selectedDay,
+    ).padStart(2, '0')}`;
+    const result = await handleCheckIn(planId, selectedDateStr, '1234567890');
+    if (result) {
+      playStampAnimation(); // 如果打卡成功，播放动画
+      fetchCalendarData();
+    }
+  };
 
   const getActivityColor = (type?: 'primary' | 'secondary' | 'tertiary') => {
     switch (type) {
       case 'primary':
-        return Colors.primaryContainer;
+        return '#4CAF50'; // 协调生机的质感绿色
       case 'secondary':
         return Colors.secondary;
       case 'tertiary':
         return Colors.tertiary;
       default:
-        return 'transparent';
+        return '#4CAF50';
     }
   };
 
@@ -118,9 +158,7 @@ const CalendarScreen: React.FC = () => {
         <View style={styles.calendarSection}>
           <View style={styles.monthHeader}>
             <View>
-              <Text style={styles.monthLabel}>
-                {`${year}年`}
-              </Text>
+              <Text style={styles.monthLabel}>{`${year}年`}</Text>
               <Text style={styles.monthTitle}>{CHINESE_MONTHS[month - 1]}</Text>
             </View>
             <View style={styles.monthNav}>
@@ -171,58 +209,80 @@ const CalendarScreen: React.FC = () => {
             </View>
 
             <View style={styles.daysGrid}>
-              {Array.from({ length: (() => {
+              {Array.from({
+                length: (() => {
                   const firstDay = new Date(year, month - 1, 1).getDay();
                   return firstDay === 0 ? 6 : firstDay - 1;
-                })() }).map((_, index) => (
+                })(),
+              }).map((_, index) => (
                 <View key={`empty-${index}`} style={styles.dayCellContainer} />
               ))}
 
-              {Array.from({ length: new Date(year, month, 0).getDate() }).map((_, index) => {
-                const dayStr = index + 1;
-                const dayObj = calendarDays.find(d => d.day === dayStr) || {
-                  day: dayStr,
-                  hasActivity: false,
-                  isToday: false,
-                  isSelected: false,
-                };
-                const isSelected = selectedDay === dayStr;
+              {Array.from({ length: new Date(year, month, 0).getDate() }).map(
+                (_, index) => {
+                  const dayStr = index + 1;
+                  const dayObj = calendarDays.find(d => d.day === dayStr) || {
+                    day: dayStr,
+                    hasActivity: false,
+                    isToday: false,
+                    isSelected: false,
+                  };
+                  const isSelected = selectedDay === dayStr;
 
-                return (
-                  <View key={`day-${dayStr}`} style={styles.dayCellContainer}>
-                    <TouchableOpacity
-                      style={[
-                        styles.dayCell,
-                        isSelected && styles.selectedDay,
-                        dayObj.isToday && !isSelected && styles.todayCell,
-                      ]}
-                      onPress={() => setSelectedDay(dayStr)}
-                    >
-                      <Text
+                  return (
+                    <View key={`day-${dayStr}`} style={styles.dayCellContainer}>
+                      <TouchableOpacity
                         style={[
-                          styles.dayText,
-                          isSelected && styles.selectedDayText,
-                          dayObj.isToday && !isSelected && styles.todayText,
+                          styles.dayCell,
+                          isSelected && styles.selectedDay,
+                          dayObj.isToday && !isSelected && styles.todayCell,
                         ]}
+                        onPress={() => setSelectedDay(dayStr)}
                       >
-                        {dayStr}
-                      </Text>
-                      {dayObj.hasActivity && (
-                        <View
+                        <Text
                           style={[
-                            styles.activityDot,
-                            {
-                              backgroundColor: getActivityColor(dayObj.activityType),
-                            },
+                            styles.dayText,
+                            isSelected && styles.selectedDayText,
+                            dayObj.isToday && !isSelected && styles.todayText,
                           ]}
-                        />
-                      )}
-                    </TouchableOpacity>
-                  </View>
-                );
-              })}
+                        >
+                          {dayStr}
+                        </Text>
+                        {dayObj.hasActivity && (
+                          <View
+                            style={[
+                              styles.activityDot,
+                              {
+                                backgroundColor: getActivityColor(
+                                  dayObj.activityType,
+                                ),
+                              },
+                            ]}
+                          />
+                        )}
+                      </TouchableOpacity>
+                    </View>
+                  );
+                },
+              )}
             </View>
           </Card>
+
+          {/* 盖章动画浮层紧贴着日历模块 */}
+          <Animated.View
+            style={[
+              styles.stampOverlay,
+              {
+                opacity: stampOpacity,
+                transform: [{ scale: stampScale }, { rotate: '-15deg' }],
+              },
+            ]}
+            pointerEvents="none"
+          >
+            <View style={styles.stampInner}>
+              <Text style={styles.stampText}>完成!</Text>
+            </View>
+          </Animated.View>
         </View>
 
         <View style={styles.habitsSection}>
@@ -240,42 +300,75 @@ const CalendarScreen: React.FC = () => {
           </View>
 
           <View style={styles.habitsList}>
-            {mockHabits.map(habit => (
-              <Card key={habit.id} style={styles.habitCard}>
-                <View style={styles.habitContent}>
-                  <View
-                    style={[
-                      styles.habitIcon,
-                      {
-                        backgroundColor: habit.completed
-                          ? Colors.tertiaryContainer
-                          : Colors.surfaceContainerHigh,
-                      },
-                    ]}
-                  >
-                    <MaterialIcons
-                      name={habit.icon}
-                      size={28}
-                      color={
-                        habit.completed
-                          ? Colors.tertiary
-                          : Colors.onSurfaceVariant
-                      }
-                    />
+            {plans.map(plan => {
+              const selectedDayObj = calendarDays.find(
+                d => d.day === selectedDay,
+              );
+              const isCompleted = selectedDayObj?.completedPlanIds
+                ? selectedDayObj.completedPlanIds.includes(plan.id)
+                : false;
+
+              const now = new Date();
+              const isTodaySelected =
+                selectedDay === now.getDate() &&
+                month === now.getMonth() + 1 &&
+                year === now.getFullYear();
+
+              let buttonTitle = '点击盖章';
+              if (isCompleted) {
+                buttonTitle = '已盖章';
+              } else if (!isTodaySelected) {
+                buttonTitle = '非今日';
+              }
+
+              return (
+                <Card key={plan.id} style={styles.habitCard}>
+                  <View style={styles.habitContent}>
+                    <View
+                      style={[
+                        styles.habitIcon,
+                        {
+                          backgroundColor: isCompleted
+                            ? Colors.tertiaryContainer
+                            : Colors.surfaceContainerHigh,
+                        },
+                      ]}
+                    >
+                      <MaterialIcons
+                        name={(plan.icon as any) || 'event'}
+                        size={28}
+                        color={
+                          isCompleted
+                            ? Colors.tertiary
+                            : Colors.onSurfaceVariant
+                        }
+                      />
+                    </View>
+                    <View style={styles.habitInfo}>
+                      <Text style={styles.habitTitle}>{plan.title}</Text>
+                      <Text style={styles.habitSubtitle}>
+                        {plan.totalDays
+                          ? `目标: ${plan.totalDays}天`
+                          : '通用计划'}
+                      </Text>
+                    </View>
                   </View>
-                  <View style={styles.habitInfo}>
-                    <Text style={styles.habitTitle}>{habit.title}</Text>
-                    <Text style={styles.habitSubtitle}>{habit.subtitle}</Text>
-                  </View>
-                </View>
-                <Button
-                  title="点击盖章"
-                  onPress={() => {}}
-                  variant="primary"
-                  size="small"
-                />
-              </Card>
-            ))}
+                  <Button
+                    title={buttonTitle}
+                    onPress={() => onCheckIn(plan.id)}
+                    variant={
+                      isCompleted
+                        ? 'outline'
+                        : isTodaySelected
+                        ? 'primary'
+                        : 'outline'
+                    }
+                    size="small"
+                    disabled={isCompleted || !isTodaySelected}
+                  />
+                </Card>
+              );
+            })}
           </View>
 
           <Card
@@ -289,7 +382,8 @@ const CalendarScreen: React.FC = () => {
               color={Colors.onPrimaryContainer}
             />
             <Text style={styles.quoteText}>
-              "Taking a deep breath is the first step towards clarity."
+              "{quote.text}"{'\n'}
+              <Text style={styles.quoteAuthor}>—— {quote.author}</Text>
             </Text>
           </Card>
         </View>
@@ -317,8 +411,8 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: Spacing.md,
-    paddingTop: 32,
-    paddingBottom: 140,
+    paddingTop: 24,
+    paddingBottom: 120,
   },
   calendarSection: {
     marginBottom: Spacing.xl,
@@ -422,6 +516,28 @@ const styles = StyleSheet.create({
     height: 6,
     borderRadius: 3,
   },
+  stampOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1000,
+    elevation: 20,
+  },
+  stampInner: {
+    borderWidth: 8,
+    borderColor: '#4CAF50',
+    borderRadius: 24,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+  },
+  stampText: {
+    fontSize: 56,
+    fontWeight: '900',
+    color: '#4CAF50',
+    letterSpacing: 4,
+    fontStyle: 'italic',
+  },
   habitsSection: {
     marginBottom: Spacing.xl,
   },
@@ -506,6 +622,12 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: Colors.onPrimaryContainer,
     lineHeight: 24,
+  },
+  quoteAuthor: {
+    fontSize: FontSize.sm,
+    fontStyle: 'normal',
+    fontWeight: 'normal',
+    marginTop: 8,
   },
 });
 
