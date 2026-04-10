@@ -16,6 +16,7 @@ import {
   Button,
   NotificationDrawer,
 } from '../components';
+import { useNotificationState } from '../hooks/useNotificationState';
 
 interface DayData {
   day: number;
@@ -115,6 +116,8 @@ const mockHabits: Habit[] = [
 
 const CalendarScreen: React.FC = () => {
   const [, setSelectedDay] = React.useState(11);
+  const [notificationDrawerVisible, setNotificationDrawerVisible] = useState(false);
+  const { notifications, markAsRead } = useNotificationState();
 
   const getActivityColor = (type?: 'primary' | 'secondary' | 'tertiary') => {
     switch (type) {
@@ -131,7 +134,12 @@ const CalendarScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <TopAppBar leftIcon="spa" title="日历" rightIcon="notifications" />
+      <TopAppBar
+        leftIcon="spa"
+        title="日历"
+        rightIcon="notifications"
+        onRightPress={() => setNotificationDrawerVisible(true)}
+      />
 
       <ScrollView
         style={styles.scrollView}
@@ -276,6 +284,13 @@ const CalendarScreen: React.FC = () => {
           </Card>
         </View>
       </ScrollView>
+
+      <NotificationDrawer
+        visible={notificationDrawerVisible}
+        onClose={() => setNotificationDrawerVisible(false)}
+        notifications={notifications}
+        onNotificationPress={markAsRead}
+      />
 
       <BottomNavBar />
     </SafeAreaView>

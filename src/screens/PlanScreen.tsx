@@ -14,10 +14,11 @@ import { BottomNavBar, TopAppBar, NotificationDrawer } from '../components';
 import {
   PlanList,
   PlanEmptyState,
-  BadgeSection,
   RhythmChart,
 } from '../components/plan';
-import { usePlanManagement, useNotifications } from '../hooks';
+import { AchievementDrawer } from '../components/specialized/AchievementDrawer';
+import { usePlanManagement } from '../hooks';
+import { useNotificationState } from '../hooks/useNotificationState';
 import {
   mockBadges,
   mockWeekRhythmData,
@@ -40,8 +41,9 @@ const PlanScreen: React.FC = () => {
     refreshPlans,
   } = usePlanManagement();
 
-  const { notifications, notificationVisible, toggleNotificationDrawer, markAsRead } =
-    useNotifications();
+  const { notifications, markAsRead } = useNotificationState();
+  const [notificationVisible, setNotificationVisible] = useState(false);
+  const [achievementVisible, setAchievementVisible] = useState(false);
 
   const [rhythmPeriod, setRhythmPeriod] = useState<RhythmPeriod>('week');
 
@@ -64,10 +66,6 @@ const PlanScreen: React.FC = () => {
     (navigation as any).navigate('CreatePlan', { planId: plan.id });
   };
 
-  const handleNotificationPress = (id: string) => {
-    markAsRead(id);
-  };
-
   const movePlan = (fromIndex: number, toIndex: number) => {
     const newPlans = [...plans];
     const [movedPlan] = newPlans.splice(fromIndex, 1);
@@ -79,9 +77,10 @@ const PlanScreen: React.FC = () => {
     <SafeAreaView style={styles.container} edges={['top']}>
       <TopAppBar
         title="我的计划"
-        leftIcon="spa"
+        leftIcon="emoji-events"
         rightIcon="notifications"
-        onRightPress={toggleNotificationDrawer}
+        onLeftPress={() => setAchievementVisible(true)}
+        onRightPress={() => setNotificationVisible(true)}
       />
 
       <ScrollView
@@ -115,17 +114,21 @@ const PlanScreen: React.FC = () => {
               period={rhythmPeriod}
               onPeriodChange={setRhythmPeriod}
             />
-
-            <BadgeSection badges={mockBadges} />
           </>
         )}
       </ScrollView>
 
       <NotificationDrawer
         visible={notificationVisible}
-        onClose={toggleNotificationDrawer}
+        onClose={() => setNotificationVisible(false)}
         notifications={notifications}
-        onNotificationPress={handleNotificationPress}
+        onNotificationPress={markAsRead}
+      />
+
+      <AchievementDrawer
+        visible={achievementVisible}
+        onClose={() => setAchievementVisible(false)}
+        badges={mockBadges}
       />
 
       <BottomNavBar />
