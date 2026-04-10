@@ -100,8 +100,6 @@ export const mockApiServer = {
         id: Date.now().toString(),
       };
       db.getPlans().push(newPlan);
-      console.log('Plan created:', newPlan);
-      console.log('Total plans:', db.getPlans().length);
       return newPlan;
     },
 

@@ -50,14 +50,11 @@ const CirclesScreen: React.FC = () => {
 
         <BuddyList
           buddies={buddies}
-          onViewAll={() => console.log('View all buddies')}
-          onBuddyPress={buddy => console.log('Buddy pressed:', buddy.id)}
+          onViewAll={() => {}}
+          onBuddyPress={() => {}}
         />
 
-        <CircleGrid
-          circles={circles}
-          onCirclePress={circle => console.log('Circle pressed:', circle.id)}
-        />
+        <CircleGrid circles={circles} onCirclePress={() => {}} />
 
         <View style={styles.section}>
           <Card style={styles.encouragementCard}>

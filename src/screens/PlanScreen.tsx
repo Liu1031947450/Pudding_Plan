@@ -46,7 +46,6 @@ const PlanScreen: React.FC = () => {
   // 当页面获得焦点时刷新数据
   useFocusEffect(
     React.useCallback(() => {
-      console.log('PlanScreen focused, refreshing plans...');
       refreshPlans();
     }, [refreshPlans]),
   );

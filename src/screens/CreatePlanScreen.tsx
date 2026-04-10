@@ -132,7 +132,6 @@ const CreatePlanScreen: React.FC = () => {
   // 当 existingPlan 数据加载完成后，更新表单数据
   useEffect(() => {
     if (existingPlan) {
-      console.log('Loading existing plan data:', existingPlan);
       setPlanName(existingPlan.title);
       setPlanDays(existingPlan.totalDays.toString());
       setCheckInMethod(existingPlan.type);
@@ -216,14 +215,10 @@ const CreatePlanScreen: React.FC = () => {
         color: planColor,
       };
 
-      console.log('Creating plan:', newPlanData);
-
       // 调用 API 创建或更新计划
       const result = isEditMode
         ? await handleUpdatePlan(planId!, newPlanData)
         : await handleCreatePlan(newPlanData);
-
-      console.log('Create/Update result:', result);
 
       if (result) {
         // 显示成功提示

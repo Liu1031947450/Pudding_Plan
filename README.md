@@ -2,44 +2,117 @@
 
 一个使用 [**React Native**](https://reactnative.dev) + [**Expo**](https://expo.dev) 构建的跨平台移动应用，专注于习惯养成和自律打卡。
 
+## ✨ 功能特性
+
+- **计划管理**: 创建、编辑、删除习惯打卡计划
+- **多种打卡方式**: 支持盖章打卡、数值记录、文字日记三种打卡模式
+- **里程碑奖励**: 设置阶段性目标和奖励，激励持续打卡
+- **成就系统**: 解锁成就徽章，记录成长历程
+- **日历视图**: 直观查看打卡历史和活动记录
+- **节奏图表**: 可视化展示打卡频率和坚持情况
+- **圈子功能**: 加入兴趣圈子，与伙伴共同进步
+- **提醒通知**: 自定义打卡提醒时间，不错过每一天
+
 ## 📁 项目结构
 
 ```
 Pudding_Plan/
 ├── android/                    # Android 原生代码
-│   ├── app/
-│   │   ├── src/main/java/      # Kotlin/Java 源码
-│   │   └── src/main/res/       # Android 资源文件
-│   ├── gradle/                 # Gradle 配置
-│   └── build.gradle            # 项目级构建配置
-│
 ├── ios/                        # iOS 原生代码
-│   ├── PuddingPlan/            # iOS 应用源码
-│   ├── PuddingPlan.xcodeproj/  # Xcode 项目文件
-│   └── Podfile                 # CocoaPods 依赖配置
 │
 ├── src/                        # 源代码目录
-│   ├── components/             # 通用组件
-│   ├── constants/              # 常量配置（主题、颜色、间距等）
-│   │   └── theme.ts
+│   ├── api/                    # API 接口层
+│   │   ├── client.ts           # HTTP 客户端配置
+│   │   ├── mock-server.ts      # Mock 数据服务
+│   │   ├── plans.ts            # 计划相关 API
+│   │   ├── calendar.ts         # 日历相关 API
+│   │   ├── circles.ts          # 圈子相关 API
+│   │   └── notifications.ts    # 通知相关 API
+│   │
+│   ├── components/             # 组件目录
+│   │   ├── common/             # 通用组件
+│   │   │   ├── Button.tsx      # 按钮组件
+│   │   │   ├── Card.tsx        # 卡片组件
+│   │   │   ├── Chip.tsx        # 标签组件
+│   │   │   ├── Avatar.tsx      # 头像组件
+│   │   │   ├── Toast.tsx       # 提示组件
+│   │   │   └── EmptyState.tsx  # 空状态组件
+│   │   │
+│   │   ├── layout/             # 布局组件
+│   │   │   ├── TopAppBar.tsx   # 顶部导航栏
+│   │   │   └── BottomNavBar.tsx # 底部导航栏
+│   │   │
+│   │   ├── plan/               # 计划相关组件
+│   │   │   ├── PlanCard.tsx    # 计划卡片
+│   │   │   ├── PlanList.tsx    # 计划列表
+│   │   │   ├── PlanEmptyState.tsx # 空状态
+│   │   │   ├── RhythmChart.tsx # 节奏图表
+│   │   │   ├── PlanHeroSection.tsx # 计划头部
+│   │   │   ├── PlanBasicInfoForm.tsx # 基本信息表单
+│   │   │   ├── CheckInMethodSelector.tsx # 打卡方式选择器
+│   │   │   └── ReminderManager.tsx # 提醒管理器
+│   │   │
+│   │   ├── circle/             # 圈子相关组件
+│   │   │   ├── CircleCard.tsx  # 圈子卡片
+│   │   │   ├── CircleGrid.tsx  # 圈子网格
+│   │   │   ├── BuddyCard.tsx   # 伙伴卡片
+│   │   │   └── BuddyList.tsx   # 伙伴列表
+│   │   │
+│   │   ├── progress/           # 进度组件
+│   │   │   ├── ProgressBar.tsx # 进度条
+│   │   │   └── BloomProgress.tsx # 圆形进度
+│   │   │
+│   │   └── specialized/        # 专用组件
+│   │       ├── NotificationDrawer.tsx # 通知抽屉
+│   │       └── AchievementDrawer.tsx  # 成就抽屉
+│   │
+│   ├── constants/              # 常量配置
+│   │   └── theme.ts            # 主题配置（颜色、间距、字体等）
+│   │
+│   ├── data/                   # 数据层
+│   │   ├── mockData.ts         # Mock 数据
+│   │   └── templates.ts        # 计划模板数据
+│   │
 │   ├── hooks/                  # 自定义 Hooks
+│   │   ├── usePlanManagement.ts # 计划管理
+│   │   ├── useCalendarData.ts  # 日历数据
+│   │   ├── useCircleData.ts    # 圈子数据
+│   │   ├── useNotificationState.ts # 通知状态
+│   │   └── useReminderState.ts # 提醒状态
+│   │
 │   ├── navigation/             # 导航配置
-│   │   └── AppNavigator.tsx
+│   │   └── AppNavigator.tsx    # 应用导航器
+│   │
 │   ├── screens/                # 页面组件
-│   │   └── HomeScreen.tsx
-│   ├── services/              # API 服务层
+│   │   ├── SplashScreen.tsx    # 启动页
+│   │   ├── PlanScreen.tsx      # 计划页（首页）
+│   │   ├── CalendarScreen.tsx  # 日历页
+│   │   ├── CirclesScreen.tsx   # 圈子页
+│   │   ├── ProfileScreen.tsx   # 个人中心页
+│   │   ├── SettingsScreen.tsx  # 设置页
+│   │   ├── CreatePlanScreen.tsx # 创建/编辑计划页
+│   │   ├── TemplateSelectionScreen.tsx # 模板选择页
+│   │   └── PostMomentScreen.tsx # 发布动态页
+│   │
+│   ├── services/               # 业务服务层
+│   │   ├── planService.ts      # 计划服务
+│   │   ├── calendarService.ts  # 日历服务
+│   │   ├── circleService.ts    # 圈子服务
+│   │   └── templateService.ts  # 模板服务
+│   │
 │   ├── types/                  # TypeScript 类型定义
-│   │   └── index.ts
+│   │   ├── domain.ts           # 领域模型类型
+│   │   ├── ui.ts               # UI 相关类型
+│   │   └── navigation.ts       # 导航类型
+│   │
 │   └── utils/                  # 工具函数
-│       └── index.ts
+│       └── index.ts            # 通用工具函数
 │
 ├── App.tsx                     # 应用入口组件
 ├── index.js                    # React Native 入口文件
 ├── package.json                # 项目依赖配置
 ├── tsconfig.json               # TypeScript 配置
-├── metro.config.js             # Metro 打包器配置
-├── babel.config.js             # Babel 转译配置
-└── jest.config.js              # Jest 测试配置
+└── README.md                   # 项目文档
 ```
 
 ## 🚀 快速开始
@@ -171,9 +244,68 @@ lsof -ti:19001 | xargs kill -9
   - expo-blur (毛玻璃效果)
   - expo-linear-gradient (渐变效果)
   - react-native-svg (矢量图形)
-- **状态管理**: React Hooks
+- **状态管理**: React Hooks + Custom Hooks
+- **数据持久化**: Mock Server (开发阶段)
 - **构建工具**: Metro + Expo
 - **设计系统**: Material Design 3
+
+## 🏗️ 架构设计
+
+### 分层架构
+
+```
+┌─────────────────────────────────────┐
+│         Screens (页面层)             │  用户界面和页面逻辑
+├─────────────────────────────────────┤
+│       Components (组件层)            │  可复用的 UI 组件
+├─────────────────────────────────────┤
+│         Hooks (逻辑层)               │  业务逻辑和状态管理
+├─────────────────────────────────────┤
+│       Services (服务层)              │  业务逻辑封装
+├─────────────────────────────────────┤
+│          API (接口层)                │  数据获取和处理
+├─────────────────────────────────────┤
+│      Data/Types (数据层)             │  数据模型和类型定义
+└─────────────────────────────────────┘
+```
+
+### 核心设计模式
+
+- **组件化**: 按功能和复用性组织组件（common/layout/plan/circle/specialized）
+- **Hooks 模式**: 使用自定义 Hooks 封装业务逻辑和状态管理
+- **服务层模式**: 将业务逻辑从组件中抽离到 Service 层
+- **Mock 数据**: 使用 Mock Server 模拟后端 API，便于前端独立开发
+
+## 📊 代码优化记录
+
+### 2026-04-10 代码整理
+
+**删除的文件**:
+- `src/screens/HomeScreen.tsx` - 未使用的首页组件
+- `src/components/plan/BadgeSection.tsx` - 已被 AchievementDrawer 替代
+- `src/components/specialized/BentoGrid.tsx` - 未使用的网格组件
+
+**清理的代码**:
+- 移除所有 `console.log` 调试语句
+- 移除所有 `Alert` 测试代码
+- 清理重复的导出声明
+- 优化组件导入路径
+
+**优化的组件**:
+- `AchievementDrawer`: 添加打开/关闭动画，优化布局为两列显示
+- `PlanScreen`: 移除内联成就展示，改用抽屉方式
+- `CirclesScreen`: 移除占位符事件处理
+
+**文件统计**:
+- 优化前: 75 个 TypeScript 文件
+- 优化后: 72 个 TypeScript 文件
+- 删除: 3 个文件
+- 清理: 9 处 console.log，2 处 Alert
+
+**目录结构优化**:
+- 保留空目录 `src/assets/` 和 `src/contexts/` 供未来扩展
+- 统一组件导出方式，使用 barrel exports (index.ts)
+- 规范化文件命名和组织结构
 
 ## 📝 开发指南
 
