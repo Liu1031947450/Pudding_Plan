@@ -222,10 +222,32 @@ export const mockApiServer = {
   // Calendar API - 日历相关接口
   calendar: {
     // 获取日历数据
-    getData: async (): Promise<DayData[]> => {
+    getData: async (year: number, month: number, userId?: string): Promise<DayData[]> => {
       await delay();
-      const data = [...db.getCalendar()];
-      return data;
+      
+      const daysInMonth = new Date(year, month, 0).getDate();
+      const mockedMonthData: DayData[] = [];
+      
+      const now = new Date();
+      const isCurrentMonth = now.getFullYear() === year && (now.getMonth() + 1) === month;
+      
+      for (let i = 1; i <= daysInMonth; i++) {
+        const hasActivity = Math.random() > 0.7;
+        const activityTypes: Array<'primary' | 'secondary' | 'tertiary'> = ['primary', 'secondary', 'tertiary'];
+        
+        mockedMonthData.push({
+          day: i,
+          hasActivity,
+          isToday: isCurrentMonth && now.getDate() === i,
+          isSelected: false,
+          activityType: hasActivity ? activityTypes[Math.floor(Math.random() * activityTypes.length)] : undefined,
+        });
+      }
+
+      if (userId) {
+        console.log(`[Mock API] calendar.getData - year: ${year}, month: ${month}, userId: ${userId}`);
+      }
+      return mockedMonthData;
     },
 
     // 更新日历活动

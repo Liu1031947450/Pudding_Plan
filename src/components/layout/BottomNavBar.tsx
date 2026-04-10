@@ -23,13 +23,13 @@ export const BottomNavBar: React.FC = () => {
   const route = useRoute();
 
   const items: NavItem[] = [
-    { key: 'plan', label: '计划', icon: 'edit-note', routeName: 'Plan' },
     {
       key: 'calendar',
       label: '日历',
       icon: 'calendar-today',
       routeName: 'Calendar',
     },
+    { key: 'plan', label: '计划', icon: 'edit-note', routeName: 'Plan' },
     { key: 'circles', label: '圈子', icon: 'group', routeName: 'Circles' },
     { key: 'profile', label: '我的', icon: 'person', routeName: 'Profile' },
   ];

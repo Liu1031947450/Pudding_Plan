@@ -7,17 +7,20 @@ const USE_MOCK = true;
 
 export const calendarApi = {
   // 获取日历数据
-  getData: async (): Promise<ApiResponse<DayData[]>> => {
+  getData: async (year: number, month: number, userId?: string): Promise<ApiResponse<DayData[]>> => {
     if (USE_MOCK) {
       try {
-        const data = await mockApiServer.calendar.getData();
-        console.log('[Mock API] calendarApi.getData - 获取日历数据', data);
+        const data = await mockApiServer.calendar.getData(year, month, userId);
+        console.log('[Mock API] calendarApi.getData - 获取日历数据', year, month);
         return { success: true, data };
       } catch (error: any) {
         return { success: false, error: error.message };
       }
     }
-    return apiClient.get<DayData[]>(API_ENDPOINTS.CALENDAR);
+    const endpoint = userId 
+      ? `${API_ENDPOINTS.CALENDAR}?year=${year}&month=${month}&userId=${userId}` 
+      : `${API_ENDPOINTS.CALENDAR}?year=${year}&month=${month}`;
+    return apiClient.get<DayData[]>(endpoint);
   },
 
   // 更新日历活动

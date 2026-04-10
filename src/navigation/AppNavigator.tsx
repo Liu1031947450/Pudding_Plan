@@ -38,10 +38,10 @@ const MainNavigator: React.FC = () => {
         headerShown: false,
         tabBarStyle: { display: 'none' }, // Hide default tab bar
       }}
-      initialRouteName="Plan"
+      initialRouteName="Calendar"
     >
-      <Tab.Screen name="Plan" component={PlanScreen} />
       <Tab.Screen name="Calendar" component={CalendarScreen} />
+      <Tab.Screen name="Plan" component={PlanScreen} />
       <Tab.Screen name="Circles" component={CirclesScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>

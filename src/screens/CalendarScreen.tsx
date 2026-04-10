@@ -26,65 +26,7 @@ interface DayData {
   activityType?: 'primary' | 'secondary' | 'tertiary';
 }
 
-const mockCalendarData: DayData[] = [
-  { day: 26, hasActivity: false, isToday: false, isSelected: false },
-  { day: 27, hasActivity: false, isToday: false, isSelected: false },
-  { day: 28, hasActivity: false, isToday: false, isSelected: false },
-  { day: 29, hasActivity: false, isToday: false, isSelected: false },
-  { day: 1, hasActivity: false, isToday: false, isSelected: false },
-  { day: 2, hasActivity: false, isToday: false, isSelected: false },
-  {
-    day: 3,
-    hasActivity: true,
-    activityType: 'secondary',
-    isToday: false,
-    isSelected: false,
-  },
-  {
-    day: 4,
-    hasActivity: true,
-    activityType: 'secondary',
-    isToday: false,
-    isSelected: false,
-  },
-  { day: 5, hasActivity: false, isToday: false, isSelected: false },
-  {
-    day: 6,
-    hasActivity: true,
-    activityType: 'primary',
-    isToday: false,
-    isSelected: false,
-  },
-  { day: 7, hasActivity: false, isToday: false, isSelected: false },
-  {
-    day: 8,
-    hasActivity: true,
-    activityType: 'secondary',
-    isToday: false,
-    isSelected: false,
-  },
-  { day: 9, hasActivity: false, isToday: false, isSelected: false },
-  {
-    day: 10,
-    hasActivity: true,
-    activityType: 'tertiary',
-    isToday: false,
-    isSelected: false,
-  },
-  {
-    day: 11,
-    hasActivity: true,
-    activityType: 'primary',
-    isToday: true,
-    isSelected: true,
-  },
-  { day: 12, hasActivity: false, isToday: false, isSelected: false },
-  { day: 13, hasActivity: false, isToday: false, isSelected: false },
-  { day: 14, hasActivity: false, isToday: false, isSelected: false },
-  { day: 15, hasActivity: false, isToday: false, isSelected: false },
-  { day: 16, hasActivity: false, isToday: false, isSelected: false },
-  { day: 17, hasActivity: false, isToday: false, isSelected: false },
-];
+import { calendarApi } from '../api/calendar';
 
 interface Habit {
   id: string;
@@ -115,9 +57,11 @@ const mockHabits: Habit[] = [
 ];
 
 const CalendarScreen: React.FC = () => {
-  const [, setSelectedDay] = React.useState(11);
-  const [notificationDrawerVisible, setNotificationDrawerVisible] =
-    useState(false);
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedDay, setSelectedDay] = useState(new Date().getDate());
+  const [calendarDays, setCalendarDays] = useState<DayData[]>([]);
+
+  const [notificationDrawerVisible, setNotificationDrawerVisible] = useState(false);
   const { notifications, markAsRead, refreshNotifications, unreadCount } = useNotificationState();
 
   const handleOpenNotifications = () => {
@@ -126,8 +70,22 @@ const CalendarScreen: React.FC = () => {
 
   // 页面初始化时加载通知
   React.useEffect(() => {
-    refreshNotifications();
+    refreshNotifications('1234567890');
   }, [refreshNotifications]);
+
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth() + 1;
+  const CHINESE_MONTHS = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'];
+
+  React.useEffect(() => {
+    const fetchCalendarData = async () => {
+      const res = await calendarApi.getData(year, month, '1234567890');
+      if (res.success && res.data) {
+        setCalendarDays(res.data);
+      }
+    };
+    fetchCalendarData();
+  }, [year, month]);
 
   const getActivityColor = (type?: 'primary' | 'secondary' | 'tertiary') => {
     switch (type) {
@@ -160,18 +118,40 @@ const CalendarScreen: React.FC = () => {
         <View style={styles.calendarSection}>
           <View style={styles.monthHeader}>
             <View>
-              <Text style={styles.monthLabel}>March 2024</Text>
-              <Text style={styles.monthTitle}>Calendar</Text>
+              <Text style={styles.monthLabel}>
+                {`${year}年`}
+              </Text>
+              <Text style={styles.monthTitle}>{CHINESE_MONTHS[month - 1]}</Text>
             </View>
             <View style={styles.monthNav}>
-              <TouchableOpacity style={styles.navButton}>
+              <TouchableOpacity
+                style={styles.navButton}
+                onPress={() => {
+                  const today = new Date();
+                  setCurrentDate(today);
+                  setSelectedDay(today.getDate());
+                }}
+              >
+                <MaterialIcons
+                  name="today"
+                  size={20}
+                  color={Colors.onSurface}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.navButton}
+                onPress={() => setCurrentDate(new Date(year, month - 2, 1))}
+              >
                 <MaterialIcons
                   name="chevron-left"
                   size={24}
                   color={Colors.onSurface}
                 />
               </TouchableOpacity>
-              <TouchableOpacity style={styles.navButton}>
+              <TouchableOpacity
+                style={styles.navButton}
+                onPress={() => setCurrentDate(new Date(year, month, 1))}
+              >
                 <MaterialIcons
                   name="chevron-right"
                   size={24}
@@ -183,7 +163,7 @@ const CalendarScreen: React.FC = () => {
 
           <Card style={styles.calendarCard}>
             <View style={styles.weekDays}>
-              {['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map(day => (
+              {['一', '二', '三', '四', '五', '六', '日'].map(day => (
                 <Text key={day} style={styles.weekDay}>
                   {day}
                 </Text>
@@ -191,37 +171,56 @@ const CalendarScreen: React.FC = () => {
             </View>
 
             <View style={styles.daysGrid}>
-              {mockCalendarData.map((item, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={[
-                    styles.dayCell,
-                    item.isSelected && styles.selectedDay,
-                    item.isToday && styles.todayCell,
-                  ]}
-                  onPress={() => setSelectedDay(item.day)}
-                >
-                  <Text
-                    style={[
-                      styles.dayText,
-                      item.isSelected && styles.selectedDayText,
-                      item.isToday && styles.todayText,
-                    ]}
-                  >
-                    {item.day}
-                  </Text>
-                  {item.hasActivity && (
-                    <View
-                      style={[
-                        styles.activityDot,
-                        {
-                          backgroundColor: getActivityColor(item.activityType),
-                        },
-                      ]}
-                    />
-                  )}
-                </TouchableOpacity>
+              {Array.from({ length: (() => {
+                  const firstDay = new Date(year, month - 1, 1).getDay();
+                  return firstDay === 0 ? 6 : firstDay - 1;
+                })() }).map((_, index) => (
+                <View key={`empty-${index}`} style={styles.dayCellContainer} />
               ))}
+
+              {Array.from({ length: new Date(year, month, 0).getDate() }).map((_, index) => {
+                const dayStr = index + 1;
+                const dayObj = calendarDays.find(d => d.day === dayStr) || {
+                  day: dayStr,
+                  hasActivity: false,
+                  isToday: false,
+                  isSelected: false,
+                };
+                const isSelected = selectedDay === dayStr;
+
+                return (
+                  <View key={`day-${dayStr}`} style={styles.dayCellContainer}>
+                    <TouchableOpacity
+                      style={[
+                        styles.dayCell,
+                        isSelected && styles.selectedDay,
+                        dayObj.isToday && !isSelected && styles.todayCell,
+                      ]}
+                      onPress={() => setSelectedDay(dayStr)}
+                    >
+                      <Text
+                        style={[
+                          styles.dayText,
+                          isSelected && styles.selectedDayText,
+                          dayObj.isToday && !isSelected && styles.todayText,
+                        ]}
+                      >
+                        {dayStr}
+                      </Text>
+                      {dayObj.hasActivity && (
+                        <View
+                          style={[
+                            styles.activityDot,
+                            {
+                              backgroundColor: getActivityColor(dayObj.activityType),
+                            },
+                          ]}
+                        />
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                );
+              })}
             </View>
           </Card>
         </View>
@@ -380,18 +379,29 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
   },
-  dayCell: {
+  dayCellContainer: {
     width: '14.28%',
-    aspectRatio: 1,
+    height: 48,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  dayCell: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    paddingTop: 4,
     position: 'relative',
+    borderRadius: 20,
   },
   selectedDay: {
-    backgroundColor: `${Colors.primaryContainer}20`,
+    backgroundColor: Colors.primaryContainer,
     borderRadius: BorderRadius.full,
   },
-  todayCell: {},
+  todayCell: {
+    backgroundColor: `${Colors.primaryContainer}40`,
+    borderRadius: BorderRadius.full,
+  },
   dayText: {
     fontSize: FontSize.md,
     fontWeight: '500',
@@ -399,7 +409,7 @@ const styles = StyleSheet.create({
   },
   selectedDayText: {
     fontWeight: '700',
-    color: Colors.primary,
+    color: Colors.onPrimaryContainer,
   },
   todayText: {
     fontWeight: '700',
@@ -407,7 +417,7 @@ const styles = StyleSheet.create({
   },
   activityDot: {
     position: 'absolute',
-    bottom: 6,
+    bottom: 4,
     width: 6,
     height: 6,
     borderRadius: 3,
