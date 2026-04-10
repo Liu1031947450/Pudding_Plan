@@ -9,17 +9,14 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Colors, Spacing } from '../constants/theme';
-import type { Plan } from '../types/domain';
+import type { Plan, Badge } from '../types/domain';
 import { BottomNavBar, TopAppBar, NotificationDrawer } from '../components';
 import { PlanList, PlanEmptyState, RhythmChart } from '../components/plan';
 import { AchievementDrawer } from '../components/specialized/AchievementDrawer';
 import { usePlanManagement } from '../hooks';
 import { useNotificationState } from '../hooks/useNotificationState';
-import {
-  mockBadges,
-  mockWeekRhythmData,
-  mockMonthRhythmData,
-} from '../data/mockData';
+import { mockWeekRhythmData, mockMonthRhythmData } from '../data/mockData';
+import { fetchBadges } from '../api';
 
 type RhythmPeriod = 'week' | 'month';
 
@@ -40,6 +37,8 @@ const PlanScreen: React.FC = () => {
   const { notifications, markAsRead } = useNotificationState();
   const [notificationVisible, setNotificationVisible] = useState(false);
   const [achievementVisible, setAchievementVisible] = useState(false);
+  const [badges, setBadges] = useState<Badge[]>([]);
+  const [badgesLoading, setBadgesLoading] = useState(false);
 
   const [rhythmPeriod, setRhythmPeriod] = useState<RhythmPeriod>('week');
 
@@ -52,6 +51,19 @@ const PlanScreen: React.FC = () => {
 
   const rhythmData =
     rhythmPeriod === 'week' ? mockWeekRhythmData : mockMonthRhythmData;
+
+  const handleOpenAchievements = async () => {
+    setBadgesLoading(true);
+    try {
+      const data = await fetchBadges();
+      setBadges(data);
+    } catch (error) {
+      console.error('Failed to fetch badges:', error);
+    } finally {
+      setBadgesLoading(false);
+      setAchievementVisible(true);
+    }
+  };
 
   const handleCreatePlan = () => {
     navigation.navigate('TemplateSelection' as never);
@@ -74,7 +86,7 @@ const PlanScreen: React.FC = () => {
         title="我的计划"
         leftIcon="emoji-events"
         rightIcon="notifications"
-        onLeftPress={() => setAchievementVisible(true)}
+        onLeftPress={handleOpenAchievements}
         onRightPress={() => setNotificationVisible(true)}
       />
 
@@ -123,7 +135,8 @@ const PlanScreen: React.FC = () => {
       <AchievementDrawer
         visible={achievementVisible}
         onClose={() => setAchievementVisible(false)}
-        badges={mockBadges}
+        badges={badges}
+        loading={badgesLoading}
       />
 
       <BottomNavBar />

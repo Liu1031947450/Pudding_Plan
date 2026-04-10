@@ -8,6 +8,7 @@ import {
   Animated,
   Dimensions,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize } from '../../constants/theme';
@@ -21,6 +22,7 @@ interface AchievementDrawerProps {
   visible: boolean;
   onClose: () => void;
   badges: Badge[];
+  loading?: boolean;
   onBadgePress?: (badge: Badge) => void;
 }
 
@@ -28,6 +30,7 @@ export const AchievementDrawer: React.FC<AchievementDrawerProps> = ({
   visible,
   onClose,
   badges,
+  loading = false,
   onBadgePress,
 }) => {
   const slideAnim = React.useRef(new Animated.Value(-DRAWER_WIDTH)).current;
@@ -113,27 +116,49 @@ export const AchievementDrawer: React.FC<AchievementDrawerProps> = ({
             style={styles.content}
             showsVerticalScrollIndicator={false}
           >
-            <View style={styles.badgesGrid}>
-              {badges.map(badge => (
-                <Card
-                  key={badge.id}
-                  style={styles.badgeCard}
-                  onPress={onBadgePress ? () => onBadgePress(badge) : undefined}
-                >
-                  <View
-                    style={[styles.badgeIcon, { backgroundColor: badge.color }]}
+            {loading ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color={Colors.primary} />
+                <Text style={styles.loadingText}>加载中...</Text>
+              </View>
+            ) : badges.length === 0 ? (
+              <View style={styles.emptyContainer}>
+                <MaterialIcons
+                  name="emoji-events"
+                  size={64}
+                  color={Colors.onSurfaceVariant}
+                />
+                <Text style={styles.emptyText}>暂无成就</Text>
+                <Text style={styles.emptySubtext}>完成更多计划解锁成就吧</Text>
+              </View>
+            ) : (
+              <View style={styles.badgesGrid}>
+                {badges.map(badge => (
+                  <Card
+                    key={badge.id}
+                    style={styles.badgeCard}
+                    onPress={
+                      onBadgePress ? () => onBadgePress(badge) : undefined
+                    }
                   >
-                    <MaterialIcons
-                      name={badge.icon}
-                      size={32}
-                      color={Colors.surface}
-                    />
-                  </View>
-                  <Text style={styles.badgeTitle}>{badge.title}</Text>
-                  <Text style={styles.badgeDesc}>{badge.description}</Text>
-                </Card>
-              ))}
-            </View>
+                    <View
+                      style={[
+                        styles.badgeIcon,
+                        { backgroundColor: badge.color },
+                      ]}
+                    >
+                      <MaterialIcons
+                        name={badge.icon}
+                        size={32}
+                        color={Colors.surface}
+                      />
+                    </View>
+                    <Text style={styles.badgeTitle}>{badge.title}</Text>
+                    <Text style={styles.badgeDesc}>{badge.description}</Text>
+                  </Card>
+                ))}
+              </View>
+            )}
           </ScrollView>
         </Animated.View>
       </View>
@@ -224,5 +249,33 @@ const styles = StyleSheet.create({
     color: Colors.onSurfaceVariant,
     textAlign: 'center',
     lineHeight: 16,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: Spacing.xl,
+  },
+  loadingText: {
+    marginTop: Spacing.md,
+    fontSize: FontSize.sm,
+    color: Colors.onSurfaceVariant,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: Spacing.xl,
+  },
+  emptyText: {
+    marginTop: Spacing.md,
+    fontSize: FontSize.lg,
+    fontWeight: '600',
+    color: Colors.onSurface,
+  },
+  emptySubtext: {
+    marginTop: Spacing.xs,
+    fontSize: FontSize.sm,
+    color: Colors.onSurfaceVariant,
   },
 });

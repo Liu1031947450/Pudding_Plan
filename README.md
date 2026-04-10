@@ -281,28 +281,33 @@ lsof -ti:19001 | xargs kill -9
 ### 2026-04-10 代码整理
 
 **删除的文件**:
+
 - `src/screens/HomeScreen.tsx` - 未使用的首页组件
 - `src/components/plan/BadgeSection.tsx` - 已被 AchievementDrawer 替代
 - `src/components/specialized/BentoGrid.tsx` - 未使用的网格组件
 
 **清理的代码**:
+
 - 移除所有 `console.log` 调试语句
 - 移除所有 `Alert` 测试代码
 - 清理重复的导出声明
 - 优化组件导入路径
 
 **优化的组件**:
+
 - `AchievementDrawer`: 添加打开/关闭动画，优化布局为两列显示
 - `PlanScreen`: 移除内联成就展示，改用抽屉方式
 - `CirclesScreen`: 移除占位符事件处理
 
 **文件统计**:
+
 - 优化前: 75 个 TypeScript 文件
 - 优化后: 72 个 TypeScript 文件
 - 删除: 3 个文件
 - 清理: 9 处 console.log，2 处 Alert
 
 **目录结构优化**:
+
 - 保留空目录 `src/assets/` 和 `src/contexts/` 供未来扩展
 - 统一组件导出方式，使用 barrel exports (index.ts)
 - 规范化文件命名和组织结构
