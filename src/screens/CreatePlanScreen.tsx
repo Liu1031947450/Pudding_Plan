@@ -10,8 +10,6 @@ import {
   Switch,
   ActivityIndicator,
   LayoutAnimation,
-  Platform,
-  UIManager,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
@@ -20,6 +18,7 @@ import { Colors, Spacing, FontSize, BorderRadius } from '../constants/theme';
 import { TopAppBar, Card, Button, Toast } from '../components';
 import { templateDetails } from '../data/templates';
 import { usePlanManagement } from '../hooks';
+import { planService } from '../services/planService';
 import type { TemplateDetail, Reminder, Plan } from '../types/domain';
 
 type CreatePlanRouteProp = RouteProp<
@@ -28,25 +27,28 @@ type CreatePlanRouteProp = RouteProp<
 >;
 
 const CreatePlanScreen: React.FC = () => {
-  // 启用 Android 的 LayoutAnimation
-  useEffect(() => {
-    if (
-      Platform.OS === 'android' &&
-      UIManager.setLayoutAnimationEnabledExperimental
-    ) {
-      UIManager.setLayoutAnimationEnabledExperimental(true);
-    }
-  }, []);
-
   const navigation = useNavigation();
   const route = useRoute<CreatePlanRouteProp>();
   const templateId = route.params?.templateId;
   const planId = route.params?.planId;
-  const { handleCreatePlan, handleUpdatePlan, plans } = usePlanManagement();
+  const { handleCreatePlan, handleUpdatePlan, plans } =
+    usePlanManagement();
 
-  // 如果是编辑模式，获取计划数据
-  const existingPlan = planId ? plans.find(p => p.id === planId) : undefined;
-  const isEditMode = !!existingPlan;
+  const [existingPlan, setExistingPlan] = useState<Plan | undefined>(undefined);
+  const isEditMode = !!planId;
+
+  useEffect(() => {
+    if (planId) {
+      const fetchPlanDetail = async () => {
+        const userId = '1234567890'; // mock userId
+        const planData = await planService.getPlanById(planId, userId);
+        if (planData) {
+          setExistingPlan(planData);
+        }
+      };
+      fetchPlanDetail();
+    }
+  }, [planId]);
 
   // 获取模板数据
   const templateData: TemplateDetail | undefined = templateId
@@ -216,9 +218,10 @@ const CreatePlanScreen: React.FC = () => {
       };
 
       // 调用 API 创建或更新计划
+      const userId = '1234567890'; // mock userId
       const result = isEditMode
-        ? await handleUpdatePlan(planId!, newPlanData)
-        : await handleCreatePlan(newPlanData);
+        ? await handleUpdatePlan(planId!, newPlanData, userId)
+        : await handleCreatePlan(newPlanData, userId);
 
       if (result) {
         // 显示成功提示

@@ -46,8 +46,9 @@ const PlanScreen: React.FC = () => {
   // 当页面获得焦点时刷新数据
   useFocusEffect(
     React.useCallback(() => {
-      refreshPlans();
-      refreshNotifications();
+      const userId = '1234567890';
+      refreshPlans(userId);
+      refreshNotifications(userId);
     }, [refreshPlans, refreshNotifications]),
   );
 
@@ -55,9 +56,10 @@ const PlanScreen: React.FC = () => {
   const fetchRhythmData = async (period: RhythmPeriod) => {
     setRhythmLoading(true);
     try {
+      const userId = '1234567890';
       const response = period === 'week'
-        ? await rhythmApi.getWeek()
-        : await rhythmApi.getMonth();
+        ? await rhythmApi.getWeek(userId)
+        : await rhythmApi.getMonth(userId);
       if (response.success && response.data) {
         setRhythmData(response.data);
       }
@@ -76,7 +78,8 @@ const PlanScreen: React.FC = () => {
   const handleOpenAchievements = async () => {
     setBadgesLoading(true);
     try {
-      const data = await fetchBadges();
+      const userId = '1234567890';
+      const data = await fetchBadges(userId);
       setBadges(data);
     } catch (error) {
       console.error('Failed to fetch badges:', error);
@@ -136,7 +139,7 @@ const PlanScreen: React.FC = () => {
               selectedPlans={selectedPlans}
               onToggleManage={toggleManageMode}
               onToggleSelect={togglePlanSelection}
-              onDeleteSelected={handleDeleteSelected}
+              onDeleteSelected={() => handleDeleteSelected('1234567890')}
               onMovePlan={movePlan}
               onCreatePlan={handleCreatePlan}
               onPlanPress={handlePlanPress}
@@ -156,7 +159,7 @@ const PlanScreen: React.FC = () => {
         visible={notificationVisible}
         onClose={() => setNotificationVisible(false)}
         notifications={notifications}
-        onNotificationPress={markAsRead}
+        onNotificationPress={(id) => markAsRead(id, '1234567890')}
       />
 
       <AchievementDrawer

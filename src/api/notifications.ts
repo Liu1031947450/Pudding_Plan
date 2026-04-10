@@ -7,24 +7,25 @@ const USE_MOCK = true;
 
 export const notificationsApi = {
   // 获取所有通知
-  getAll: async (): Promise<ApiResponse<Notification[]>> => {
+  getAll: async (userId?: string): Promise<ApiResponse<Notification[]>> => {
     if (USE_MOCK) {
       try {
-        const data = await mockApiServer.notifications.getAll();
+        const data = await mockApiServer.notifications.getAll(userId);
         console.log('[Mock API] notificationsApi.getAll - 获取所有通知', data);
         return { success: true, data };
       } catch (error: any) {
         return { success: false, error: error.message };
       }
     }
-    return apiClient.get<Notification[]>(API_ENDPOINTS.NOTIFICATIONS);
+    const endpoint = userId ? `${API_ENDPOINTS.NOTIFICATIONS}?userId=${userId}` : API_ENDPOINTS.NOTIFICATIONS;
+    return apiClient.get<Notification[]>(endpoint);
   },
 
   // 标记通知为已读
-  markAsRead: async (id: string): Promise<ApiResponse<boolean>> => {
+  markAsRead: async (id: string, userId?: string): Promise<ApiResponse<boolean>> => {
     if (USE_MOCK) {
       try {
-        const success = await mockApiServer.notifications.markAsRead(id);
+        const success = await mockApiServer.notifications.markAsRead(id, userId);
         if (!success) {
           return { success: false, error: '未找到通知' };
         }
@@ -37,9 +38,10 @@ export const notificationsApi = {
         return { success: false, error: error.message };
       }
     }
-    return apiClient.patch<boolean>(
-      `${API_ENDPOINTS.NOTIFICATIONS}/${id}/read`,
-    );
+    const endpoint = userId 
+      ? `${API_ENDPOINTS.NOTIFICATIONS}/${id}/read?userId=${userId}` 
+      : `${API_ENDPOINTS.NOTIFICATIONS}/${id}/read`;
+    return apiClient.patch<boolean>(endpoint);
   },
 };
 

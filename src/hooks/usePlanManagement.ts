@@ -8,10 +8,10 @@ export const usePlanManagement = () => {
   const [selectedPlans, setSelectedPlans] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
 
-  const loadPlans = useCallback(async () => {
+  const loadPlans = useCallback(async (userId?: string) => {
     setLoading(true);
     try {
-      const data = await planService.getPlans();
+      const data = await planService.getPlans(userId);
       setPlans(data);
     } catch (error) {
       console.error('Failed to load plans:', error);
@@ -21,8 +21,8 @@ export const usePlanManagement = () => {
   }, []);
 
   const handleCreatePlan = useCallback(
-    async (planData: Omit<Plan, 'id'>) => {
-      const newPlan = await planService.createPlan(planData);
+    async (planData: Omit<Plan, 'id'>, userId?: string) => {
+      const newPlan = await planService.createPlan(planData, userId);
       if (newPlan) {
         await loadPlans();
       }
@@ -32,8 +32,8 @@ export const usePlanManagement = () => {
   );
 
   const handleUpdatePlan = useCallback(
-    async (id: string, planData: Partial<Plan>) => {
-      const updatedPlan = await planService.updatePlan(id, planData);
+    async (id: string, planData: Partial<Plan>, userId?: string) => {
+      const updatedPlan = await planService.updatePlan(id, planData, userId);
       if (updatedPlan) {
         await loadPlans();
       }
@@ -43,24 +43,24 @@ export const usePlanManagement = () => {
   );
 
   const handleDeletePlan = useCallback(
-    async (id: string) => {
-      const success = await planService.deletePlan(id);
+    async (id: string, userId?: string) => {
+      const success = await planService.deletePlan(id, userId);
       if (success) {
-        await loadPlans();
+        await loadPlans(userId);
       }
       return success;
     },
     [loadPlans],
   );
 
-  const handleDeleteSelected = useCallback(async () => {
+  const handleDeleteSelected = useCallback(async (userId?: string) => {
     let deletedCount = 0;
     for (const id of selectedPlans) {
-      const success = await planService.deletePlan(id);
+      const success = await planService.deletePlan(id, userId);
       if (success) deletedCount++;
     }
     if (deletedCount > 0) {
-      await loadPlans();
+      await loadPlans(userId);
       setSelectedPlans(new Set());
       setIsManaging(false);
     }

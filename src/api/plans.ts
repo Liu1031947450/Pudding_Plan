@@ -8,58 +8,64 @@ const USE_MOCK = true;
 
 export const plansApi = {
   // 获取所有计划
-  getAll: async (): Promise<ApiResponse<Plan[]>> => {
+  getAll: async (userId?: string): Promise<ApiResponse<Plan[]>> => {
     if (USE_MOCK) {
       try {
-        const data = await mockApiServer.plans.getAll();
+        const data = await mockApiServer.plans.getAll(userId);
         console.log('[Mock API] plansApi.getAll - 获取所有计划', data);
         return { success: true, data };
       } catch (error: any) {
         return { success: false, error: error.message };
       }
     }
-    return apiClient.get<Plan[]>(API_ENDPOINTS.PLANS);
+    const endpoint = userId ? `${API_ENDPOINTS.PLANS}?userId=${userId}` : API_ENDPOINTS.PLANS;
+    return apiClient.get<Plan[]>(endpoint);
   },
 
   // 根据 ID 获取单个计划
-  getById: async (id: string): Promise<ApiResponse<Plan>> => {
+  getById: async (id: string, userId?: string): Promise<ApiResponse<Plan>> => {
     if (USE_MOCK) {
       try {
-        const data = await mockApiServer.plans.getById(id);
+        const data = await mockApiServer.plans.getById(id, userId);
         if (!data) {
           return { success: false, error: '未找到计划' };
         }
-        console.log('[Mock API] plansApi.getById - 获取单个计划详情', data);
+        console.log('[Mock API] plansApi.getById - 获取单个计划详情', data, 'userId:', userId);
         return { success: true, data };
       } catch (error: any) {
         return { success: false, error: error.message };
       }
     }
-    return apiClient.get<Plan>(API_ENDPOINTS.PLAN_DETAIL(id));
+    const endpoint = userId 
+      ? `${API_ENDPOINTS.PLAN_DETAIL(id)}?userId=${userId}` 
+      : API_ENDPOINTS.PLAN_DETAIL(id);
+    return apiClient.get<Plan>(endpoint);
   },
 
   // 创建新计划
-  create: async (plan: Omit<Plan, 'id'>): Promise<ApiResponse<Plan>> => {
+  create: async (plan: Omit<Plan, 'id'>, userId?: string): Promise<ApiResponse<Plan>> => {
     if (USE_MOCK) {
       try {
-        const data = await mockApiServer.plans.create(plan);
+        const data = await mockApiServer.plans.create(plan, userId);
         console.log('[Mock API] plansApi.create - 创建新计划', data);
         return { success: true, data, message: '计划创建成功' };
       } catch (error: any) {
         return { success: false, error: error.message };
       }
     }
-    return apiClient.post<Plan>(API_ENDPOINTS.PLANS, plan);
+    const endpoint = userId ? `${API_ENDPOINTS.PLANS}?userId=${userId}` : API_ENDPOINTS.PLANS;
+    return apiClient.post<Plan>(endpoint, plan);
   },
 
   // 更新计划
   update: async (
     id: string,
     updates: Partial<Plan>,
+    userId?: string,
   ): Promise<ApiResponse<Plan>> => {
     if (USE_MOCK) {
       try {
-        const data = await mockApiServer.plans.update(id, updates);
+        const data = await mockApiServer.plans.update(id, updates, userId);
         if (!data) {
           return { success: false, error: '未找到计划' };
         }
@@ -69,14 +75,17 @@ export const plansApi = {
         return { success: false, error: error.message };
       }
     }
-    return apiClient.put<Plan>(API_ENDPOINTS.PLAN_DETAIL(id), updates);
+    const endpoint = userId 
+      ? `${API_ENDPOINTS.PLAN_DETAIL(id)}?userId=${userId}` 
+      : API_ENDPOINTS.PLAN_DETAIL(id);
+    return apiClient.put<Plan>(endpoint, updates);
   },
 
   // 删除计划
-  delete: async (id: string): Promise<ApiResponse<boolean>> => {
+  delete: async (id: string, userId?: string): Promise<ApiResponse<boolean>> => {
     if (USE_MOCK) {
       try {
-        const success = await mockApiServer.plans.delete(id);
+        const success = await mockApiServer.plans.delete(id, userId);
         if (!success) {
           return { success: false, error: '未找到计划' };
         }
@@ -86,7 +95,10 @@ export const plansApi = {
         return { success: false, error: error.message };
       }
     }
-    return apiClient.delete<boolean>(API_ENDPOINTS.PLAN_DETAIL(id));
+    const endpoint = userId 
+      ? `${API_ENDPOINTS.PLAN_DETAIL(id)}?userId=${userId}` 
+      : API_ENDPOINTS.PLAN_DETAIL(id);
+    return apiClient.delete<boolean>(endpoint);
   },
 
   // 计划打卡

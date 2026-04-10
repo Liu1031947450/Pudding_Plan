@@ -84,27 +84,36 @@ export const mockApiServer = {
   // Plans API - 计划相关接口
   plans: {
     // 获取所有计划列表
-    getAll: async (): Promise<Plan[]> => {
+    getAll: async (userId?: string): Promise<Plan[]> => {
       await delay();
       const data = [...db.getPlans()];
+      if (userId) {
+        console.log(`[Mock API] plans.getAll - userId: ${userId}`);
+      }
       return data;
     },
 
     // 获取单个计划详情
-    getById: async (id: string): Promise<Plan | null> => {
+    getById: async (id: string, userId?: string): Promise<Plan | null> => {
       await delay();
       const data = db.getPlans().find(p => p.id === id) || null;
+      if (userId) {
+        console.log(`[Mock API] getById - planId: ${id}, userId: ${userId}`);
+      }
       return data;
     },
 
     // 创建新计划
-    create: async (plan: Omit<Plan, 'id'>): Promise<Plan> => {
+    create: async (plan: Omit<Plan, 'id'>, userId?: string): Promise<Plan> => {
       await delay();
       const newPlan: Plan = {
         ...plan,
         id: Date.now().toString(),
       };
       db.getPlans().push(newPlan);
+      if (userId) {
+        console.log(`[Mock API] create - planId: ${newPlan.id}, userId: ${userId}`);
+      }
       return newPlan;
     },
 
@@ -112,22 +121,29 @@ export const mockApiServer = {
     update: async (
       id: string,
       updates: Partial<Plan>,
+      userId?: string,
     ): Promise<Plan | null> => {
       await delay();
       const plans = db.getPlans();
       const index = plans.findIndex(p => p.id === id);
       if (index === -1) return null;
       plans[index] = { ...plans[index], ...updates };
+      if (userId) {
+        console.log(`[Mock API] update - planId: ${id}, userId: ${userId}`);
+      }
       return plans[index];
     },
 
     // 删除计划
-    delete: async (id: string): Promise<boolean> => {
+    delete: async (id: string, userId?: string): Promise<boolean> => {
       await delay();
       const plans = db.getPlans();
       const index = plans.findIndex(p => p.id === id);
       if (index === -1) return false;
       plans.splice(index, 1);
+      if (userId) {
+        console.log(`[Mock API] plans.delete - planId: ${id}, userId: ${userId}`);
+      }
       return true;
     },
 
@@ -249,18 +265,24 @@ export const mockApiServer = {
   // Notifications API - 通知相关接口
   notifications: {
     // 获取所有通知列表
-    getAll: async (): Promise<Notification[]> => {
+    getAll: async (userId?: string): Promise<Notification[]> => {
       await delay();
       const data = [...db.getNotifications()];
+      if (userId) {
+        console.log(`[Mock API] notifications.getAll - userId: ${userId}`);
+      }
       return data;
     },
 
     // 标记通知为已读
-    markAsRead: async (id: string): Promise<boolean> => {
+    markAsRead: async (id: string, userId?: string): Promise<boolean> => {
       await delay();
       const notification = db.getNotifications().find(n => n.id === id);
       if (!notification) return false;
       notification.read = true;
+      if (userId) {
+        console.log(`[Mock API] notifications.markAsRead - id: ${id}, userId: ${userId}`);
+      }
       return true;
     },
   },
@@ -278,14 +300,20 @@ export const mockApiServer = {
   // Rhythm Data API - 节奏数据相关接口
   rhythm: {
     // 获取周节奏数据
-    getWeek: async (): Promise<RhythmData[]> => {
+    getWeek: async (userId?: string): Promise<RhythmData[]> => {
       await delay();
+      if (userId) {
+        console.log(`[Mock API] rhythm.getWeek - userId: ${userId}`);
+      }
       return [...mockWeekRhythmData];
     },
 
     // 获取月节奏数据
-    getMonth: async (): Promise<RhythmData[]> => {
+    getMonth: async (userId?: string): Promise<RhythmData[]> => {
       await delay();
+      if (userId) {
+        console.log(`[Mock API] rhythm.getMonth - userId: ${userId}`);
+      }
       return [...mockMonthRhythmData];
     },
   },
