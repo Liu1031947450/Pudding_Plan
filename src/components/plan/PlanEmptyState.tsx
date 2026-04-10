@@ -86,7 +86,7 @@ export const PlanEmptyState: React.FC<PlanEmptyStateProps> = ({
 const styles = StyleSheet.create({
   emptyState: {
     alignItems: 'center',
-    paddingTop: Spacing.xxl * 2,
+    paddingTop: Spacing.xl,
   },
   emptyImageContainer: {
     marginBottom: Spacing.xl,

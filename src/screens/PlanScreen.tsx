@@ -40,7 +40,7 @@ const PlanScreen: React.FC = () => {
     refreshPlans,
   } = usePlanManagement();
 
-  const { notifications, notificationVisible, toggleNotificationDrawer } =
+  const { notifications, notificationVisible, toggleNotificationDrawer, markAsRead } =
     useNotifications();
 
   const [rhythmPeriod, setRhythmPeriod] = useState<RhythmPeriod>('week');
@@ -62,6 +62,10 @@ const PlanScreen: React.FC = () => {
 
   const handlePlanPress = (plan: Plan) => {
     (navigation as any).navigate('CreatePlan', { planId: plan.id });
+  };
+
+  const handleNotificationPress = (id: string) => {
+    markAsRead(id);
   };
 
   const movePlan = (fromIndex: number, toIndex: number) => {
@@ -121,9 +125,7 @@ const PlanScreen: React.FC = () => {
         visible={notificationVisible}
         onClose={toggleNotificationDrawer}
         notifications={notifications}
-        onNotificationPress={id => {
-          console.log('Notification pressed:', id);
-        }}
+        onNotificationPress={handleNotificationPress}
       />
 
       <BottomNavBar />
