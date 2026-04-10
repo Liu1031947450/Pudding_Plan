@@ -79,8 +79,7 @@ export const getLongestStreak = (plan: Plan): number => {
   for (let i = 1; i < sorted.length; i++) {
     const prev = new Date(sorted[i - 1]);
     const curr = new Date(sorted[i]);
-    const diffDays =
-      (curr.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24);
+    const diffDays = (curr.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24);
 
     if (diffDays === 1) {
       current++;
@@ -115,11 +114,11 @@ export const isStreakBroken = (plan: Plan): boolean => {
 // ─────────────────────────────────────────────
 
 export interface PlanDisplayData {
-  days: number;        // 已打卡总天数
-  progress: number;    // 进度百分比
-  streak: number;      // 当前连续天数
+  days: number; // 已打卡总天数
+  progress: number; // 进度百分比
+  streak: number; // 当前连续天数
   streakBroken: boolean; // 是否已中断
-  subtitle: string;    // 展示用副标题
+  subtitle: string; // 展示用副标题
 }
 
 /**

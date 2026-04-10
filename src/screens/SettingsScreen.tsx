@@ -10,7 +10,20 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize, BorderRadius } from '../constants/theme';
-import { TopAppBar, Card } from '../components';
+import {
+  TopAppBar,
+  Card,
+  Toast,
+  BottomDrawer,
+  ProfileEditSheet,
+  PhoneBindSheet,
+  NotificationSheet,
+  DNDSheet,
+  AppearanceSheet,
+  LegalDocSheet,
+  FeedbackSheet,
+  ConfirmSheet,
+} from '../components';
 
 interface SettingItem {
   id: string;
@@ -137,9 +150,158 @@ const mockSettings: SettingSection[] = [
 
 const SettingsScreen: React.FC = () => {
   const navigation = useNavigation();
+  const [activeDrawer, setActiveDrawer] = React.useState<string | null>(null);
+  const [toastVisible, setToastVisible] = React.useState(false);
+  const [toastMessage, setToastMessage] = React.useState('');
+
+  // 模拟本地状态
+  const [profile, setProfile] = React.useState({
+    nickname: '治愈小助手',
+    bio: '让每一天都充满阳光 ☀️',
+  });
+  const [phone, setPhone] = React.useState('138****8888');
+  const [notifEnabled, setNotifEnabled] = React.useState(true);
+  const [notifTime, setNotifTime] = React.useState('08:00');
+  const [dndRange, setDndRange] = React.useState({
+    start: '22:00',
+    end: '07:00',
+  });
+  const [appearance, setAppearance] = React.useState<{
+    theme: 'light' | 'dark' | 'system';
+    fontSize: 'small' | 'medium' | 'large';
+  }>({ theme: 'system', fontSize: 'medium' });
+
+  const showToast = (message: string) => {
+    setToastMessage(message);
+    setToastVisible(true);
+  };
 
   const handleBack = () => {
     navigation.goBack();
+  };
+
+  const handleItemPress = (itemId: string) => {
+    setActiveDrawer(itemId);
+  };
+
+  const renderDrawerContent = () => {
+    switch (activeDrawer) {
+      case '1':
+        return (
+          <ProfileEditSheet
+            initialData={profile}
+            onSave={data => {
+              setProfile(prev => ({ ...prev, ...data }));
+              setActiveDrawer(null);
+              showToast('个人资料已更新');
+            }}
+          />
+        );
+      case '2':
+        return (
+          <PhoneBindSheet
+            currentPhone={phone}
+            onBind={newPhone => {
+              setPhone(newPhone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2'));
+              setActiveDrawer(null);
+              showToast('手机号绑定成功');
+            }}
+          />
+        );
+      case '3':
+        return (
+          <NotificationSheet
+            initialEnabled={notifEnabled}
+            initialTime={notifTime}
+            onSave={(enabled, time) => {
+              setNotifEnabled(enabled);
+              setNotifTime(time);
+              setActiveDrawer(null);
+              showToast('通知设置已保存');
+            }}
+          />
+        );
+      case '4':
+        return (
+          <DNDSheet
+            initialStartTime={dndRange.start}
+            initialEndTime={dndRange.end}
+            onSave={(start, end) => {
+              setDndRange({ start, end });
+              setActiveDrawer(null);
+              showToast('勿扰时间已更新');
+            }}
+          />
+        );
+      case '5':
+      case '6':
+        return (
+          <AppearanceSheet
+            currentTheme={appearance.theme}
+            currentFontSize={appearance.fontSize}
+            onSave={(theme, fontSize) => {
+              setAppearance({ theme, fontSize });
+              setActiveDrawer(null);
+              showToast('外观设置已应用');
+            }}
+          />
+        );
+      case '7':
+        return <LegalDocSheet title="隐私政策" />;
+      case '8':
+        return <LegalDocSheet title="用户协议" />;
+      case '9':
+        return (
+          <ConfirmSheet
+            title="确认清除所有数据？"
+            message="此操作将永久删除你的所有计划、打卡记录和个人设置，且无法撤销。"
+            confirmLabel="确认清除"
+            isDestructive
+            onConfirm={() => {
+              setActiveDrawer(null);
+              showToast('所有数据已清除');
+            }}
+            onCancel={() => setActiveDrawer(null)}
+          />
+        );
+      case '11':
+        return (
+          <FeedbackSheet
+            onSubmit={() => {
+              setActiveDrawer(null);
+              showToast('反馈已提交，感谢你的支持');
+            }}
+          />
+        );
+      case 'logout':
+        return (
+          <ConfirmSheet
+            title="退出登录"
+            message="确定要退出当前账号吗？"
+            confirmLabel="退出"
+            isDestructive
+            onConfirm={() => {
+              setActiveDrawer(null);
+              showToast('已安全退出');
+            }}
+            onCancel={() => setActiveDrawer(null)}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
+  const getDrawerTitle = () => {
+    if (activeDrawer === 'logout') return '安全退出';
+    const allItems = mockSettings.flatMap(s => s.items);
+    return allItems.find(i => i.id === activeDrawer)?.title || '设置';
+  };
+
+  const getDrawerHeight = () => {
+    if (['9', 'logout'].includes(activeDrawer || '')) return 'auto';
+    if (['7', '8', '11', '1', '3'].includes(activeDrawer || '')) return '85%';
+    return '70%';
   };
 
   return (
@@ -163,7 +325,7 @@ const SettingsScreen: React.FC = () => {
                     index < section.items.length - 1 &&
                       styles.settingItemBorder,
                   ]}
-                  onPress={item.onPress}
+                  onPress={() => handleItemPress(item.id)}
                   activeOpacity={0.7}
                 >
                   <View style={styles.settingLeft}>
@@ -206,10 +368,28 @@ const SettingsScreen: React.FC = () => {
           </View>
         ))}
 
-        <TouchableOpacity style={styles.logoutButton}>
+        <TouchableOpacity
+          style={styles.logoutButton}
+          onPress={() => setActiveDrawer('logout')}
+        >
           <Text style={styles.logoutText}>退出登录</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      <BottomDrawer
+        visible={activeDrawer !== null}
+        onClose={() => setActiveDrawer(null)}
+        title={getDrawerTitle()}
+        height={getDrawerHeight()}
+      >
+        {renderDrawerContent()}
+      </BottomDrawer>
+
+      <Toast
+        visible={toastVisible}
+        message={toastMessage}
+        onHide={() => setToastVisible(false)}
+      />
     </SafeAreaView>
   );
 };

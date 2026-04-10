@@ -101,7 +101,13 @@ export const PlanCard: React.FC<PlanCardProps> = ({
       </View>
       <ProgressBar
         progress={progress}
-        color={streakBroken ? Colors.error : progress >= 100 ? Colors.primary : Colors.tertiary}
+        color={
+          streakBroken
+            ? Colors.error
+            : progress >= 100
+            ? Colors.primary
+            : Colors.tertiary
+        }
         height={8}
       />
     </Card>

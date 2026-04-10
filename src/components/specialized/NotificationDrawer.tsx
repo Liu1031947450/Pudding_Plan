@@ -3,13 +3,12 @@ import {
   View,
   Text,
   StyleSheet,
-  Modal,
-  TouchableOpacity,
   ScrollView,
-  Pressable,
+  TouchableOpacity,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize, BorderRadius } from '../../constants/theme';
+import { BottomDrawer } from '../common/BottomDrawer';
 
 interface Notification {
   id: string;
@@ -64,132 +63,75 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
   };
 
   return (
-    <Modal
+    <BottomDrawer
       visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
+      onClose={onClose}
+      title="消息通知"
+      height="80%"
     >
-      <Pressable style={styles.overlay} onPress={onClose}>
-        <Pressable style={styles.drawer} onPress={e => e.stopPropagation()}>
-          <View style={styles.handle} />
-
-          <View style={styles.header}>
-            <Text style={styles.headerTitle}>消息通知</Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <MaterialIcons name="close" size={24} color={Colors.onSurface} />
-            </TouchableOpacity>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {notifications.length === 0 ? (
+          <View style={styles.emptyState}>
+            <MaterialIcons
+              name="notifications-none"
+              size={64}
+              color={Colors.outlineVariant}
+            />
+            <Text style={styles.emptyText}>暂无新消息</Text>
+            <Text style={styles.emptySubtext}>保持专注，继续前行</Text>
           </View>
-
-          <ScrollView
-            style={styles.scrollView}
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={false}
-          >
-            {notifications.length === 0 ? (
-              <View style={styles.emptyState}>
+        ) : (
+          notifications.map(notification => (
+            <TouchableOpacity
+              key={notification.id}
+              style={[
+                styles.notificationItem,
+                !notification.read && styles.notificationUnread,
+              ]}
+              onPress={() => onNotificationPress?.(notification.id)}
+              activeOpacity={0.7}
+            >
+              <View
+                style={[
+                  styles.notificationIcon,
+                  {
+                    backgroundColor: `${getNotificationColor(
+                      notification.type,
+                    )}15`,
+                  },
+                ]}
+              >
                 <MaterialIcons
-                  name="notifications-none"
-                  size={64}
-                  color={Colors.outlineVariant}
+                  name={getNotificationIcon(notification.type)}
+                  size={24}
+                  color={getNotificationColor(notification.type)}
                 />
-                <Text style={styles.emptyText}>暂无新消息</Text>
-                <Text style={styles.emptySubtext}>保持专注，继续前行</Text>
               </View>
-            ) : (
-              notifications.map(notification => (
-                <TouchableOpacity
-                  key={notification.id}
-                  style={[
-                    styles.notificationItem,
-                    !notification.read && styles.notificationUnread,
-                  ]}
-                  onPress={() => onNotificationPress?.(notification.id)}
-                  activeOpacity={0.7}
-                >
-                  <View
-                    style={[
-                      styles.notificationIcon,
-                      {
-                        backgroundColor: `${getNotificationColor(
-                          notification.type,
-                        )}15`,
-                      },
-                    ]}
-                  >
-                    <MaterialIcons
-                      name={getNotificationIcon(notification.type)}
-                      size={24}
-                      color={getNotificationColor(notification.type)}
-                    />
-                  </View>
-                  <View style={styles.notificationContent}>
-                    <View style={styles.notificationHeader}>
-                      <Text style={styles.notificationTitle}>
-                        {notification.title}
-                      </Text>
-                      {!notification.read && <View style={styles.unreadDot} />}
-                    </View>
-                    <Text style={styles.notificationMessage} numberOfLines={2}>
-                      {notification.message}
-                    </Text>
-                    <Text style={styles.notificationTime}>
-                      {notification.time}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              ))
-            )}
-          </ScrollView>
-        </Pressable>
-      </Pressable>
-    </Modal>
+              <View style={styles.notificationContent}>
+                <View style={styles.notificationHeader}>
+                  <Text style={styles.notificationTitle}>
+                    {notification.title}
+                  </Text>
+                  {!notification.read && <View style={styles.unreadDot} />}
+                </View>
+                <Text style={styles.notificationMessage} numberOfLines={2}>
+                  {notification.message}
+                </Text>
+                <Text style={styles.notificationTime}>{notification.time}</Text>
+              </View>
+            </TouchableOpacity>
+          ))
+        )}
+      </ScrollView>
+    </BottomDrawer>
   );
 };
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-  },
-  drawer: {
-    backgroundColor: Colors.surface,
-    borderTopLeftRadius: BorderRadius.xl,
-    borderTopRightRadius: BorderRadius.xl,
-    height: '80%',
-    paddingBottom: Spacing.xl,
-  },
-  handle: {
-    width: 40,
-    height: 4,
-    backgroundColor: Colors.outlineVariant,
-    borderRadius: 2,
-    alignSelf: 'center',
-    marginTop: Spacing.sm,
-    marginBottom: Spacing.md,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: Spacing.lg,
-    paddingBottom: Spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: `${Colors.outlineVariant}20`,
-  },
-  headerTitle: {
-    fontSize: FontSize.xl,
-    fontWeight: '700',
-    color: Colors.onSurface,
-  },
-  closeButton: {
-    width: 40,
-    height: 40,
-    borderRadius: BorderRadius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   scrollView: {
     flex: 1,
   },

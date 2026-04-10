@@ -390,8 +390,8 @@ const CalendarScreen: React.FC = () => {
                           isCompleted
                             ? 'outline'
                             : isTodaySelected
-                              ? 'primary'
-                              : 'outline'
+                            ? 'primary'
+                            : 'outline'
                         }
                         size="small"
                         disabled={isCompleted || !isTodaySelected}

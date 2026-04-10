@@ -15,7 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize, BorderRadius } from '../constants/theme';
-import { TopAppBar, Card, Button, Toast } from '../components';
+import { TopAppBar, Card, Button, Toast, BottomDrawer } from '../components';
 import { templateDetails } from '../data/templates';
 import { usePlanManagement } from '../hooks';
 import { planService } from '../services/planService';
@@ -893,191 +893,71 @@ const CreatePlanScreen: React.FC = () => {
         </Modal>
       )}
 
-      {showMilestoneDrawer && (
-        <Modal
-          visible={showMilestoneDrawer}
-          transparent
-          animationType="slide"
-          onRequestClose={() => setShowMilestoneDrawer(false)}
-        >
-          <TouchableOpacity
-            style={styles.modalOverlay}
-            activeOpacity={1}
-            onPress={() => setShowMilestoneDrawer(false)}
-          >
+      <BottomDrawer
+        visible={showMilestoneDrawer}
+        onClose={() => setShowMilestoneDrawer(false)}
+        title={editingMilestoneIndex !== null ? '编辑里程碑' : '添加里程碑'}
+        height="75%"
+      >
+        <View style={styles.drawerContent}>
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>天数</Text>
+            <View style={styles.inputWrapper}>
+              <TextInput
+                style={styles.input}
+                value={milestoneDay}
+                onChangeText={setMilestoneDay}
+                placeholder="输入天数"
+                placeholderTextColor={Colors.onSurfaceVariant}
+                keyboardType="number-pad"
+              />
+              <Text style={styles.inputSuffix}>天</Text>
+            </View>
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>里程碑名称</Text>
+            <View style={styles.inputWrapper}>
+              <TextInput
+                style={styles.input}
+                value={milestoneTitle}
+                onChangeText={setMilestoneTitle}
+                placeholder="例如：小有所成"
+                placeholderTextColor={Colors.onSurfaceVariant}
+              />
+            </View>
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>奖励内容</Text>
+            <View style={styles.inputWrapper}>
+              <TextInput
+                style={styles.input}
+                value={milestoneReward}
+                onChangeText={setMilestoneReward}
+                placeholder="例如：奖励一顿丰盛早餐"
+                placeholderTextColor={Colors.onSurfaceVariant}
+                multiline
+              />
+            </View>
+          </View>
+
+          <View style={styles.modalActions}>
             <TouchableOpacity
-              style={styles.timePickerModal}
-              activeOpacity={1}
-              onPress={e => e.stopPropagation()}
+              style={styles.modalCancelButton}
+              onPress={() => setShowMilestoneDrawer(false)}
             >
-              <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>
-                  {editingMilestoneIndex !== null ? '编辑里程碑' : '添加里程碑'}
-                </Text>
-                <TouchableOpacity onPress={() => setShowMilestoneDrawer(false)}>
-                  <MaterialIcons
-                    name="close"
-                    size={24}
-                    color={Colors.onSurface}
-                  />
-                </TouchableOpacity>
-              </View>
-
-              <View style={styles.drawerContent}>
-                <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>天数</Text>
-                  <View style={styles.inputWrapper}>
-                    <TextInput
-                      style={styles.input}
-                      value={milestoneDay}
-                      onChangeText={setMilestoneDay}
-                      placeholder="输入天数"
-                      placeholderTextColor={Colors.onSurfaceVariant}
-                      keyboardType="number-pad"
-                    />
-                    <Text style={styles.inputSuffix}>天</Text>
-                  </View>
-                </View>
-
-                <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>里程碑名称</Text>
-                  <View style={styles.inputWrapper}>
-                    <TextInput
-                      style={styles.input}
-                      value={milestoneTitle}
-                      onChangeText={setMilestoneTitle}
-                      placeholder="例如：小有所成"
-                      placeholderTextColor={Colors.onSurfaceVariant}
-                    />
-                  </View>
-                </View>
-
-                <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>奖励内容</Text>
-                  <View style={styles.inputWrapper}>
-                    <TextInput
-                      style={styles.input}
-                      value={milestoneReward}
-                      onChangeText={setMilestoneReward}
-                      placeholder="例如：奖励一顿丰盛早餐"
-                      placeholderTextColor={Colors.onSurfaceVariant}
-                      multiline
-                    />
-                  </View>
-                </View>
-              </View>
-
-              <View style={styles.modalActions}>
-                <TouchableOpacity
-                  style={styles.modalCancelButton}
-                  onPress={() => setShowMilestoneDrawer(false)}
-                >
-                  <Text style={styles.modalCancelText}>取消</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.modalConfirmButton}
-                  onPress={handleSaveMilestone}
-                >
-                  <Text style={styles.modalConfirmText}>保存</Text>
-                </TouchableOpacity>
-              </View>
+              <Text style={styles.modalCancelText}>取消</Text>
             </TouchableOpacity>
-          </TouchableOpacity>
-        </Modal>
-      )}
-
-      {showMilestoneDrawer && (
-        <Modal
-          visible={showMilestoneDrawer}
-          transparent
-          animationType="slide"
-          onRequestClose={() => setShowMilestoneDrawer(false)}
-        >
-          <TouchableOpacity
-            style={styles.modalOverlay}
-            activeOpacity={1}
-            onPress={() => setShowMilestoneDrawer(false)}
-          >
             <TouchableOpacity
-              style={styles.timePickerModal}
-              activeOpacity={1}
-              onPress={e => e.stopPropagation()}
+              style={styles.modalConfirmButton}
+              onPress={handleSaveMilestone}
             >
-              <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>
-                  {editingMilestoneIndex !== null ? '编辑里程碑' : '添加里程碑'}
-                </Text>
-                <TouchableOpacity onPress={() => setShowMilestoneDrawer(false)}>
-                  <MaterialIcons
-                    name="close"
-                    size={24}
-                    color={Colors.onSurface}
-                  />
-                </TouchableOpacity>
-              </View>
-
-              <View style={styles.drawerContent}>
-                <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>天数</Text>
-                  <View style={styles.inputWrapper}>
-                    <TextInput
-                      style={styles.input}
-                      value={milestoneDay}
-                      onChangeText={setMilestoneDay}
-                      placeholder="输入天数"
-                      placeholderTextColor={Colors.onSurfaceVariant}
-                      keyboardType="number-pad"
-                    />
-                    <Text style={styles.inputSuffix}>天</Text>
-                  </View>
-                </View>
-
-                <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>里程碑名称</Text>
-                  <View style={styles.inputWrapper}>
-                    <TextInput
-                      style={styles.input}
-                      value={milestoneTitle}
-                      onChangeText={setMilestoneTitle}
-                      placeholder="例如：小有所成"
-                      placeholderTextColor={Colors.onSurfaceVariant}
-                    />
-                  </View>
-                </View>
-
-                <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>奖励内容</Text>
-                  <View style={styles.inputWrapper}>
-                    <TextInput
-                      style={styles.input}
-                      value={milestoneReward}
-                      onChangeText={setMilestoneReward}
-                      placeholder="例如：奖励一顿丰盛早餐"
-                      placeholderTextColor={Colors.onSurfaceVariant}
-                      multiline
-                    />
-                  </View>
-                </View>
-              </View>
-
-              <View style={styles.modalActions}>
-                <TouchableOpacity
-                  style={styles.modalCancelButton}
-                  onPress={() => setShowMilestoneDrawer(false)}
-                >
-                  <Text style={styles.modalCancelText}>取消</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.modalConfirmButton}
-                  onPress={handleSaveMilestone}
-                >
-                  <Text style={styles.modalConfirmText}>保存</Text>
-                </TouchableOpacity>
-              </View>
+              <Text style={styles.modalConfirmText}>保存</Text>
             </TouchableOpacity>
-          </TouchableOpacity>
-        </Modal>
-      )}
+          </View>
+        </View>
+      </BottomDrawer>
 
       <View style={styles.bottomBar}>
         <Button

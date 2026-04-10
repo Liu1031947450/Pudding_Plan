@@ -259,7 +259,7 @@ export const mockApiServer = {
     getData: async (
       year: number,
       month: number,
-      userId?: string,
+      _userId?: string,
     ): Promise<DayData[]> => {
       await delay();
 

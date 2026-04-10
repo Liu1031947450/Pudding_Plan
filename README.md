@@ -310,6 +310,7 @@ lsof -ti:19001 | xargs kill -9
 ### 2026-04-10 数据架构升级
 
 **核心变更**:
+
 - **事实源统一**: 引入 `completedDate: string[]` 作为计划打卡的唯一事实源，废弃了分散在 `currentDays` 和 `checkInsDB` 中的状态数据。
 - **派生逻辑抽离**: 新建 `src/utils/planUtils.ts`，统一负责计算连续天数 (Streak)、历史最长天数、打卡进度及中断检测。
 - **UI 逻辑优化**: `PlanCard` 等组件现在完全基于 `completedDate` 派生展示数据，确保了数据的一致性和逻辑的健壮性。
