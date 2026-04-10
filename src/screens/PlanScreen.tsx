@@ -188,6 +188,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingTop: 32,
     paddingBottom: 100,
+    flexGrow: 1, // 确保 loading 时可以垂直居中
   },
   loadingContainer: {
     flex: 1,

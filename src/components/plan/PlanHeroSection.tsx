@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Colors, Spacing, FontSize } from '../../constants/theme';
+import { MaterialIcons } from '@expo/vector-icons';
 
 interface PlanHeroSectionProps {
   planIcon: string;
@@ -26,7 +27,11 @@ export const PlanHeroSection: React.FC<PlanHeroSectionProps> = ({
             { backgroundColor: `${planColor}20` },
           ]}
         >
-          <Text style={styles.heroImageText}>{planIcon}</Text>
+          <MaterialIcons
+            name={planIcon as any}
+            size={64}
+            color={Colors.primary}
+          />
         </View>
       </View>
       <View style={styles.heroContent}>

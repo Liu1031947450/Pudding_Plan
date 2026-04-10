@@ -34,7 +34,7 @@ export const PlanCard: React.FC<PlanCardProps> = ({
   // 从 completedDate 派生所有展示数据（completedDate 是唯一事实源）
   const { days, progress, streakBroken, subtitle } = getPlanDisplayData(plan);
   const color = plan.color ?? Colors.primaryContainer;
-  const icon = plan.icon || '✨';
+  const icon = plan.icon || 'stars';
 
   return (
     <Card
@@ -64,16 +64,11 @@ export const PlanCard: React.FC<PlanCardProps> = ({
             </TouchableOpacity>
           )}
           <View style={[styles.planIcon, { backgroundColor: color }]}>
-            {/* 判断是 emoji 还是 MaterialIcon */}
-            {icon.length <= 2 ? (
-              <Text style={styles.planIconEmoji}>{icon}</Text>
-            ) : (
-              <MaterialIcons
-                name={icon as any}
-                size={24}
-                color={Colors.onSurface}
-              />
-            )}
+            <MaterialIcons
+              name={icon as any}
+              size={24}
+              color={Colors.onSurface}
+            />
           </View>
           <View style={styles.planText}>
             <Text style={styles.planTitle}>{plan.title}</Text>

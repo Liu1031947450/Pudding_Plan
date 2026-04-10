@@ -6,8 +6,10 @@ import {
   ScrollView,
   TouchableOpacity,
   Animated,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize, BorderRadius } from '../constants/theme';
 import {
@@ -31,6 +33,7 @@ const CalendarScreen: React.FC = () => {
     text: '每一个不曾起舞的日子，都是对生命的辜负。',
     author: '尼采',
   });
+  const [loading, setLoading] = useState(true);
   const { plans, refreshPlans, handleCheckIn } = usePlanManagement();
 
   // 盖章动画状态
@@ -76,12 +79,6 @@ const CalendarScreen: React.FC = () => {
     setNotificationDrawerVisible(true);
   };
 
-  // 页面初始化时加载通知和计划列表
-  React.useEffect(() => {
-    refreshNotifications('1234567890');
-    refreshPlans('1234567890');
-  }, [refreshNotifications, refreshPlans]);
-
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth() + 1;
   const CHINESE_MONTHS = [
@@ -99,18 +96,36 @@ const CalendarScreen: React.FC = () => {
     '十二月',
   ];
 
-  const fetchCalendarData = React.useCallback(async () => {
-    const res = await calendarApi.getData(year, month, '1234567890');
-    if (res.success && res.data) {
-      setCalendarDays(res.data);
-    }
+  const fetchCalendarData = React.useCallback(
+    async (silent = false) => {
+      if (!silent) setLoading(true);
+      try {
+        const res = await calendarApi.getData(year, month, '1234567890');
+        if (res.success && res.data) {
+          setCalendarDays(res.data);
+        }
 
-    // 获取当天的金句
-    const quoteRes = await calendarApi.getDailyQuote();
-    if (quoteRes.success && quoteRes.data) {
-      setQuote(quoteRes.data);
-    }
-  }, [year, month]);
+        // 获取当天的金句
+        const quoteRes = await calendarApi.getDailyQuote();
+        if (quoteRes.success && quoteRes.data) {
+          setQuote(quoteRes.data);
+        }
+      } finally {
+        if (!silent) setLoading(false);
+      }
+    },
+    [year, month],
+  );
+
+  // 当页面获得焦点时刷新通知、计划列表和日历数据
+  useFocusEffect(
+    React.useCallback(() => {
+      const userId = '1234567890';
+      refreshNotifications(userId);
+      refreshPlans(userId);
+      fetchCalendarData(); // 每次切回来都触发包含 loading 的刷新
+    }, [refreshNotifications, refreshPlans, fetchCalendarData]),
+  );
 
   React.useEffect(() => {
     fetchCalendarData();
@@ -123,7 +138,7 @@ const CalendarScreen: React.FC = () => {
     const result = await handleCheckIn(planId, selectedDateStr, '1234567890');
     if (result) {
       playStampAnimation(); // 如果打卡成功，播放动画
-      fetchCalendarData();
+      fetchCalendarData(true); // 静默刷新，不触发全屏 loading
     }
   };
 
@@ -155,238 +170,255 @@ const CalendarScreen: React.FC = () => {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.calendarSection}>
-          <View style={styles.monthHeader}>
-            <View>
-              <Text style={styles.monthLabel}>{`${year}年`}</Text>
-              <Text style={styles.monthTitle}>{CHINESE_MONTHS[month - 1]}</Text>
-            </View>
-            <View style={styles.monthNav}>
-              <TouchableOpacity
-                style={styles.navButton}
-                onPress={() => {
-                  const today = new Date();
-                  setCurrentDate(today);
-                  setSelectedDay(today.getDate());
-                }}
-              >
-                <MaterialIcons
-                  name="today"
-                  size={20}
-                  color={Colors.onSurface}
-                />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.navButton}
-                onPress={() => setCurrentDate(new Date(year, month - 2, 1))}
-              >
-                <MaterialIcons
-                  name="chevron-left"
-                  size={24}
-                  color={Colors.onSurface}
-                />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.navButton}
-                onPress={() => setCurrentDate(new Date(year, month, 1))}
-              >
-                <MaterialIcons
-                  name="chevron-right"
-                  size={24}
-                  color={Colors.onSurface}
-                />
-              </TouchableOpacity>
-            </View>
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={Colors.primary} />
+            <Text style={styles.loadingText}>加载中...</Text>
           </View>
+        ) : (
+          <>
+            <View style={styles.calendarSection}>
+              <View style={styles.monthHeader}>
+                <View>
+                  <Text style={styles.monthLabel}>{`${year}年`}</Text>
+                  <Text style={styles.monthTitle}>
+                    {CHINESE_MONTHS[month - 1]}
+                  </Text>
+                </View>
+                <View style={styles.monthNav}>
+                  <TouchableOpacity
+                    style={styles.navButton}
+                    onPress={() => {
+                      const today = new Date();
+                      setCurrentDate(today);
+                      setSelectedDay(today.getDate());
+                    }}
+                  >
+                    <MaterialIcons
+                      name="today"
+                      size={20}
+                      color={Colors.onSurface}
+                    />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.navButton}
+                    onPress={() => setCurrentDate(new Date(year, month - 2, 1))}
+                  >
+                    <MaterialIcons
+                      name="chevron-left"
+                      size={24}
+                      color={Colors.onSurface}
+                    />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.navButton}
+                    onPress={() => setCurrentDate(new Date(year, month, 1))}
+                  >
+                    <MaterialIcons
+                      name="chevron-right"
+                      size={24}
+                      color={Colors.onSurface}
+                    />
+                  </TouchableOpacity>
+                </View>
+              </View>
 
-          <Card style={styles.calendarCard}>
-            <View style={styles.weekDays}>
-              {['一', '二', '三', '四', '五', '六', '日'].map(day => (
-                <Text key={day} style={styles.weekDay}>
-                  {day}
-                </Text>
-              ))}
+              <Card style={styles.calendarCard}>
+                <View style={styles.weekDays}>
+                  {['一', '二', '三', '四', '五', '六', '日'].map(day => (
+                    <Text key={day} style={styles.weekDay}>
+                      {day}
+                    </Text>
+                  ))}
+                </View>
+
+                <View style={styles.daysGrid}>
+                  {Array.from({
+                    length: (() => {
+                      const firstDay = new Date(year, month - 1, 1).getDay();
+                      return firstDay === 0 ? 6 : firstDay - 1;
+                    })(),
+                  }).map((_, index) => (
+                    <View
+                      key={`empty-${index}`}
+                      style={styles.dayCellContainer}
+                    />
+                  ))}
+
+                  {Array.from({
+                    length: new Date(year, month, 0).getDate(),
+                  }).map((_, index) => {
+                    const dayStr = index + 1;
+                    const dayObj = calendarDays.find(d => d.day === dayStr) || {
+                      day: dayStr,
+                      hasActivity: false,
+                      isToday: false,
+                      isSelected: false,
+                    };
+                    const isSelected = selectedDay === dayStr;
+
+                    return (
+                      <View
+                        key={`day-${dayStr}`}
+                        style={styles.dayCellContainer}
+                      >
+                        <TouchableOpacity
+                          style={[
+                            styles.dayCell,
+                            isSelected && styles.selectedDay,
+                            dayObj.isToday && !isSelected && styles.todayCell,
+                          ]}
+                          onPress={() => setSelectedDay(dayStr)}
+                        >
+                          <Text
+                            style={[
+                              styles.dayText,
+                              isSelected && styles.selectedDayText,
+                              dayObj.isToday && !isSelected && styles.todayText,
+                            ]}
+                          >
+                            {dayStr}
+                          </Text>
+                          {dayObj.hasActivity && (
+                            <View
+                              style={[
+                                styles.activityDot,
+                                {
+                                  backgroundColor: getActivityColor(
+                                    dayObj.activityType,
+                                  ),
+                                },
+                              ]}
+                            />
+                          )}
+                        </TouchableOpacity>
+                      </View>
+                    );
+                  })}
+                </View>
+              </Card>
+
+              {/* 盖章动画浮层紧贴着日历模块 */}
+              <Animated.View
+                style={[
+                  styles.stampOverlay,
+                  {
+                    opacity: stampOpacity,
+                    transform: [{ scale: stampScale }, { rotate: '-15deg' }],
+                  },
+                ]}
+                pointerEvents="none"
+              >
+                <View style={styles.stampInner}>
+                  <Text style={styles.stampText}>完成!</Text>
+                </View>
+              </Animated.View>
             </View>
 
-            <View style={styles.daysGrid}>
-              {Array.from({
-                length: (() => {
-                  const firstDay = new Date(year, month - 1, 1).getDay();
-                  return firstDay === 0 ? 6 : firstDay - 1;
-                })(),
-              }).map((_, index) => (
-                <View key={`empty-${index}`} style={styles.dayCellContainer} />
-              ))}
+            <View style={styles.habitsSection}>
+              <View style={styles.sectionHeader}>
+                <View style={styles.sectionTitleRow}>
+                  <View style={styles.sectionIcon}>
+                    <MaterialIcons
+                      name="check-circle"
+                      size={20}
+                      color={Colors.secondary}
+                    />
+                  </View>
+                  <Text style={styles.sectionTitle}>今日重点</Text>
+                </View>
+              </View>
 
-              {Array.from({ length: new Date(year, month, 0).getDate() }).map(
-                (_, index) => {
-                  const dayStr = index + 1;
-                  const dayObj = calendarDays.find(d => d.day === dayStr) || {
-                    day: dayStr,
-                    hasActivity: false,
-                    isToday: false,
-                    isSelected: false,
-                  };
-                  const isSelected = selectedDay === dayStr;
+              <View style={styles.habitsList}>
+                {plans.map(plan => {
+                  const selectedDayObj = calendarDays.find(
+                    d => d.day === selectedDay,
+                  );
+                  const isCompleted = selectedDayObj?.completedPlanIds
+                    ? selectedDayObj.completedPlanIds.includes(plan.id)
+                    : false;
+
+                  const now = new Date();
+                  const isTodaySelected =
+                    selectedDay === now.getDate() &&
+                    month === now.getMonth() + 1 &&
+                    year === now.getFullYear();
+
+                  let buttonTitle = '点击盖章';
+                  if (isCompleted) {
+                    buttonTitle = '已盖章';
+                  } else if (!isTodaySelected) {
+                    buttonTitle = '非今日';
+                  }
 
                   return (
-                    <View key={`day-${dayStr}`} style={styles.dayCellContainer}>
-                      <TouchableOpacity
-                        style={[
-                          styles.dayCell,
-                          isSelected && styles.selectedDay,
-                          dayObj.isToday && !isSelected && styles.todayCell,
-                        ]}
-                        onPress={() => setSelectedDay(dayStr)}
-                      >
-                        <Text
+                    <Card key={plan.id} style={styles.habitCard}>
+                      <View style={styles.habitContent}>
+                        <View
                           style={[
-                            styles.dayText,
-                            isSelected && styles.selectedDayText,
-                            dayObj.isToday && !isSelected && styles.todayText,
+                            styles.habitIcon,
+                            {
+                              backgroundColor: isCompleted
+                                ? Colors.tertiaryContainer
+                                : plan.color || Colors.surfaceContainerHigh,
+                            },
                           ]}
                         >
-                          {dayStr}
-                        </Text>
-                        {dayObj.hasActivity && (
-                          <View
-                            style={[
-                              styles.activityDot,
-                              {
-                                backgroundColor: getActivityColor(
-                                  dayObj.activityType,
-                                ),
-                              },
-                            ]}
+                          <MaterialIcons
+                            name={(plan.icon || 'stars') as any}
+                            size={28}
+                            color={
+                              isCompleted
+                                ? Colors.tertiary
+                                : Colors.onSurfaceVariant
+                            }
                           />
-                        )}
-                      </TouchableOpacity>
-                    </View>
-                  );
-                },
-              )}
-            </View>
-          </Card>
-
-          {/* 盖章动画浮层紧贴着日历模块 */}
-          <Animated.View
-            style={[
-              styles.stampOverlay,
-              {
-                opacity: stampOpacity,
-                transform: [{ scale: stampScale }, { rotate: '-15deg' }],
-              },
-            ]}
-            pointerEvents="none"
-          >
-            <View style={styles.stampInner}>
-              <Text style={styles.stampText}>完成!</Text>
-            </View>
-          </Animated.View>
-        </View>
-
-        <View style={styles.habitsSection}>
-          <View style={styles.sectionHeader}>
-            <View style={styles.sectionTitleRow}>
-              <View style={styles.sectionIcon}>
-                <MaterialIcons
-                  name="check-circle"
-                  size={20}
-                  color={Colors.secondary}
-                />
-              </View>
-              <Text style={styles.sectionTitle}>今日重点</Text>
-            </View>
-          </View>
-
-          <View style={styles.habitsList}>
-            {plans.map(plan => {
-              const selectedDayObj = calendarDays.find(
-                d => d.day === selectedDay,
-              );
-              const isCompleted = selectedDayObj?.completedPlanIds
-                ? selectedDayObj.completedPlanIds.includes(plan.id)
-                : false;
-
-              const now = new Date();
-              const isTodaySelected =
-                selectedDay === now.getDate() &&
-                month === now.getMonth() + 1 &&
-                year === now.getFullYear();
-
-              let buttonTitle = '点击盖章';
-              if (isCompleted) {
-                buttonTitle = '已盖章';
-              } else if (!isTodaySelected) {
-                buttonTitle = '非今日';
-              }
-
-              return (
-                <Card key={plan.id} style={styles.habitCard}>
-                  <View style={styles.habitContent}>
-                    <View
-                      style={[
-                        styles.habitIcon,
-                        {
-                          backgroundColor: isCompleted
-                            ? Colors.tertiaryContainer
-                            : Colors.surfaceContainerHigh,
-                        },
-                      ]}
-                    >
-                      <MaterialIcons
-                        name={(plan.icon as any) || 'event'}
-                        size={28}
-                        color={
+                        </View>
+                        <View style={styles.habitInfo}>
+                          <Text style={styles.habitTitle}>{plan.title}</Text>
+                          <Text style={styles.habitSubtitle}>
+                            {plan.totalDays
+                              ? `目标: ${plan.totalDays}天`
+                              : '通用计划'}
+                          </Text>
+                        </View>
+                      </View>
+                      <Button
+                        title={buttonTitle}
+                        onPress={() => onCheckIn(plan.id)}
+                        variant={
                           isCompleted
-                            ? Colors.tertiary
-                            : Colors.onSurfaceVariant
+                            ? 'outline'
+                            : isTodaySelected
+                              ? 'primary'
+                              : 'outline'
                         }
+                        size="small"
+                        disabled={isCompleted || !isTodaySelected}
                       />
-                    </View>
-                    <View style={styles.habitInfo}>
-                      <Text style={styles.habitTitle}>{plan.title}</Text>
-                      <Text style={styles.habitSubtitle}>
-                        {plan.totalDays
-                          ? `目标: ${plan.totalDays}天`
-                          : '通用计划'}
-                      </Text>
-                    </View>
-                  </View>
-                  <Button
-                    title={buttonTitle}
-                    onPress={() => onCheckIn(plan.id)}
-                    variant={
-                      isCompleted
-                        ? 'outline'
-                        : isTodaySelected
-                        ? 'primary'
-                        : 'outline'
-                    }
-                    size="small"
-                    disabled={isCompleted || !isTodaySelected}
-                  />
-                </Card>
-              );
-            })}
-          </View>
+                    </Card>
+                  );
+                })}
+              </View>
 
-          <Card
-            style={styles.quoteCard}
-            gradient
-            gradientColors={[Colors.primary, Colors.primaryContainer]}
-          >
-            <MaterialIcons
-              name="format-quote"
-              size={32}
-              color={Colors.onPrimaryContainer}
-            />
-            <Text style={styles.quoteText}>
-              "{quote.text}"{'\n'}
-              <Text style={styles.quoteAuthor}>—— {quote.author}</Text>
-            </Text>
-          </Card>
-        </View>
+              <Card
+                style={styles.quoteCard}
+                gradient
+                gradientColors={[Colors.primary, Colors.primaryContainer]}
+              >
+                <MaterialIcons
+                  name="format-quote"
+                  size={32}
+                  color={Colors.onPrimaryContainer}
+                />
+                <Text style={styles.quoteText}>
+                  "{quote.text}"{'\n'}
+                  <Text style={styles.quoteAuthor}>—— {quote.author}</Text>
+                </Text>
+              </Card>
+            </View>
+          </>
+        )}
       </ScrollView>
 
       <NotificationDrawer
@@ -413,6 +445,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingTop: 24,
     paddingBottom: 120,
+    flexGrow: 1, // 确保 loading 状态下能居中
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 100,
+  },
+  loadingText: {
+    marginTop: Spacing.md,
+    fontSize: 14,
+    color: Colors.onSurfaceVariant,
   },
   calendarSection: {
     marginBottom: Spacing.xl,

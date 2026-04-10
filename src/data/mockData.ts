@@ -32,7 +32,7 @@ export const mockPlans: Plan[] = [
         status: true, // 成就状态：true-已解锁, false-未解锁
       },
     ], // 阶段里程碑
-    icon: '', // 计划图标
+    icon: 'event-available', // 计划图标
     completedDate: [
       '2026-04-01',
       '2026-04-02',

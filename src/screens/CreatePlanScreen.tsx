@@ -62,20 +62,19 @@ const CreatePlanScreen: React.FC = () => {
       templateData?.duration.toString() ||
       '',
   );
-  const [planIcon, setPlanIcon] = useState<string>('✨');
+  const [planIcon, setPlanIcon] = useState<string>('stars');
   const [planColor, setPlanColor] = useState<string>(Colors.primaryContainer);
 
-  // 根据模板获取图标，如果是 emoji 则直接使用，否则使用默认的 MaterialIcon
+  // 根据模板获取图标
   const getIconForPlan = (plan?: Plan, template?: TemplateDetail): string => {
     if (plan?.icon) {
       return plan.icon;
     }
     if (template?.icon) {
-      // 如果模板有 emoji 图标，返回 emoji
       return template.icon;
     }
     // 自定义计划使用默认图标
-    return '✨';
+    return 'stars';
   };
 
   const [checkInMethod, setCheckInMethod] = useState<0 | 1 | 2>(
@@ -469,7 +468,11 @@ const CreatePlanScreen: React.FC = () => {
                 { backgroundColor: `${planColor}20` },
               ]}
             >
-              <Text style={styles.heroImageText}>{planIcon}</Text>
+              <MaterialIcons
+                name={planIcon as any}
+                size={48}
+                color={Colors.primary}
+              />
             </View>
           </View>
           <View style={styles.heroContent}>

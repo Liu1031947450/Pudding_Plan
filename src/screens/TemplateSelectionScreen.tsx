@@ -16,75 +16,11 @@ type RootStackParamList = {
   CreatePlan: { templateId?: string } | undefined;
 };
 
-interface Template {
-  id: string;
-  title: string;
-  subtitle: string;
-  duration: string;
-  icon: string;
-  color: string;
-  category: string;
-}
-
-const mockTemplates: Template[] = [
-  {
-    id: '1',
-    title: '晨间瑜伽与冥想',
-    subtitle: '开启活力一天',
-    duration: '21天',
-    icon: '🧘',
-    color: Colors.primaryContainer,
-    category: '身心健康',
-  },
-  {
-    id: '2',
-    title: '早起挑战',
-    subtitle: '养成早睡早起习惯',
-    duration: '30天',
-    icon: '☀️',
-    color: Colors.secondaryContainer,
-    category: '生活习惯',
-  },
-  {
-    id: '3',
-    title: '阅读计划',
-    subtitle: '每天阅读30分钟',
-    duration: '60天',
-    icon: '📚',
-    color: Colors.tertiaryContainer,
-    category: '学习成长',
-  },
-  {
-    id: '4',
-    title: '健身减脂',
-    subtitle: '科学运动塑形',
-    duration: '90天',
-    icon: '💪',
-    color: Colors.primaryContainer,
-    category: '身心健康',
-  },
-  {
-    id: '5',
-    title: '戒糖挑战',
-    subtitle: '远离高糖食物',
-    duration: '21天',
-    icon: '🍎',
-    color: Colors.secondaryContainer,
-    category: '生活习惯',
-  },
-  {
-    id: '6',
-    title: '学习新技能',
-    subtitle: '每天练习1小时',
-    duration: '100天',
-    icon: '🎯',
-    color: Colors.tertiaryContainer,
-    category: '学习成长',
-  },
-];
+import { templateDetails } from '../data/templates';
 
 const TemplateSelectionScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const templates = Object.values(templateDetails);
 
   const handleBack = () => {
     navigation.goBack();
@@ -115,7 +51,7 @@ const TemplateSelectionScreen: React.FC = () => {
         </View>
 
         <View style={styles.templatesGrid}>
-          {mockTemplates.map(template => (
+          {templates.map(template => (
             <TouchableOpacity
               key={template.id}
               style={styles.templateCard}
@@ -129,7 +65,11 @@ const TemplateSelectionScreen: React.FC = () => {
                     { backgroundColor: template.color },
                   ]}
                 >
-                  <Text style={styles.templateIconText}>{template.icon}</Text>
+                  <MaterialIcons
+                    name={template.icon as any}
+                    size={32}
+                    color={Colors.primary}
+                  />
                 </View>
                 <View style={styles.templateContent}>
                   <View style={styles.templateHeader}>
@@ -150,7 +90,7 @@ const TemplateSelectionScreen: React.FC = () => {
                       color={Colors.onSurfaceVariant}
                     />
                     <Text style={styles.templateDuration}>
-                      {template.duration}
+                      {template.duration}天
                     </Text>
                   </View>
                 </View>
