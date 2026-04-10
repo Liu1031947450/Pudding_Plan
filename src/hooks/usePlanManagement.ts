@@ -1,38 +1,68 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import type { Plan } from '../types/domain';
 import { planService } from '../services/planService';
 
 export const usePlanManagement = () => {
-  const [plans, setPlans] = useState<Plan[]>(planService.getPlans());
+  const [plans, setPlans] = useState<Plan[]>([]);
   const [isManaging, setIsManaging] = useState(false);
   const [selectedPlans, setSelectedPlans] = useState<Set<string>>(new Set());
+  const [loading, setLoading] = useState(false);
 
-  const handleCreatePlan = useCallback((planData: Omit<Plan, 'id'>) => {
-    const newPlan = planService.createPlan(planData);
-    setPlans(planService.getPlans());
-    return newPlan;
+  const loadPlans = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await planService.getPlans();
+      setPlans(data);
+    } catch (error) {
+      console.error('Failed to load plans:', error);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const handleDeletePlan = useCallback((id: string) => {
-    const success = planService.deletePlan(id);
+  useEffect(() => {
+    loadPlans();
+  }, [loadPlans]);
+
+  const handleCreatePlan = useCallback(async (planData: Omit<Plan, 'id'>) => {
+    const newPlan = await planService.createPlan(planData);
+    if (newPlan) {
+      await loadPlans();
+    }
+    return newPlan;
+  }, [loadPlans]);
+
+  const handleUpdatePlan = useCallback(async (id: string, planData: Partial<Plan>) => {
+    const updatedPlan = await planService.updatePlan(id, planData);
+    if (updatedPlan) {
+      await loadPlans();
+    }
+    return updatedPlan;
+  }, [loadPlans]);
+
+  const handleDeletePlan = useCallback(async (id: string) => {
+    const success = await planService.deletePlan(id);
     if (success) {
-      setPlans(planService.getPlans());
+      await loadPlans();
     }
     return success;
-  }, []);
+  }, [loadPlans]);
 
-  const handleDeleteSelected = useCallback(() => {
-    const deletedCount = planService.deletePlans(Array.from(selectedPlans));
+  const handleDeleteSelected = useCallback(async () => {
+    let deletedCount = 0;
+    for (const id of selectedPlans) {
+      const success = await planService.deletePlan(id);
+      if (success) deletedCount++;
+    }
     if (deletedCount > 0) {
-      setPlans(planService.getPlans());
+      await loadPlans();
       setSelectedPlans(new Set());
       setIsManaging(false);
     }
     return deletedCount;
-  }, [selectedPlans]);
+  }, [selectedPlans, loadPlans]);
 
   const handleReorderPlans = useCallback((newOrder: Plan[]) => {
-    planService.reorderPlans(newOrder);
     setPlans(newOrder);
   }, []);
 
@@ -55,13 +85,16 @@ export const usePlanManagement = () => {
 
   return {
     plans,
+    loading,
     isManaging,
     selectedPlans,
     handleCreatePlan,
+    handleUpdatePlan,
     handleDeletePlan,
     handleDeleteSelected,
     handleReorderPlans,
     toggleManageMode,
     togglePlanSelection,
+    refreshPlans: loadPlans,
   };
 };

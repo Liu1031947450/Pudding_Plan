@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { Buddy, Circle } from '../types/domain';
 import { circleService } from '../services/circleService';
 
@@ -7,29 +7,39 @@ export const useCircleData = () => {
   const [circles, setCircles] = useState<Circle[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchData = () => {
-      try {
-        const buddiesData = circleService.getBuddies();
-        const circlesData = circleService.getCircles();
-        setBuddies(buddiesData);
-        setCircles(circlesData);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [buddiesData, circlesData] = await Promise.all([
+        circleService.getBuddies(),
+        circleService.getCircles(),
+      ]);
+      setBuddies(buddiesData);
+      setCircles(circlesData);
+    } catch (error) {
+      console.error('Failed to load circle data:', error);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const joinCircle = (circleId: string) => {
-    return circleService.joinCircle(circleId);
-  };
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const joinCircle = useCallback(async (circleId: string) => {
+    const success = await circleService.joinCircle(circleId);
+    if (success) {
+      await loadData();
+    }
+    return success;
+  }, [loadData]);
 
   return {
     buddies,
     circles,
     loading,
     joinCircle,
+    refreshData: loadData,
   };
 };

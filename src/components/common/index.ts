@@ -4,3 +4,4 @@ export * from './Card';
 export * from './Chip';
 export * from './Avatar';
 export * from './EmptyState';
+export * from './Toast';

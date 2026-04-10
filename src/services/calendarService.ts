@@ -1,38 +1,34 @@
 import type { DayData, Habit } from '../types/domain';
-import { mockCalendarData, mockHabits } from '../data/mockData';
+import { calendarApi, habitsApi } from '../api';
 
 // Calendar Service - handles calendar and habit operations
 class CalendarService {
-  private calendarData: DayData[] = [...mockCalendarData];
-  private habits: Habit[] = [...mockHabits];
-
   // Get calendar data
-  getCalendarData(): DayData[] {
-    return this.calendarData;
+  async getCalendarData(): Promise<DayData[]> {
+    const response = await calendarApi.getData();
+    return response.data || [];
   }
 
   // Get habits
-  getHabits(): Habit[] {
-    return this.habits;
+  async getHabits(): Promise<Habit[]> {
+    const response = await habitsApi.getAll();
+    return response.data || [];
   }
 
   // Toggle habit completion
-  toggleHabit(habitId: string): boolean {
-    const habit = this.habits.find(h => h.id === habitId);
-    if (!habit) return false;
-
-    habit.completed = !habit.completed;
-    return true;
+  async toggleHabit(habitId: string): Promise<Habit | undefined> {
+    const response = await habitsApi.toggle(habitId);
+    return response.data;
   }
 
   // Update day activity
-  updateDayActivity(day: number, hasActivity: boolean, activityType?: 'primary' | 'secondary' | 'tertiary'): boolean {
-    const dayData = this.calendarData.find(d => d.day === day);
-    if (!dayData) return false;
-
-    dayData.hasActivity = hasActivity;
-    dayData.activityType = activityType;
-    return true;
+  async updateDayActivity(
+    day: number,
+    hasActivity: boolean,
+    activityType?: 'primary' | 'secondary' | 'tertiary'
+  ): Promise<boolean> {
+    const response = await calendarApi.updateDay(day, hasActivity, activityType);
+    return response.success;
   }
 }
 

@@ -69,7 +69,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
     );
     dotAnimation.start();
 
-    // Auto close after 5 seconds
+    // Auto close after 3 seconds
     const timer = setTimeout(() => {
       Animated.timing(fadeAnim, {
         toValue: 0,
@@ -78,7 +78,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
       }).start(() => {
         onFinish();
       });
-    }, 5000);
+    }, 3000);
 
     return () => {
       clearTimeout(timer);

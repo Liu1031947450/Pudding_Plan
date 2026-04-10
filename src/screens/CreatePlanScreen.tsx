@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,75 +8,366 @@ import {
   TextInput,
   Modal,
   Switch,
+  ActivityIndicator,
+  LayoutAnimation,
+  Platform,
+  UIManager,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { Colors, Spacing, FontSize, BorderRadius } from '../constants/theme';
-import { TopAppBar, Card, Button } from '../components';
+import { TopAppBar, Card, Button, Toast } from '../components';
 import { templateDetails } from '../data/templates';
-import type { TemplateDetail, Reminder } from '../types/domain';
+import { usePlanManagement } from '../hooks';
+import type { TemplateDetail, Reminder, Plan } from '../types/domain';
 
-type CreatePlanRouteProp = RouteProp<{ CreatePlan: { templateId?: string } }, 'CreatePlan'>;
+type CreatePlanRouteProp = RouteProp<
+  { CreatePlan: { templateId?: string; planId?: string } },
+  'CreatePlan'
+>;
 
 const CreatePlanScreen: React.FC = () => {
+  // 启用 Android 的 LayoutAnimation
+  useEffect(() => {
+    if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+      UIManager.setLayoutAnimationEnabledExperimental(true);
+    }
+  }, []);
+
   const navigation = useNavigation();
   const route = useRoute<CreatePlanRouteProp>();
   const templateId = route.params?.templateId;
+  const planId = route.params?.planId;
+  const { handleCreatePlan, handleUpdatePlan, plans } = usePlanManagement();
+
+  // 如果是编辑模式，获取计划数据
+  const existingPlan = planId ? plans.find(p => p.id === planId) : undefined;
+  const isEditMode = !!existingPlan;
 
   // 获取模板数据
-  const templateData: TemplateDetail | undefined = templateId ? templateDetails[templateId] : undefined;
+  const templateData: TemplateDetail | undefined = templateId
+    ? templateDetails[templateId]
+    : undefined;
 
-  const [planName, setPlanName] = useState(templateData?.title || '');
-  const [planDays, setPlanDays] = useState(templateData?.duration.toString() || '');
-  const planIcon = templateData?.icon || '✨';
-  const planColor = templateData?.color || Colors.primaryContainer;
+  const [planName, setPlanName] = useState(
+    existingPlan?.title || templateData?.title || '',
+  );
+  const [planDays, setPlanDays] = useState(
+    existingPlan?.totalDays.toString() ||
+      templateData?.duration.toString() ||
+      '',
+  );
+  const [planIcon, setPlanIcon] = useState<string>('✨');
+  const [planColor, setPlanColor] = useState<string>(Colors.primaryContainer);
 
-  const [checkInMethod, setCheckInMethod] = useState<'stamp' | 'number' | 'diary'>('stamp');
-  const [reminders, setReminders] = useState<Reminder[]>([
-    { id: '1', time: new Date(2024, 0, 1, 7, 30), label: '每日', enabled: true },
-    { id: '2', time: new Date(2024, 0, 1, 22, 0), label: '复盘', enabled: false },
-  ]);
+  // 根据模板获取图标，如果是 emoji 则直接使用，否则使用默认的 MaterialIcon
+  const getIconForPlan = (plan?: Plan, template?: TemplateDetail): string => {
+    if (plan?.icon) {
+      return plan.icon;
+    }
+    if (template?.icon) {
+      // 如果模板有 emoji 图标，返回 emoji
+      return template.icon;
+    }
+    // 自定义计划使用默认图标
+    return '✨';
+  };
+
+  const [checkInMethod, setCheckInMethod] = useState<0 | 1 | 2>(
+    existingPlan?.type ?? 0,
+  );
+  const [reminders, setReminders] = useState<Reminder[]>(
+    existingPlan?.remindSetting.map((r, idx) => ({
+      id: `${idx + 1}`,
+      time: r.time,
+      label: '每日',
+      enabled: r.status,
+    })) || [
+      {
+        id: '1',
+        time: new Date(2024, 0, 1, 7, 30),
+        label: '每日',
+        enabled: true,
+      },
+      {
+        id: '2',
+        time: new Date(2024, 0, 1, 22, 0),
+        label: '复盘',
+        enabled: false,
+      },
+    ],
+  );
+  const [_milestones, _setMilestones] = useState<
+    {
+      times: number;
+      title: string;
+      description: string;
+      status: boolean;
+    }[]
+  >(existingPlan?.rewords || []);
   const [showTimePicker, setShowTimePicker] = useState(false);
-  const [selectedTime, setSelectedTime] = useState(new Date());
+  const [selectedHour, setSelectedHour] = useState(9);
+  const [selectedMinute, setSelectedMinute] = useState(0);
+  const [editingReminderId, setEditingReminderId] = useState<string | null>(
+    null,
+  );
+  const [isCreating, setIsCreating] = useState(false);
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState<'success' | 'error' | 'info'>(
+    'success',
+  );
+
+  // 当 existingPlan 数据加载完成后，更新表单数据
+  useEffect(() => {
+    if (existingPlan) {
+      console.log('Loading existing plan data:', existingPlan);
+      setPlanName(existingPlan.title);
+      setPlanDays(existingPlan.totalDays.toString());
+      setCheckInMethod(existingPlan.type);
+      setPlanIcon(getIconForPlan(existingPlan, templateData));
+      setPlanColor(
+        existingPlan.color || templateData?.color || Colors.primaryContainer,
+      );
+
+      // 更新提醒设置
+      if (existingPlan.remindSetting && existingPlan.remindSetting.length > 0) {
+        setReminders(
+          existingPlan.remindSetting.map((r, idx) => ({
+            id: `${idx + 1}`,
+            time: r.time,
+            label: '每日',
+            enabled: r.status,
+          })),
+        );
+      }
+
+      // 更新里程碑
+      if (existingPlan.rewords && existingPlan.rewords.length > 0) {
+        _setMilestones(existingPlan.rewords);
+      }
+    } else if (templateData) {
+      // 如果是模板模式，设置模板的 icon 和 color
+      setPlanIcon(getIconForPlan(undefined, templateData));
+      setPlanColor(templateData.color || Colors.primaryContainer);
+    }
+  }, [existingPlan, templateData]);
 
   const handleBack = () => {
     navigation.goBack();
   };
 
-  const handleComplete = () => {
-    navigation.goBack();
-  };
+  const handleComplete = async () => {
+    // 验证输入
+    if (!planName.trim()) {
+      setToastMessage('请输入计划名称');
+      setToastType('error');
+      setToastVisible(true);
+      return;
+    }
 
-  const handleAddReminder = () => {
-    setShowTimePicker(true);
-  };
+    const days = parseInt(planDays, 10);
+    if (!days || days <= 0) {
+      setToastMessage('请输入有效的打卡周期');
+      setToastType('error');
+      setToastVisible(true);
+      return;
+    }
 
-  const handleTimeChange = (_event: any, date?: Date) => {
-    if (date) {
-      setSelectedTime(date);
+    setIsCreating(true);
+
+    try {
+      // 构建计划数据
+      const newPlanData: Omit<Plan, 'id'> = {
+        title: planName,
+        totalDays: days,
+        currentDays: existingPlan?.currentDays ?? 0, // 保留已完成天数
+        type: checkInMethod,
+        remindSetting: reminders.map(r => ({
+          time: typeof r.time === 'string' ? r.time : formatTime(r.time),
+          status: r.enabled,
+        })),
+        rewords: _milestones.map(
+          (m: {
+            times: number;
+            title: string;
+            description: string;
+            status: boolean;
+          }) => ({
+            times: m.times,
+            title: m.title,
+            description: m.description,
+            status: m.status,
+          }),
+        ),
+        icon: planIcon,
+        // 可选的展示字段
+        color: planColor,
+      };
+
+      console.log('Creating plan:', newPlanData);
+
+      // 调用 API 创建或更新计划
+      const result = isEditMode
+        ? await handleUpdatePlan(planId!, newPlanData)
+        : await handleCreatePlan(newPlanData);
+
+      console.log('Create/Update result:', result);
+
+      if (result) {
+        // 显示成功提示
+        setToastMessage(isEditMode ? '计划更新成功！' : '计划创建成功！');
+        setToastType('success');
+        setToastVisible(true);
+
+        // 延迟返回，让用户看到提示
+        setTimeout(() => {
+          setIsCreating(false);
+
+          // 获取导航状态，判断是否需要返回多层
+          const navState = navigation.getState();
+          const routes = navState?.routes || [];
+          const currentIndex = navState?.index || 0;
+
+          // 如果当前路由栈中有 TemplateSelection，需要返回两层
+          const hasTemplateSelection = routes.some(
+            r => r.name === 'TemplateSelection',
+          );
+
+          if (hasTemplateSelection && currentIndex >= 2) {
+            // 返回到 Main（Plan 页面），跳过 TemplateSelection
+            navigation.navigate('Main' as never);
+          } else {
+            // 直接返回上一页
+            navigation.goBack();
+          }
+        }, 1500);
+      } else {
+        setIsCreating(false);
+        setToastMessage(
+          isEditMode ? '计划更新失败，请重试' : '计划创建失败，请重试',
+        );
+        setToastType('error');
+        setToastVisible(true);
+      }
+    } catch (error) {
+      console.error('Create/Update plan error:', error);
+      setIsCreating(false);
+      setToastMessage(
+        isEditMode ? '计划更新失败，请重试' : '计划创建失败，请重试',
+      );
+      setToastType('error');
+      setToastVisible(true);
     }
   };
 
+  const handleAddReminder = () => {
+    if (reminders.length >= 5) return; // 最多5个提醒
+    setEditingReminderId(null); // 新增模式
+    setSelectedHour(9);
+    setSelectedMinute(0);
+    setShowTimePicker(true);
+  };
+
+  const handleEditReminder = (reminder: Reminder) => {
+    setEditingReminderId(reminder.id); // 编辑模式
+    // 解析时间字符串
+    const timeStr =
+      typeof reminder.time === 'string'
+        ? reminder.time
+        : formatTime(reminder.time);
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    setSelectedHour(hours);
+    setSelectedMinute(minutes);
+    setShowTimePicker(true);
+  };
+
   const handleConfirmTime = () => {
-    const newReminder: Reminder = {
-      id: Date.now().toString(),
-      time: selectedTime,
-      label: '每日',
-      enabled: true,
-    };
-    setReminders([...reminders, newReminder]);
+    const timeString = `${selectedHour.toString().padStart(2, '0')}:${selectedMinute.toString().padStart(2, '0')}`;
+
+    if (editingReminderId) {
+      // 编辑模式：更新现有提醒
+      setReminders(
+        reminders.map(r =>
+          r.id === editingReminderId ? { ...r, time: timeString } : r,
+        ),
+      );
+    } else {
+      // 新增模式：添加新提醒
+      const newReminder: Reminder = {
+        id: Date.now().toString(),
+        time: timeString,
+        label: '每日',
+        enabled: true,
+      };
+      setReminders([...reminders, newReminder]);
+    }
+
     setShowTimePicker(false);
+    setEditingReminderId(null);
   };
 
   const toggleReminder = (id: string) => {
-    setReminders(reminders.map(r =>
-      r.id === id ? { ...r, enabled: !r.enabled } : r
-    ));
+    LayoutAnimation.configureNext({
+      duration: 1200,
+      create: {
+        type: LayoutAnimation.Types.easeInEaseOut,
+        property: LayoutAnimation.Properties.opacity,
+      },
+      update: {
+        type: LayoutAnimation.Types.easeInEaseOut,
+        springDamping: 0.8,
+      },
+      delete: {
+        type: LayoutAnimation.Types.easeInEaseOut,
+        property: LayoutAnimation.Properties.opacity,
+      },
+    });
+    // 切换提醒的启用/禁用状态
+    setReminders(
+      reminders.map(r => (r.id === id ? { ...r, enabled: !r.enabled } : r)),
+    );
   };
 
-  const formatTime = (date: Date) => {
+  // 获取排序后的提醒列表
+  const getSortedReminders = () => {
+    const parseTime = (timeStr: string) => {
+      const [hours, minutes] = timeStr.split(':').map(Number);
+      return hours * 60 + minutes;
+    };
+
+    const enabled = reminders
+      .filter(r => r.enabled)
+      .sort((a, b) => {
+        const timeA = parseTime(
+          typeof a.time === 'string' ? a.time : formatTime(a.time),
+        );
+        const timeB = parseTime(
+          typeof b.time === 'string' ? b.time : formatTime(b.time),
+        );
+        return timeA - timeB;
+      });
+
+    const disabled = reminders
+      .filter(r => !r.enabled)
+      .sort((a, b) => {
+        const timeA = parseTime(
+          typeof a.time === 'string' ? a.time : formatTime(a.time),
+        );
+        const timeB = parseTime(
+          typeof b.time === 'string' ? b.time : formatTime(b.time),
+        );
+        return timeA - timeB;
+      });
+
+    return [...enabled, ...disabled];
+  };
+
+  const formatTime = (date: Date | string) => {
+    if (typeof date === 'string') {
+      return date;
+    }
     const hours = date.getHours().toString().padStart(2, '0');
     const minutes = date.getMinutes().toString().padStart(2, '0');
     return `${hours}:${minutes}`;
@@ -85,7 +376,7 @@ const CreatePlanScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <TopAppBar
-        title="定制我的计划"
+        title={isEditMode ? '编辑计划' : '定制我的计划'}
         showBackButton
         onBackPress={handleBack}
       />
@@ -97,19 +388,28 @@ const CreatePlanScreen: React.FC = () => {
       >
         <View style={styles.heroSection}>
           <View style={styles.heroImage}>
-            <View style={[styles.heroImagePlaceholder, { backgroundColor: `${planColor}20` }]}>
+            <View
+              style={[
+                styles.heroImagePlaceholder,
+                { backgroundColor: `${planColor}20` },
+              ]}
+            >
               <Text style={styles.heroImageText}>{planIcon}</Text>
             </View>
           </View>
           <View style={styles.heroContent}>
             <Text style={styles.heroLabel}>
-              {templateData ? templateData.category : '开始新的旅程'}
+              {isEditMode
+                ? '编辑计划'
+                : templateData
+                  ? templateData.category
+                  : '开始新的旅程'}
             </Text>
-            <Text style={styles.heroTitle}>
-              {planName || '自定义计划'}
-            </Text>
-            {templateData && (
-              <Text style={styles.heroDescription}>{templateData.description}</Text>
+            <Text style={styles.heroTitle}>{planName || '自定义计划'}</Text>
+            {templateData && !isEditMode && (
+              <Text style={styles.heroDescription}>
+                {templateData.description}
+              </Text>
             )}
           </View>
         </View>
@@ -123,7 +423,11 @@ const CreatePlanScreen: React.FC = () => {
             <View style={styles.goalsList}>
               {templateData.goals.map((goal, index) => (
                 <View key={index} style={styles.goalItem}>
-                  <MaterialIcons name="check-circle" size={20} color={Colors.primary} />
+                  <MaterialIcons
+                    name="check-circle"
+                    size={20}
+                    color={Colors.primary}
+                  />
                   <Text style={styles.goalText}>{goal}</Text>
                 </View>
               ))}
@@ -168,7 +472,11 @@ const CreatePlanScreen: React.FC = () => {
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <MaterialIcons name="check-circle" size={20} color={Colors.primary} />
+            <MaterialIcons
+              name="check-circle"
+              size={20}
+              color={Colors.primary}
+            />
             <Text style={styles.sectionTitle}>打卡方式</Text>
           </View>
 
@@ -176,19 +484,23 @@ const CreatePlanScreen: React.FC = () => {
             <TouchableOpacity
               style={[
                 styles.methodButton,
-                checkInMethod === 'stamp' && styles.methodButtonActive,
+                checkInMethod === 0 && styles.methodButtonActive,
               ]}
-              onPress={() => setCheckInMethod('stamp')}
+              onPress={() => setCheckInMethod(0)}
             >
               <MaterialIcons
                 name="verified"
                 size={24}
-                color={checkInMethod === 'stamp' ? Colors.onPrimary : Colors.onSurfaceVariant}
+                color={
+                  checkInMethod === 0
+                    ? Colors.onPrimary
+                    : Colors.onSurfaceVariant
+                }
               />
               <Text
                 style={[
                   styles.methodText,
-                  checkInMethod === 'stamp' && styles.methodTextActive,
+                  checkInMethod === 0 && styles.methodTextActive,
                 ]}
               >
                 盖章打卡
@@ -198,19 +510,23 @@ const CreatePlanScreen: React.FC = () => {
             <TouchableOpacity
               style={[
                 styles.methodButton,
-                checkInMethod === 'number' && styles.methodButtonActive,
+                checkInMethod === 1 && styles.methodButtonActive,
               ]}
-              onPress={() => setCheckInMethod('number')}
+              onPress={() => setCheckInMethod(1)}
             >
               <MaterialIcons
                 name="show-chart"
                 size={24}
-                color={checkInMethod === 'number' ? Colors.onPrimary : Colors.onSurfaceVariant}
+                color={
+                  checkInMethod === 1
+                    ? Colors.onPrimary
+                    : Colors.onSurfaceVariant
+                }
               />
               <Text
                 style={[
                   styles.methodText,
-                  checkInMethod === 'number' && styles.methodTextActive,
+                  checkInMethod === 1 && styles.methodTextActive,
                 ]}
               >
                 数值记录
@@ -220,19 +536,23 @@ const CreatePlanScreen: React.FC = () => {
             <TouchableOpacity
               style={[
                 styles.methodButton,
-                checkInMethod === 'diary' && styles.methodButtonActive,
+                checkInMethod === 2 && styles.methodButtonActive,
               ]}
-              onPress={() => setCheckInMethod('diary')}
+              onPress={() => setCheckInMethod(2)}
             >
               <MaterialIcons
                 name="edit-note"
                 size={24}
-                color={checkInMethod === 'diary' ? Colors.onPrimary : Colors.onSurfaceVariant}
+                color={
+                  checkInMethod === 2
+                    ? Colors.onPrimary
+                    : Colors.onSurfaceVariant
+                }
               />
               <Text
                 style={[
                   styles.methodText,
-                  checkInMethod === 'diary' && styles.methodTextActive,
+                  checkInMethod === 2 && styles.methodTextActive,
                 ]}
               >
                 文字日记
@@ -243,24 +563,59 @@ const CreatePlanScreen: React.FC = () => {
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <MaterialIcons name="notifications" size={20} color={Colors.primary} />
+            <MaterialIcons
+              name="notifications"
+              size={20}
+              color={Colors.primary}
+            />
             <Text style={styles.sectionTitle}>提醒设置</Text>
-            <TouchableOpacity style={styles.addButton} onPress={handleAddReminder}>
-              <MaterialIcons name="add" size={16} color={Colors.tertiary} />
-              <Text style={styles.addButtonText}>添加</Text>
+            <TouchableOpacity
+              style={[
+                styles.addButton,
+                reminders.length >= 5 && styles.addButtonDisabled,
+              ]}
+              onPress={handleAddReminder}
+              disabled={reminders.length >= 5}
+            >
+              <MaterialIcons
+                name="add"
+                size={16}
+                color={
+                  reminders.length >= 5
+                    ? Colors.outlineVariant
+                    : Colors.tertiary
+                }
+              />
+              <Text
+                style={[
+                  styles.addButtonText,
+                  reminders.length >= 5 && styles.addButtonTextDisabled,
+                ]}
+              >
+                添加 ({reminders.length}/5)
+              </Text>
             </TouchableOpacity>
           </View>
 
           <View style={styles.remindersList}>
-            {reminders.map(reminder => (
+            {getSortedReminders().map(reminder => (
               <Card key={reminder.id} style={styles.reminderCard}>
-                <View style={styles.reminderLeft}>
+                <TouchableOpacity
+                  style={styles.reminderLeft}
+                  onPress={() => handleEditReminder(reminder)}
+                >
                   <MaterialIcons
                     name="alarm"
                     size={20}
-                    color={reminder.enabled ? Colors.primary : Colors.onSurfaceVariant}
+                    color={
+                      reminder.enabled
+                        ? Colors.primary
+                        : Colors.onSurfaceVariant
+                    }
                   />
-                  <Text style={styles.reminderTime}>{formatTime(reminder.time)}</Text>
+                  <Text style={styles.reminderTime}>
+                    {formatTime(reminder.time)}
+                  </Text>
                   <View
                     style={[
                       styles.reminderBadge,
@@ -276,12 +631,17 @@ const CreatePlanScreen: React.FC = () => {
                       {reminder.label}
                     </Text>
                   </View>
-                </View>
+                </TouchableOpacity>
                 <Switch
                   value={reminder.enabled}
                   onValueChange={() => toggleReminder(reminder.id)}
-                  trackColor={{ false: Colors.surfaceContainerHigh, true: Colors.primaryContainer }}
-                  thumbColor={reminder.enabled ? Colors.primary : Colors.outline}
+                  trackColor={{
+                    false: Colors.surfaceContainerHigh,
+                    true: Colors.primaryContainer,
+                  }}
+                  thumbColor={
+                    reminder.enabled ? Colors.primary : Colors.outline
+                  }
                 />
               </Card>
             ))}
@@ -290,7 +650,11 @@ const CreatePlanScreen: React.FC = () => {
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <MaterialIcons name="emoji-events" size={20} color={Colors.primary} />
+            <MaterialIcons
+              name="emoji-events"
+              size={20}
+              color={Colors.primary}
+            />
             <Text style={styles.sectionTitle}>阶段里程碑</Text>
           </View>
 
@@ -330,14 +694,25 @@ const CreatePlanScreen: React.FC = () => {
             </Card>
 
             <TouchableOpacity style={styles.addMilestoneButton}>
-              <MaterialIcons name="add" size={20} color={Colors.onSurfaceVariant} />
+              <MaterialIcons
+                name="add"
+                size={20}
+                color={Colors.onSurfaceVariant}
+              />
               <Text style={styles.addMilestoneText}>添加里程碑阶段</Text>
             </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
 
-{showTimePicker && (
+      <Toast
+        visible={toastVisible}
+        message={toastMessage}
+        type={toastType}
+        onHide={() => setToastVisible(false)}
+      />
+
+      {showTimePicker && (
         <Modal
           visible={showTimePicker}
           transparent
@@ -352,23 +727,78 @@ const CreatePlanScreen: React.FC = () => {
             <TouchableOpacity
               style={styles.timePickerModal}
               activeOpacity={1}
-              onPress={(e) => e.stopPropagation()}
+              onPress={e => e.stopPropagation()}
             >
               <View style={styles.modalHeader}>
                 <Text style={styles.modalTitle}>选择提醒时间</Text>
                 <TouchableOpacity onPress={() => setShowTimePicker(false)}>
-                  <MaterialIcons name="close" size={24} color={Colors.onSurface} />
+                  <MaterialIcons
+                    name="close"
+                    size={24}
+                    color={Colors.onSurface}
+                  />
                 </TouchableOpacity>
               </View>
-              <View style={styles.pickerContainer}>
-                <DateTimePicker
-                  value={selectedTime}
-                  mode="time"
-                  display="spinner"
-                  onChange={handleTimeChange}
-                  locale="zh-CN"
-                />
+
+              <View style={styles.customPickerContainer}>
+                <View style={styles.pickerRow}>
+                  <ScrollView
+                    style={styles.pickerColumn}
+                    showsVerticalScrollIndicator={false}
+                  >
+                    {Array.from({ length: 24 }, (_, i) => i).map(hour => (
+                      <TouchableOpacity
+                        key={hour}
+                        style={[
+                          styles.pickerItem,
+                          selectedHour === hour && styles.pickerItemSelected,
+                        ]}
+                        onPress={() => setSelectedHour(hour)}
+                      >
+                        <Text
+                          style={[
+                            styles.pickerItemText,
+                            selectedHour === hour &&
+                              styles.pickerItemTextSelected,
+                          ]}
+                        >
+                          {hour.toString().padStart(2, '0')}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+
+                  <Text style={styles.pickerSeparator}>:</Text>
+
+                  <ScrollView
+                    style={styles.pickerColumn}
+                    showsVerticalScrollIndicator={false}
+                  >
+                    {Array.from({ length: 60 }, (_, i) => i).map(minute => (
+                      <TouchableOpacity
+                        key={minute}
+                        style={[
+                          styles.pickerItem,
+                          selectedMinute === minute &&
+                            styles.pickerItemSelected,
+                        ]}
+                        onPress={() => setSelectedMinute(minute)}
+                      >
+                        <Text
+                          style={[
+                            styles.pickerItemText,
+                            selectedMinute === minute &&
+                              styles.pickerItemTextSelected,
+                          ]}
+                        >
+                          {minute.toString().padStart(2, '0')}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
               </View>
+
               <View style={styles.modalActions}>
                 <TouchableOpacity
                   style={styles.modalCancelButton}
@@ -390,12 +820,20 @@ const CreatePlanScreen: React.FC = () => {
 
       <View style={styles.bottomBar}>
         <Button
-          title="完成"
+          title={isCreating ? '创建中...' : '完成'}
           onPress={handleComplete}
           variant="primary"
           size="large"
           style={styles.completeButton}
+          disabled={isCreating}
         />
+        {isCreating && (
+          <ActivityIndicator
+            style={styles.loadingIndicator}
+            color={Colors.primary}
+            size="small"
+          />
+        )}
       </View>
     </SafeAreaView>
   );
@@ -412,7 +850,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: Spacing.md,
     paddingTop: 32,
-    paddingBottom: 120,
+    paddingBottom: Spacing.md,
   },
   heroSection: {
     marginBottom: Spacing.xl,
@@ -691,16 +1129,18 @@ const styles = StyleSheet.create({
     color: Colors.onSurfaceVariant,
   },
   bottomBar: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
     padding: Spacing.md,
-    paddingBottom: 40,
-    backgroundColor: Colors.surfaceContainerLowest,
+    paddingBottom: Spacing.md,
+    backgroundColor: Colors.background,
   },
   completeButton: {
-    width: '100%',
+    paddingVertical: Spacing.sm,
+  },
+  loadingIndicator: {
+    position: 'absolute',
+    right: Spacing.xl,
+    top: '50%',
+    marginTop: -8,
   },
   modalOverlay: {
     flex: 1,
@@ -759,6 +1199,43 @@ const styles = StyleSheet.create({
   pickerContainer: {
     paddingVertical: Spacing.lg,
     minHeight: 200,
+  },
+  customPickerContainer: {
+    paddingVertical: Spacing.lg,
+    paddingHorizontal: Spacing.lg,
+  },
+  pickerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.md,
+  },
+  pickerColumn: {
+    maxHeight: 200,
+  },
+  pickerItem: {
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.lg,
+    alignItems: 'center',
+    borderRadius: BorderRadius.md,
+    marginVertical: 2,
+  },
+  pickerItemSelected: {
+    backgroundColor: Colors.primaryContainer,
+  },
+  pickerItemText: {
+    fontSize: FontSize.lg,
+    color: Colors.onSurfaceVariant,
+    fontWeight: '500',
+  },
+  pickerItemTextSelected: {
+    color: Colors.primary,
+    fontWeight: '700',
+  },
+  pickerSeparator: {
+    fontSize: FontSize.xxl,
+    fontWeight: '700',
+    color: Colors.onSurface,
   },
 });
 

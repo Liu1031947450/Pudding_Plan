@@ -7,46 +7,51 @@ export const useCalendarData = () => {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchData = () => {
-      try {
-        const calendar = calendarService.getCalendarData();
-        const habitsData = calendarService.getHabits();
-        setCalendarData(calendar);
-        setHabits(habitsData);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  const toggleHabit = useCallback((habitId: string) => {
-    const success = calendarService.toggleHabit(habitId);
-    if (success) {
-      setHabits(calendarService.getHabits());
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [calendar, habitsData] = await Promise.all([
+        calendarService.getCalendarData(),
+        calendarService.getHabits(),
+      ]);
+      setCalendarData(calendar);
+      setHabits(habitsData);
+    } catch (error) {
+      console.error('Failed to load calendar data:', error);
+    } finally {
+      setLoading(false);
     }
-    return success;
   }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const toggleHabit = useCallback(async (habitId: string) => {
+    const habit = await calendarService.toggleHabit(habitId);
+    if (habit) {
+      await loadData();
+    }
+    return !!habit;
+  }, [loadData]);
 
   const updateDayActivity = useCallback(
-    (
+    async (
       day: number,
       hasActivity: boolean,
       activityType?: 'primary' | 'secondary' | 'tertiary',
     ) => {
-      const success = calendarService.updateDayActivity(
+      const success = await calendarService.updateDayActivity(
         day,
         hasActivity,
         activityType,
       );
       if (success) {
-        setCalendarData(calendarService.getCalendarData());
+        await loadData();
       }
       return success;
     },
-    [],
+    [loadData],
   );
 
   return {
@@ -55,5 +60,6 @@ export const useCalendarData = () => {
     loading,
     toggleHabit,
     updateDayActivity,
+    refreshData: loadData,
   };
 };

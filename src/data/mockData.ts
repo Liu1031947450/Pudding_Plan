@@ -1,37 +1,38 @@
 import { Colors } from '../constants/theme';
-import type { Plan, Badge, Notification, Buddy, Circle, DayData, Habit, RhythmData } from '../types/domain';
+import type {
+  Plan,
+  Badge,
+  Notification,
+  Buddy,
+  Circle,
+  DayData,
+  Habit,
+  RhythmData,
+} from '../types/domain';
 
 // Mock Plans Data
 export const mockPlans: Plan[] = [
   {
-    id: '1',
-    title: '21天正念冥想',
-    subtitle: '已坚持 14 天',
-    progress: 66,
-    days: 14,
-    totalDays: 21,
-    icon: 'self-improvement',
-    color: Colors.primaryContainer,
-  },
-  {
-    id: '2',
-    title: '60天减脂挑战',
-    subtitle: '已坚持 12 天',
-    progress: 20,
-    days: 12,
-    totalDays: 60,
-    icon: 'fitness-center',
-    color: Colors.tertiaryContainer,
-  },
-  {
-    id: '3',
-    title: '99天正念冥想',
-    subtitle: '已坚持 98 天',
-    progress: 66,
-    days: 98,
-    totalDays: 99,
-    icon: 'self-improvement',
-    color: Colors.primaryContainer,
+    id: '99',
+    title: '测试数据01', // 计划名称
+    totalDays: 21, // 打卡周期（总天数）
+    currentDays: 10, // 当前打卡天数
+    type: 0, // 打卡方式：0-盖章打卡, 1-数值记录, 2-文字日记
+    remindSetting: [
+      {
+        time: '09:00', // 提醒时间（HH:mm）
+        status: true, // 提醒状态：true-开启, false-关闭
+      },
+    ], // 提醒设置
+    rewords: [
+      {
+        times: 7, // 成就条件（天数）
+        title: '小有成就', // 成就名称
+        description: '吃一顿大餐', // 成就奖励
+        status: true, // 成就状态：true-已解锁, false-未解锁
+      },
+    ], // 阶段里程碑,
+    icon: '', // 计划图标
   },
 ];
 
@@ -265,10 +266,13 @@ export const mockWeekRhythmData: RhythmData[] = [
 ];
 
 // Mock Rhythm Data (Month)
-export const mockMonthRhythmData: RhythmData[] = Array.from({ length: 30 }, (_, i) => ({
-  date: `${i + 1}`,
-  value: Math.max(
-    40,
-    Math.min(100, 65 + Math.sin(i / 4) * 25 + (Math.random() - 0.5) * 15),
-  ),
-}));
+export const mockMonthRhythmData: RhythmData[] = Array.from(
+  { length: 30 },
+  (_, i) => ({
+    date: `${i + 1}`,
+    value: Math.max(
+      40,
+      Math.min(100, 65 + Math.sin(i / 4) * 25 + (Math.random() - 0.5) * 15),
+    ),
+  }),
+);

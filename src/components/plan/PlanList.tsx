@@ -14,6 +14,7 @@ interface PlanListProps {
   onDeleteSelected: () => void;
   onMovePlan: (fromIndex: number, toIndex: number) => void;
   onCreatePlan: () => void;
+  onPlanPress?: (plan: Plan) => void;
 }
 
 export const PlanList: React.FC<PlanListProps> = ({
@@ -25,6 +26,7 @@ export const PlanList: React.FC<PlanListProps> = ({
   onDeleteSelected,
   onMovePlan,
   onCreatePlan,
+  onPlanPress,
 }) => {
   return (
     <View style={styles.section}>
@@ -65,6 +67,7 @@ export const PlanList: React.FC<PlanListProps> = ({
             onMoveDown={() => onMovePlan(index, index + 1)}
             canMoveUp={index > 0}
             canMoveDown={index < plans.length - 1}
+            onPress={() => onPlanPress?.(plan)}
           />
         ))}
 

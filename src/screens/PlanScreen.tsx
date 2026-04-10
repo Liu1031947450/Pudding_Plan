@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { StyleSheet, ScrollView } from 'react-native';
+import { StyleSheet, ScrollView, View, ActivityIndicator, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Colors, Spacing } from '../constants/theme';
+import type { Plan } from '../types/domain';
 import {
   BottomNavBar,
   TopAppBar,
@@ -23,12 +24,14 @@ const PlanScreen: React.FC = () => {
   const navigation = useNavigation();
   const {
     plans,
+    loading,
     isManaging,
     selectedPlans,
     handleDeleteSelected,
     handleReorderPlans,
     toggleManageMode,
     togglePlanSelection,
+    refreshPlans,
   } = usePlanManagement();
 
   const {
@@ -39,10 +42,22 @@ const PlanScreen: React.FC = () => {
 
   const [rhythmPeriod, setRhythmPeriod] = useState<RhythmPeriod>('week');
 
+  // 当页面获得焦点时刷新数据
+  useFocusEffect(
+    React.useCallback(() => {
+      console.log('PlanScreen focused, refreshing plans...');
+      refreshPlans();
+    }, [refreshPlans])
+  );
+
   const rhythmData = rhythmPeriod === 'week' ? mockWeekRhythmData : mockMonthRhythmData;
 
   const handleCreatePlan = () => {
     navigation.navigate('TemplateSelection' as never);
+  };
+
+  const handlePlanPress = (plan: Plan) => {
+    (navigation as any).navigate('CreatePlan', { planId: plan.id });
   };
 
   const movePlan = (fromIndex: number, toIndex: number) => {
@@ -66,7 +81,12 @@ const PlanScreen: React.FC = () => {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {plans.length === 0 ? (
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={Colors.primary} />
+            <Text style={styles.loadingText}>加载中...</Text>
+          </View>
+        ) : plans.length === 0 ? (
           <PlanEmptyState onCreatePlan={handleCreatePlan} />
         ) : (
           <>
@@ -79,6 +99,7 @@ const PlanScreen: React.FC = () => {
               onDeleteSelected={handleDeleteSelected}
               onMovePlan={movePlan}
               onCreatePlan={handleCreatePlan}
+              onPlanPress={handlePlanPress}
             />
 
             <RhythmChart
@@ -118,6 +139,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingTop: 32,
     paddingBottom: 100,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 100,
+  },
+  loadingText: {
+    marginTop: Spacing.md,
+    fontSize: 14,
+    color: Colors.onSurfaceVariant,
   },
 });
 

@@ -30,6 +30,13 @@ export const PlanCard: React.FC<PlanCardProps> = ({
   canMoveUp = true,
   canMoveDown = true,
 }) => {
+  // 计算展示数据
+  const days = plan.currentDays ?? plan.days ?? 0;
+  const progress = plan.progress ?? Math.round((days / plan.totalDays) * 100);
+  const subtitle = plan.subtitle ?? `已坚持 ${days} 天`;
+  const color = plan.color ?? Colors.primaryContainer;
+  const icon = plan.icon || '✨'; // 如果没有 icon，使用默认星星
+
   return (
     <Card
       style={styles.planCard}
@@ -63,18 +70,23 @@ export const PlanCard: React.FC<PlanCardProps> = ({
           <View
             style={[
               styles.planIcon,
-              { backgroundColor: plan.color },
+              { backgroundColor: color },
             ]}
           >
-            <MaterialIcons
-              name={plan.icon}
-              size={24}
-              color={Colors.onSurface}
-            />
+            {/* 判断是 emoji 还是 MaterialIcon */}
+            {icon.length <= 2 ? (
+              <Text style={styles.planIconEmoji}>{icon}</Text>
+            ) : (
+              <MaterialIcons
+                name={icon as any}
+                size={24}
+                color={Colors.onSurface}
+              />
+            )}
           </View>
           <View style={styles.planText}>
             <Text style={styles.planTitle}>{plan.title}</Text>
-            <Text style={styles.planSubtitle}>{plan.subtitle}</Text>
+            <Text style={styles.planSubtitle}>{subtitle}</Text>
           </View>
         </View>
         <View style={styles.planActions}>
@@ -111,16 +123,16 @@ export const PlanCard: React.FC<PlanCardProps> = ({
             </View>
           )}
           <BloomProgress
-            progress={plan.progress}
+            progress={progress}
             size={56}
             strokeWidth={6}
           />
         </View>
       </View>
       <ProgressBar
-        progress={plan.progress}
+        progress={progress}
         color={
-          plan.progress === 66 ? Colors.primary : Colors.tertiary
+          progress === 66 ? Colors.primary : Colors.tertiary
         }
         height={8}
       />
@@ -168,6 +180,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: Spacing.sm,
+  },
+  planIconEmoji: {
+    fontSize: 24,
   },
   planText: {
     flex: 1,

@@ -3,18 +3,31 @@ import { MaterialIcons } from '@expo/vector-icons';
 // Plan related types
 export interface Plan {
   id: string;
-  title: string;
-  subtitle: string;
-  progress: number;
-  days: number;
-  totalDays: number;
-  icon: keyof typeof MaterialIcons.glyphMap;
-  color: string;
+  title: string; // 计划名称
+  totalDays: number; // 打卡周期（总天数）
+  currentDays?: number; // 当前打卡天数
+  type: 0 | 1 | 2; // 打卡方式：0-盖章打卡, 1-数值记录, 2-文字日记
+  remindSetting: {
+    time: string; // 提醒时间（HH:mm）
+    status: boolean; // 提醒状态：true-开启, false-关闭
+  }[];
+  rewords: {
+    times: number; // 成就条件（天数）
+    title: string; // 成就名称
+    description: string; // 成就奖励
+    status: boolean; // 成就状态：true-已解锁, false-未解锁
+  }[];
+  icon: keyof typeof MaterialIcons.glyphMap | string; // 计划图标
+  // 以下字段用于展示，可以从其他数据计算得出
+  subtitle?: string; // 副标题（如"已坚持 X 天"）
+  progress?: number; // 进度百分比
+  days?: number; // 已打卡天数（兼容旧字段）
+  color?: string; // 卡片颜色
 }
 
 export interface Reminder {
   id: string;
-  time: Date;
+  time: Date | string; // 支持 Date 对象或 HH:mm 格式字符串
   label: string;
   enabled: boolean;
 }

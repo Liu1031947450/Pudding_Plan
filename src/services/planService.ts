@@ -1,59 +1,42 @@
 import type { Plan } from '../types/domain';
-import { mockPlans } from '../data/mockData';
+import { plansApi } from '../api';
 
 // Plan Service - handles all plan-related operations
 class PlanService {
-  private plans: Plan[] = [...mockPlans];
-
   // Get all plans
-  getPlans(): Plan[] {
-    return this.plans;
+  async getPlans(): Promise<Plan[]> {
+    const response = await plansApi.getAll();
+    return response.data || [];
   }
 
   // Get plan by ID
-  getPlanById(id: string): Plan | undefined {
-    return this.plans.find(plan => plan.id === id);
+  async getPlanById(id: string): Promise<Plan | undefined> {
+    const response = await plansApi.getById(id);
+    return response.data;
   }
 
   // Create new plan
-  createPlan(plan: Omit<Plan, 'id'>): Plan {
-    const newPlan: Plan = {
-      ...plan,
-      id: Date.now().toString(),
-    };
-    this.plans.push(newPlan);
-    return newPlan;
+  async createPlan(plan: Omit<Plan, 'id'>): Promise<Plan | undefined> {
+    const response = await plansApi.create(plan);
+    return response.data;
   }
 
   // Update plan
-  updatePlan(id: string, updates: Partial<Plan>): Plan | undefined {
-    const index = this.plans.findIndex(plan => plan.id === id);
-    if (index === -1) return undefined;
-
-    this.plans[index] = { ...this.plans[index], ...updates };
-    return this.plans[index];
+  async updatePlan(id: string, updates: Partial<Plan>): Promise<Plan | undefined> {
+    const response = await plansApi.update(id, updates);
+    return response.data;
   }
 
   // Delete plan
-  deletePlan(id: string): boolean {
-    const index = this.plans.findIndex(plan => plan.id === id);
-    if (index === -1) return false;
-
-    this.plans.splice(index, 1);
-    return true;
+  async deletePlan(id: string): Promise<boolean> {
+    const response = await plansApi.delete(id);
+    return response.success;
   }
 
-  // Delete multiple plans
-  deletePlans(ids: string[]): number {
-    const idsSet = new Set(ids);
-    const initialLength = this.plans.length;
-    this.plans = this.plans.filter(plan => !idsSet.has(plan.id));
-    return initialLength - this.plans.length;
-  }
-
-  // Reorder plans
-  reorderPlans(newOrder: Plan[]): void {
-    this.plans = newOrder;
+  // Check in plan
+  async checkInPlan(id: string): Promise<Plan | undefined> {
+    const response = await plansApi.checkIn(id);
+    return response.data;
   }
 }
 
