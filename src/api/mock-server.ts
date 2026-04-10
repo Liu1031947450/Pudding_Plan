@@ -1,6 +1,25 @@
-import { mockPlans, mockBadges, mockNotifications, mockBuddies, mockCircles, mockCalendarData, mockHabits, mockWeekRhythmData, mockMonthRhythmData } from '../data/mockData';
+import {
+  mockPlans,
+  mockBadges,
+  mockNotifications,
+  mockBuddies,
+  mockCircles,
+  mockCalendarData,
+  mockHabits,
+  mockWeekRhythmData,
+  mockMonthRhythmData,
+} from '../data/mockData';
 import { templateDetails } from '../data/templates';
-import type { Plan, Badge, Notification, Buddy, Circle, DayData, Habit, RhythmData } from '../types/domain';
+import type {
+  Plan,
+  Badge,
+  Notification,
+  Buddy,
+  Circle,
+  DayData,
+  Habit,
+  RhythmData,
+} from '../types/domain';
 import type { TemplateDetail } from '../data/templates';
 
 // Mock database - 使用单例模式保持数据持久化（在应用运行期间）
@@ -31,19 +50,34 @@ class MockDatabase {
     return MockDatabase.instance;
   }
 
-  getPlans() { return this.plansDB; }
-  getBadges() { return this.badgesDB; }
-  getNotifications() { return this.notificationsDB; }
-  getBuddies() { return this.buddiesDB; }
-  getCircles() { return this.circlesDB; }
-  getCalendar() { return this.calendarDB; }
-  getHabits() { return this.habitsDB; }
+  getPlans() {
+    return this.plansDB;
+  }
+  getBadges() {
+    return this.badgesDB;
+  }
+  getNotifications() {
+    return this.notificationsDB;
+  }
+  getBuddies() {
+    return this.buddiesDB;
+  }
+  getCircles() {
+    return this.circlesDB;
+  }
+  getCalendar() {
+    return this.calendarDB;
+  }
+  getHabits() {
+    return this.habitsDB;
+  }
 }
 
 const db = MockDatabase.getInstance();
 
 // Simulate network delay
-const delay = (ms: number = 300) => new Promise(resolve => setTimeout(resolve, ms));
+const delay = (ms: number = 300) =>
+  new Promise(resolve => setTimeout(resolve, ms));
 
 // Mock API Server
 export const mockApiServer = {
@@ -71,7 +105,10 @@ export const mockApiServer = {
       return newPlan;
     },
 
-    update: async (id: string, updates: Partial<Plan>): Promise<Plan | null> => {
+    update: async (
+      id: string,
+      updates: Partial<Plan>,
+    ): Promise<Plan | null> => {
       await delay();
       const plans = db.getPlans();
       const index = plans.findIndex(p => p.id === id);
@@ -114,7 +151,9 @@ export const mockApiServer = {
 
     getByCategory: async (category: string): Promise<TemplateDetail[]> => {
       await delay();
-      return Object.values(templateDetails).filter(t => t.category === category);
+      return Object.values(templateDetails).filter(
+        t => t.category === category,
+      );
     },
   },
 
@@ -152,7 +191,11 @@ export const mockApiServer = {
       return [...db.getCalendar()];
     },
 
-    updateDay: async (day: number, hasActivity: boolean, activityType?: 'primary' | 'secondary' | 'tertiary'): Promise<boolean> => {
+    updateDay: async (
+      day: number,
+      hasActivity: boolean,
+      activityType?: 'primary' | 'secondary' | 'tertiary',
+    ): Promise<boolean> => {
       await delay();
       const dayData = db.getCalendar().find(d => d.day === day);
       if (!dayData) return false;

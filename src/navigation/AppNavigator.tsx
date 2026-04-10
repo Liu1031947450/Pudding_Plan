@@ -40,22 +40,10 @@ const MainNavigator: React.FC = () => {
       }}
       initialRouteName="Plan"
     >
-      <Tab.Screen
-        name="Plan"
-        component={PlanScreen}
-      />
-      <Tab.Screen
-        name="Calendar"
-        component={CalendarScreen}
-      />
-      <Tab.Screen
-        name="Circles"
-        component={CirclesScreen}
-      />
-      <Tab.Screen
-        name="Profile"
-        component={ProfileScreen}
-      />
+      <Tab.Screen name="Plan" component={PlanScreen} />
+      <Tab.Screen name="Calendar" component={CalendarScreen} />
+      <Tab.Screen name="Circles" component={CirclesScreen} />
+      <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );
 };

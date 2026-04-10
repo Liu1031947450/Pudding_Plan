@@ -19,12 +19,7 @@ export const BuddyCard: React.FC<BuddyCardProps> = ({
   onPress,
 }) => {
   return (
-    <Card
-      style={[
-        styles.buddyCard,
-        offset && styles.buddyCardOffset,
-      ]}
-    >
+    <Card style={[styles.buddyCard, offset && styles.buddyCardOffset]}>
       <Avatar
         uri={buddy.avatarUri}
         name={buddy.name}

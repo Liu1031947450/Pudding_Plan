@@ -47,10 +47,7 @@ export const PlanCard: React.FC<PlanCardProps> = ({
       <View style={styles.planHeader}>
         <View style={styles.planInfo}>
           {isManaging && (
-            <TouchableOpacity
-              style={styles.checkbox}
-              onPress={onToggleSelect}
-            >
+            <TouchableOpacity style={styles.checkbox} onPress={onToggleSelect}>
               <View
                 style={[
                   styles.checkboxInner,
@@ -67,12 +64,7 @@ export const PlanCard: React.FC<PlanCardProps> = ({
               </View>
             </TouchableOpacity>
           )}
-          <View
-            style={[
-              styles.planIcon,
-              { backgroundColor: color },
-            ]}
-          >
+          <View style={[styles.planIcon, { backgroundColor: color }]}>
             {/* 判断是 emoji 还是 MaterialIcon */}
             {icon.length <= 2 ? (
               <Text style={styles.planIconEmoji}>{icon}</Text>
@@ -92,48 +84,30 @@ export const PlanCard: React.FC<PlanCardProps> = ({
         <View style={styles.planActions}>
           {isManaging && (
             <View style={styles.dragHandle}>
-              <TouchableOpacity
-                disabled={!canMoveUp}
-                onPress={onMoveUp}
-              >
+              <TouchableOpacity disabled={!canMoveUp} onPress={onMoveUp}>
                 <MaterialIcons
                   name="keyboard-arrow-up"
                   size={24}
-                  color={
-                    !canMoveUp
-                      ? Colors.outlineVariant
-                      : Colors.onSurface
-                  }
+                  color={!canMoveUp ? Colors.outlineVariant : Colors.onSurface}
                 />
               </TouchableOpacity>
-              <TouchableOpacity
-                disabled={!canMoveDown}
-                onPress={onMoveDown}
-              >
+              <TouchableOpacity disabled={!canMoveDown} onPress={onMoveDown}>
                 <MaterialIcons
                   name="keyboard-arrow-down"
                   size={24}
                   color={
-                    !canMoveDown
-                      ? Colors.outlineVariant
-                      : Colors.onSurface
+                    !canMoveDown ? Colors.outlineVariant : Colors.onSurface
                   }
                 />
               </TouchableOpacity>
             </View>
           )}
-          <BloomProgress
-            progress={progress}
-            size={56}
-            strokeWidth={6}
-          />
+          <BloomProgress progress={progress} size={56} strokeWidth={6} />
         </View>
       </View>
       <ProgressBar
         progress={progress}
-        color={
-          progress === 66 ? Colors.primary : Colors.tertiary
-        }
+        color={progress === 66 ? Colors.primary : Colors.tertiary}
         height={8}
       />
     </Card>

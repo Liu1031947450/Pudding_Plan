@@ -27,13 +27,16 @@ export const useCalendarData = () => {
     loadData();
   }, [loadData]);
 
-  const toggleHabit = useCallback(async (habitId: string) => {
-    const habit = await calendarService.toggleHabit(habitId);
-    if (habit) {
-      await loadData();
-    }
-    return !!habit;
-  }, [loadData]);
+  const toggleHabit = useCallback(
+    async (habitId: string) => {
+      const habit = await calendarService.toggleHabit(habitId);
+      if (habit) {
+        await loadData();
+      }
+      return !!habit;
+    },
+    [loadData],
+  );
 
   const updateDayActivity = useCallback(
     async (

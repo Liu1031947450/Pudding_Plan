@@ -44,11 +44,7 @@ export const PlanList: React.FC<PlanListProps> = ({
           style={styles.deleteButton}
           onPress={onDeleteSelected}
         >
-          <MaterialIcons
-            name="delete"
-            size={20}
-            color={Colors.onError}
-          />
+          <MaterialIcons name="delete" size={20} color={Colors.onError} />
           <Text style={styles.deleteButtonText}>
             删除 ({selectedPlans.size})
           </Text>
@@ -71,16 +67,9 @@ export const PlanList: React.FC<PlanListProps> = ({
           />
         ))}
 
-        <TouchableOpacity
-          style={styles.addPlanCard}
-          onPress={onCreatePlan}
-        >
+        <TouchableOpacity style={styles.addPlanCard} onPress={onCreatePlan}>
           <View style={styles.addIconWrapper}>
-            <MaterialIcons
-              name="add"
-              size={24}
-              color={Colors.outline}
-            />
+            <MaterialIcons name="add" size={24} color={Colors.outline} />
           </View>
           <Text style={styles.addText}>开启新计划</Text>
         </TouchableOpacity>

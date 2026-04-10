@@ -28,9 +28,14 @@ class ApiClient {
 
   private async request<T>(
     endpoint: string,
-    options: RequestOptions = {}
+    options: RequestOptions = {},
   ): Promise<ApiResponse<T>> {
-    const { method = 'GET', headers = {}, body, timeout = this.timeout } = options;
+    const {
+      method = 'GET',
+      headers = {},
+      body,
+      timeout = this.timeout,
+    } = options;
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
@@ -80,23 +85,41 @@ class ApiClient {
     }
   }
 
-  async get<T>(endpoint: string, options?: Omit<RequestOptions, 'method' | 'body'>): Promise<ApiResponse<T>> {
+  async get<T>(
+    endpoint: string,
+    options?: Omit<RequestOptions, 'method' | 'body'>,
+  ): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, { ...options, method: 'GET' });
   }
 
-  async post<T>(endpoint: string, body?: any, options?: Omit<RequestOptions, 'method'>): Promise<ApiResponse<T>> {
+  async post<T>(
+    endpoint: string,
+    body?: any,
+    options?: Omit<RequestOptions, 'method'>,
+  ): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, { ...options, method: 'POST', body });
   }
 
-  async put<T>(endpoint: string, body?: any, options?: Omit<RequestOptions, 'method'>): Promise<ApiResponse<T>> {
+  async put<T>(
+    endpoint: string,
+    body?: any,
+    options?: Omit<RequestOptions, 'method'>,
+  ): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, { ...options, method: 'PUT', body });
   }
 
-  async delete<T>(endpoint: string, options?: Omit<RequestOptions, 'method' | 'body'>): Promise<ApiResponse<T>> {
+  async delete<T>(
+    endpoint: string,
+    options?: Omit<RequestOptions, 'method' | 'body'>,
+  ): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, { ...options, method: 'DELETE' });
   }
 
-  async patch<T>(endpoint: string, body?: any, options?: Omit<RequestOptions, 'method'>): Promise<ApiResponse<T>> {
+  async patch<T>(
+    endpoint: string,
+    body?: any,
+    options?: Omit<RequestOptions, 'method'>,
+  ): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, { ...options, method: 'PATCH', body });
   }
 }

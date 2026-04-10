@@ -32,7 +32,9 @@ export const notificationsApi = {
         return { success: false, error: error.message };
       }
     }
-    return apiClient.patch<boolean>(`${API_ENDPOINTS.NOTIFICATIONS}/${id}/read`);
+    return apiClient.patch<boolean>(
+      `${API_ENDPOINTS.NOTIFICATIONS}/${id}/read`,
+    );
   },
 };
 

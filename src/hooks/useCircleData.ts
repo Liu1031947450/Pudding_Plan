@@ -27,13 +27,16 @@ export const useCircleData = () => {
     loadData();
   }, [loadData]);
 
-  const joinCircle = useCallback(async (circleId: string) => {
-    const success = await circleService.joinCircle(circleId);
-    if (success) {
-      await loadData();
-    }
-    return success;
-  }, [loadData]);
+  const joinCircle = useCallback(
+    async (circleId: string) => {
+      const success = await circleService.joinCircle(circleId);
+      if (success) {
+        await loadData();
+      }
+      return success;
+    },
+    [loadData],
+  );
 
   return {
     buddies,

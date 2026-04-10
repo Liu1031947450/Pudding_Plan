@@ -26,12 +26,7 @@ export const BadgeSection: React.FC<BadgeSectionProps> = ({
             style={styles.badgeCard}
             onPress={onBadgePress ? () => onBadgePress(badge) : undefined}
           >
-            <View
-              style={[
-                styles.badgeIcon,
-                { backgroundColor: badge.color },
-              ]}
-            >
+            <View style={[styles.badgeIcon, { backgroundColor: badge.color }]}>
               <MaterialIcons
                 name={badge.icon}
                 size={32}

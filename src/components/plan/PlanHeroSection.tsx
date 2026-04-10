@@ -20,17 +20,18 @@ export const PlanHeroSection: React.FC<PlanHeroSectionProps> = ({
   return (
     <View style={styles.heroSection}>
       <View style={styles.heroImage}>
-        <View style={[styles.heroImagePlaceholder, { backgroundColor: `${planColor}20` }]}>
+        <View
+          style={[
+            styles.heroImagePlaceholder,
+            { backgroundColor: `${planColor}20` },
+          ]}
+        >
           <Text style={styles.heroImageText}>{planIcon}</Text>
         </View>
       </View>
       <View style={styles.heroContent}>
-        <Text style={styles.heroLabel}>
-          {category || '开始新的旅程'}
-        </Text>
-        <Text style={styles.heroTitle}>
-          {planName || '自定义计划'}
-        </Text>
+        <Text style={styles.heroLabel}>{category || '开始新的旅程'}</Text>
+        <Text style={styles.heroTitle}>{planName || '自定义计划'}</Text>
         {description && (
           <Text style={styles.heroDescription}>{description}</Text>
         )}

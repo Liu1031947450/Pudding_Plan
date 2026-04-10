@@ -1,5 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -25,37 +31,106 @@ const mockSettings: SettingSection[] = [
   {
     title: '账号与安全',
     items: [
-      { id: '1', title: '个人资料修改', icon: 'person', iconColor: Colors.primary, showArrow: true },
-      { id: '2', title: '手机号绑定', value: '138****8888', icon: 'phone', iconColor: Colors.primary, showArrow: true },
+      {
+        id: '1',
+        title: '个人资料修改',
+        icon: 'person',
+        iconColor: Colors.primary,
+        showArrow: true,
+      },
+      {
+        id: '2',
+        title: '手机号绑定',
+        value: '138****8888',
+        icon: 'phone',
+        iconColor: Colors.primary,
+        showArrow: true,
+      },
     ],
   },
   {
     title: '通知管理',
     items: [
-      { id: '3', title: '每日提醒', icon: 'notifications', iconColor: Colors.secondary, showArrow: false, value: '开启' },
-      { id: '4', title: '勿扰模式 (静谧时间)', icon: 'do-not-disturb', iconColor: Colors.secondary, value: '22:00 - 07:00' },
+      {
+        id: '3',
+        title: '每日提醒',
+        icon: 'notifications',
+        iconColor: Colors.secondary,
+        showArrow: false,
+        value: '开启',
+      },
+      {
+        id: '4',
+        title: '勿扰模式 (静谧时间)',
+        icon: 'do-not-disturb',
+        iconColor: Colors.secondary,
+        value: '22:00 - 07:00',
+      },
     ],
   },
   {
     title: '显示设置',
     items: [
-      { id: '5', title: '深色模式', icon: 'dark-mode', iconColor: Colors.tertiary, showArrow: false, value: '关闭' },
-      { id: '6', title: '字体大小', icon: 'text-fields', iconColor: Colors.tertiary, value: '标准' },
+      {
+        id: '5',
+        title: '深色模式',
+        icon: 'dark-mode',
+        iconColor: Colors.tertiary,
+        showArrow: false,
+        value: '关闭',
+      },
+      {
+        id: '6',
+        title: '字体大小',
+        icon: 'text-fields',
+        iconColor: Colors.tertiary,
+        value: '标准',
+      },
     ],
   },
   {
     title: '隐私与条款',
     items: [
-      { id: '7', title: '隐私政策', icon: 'privacy-tip', iconColor: Colors.onSurfaceVariant, showArrow: true },
-      { id: '8', title: '用户协议', icon: 'description', iconColor: Colors.onSurfaceVariant, showArrow: true },
-      { id: '9', title: '清除所有数据', icon: 'delete-forever', iconColor: Colors.error, showArrow: false },
+      {
+        id: '7',
+        title: '隐私政策',
+        icon: 'privacy-tip',
+        iconColor: Colors.onSurfaceVariant,
+        showArrow: true,
+      },
+      {
+        id: '8',
+        title: '用户协议',
+        icon: 'description',
+        iconColor: Colors.onSurfaceVariant,
+        showArrow: true,
+      },
+      {
+        id: '9',
+        title: '清除所有数据',
+        icon: 'delete-forever',
+        iconColor: Colors.error,
+        showArrow: false,
+      },
     ],
   },
   {
     title: '关于',
     items: [
-      { id: '10', title: '当前版本', icon: 'info', iconColor: Colors.onSurfaceVariant, value: 'v2.4.0 (Stable)' },
-      { id: '11', title: '意见反馈', icon: 'feedback', iconColor: Colors.onSurfaceVariant, showArrow: true },
+      {
+        id: '10',
+        title: '当前版本',
+        icon: 'info',
+        iconColor: Colors.onSurfaceVariant,
+        value: 'v2.4.0 (Stable)',
+      },
+      {
+        id: '11',
+        title: '意见反馈',
+        icon: 'feedback',
+        iconColor: Colors.onSurfaceVariant,
+        showArrow: true,
+      },
     ],
   },
 ];
@@ -76,7 +151,7 @@ const SettingsScreen: React.FC = () => {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {mockSettings.map((section) => (
+        {mockSettings.map(section => (
           <View key={section.title} style={styles.section}>
             <Text style={styles.sectionTitle}>{section.title}</Text>
             <Card style={styles.sectionCard}>
@@ -85,7 +160,8 @@ const SettingsScreen: React.FC = () => {
                   key={item.id}
                   style={[
                     styles.settingItem,
-                    index < section.items.length - 1 && styles.settingItemBorder,
+                    index < section.items.length - 1 &&
+                      styles.settingItemBorder,
                   ]}
                   onPress={item.onPress}
                   activeOpacity={0.7}
@@ -117,7 +193,11 @@ const SettingsScreen: React.FC = () => {
                       <Text style={styles.settingValue}>{item.value}</Text>
                     )}
                     {item.showArrow && (
-                      <MaterialIcons name="chevron-right" size={20} color={Colors.outlineVariant} />
+                      <MaterialIcons
+                        name="chevron-right"
+                        size={20}
+                        color={Colors.outlineVariant}
+                      />
                     )}
                   </View>
                 </TouchableOpacity>

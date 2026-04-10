@@ -26,10 +26,7 @@ export const PlanEmptyState: React.FC<PlanEmptyStateProps> = ({
       <Text style={styles.emptySubtitle}>
         开启你的第一个治愈计划，让成长自然发生。
       </Text>
-      <TouchableOpacity
-        style={styles.createButton}
-        onPress={onCreatePlan}
-      >
+      <TouchableOpacity style={styles.createButton} onPress={onCreatePlan}>
         <MaterialIcons
           name="add-circle"
           size={24}
@@ -52,11 +49,7 @@ export const PlanEmptyState: React.FC<PlanEmptyStateProps> = ({
                   { backgroundColor: Colors.secondaryContainer },
                 ]}
               >
-                <MaterialIcons
-                  name="spa"
-                  size={24}
-                  color={Colors.secondary}
-                />
+                <MaterialIcons name="spa" size={24} color={Colors.secondary} />
               </View>
               <Text style={styles.templateTitle}>晨间唤醒</Text>
               <Text style={styles.templateSubtitle}>21天习惯养成</Text>

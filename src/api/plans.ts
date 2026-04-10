@@ -50,7 +50,10 @@ export const plansApi = {
   },
 
   // Update plan
-  update: async (id: string, updates: Partial<Plan>): Promise<ApiResponse<Plan>> => {
+  update: async (
+    id: string,
+    updates: Partial<Plan>,
+  ): Promise<ApiResponse<Plan>> => {
     if (USE_MOCK) {
       try {
         const data = await mockApiServer.plans.update(id, updates);

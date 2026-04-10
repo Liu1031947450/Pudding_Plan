@@ -1,5 +1,13 @@
 import React, { useRef } from 'react';
-import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle, ActivityIndicator, Animated } from 'react-native';
+import {
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  ViewStyle,
+  TextStyle,
+  ActivityIndicator,
+  Animated,
+} from 'react-native';
 import { Colors, Spacing, FontSize, BorderRadius } from '../../constants/theme';
 
 interface ButtonProps {
@@ -75,7 +83,9 @@ export const Button: React.FC<ButtonProps> = ({
       >
         {loading ? (
           <ActivityIndicator
-            color={variant === 'primary' ? Colors.onPrimaryContainer : Colors.primary}
+            color={
+              variant === 'primary' ? Colors.onPrimaryContainer : Colors.primary
+            }
             size="small"
           />
         ) : (

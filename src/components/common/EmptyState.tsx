@@ -22,13 +22,9 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 }) => {
   return (
     <View style={[styles.container, style]}>
-      {illustration && (
-        <Text style={styles.illustration}>{illustration}</Text>
-      )}
+      {illustration && <Text style={styles.illustration}>{illustration}</Text>}
       <Text style={styles.title}>{title}</Text>
-      {description && (
-        <Text style={styles.description}>{description}</Text>
-      )}
+      {description && <Text style={styles.description}>{description}</Text>}
       {actionLabel && onAction && (
         <Button
           title={actionLabel}

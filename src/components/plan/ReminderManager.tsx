@@ -1,5 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Modal,
+  Platform,
+} from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Colors, Spacing, FontSize } from '../../constants/theme';
@@ -45,7 +52,9 @@ export const ReminderManager: React.FC<ReminderManagerProps> = ({
           <Card key={reminder.id} style={styles.reminderCard}>
             <View style={styles.reminderContent}>
               <View style={styles.reminderInfo}>
-                <Text style={styles.reminderTime}>{formatTime(reminder.time)}</Text>
+                <Text style={styles.reminderTime}>
+                  {formatTime(reminder.time)}
+                </Text>
                 <Text style={styles.reminderLabel}>{reminder.label}</Text>
               </View>
               <TouchableOpacity
@@ -66,8 +75,15 @@ export const ReminderManager: React.FC<ReminderManagerProps> = ({
           </Card>
         ))}
 
-        <TouchableOpacity style={styles.addReminderButton} onPress={onAddReminder}>
-          <MaterialIcons name="add-circle-outline" size={24} color={Colors.primary} />
+        <TouchableOpacity
+          style={styles.addReminderButton}
+          onPress={onAddReminder}
+        >
+          <MaterialIcons
+            name="add-circle-outline"
+            size={24}
+            color={Colors.primary}
+          />
           <Text style={styles.addReminderText}>添加提醒</Text>
         </TouchableOpacity>
       </View>
@@ -88,14 +104,22 @@ export const ReminderManager: React.FC<ReminderManagerProps> = ({
               onChange={onTimeChange}
             />
             <View style={styles.modalActions}>
-              <TouchableOpacity style={styles.modalButton} onPress={onCloseTimePicker}>
+              <TouchableOpacity
+                style={styles.modalButton}
+                onPress={onCloseTimePicker}
+              >
                 <Text style={styles.modalButtonText}>取消</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.modalButton, styles.modalButtonPrimary]}
                 onPress={onConfirmTime}
               >
-                <Text style={[styles.modalButtonText, styles.modalButtonTextPrimary]}>
+                <Text
+                  style={[
+                    styles.modalButtonText,
+                    styles.modalButtonTextPrimary,
+                  ]}
+                >
                   确定
                 </Text>
               </TouchableOpacity>

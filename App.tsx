@@ -26,10 +26,7 @@ function App() {
 
   return (
     <SafeAreaProvider>
-      <StatusBar
-        barStyle="dark-content"
-        backgroundColor={Colors.surface}
-      />
+      <StatusBar barStyle="dark-content" backgroundColor={Colors.surface} />
       <AppNavigator />
     </SafeAreaProvider>
   );

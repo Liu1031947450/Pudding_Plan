@@ -1,5 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Dimensions,
+} from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { Colors, Spacing, FontSize } from '../../constants/theme';
 import { Card } from '../common/Card';
@@ -38,7 +44,9 @@ export const RhythmChart: React.FC<RhythmChartProps> = ({
       const next = points[i + 1];
       const controlX = (current.x + next.x) / 2;
 
-      path += ` Q ${controlX} ${current.y}, ${controlX} ${(current.y + next.y) / 2}`;
+      path += ` Q ${controlX} ${current.y}, ${controlX} ${
+        (current.y + next.y) / 2
+      }`;
       path += ` Q ${controlX} ${next.y}, ${next.x} ${next.y}`;
     }
 
@@ -100,8 +108,8 @@ export const RhythmChart: React.FC<RhythmChartProps> = ({
                         item.value > 80
                           ? Colors.primaryFixed
                           : item.value > 0
-                            ? Colors.secondaryFixedDim
-                            : Colors.surfaceContainerHigh,
+                          ? Colors.secondaryFixedDim
+                          : Colors.surfaceContainerHigh,
                     },
                   ]}
                 />
@@ -121,12 +129,18 @@ export const RhythmChart: React.FC<RhythmChartProps> = ({
               <Svg
                 width="100%"
                 height={160}
-                viewBox={`0 0 ${Dimensions.get('window').width - Spacing.md * 2 - Spacing.lg * 2} 160`}
+                viewBox={`0 0 ${
+                  Dimensions.get('window').width -
+                  Spacing.md * 2 -
+                  Spacing.lg * 2
+                } 160`}
               >
                 <Path
                   d={generateCurvePath(
                     data,
-                    Dimensions.get('window').width - Spacing.md * 2 - Spacing.lg * 2,
+                    Dimensions.get('window').width -
+                      Spacing.md * 2 -
+                      Spacing.lg * 2,
                     160,
                   )}
                   stroke={Colors.primary}

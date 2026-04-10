@@ -25,9 +25,13 @@ class CalendarService {
   async updateDayActivity(
     day: number,
     hasActivity: boolean,
-    activityType?: 'primary' | 'secondary' | 'tertiary'
+    activityType?: 'primary' | 'secondary' | 'tertiary',
   ): Promise<boolean> {
-    const response = await calendarApi.updateDay(day, hasActivity, activityType);
+    const response = await calendarApi.updateDay(
+      day,
+      hasActivity,
+      activityType,
+    );
     return response.success;
   }
 }

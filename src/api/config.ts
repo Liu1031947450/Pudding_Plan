@@ -1,6 +1,8 @@
 // API Configuration
 export const API_CONFIG = {
-  BASE_URL: __DEV__ ? 'http://localhost:3000/api' : 'https://api.puddingplan.com',
+  BASE_URL: __DEV__
+    ? 'http://localhost:3000/api'
+    : 'https://api.puddingplan.com',
   TIMEOUT: 10000,
   RETRY_ATTEMPTS: 3,
 };
@@ -15,7 +17,8 @@ export const API_ENDPOINTS = {
   // Templates
   TEMPLATES: '/templates',
   TEMPLATE_DETAIL: (id: string) => `/templates/${id}`,
-  TEMPLATES_BY_CATEGORY: (category: string) => `/templates/category/${category}`,
+  TEMPLATES_BY_CATEGORY: (category: string) =>
+    `/templates/category/${category}`,
 
   // Circles
   CIRCLES: '/circles',

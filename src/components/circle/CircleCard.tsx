@@ -11,13 +11,13 @@ interface CircleCardProps {
   onPress?: () => void;
 }
 
-export const CircleCard: React.FC<CircleCardProps> = ({
-  circle,
-  onPress,
-}) => {
+export const CircleCard: React.FC<CircleCardProps> = ({ circle, onPress }) => {
   if (circle.type === 'large') {
     return (
-      <Card style={[styles.circleCard, styles.circleCardLarge]} onPress={onPress}>
+      <Card
+        style={[styles.circleCard, styles.circleCardLarge]}
+        onPress={onPress}
+      >
         <View style={styles.circleImageContainer}>
           {circle.imageUri && (
             <>
@@ -45,7 +45,10 @@ export const CircleCard: React.FC<CircleCardProps> = ({
 
   if (circle.type === 'small') {
     return (
-      <Card style={[styles.circleCard, styles.circleCardSmall]} onPress={onPress}>
+      <Card
+        style={[styles.circleCard, styles.circleCardSmall]}
+        onPress={onPress}
+      >
         <View style={styles.smallCircleContent}>
           <MaterialIcons
             name={circle.id === '2' ? 'palette' : 'self-improvement'}
@@ -55,7 +58,11 @@ export const CircleCard: React.FC<CircleCardProps> = ({
           <Text style={styles.smallCircleTitle}>{circle.title}</Text>
           <View style={styles.smallCircleArrow}>
             <Text style={styles.arrowText}>加入</Text>
-            <MaterialIcons name="arrow-forward" size={16} color={Colors.primary} />
+            <MaterialIcons
+              name="arrow-forward"
+              size={16}
+              color={Colors.primary}
+            />
           </View>
         </View>
       </Card>
@@ -64,7 +71,10 @@ export const CircleCard: React.FC<CircleCardProps> = ({
 
   // medium type
   return (
-    <Card style={[styles.circleCard, styles.circleCardMedium]} onPress={onPress}>
+    <Card
+      style={[styles.circleCard, styles.circleCardMedium]}
+      onPress={onPress}
+    >
       <View style={styles.mediumCircleContent}>
         <View style={styles.mediumCircleAvatars}>
           <Avatar name="User 1" size="small" style={styles.miniAvatar} />

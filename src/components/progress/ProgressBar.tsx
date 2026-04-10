@@ -56,7 +56,9 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
       {showLabel && (
         <Text style={styles.label}>{Math.round(clampedProgress)}%</Text>
       )}
-      <Animated.View style={[styles.track, { height, transform: [{ scaleX: pulseAnim }] }]}>
+      <Animated.View
+        style={[styles.track, { height, transform: [{ scaleX: pulseAnim }] }]}
+      >
         <Animated.View
           style={[
             styles.fill,

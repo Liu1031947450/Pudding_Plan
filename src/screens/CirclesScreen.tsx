@@ -37,19 +37,23 @@ const CirclesScreen: React.FC = () => {
         <BuddyList
           buddies={buddies}
           onViewAll={() => console.log('View all buddies')}
-          onBuddyPress={(buddy) => console.log('Buddy pressed:', buddy.id)}
+          onBuddyPress={buddy => console.log('Buddy pressed:', buddy.id)}
         />
 
         <CircleGrid
           circles={circles}
-          onCirclePress={(circle) => console.log('Circle pressed:', circle.id)}
+          onCirclePress={circle => console.log('Circle pressed:', circle.id)}
         />
 
         <View style={styles.section}>
           <Card style={styles.encouragementCard}>
             <View style={styles.encouragementHeader}>
               <View style={styles.encouragementIcon}>
-                <MaterialIcons name="favorite" size={20} color={Colors.onPrimaryContainer} />
+                <MaterialIcons
+                  name="favorite"
+                  size={20}
+                  color={Colors.onPrimaryContainer}
+                />
               </View>
               <Text style={styles.encouragementTitle}>每日鼓励</Text>
             </View>

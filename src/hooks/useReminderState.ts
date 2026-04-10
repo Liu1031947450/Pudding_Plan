@@ -21,15 +21,18 @@ export const useReminderState = (initialReminders: Reminder[] = []) => {
 
   const toggleReminder = useCallback((id: string) => {
     setReminders(prev =>
-      prev.map(r => (r.id === id ? { ...r, enabled: !r.enabled } : r))
+      prev.map(r => (r.id === id ? { ...r, enabled: !r.enabled } : r)),
     );
   }, []);
 
-  const updateReminder = useCallback((id: string, updates: Partial<Reminder>) => {
-    setReminders(prev =>
-      prev.map(r => (r.id === id ? { ...r, ...updates } : r))
-    );
-  }, []);
+  const updateReminder = useCallback(
+    (id: string, updates: Partial<Reminder>) => {
+      setReminders(prev =>
+        prev.map(r => (r.id === id ? { ...r, ...updates } : r)),
+      );
+    },
+    [],
+  );
 
   const openTimePicker = useCallback(() => {
     setShowTimePicker(true);

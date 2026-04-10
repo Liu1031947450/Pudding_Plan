@@ -36,7 +36,9 @@ export const templatesApi = {
   },
 
   // Get templates by category
-  getByCategory: async (category: string): Promise<ApiResponse<TemplateDetail[]>> => {
+  getByCategory: async (
+    category: string,
+  ): Promise<ApiResponse<TemplateDetail[]>> => {
     if (USE_MOCK) {
       try {
         const data = await mockApiServer.templates.getByCategory(category);
@@ -45,6 +47,8 @@ export const templatesApi = {
         return { success: false, error: error.message };
       }
     }
-    return apiClient.get<TemplateDetail[]>(API_ENDPOINTS.TEMPLATES_BY_CATEGORY(category));
+    return apiClient.get<TemplateDetail[]>(
+      API_ENDPOINTS.TEMPLATES_BY_CATEGORY(category),
+    );
   },
 };

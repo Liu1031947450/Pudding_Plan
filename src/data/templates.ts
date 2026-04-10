@@ -30,13 +30,9 @@ export const templateDetails: Record<string, TemplateDetail> = {
     icon: '🧘',
     color: Colors.primaryContainer,
     category: '身心健康',
-    description: '通过每天早晨的瑜伽和冥想练习，帮助你建立健康的生活节奏，提升身心状态。',
-    goals: [
-      '养成早起习惯',
-      '提升身体柔韧性',
-      '减轻压力和焦虑',
-      '增强专注力',
-    ],
+    description:
+      '通过每天早晨的瑜伽和冥想练习，帮助你建立健康的生活节奏，提升身心状态。',
+    goals: ['养成早起习惯', '提升身体柔韧性', '减轻压力和焦虑', '增强专注力'],
     checkpoints: [
       {
         day: 7,
@@ -71,13 +67,9 @@ export const templateDetails: Record<string, TemplateDetail> = {
     icon: '☀️',
     color: Colors.secondaryContainer,
     category: '生活习惯',
-    description: '通过30天的早起训练，调整生物钟，养成健康的作息习惯，提升一天的效率。',
-    goals: [
-      '建立规律作息',
-      '提升早晨精力',
-      '增加可支配时间',
-      '改善睡眠质量',
-    ],
+    description:
+      '通过30天的早起训练，调整生物钟，养成健康的作息习惯，提升一天的效率。',
+    goals: ['建立规律作息', '提升早晨精力', '增加可支配时间', '改善睡眠质量'],
     checkpoints: [
       {
         day: 7,
@@ -112,13 +104,9 @@ export const templateDetails: Record<string, TemplateDetail> = {
     icon: '📚',
     color: Colors.tertiaryContainer,
     category: '学习成长',
-    description: '每天投入30分钟阅读，两个月读完3-4本书，拓展知识面，提升思维能力。',
-    goals: [
-      '养成阅读习惯',
-      '完成3-4本书',
-      '拓展知识面',
-      '提升专注力',
-    ],
+    description:
+      '每天投入30分钟阅读，两个月读完3-4本书，拓展知识面，提升思维能力。',
+    goals: ['养成阅读习惯', '完成3-4本书', '拓展知识面', '提升专注力'],
     checkpoints: [
       {
         day: 15,
@@ -154,12 +142,7 @@ export const templateDetails: Record<string, TemplateDetail> = {
     color: Colors.primaryContainer,
     category: '身心健康',
     description: '通过90天系统训练，科学减脂塑形，打造健康体魄。',
-    goals: [
-      '减脂5-10kg',
-      '提升体能',
-      '塑造身材',
-      '养成运动习惯',
-    ],
+    goals: ['减脂5-10kg', '提升体能', '塑造身材', '养成运动习惯'],
     checkpoints: [
       {
         day: 30,
@@ -195,12 +178,7 @@ export const templateDetails: Record<string, TemplateDetail> = {
     color: Colors.secondaryContainer,
     category: '生活习惯',
     description: '21天戒糖挑战，减少糖分摄入，改善皮肤状态，提升健康水平。',
-    goals: [
-      '戒除糖瘾',
-      '改善皮肤',
-      '控制体重',
-      '提升精力',
-    ],
+    goals: ['戒除糖瘾', '改善皮肤', '控制体重', '提升精力'],
     checkpoints: [
       {
         day: 7,
@@ -236,12 +214,7 @@ export const templateDetails: Record<string, TemplateDetail> = {
     color: Colors.tertiaryContainer,
     category: '学习成长',
     description: '100天专注学习一项新技能，从入门到精通，投资自己的未来。',
-    goals: [
-      '掌握新技能',
-      '建立学习习惯',
-      '提升竞争力',
-      '拓展职业发展',
-    ],
+    goals: ['掌握新技能', '建立学习习惯', '提升竞争力', '拓展职业发展'],
     checkpoints: [
       {
         day: 30,
@@ -259,12 +232,7 @@ export const templateDetails: Record<string, TemplateDetail> = {
         description: '恭喜你！100天坚持，新技能已经掌握！',
       },
     ],
-    tips: [
-      '制定详细学习计划',
-      '理论结合实践',
-      '加入学习社群',
-      '定期复习巩固',
-    ],
+    tips: ['制定详细学习计划', '理论结合实践', '加入学习社群', '定期复习巩固'],
     difficulty: 'hard',
     frequency: '每天1小时',
   },

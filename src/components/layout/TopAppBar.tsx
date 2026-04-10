@@ -33,7 +33,11 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({
               onPress={onBackPress}
               activeOpacity={0.7}
             >
-              <MaterialIcons name="arrow-back" size={24} color={Colors.primary} />
+              <MaterialIcons
+                name="arrow-back"
+                size={24}
+                color={Colors.primary}
+              />
             </TouchableOpacity>
           )}
           {leftIcon && !showBackButton && (
@@ -56,7 +60,11 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({
               onPress={onRightPress}
               activeOpacity={0.7}
             >
-              <MaterialIcons name={rightIcon} size={24} color={Colors.primary} />
+              <MaterialIcons
+                name={rightIcon}
+                size={24}
+                color={Colors.primary}
+              />
             </TouchableOpacity>
           )}
         </View>

@@ -77,6 +77,7 @@ yarn start
 #### 方式一：使用 Expo Go App（推荐用于快速预览）
 
 1. 在手机上安装 Expo Go App：
+
    - iOS: 从 App Store 下载 "Expo Go"
    - Android: 从 Google Play 或应用商店下载 "Expo Go"
 
@@ -97,6 +98,7 @@ yarn start
 如果需要构建原生 Android/iOS 应用：
 
 **Android:**
+
 ```sh
 npm run android
 # 或
@@ -104,6 +106,7 @@ yarn android
 ```
 
 **iOS (仅限 macOS):**
+
 ```sh
 # 首次运行需要安装 CocoaPods 依赖
 cd ios
@@ -141,9 +144,11 @@ npm test
 ### 关闭 Expo Go 服务
 
 在运行 `npm start` 的终端窗口中：
+
 - 按 `Ctrl + C` 停止开发服务器
 
 如果端口被占用，可以手动清理：
+
 ```sh
 # 查找占用 8081 端口的进程并终止
 lsof -ti:8081 | xargs kill -9
@@ -161,7 +166,7 @@ lsof -ti:19001 | xargs kill -9
   - @react-navigation/native
   - @react-navigation/native-stack
   - @react-navigation/bottom-tabs
-- **UI 组件**: 
+- **UI 组件**:
   - @expo/vector-icons (Material Icons)
   - expo-blur (毛玻璃效果)
   - expo-linear-gradient (渐变效果)
@@ -179,6 +184,7 @@ lsof -ti:19001 | xargs kill -9
 3. 在 `src/navigation/AppNavigator.tsx` 中注册路由
 
 示例：
+
 ```typescript
 // src/screens/NewScreen.tsx
 import React from 'react';
@@ -200,7 +206,7 @@ export { default as NewScreen } from './NewScreen';
 // src/navigation/AppNavigator.tsx
 import { NewScreen } from '../screens';
 // 在 Stack.Navigator 中添加
-<Stack.Screen name="NewScreen" component={NewScreen} />
+<Stack.Screen name="NewScreen" component={NewScreen} />;
 ```
 
 ### 添加新组件
@@ -210,6 +216,7 @@ import { NewScreen } from '../screens';
 3. 组件应使用主题常量（`src/constants/theme.ts`）保持样式一致
 
 示例：
+
 ```typescript
 // src/components/MyComponent.tsx
 import React from 'react';
@@ -248,7 +255,7 @@ export { MyComponent } from './MyComponent';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Colors } from '../constants/theme';
 
-<MaterialIcons name="home" size={24} color={Colors.primary} />
+<MaterialIcons name="home" size={24} color={Colors.primary} />;
 ```
 
 查看所有可用图标：https://icons.expo.fyi/Index/MaterialIcons
@@ -261,13 +268,10 @@ import { Colors } from '../constants/theme';
   - `primary`, `secondary`, `tertiary` - 主题色
   - `surface`, `background` - 背景色
   - `onPrimary`, `onSurface` - 文字颜色
-  
 - **Spacing**: 间距配置
   - `xs: 4`, `sm: 8`, `md: 16`, `lg: 24`, `xl: 32`, `xxl: 48`
-  
 - **FontSize**: 字体大小配置
   - `xs: 12`, `sm: 14`, `md: 16`, `lg: 18`, `xl: 24`, `xxl: 32`
-  
 - **BorderRadius**: 圆角配置
   - `sm: 8`, `md: 16`, `lg: 32`, `xl: 48`, `full: 9999`
 
@@ -283,7 +287,7 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   item: {
-    width: '48%',  // 两列布局
+    width: '48%', // 两列布局
     minWidth: 140, // 最小宽度
   },
 });
@@ -367,6 +371,7 @@ npm install
 ```
 
 更多问题请查看：
+
 - [Expo 故障排除](https://docs.expo.dev/troubleshooting/overview/)
 - [React Native 故障排除](https://reactnative.dev/docs/troubleshooting)
 

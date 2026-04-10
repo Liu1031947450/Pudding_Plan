@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
-import { StyleSheet, ScrollView, View, ActivityIndicator, Text } from 'react-native';
+import {
+  StyleSheet,
+  ScrollView,
+  View,
+  ActivityIndicator,
+  Text,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Colors, Spacing } from '../constants/theme';
 import type { Plan } from '../types/domain';
-import {
-  BottomNavBar,
-  TopAppBar,
-  NotificationDrawer,
-} from '../components';
+import { BottomNavBar, TopAppBar, NotificationDrawer } from '../components';
 import {
   PlanList,
   PlanEmptyState,
@@ -16,7 +18,11 @@ import {
   RhythmChart,
 } from '../components/plan';
 import { usePlanManagement, useNotifications } from '../hooks';
-import { mockBadges, mockWeekRhythmData, mockMonthRhythmData } from '../data/mockData';
+import {
+  mockBadges,
+  mockWeekRhythmData,
+  mockMonthRhythmData,
+} from '../data/mockData';
 
 type RhythmPeriod = 'week' | 'month';
 
@@ -34,11 +40,8 @@ const PlanScreen: React.FC = () => {
     refreshPlans,
   } = usePlanManagement();
 
-  const {
-    notifications,
-    notificationVisible,
-    toggleNotificationDrawer,
-  } = useNotifications();
+  const { notifications, notificationVisible, toggleNotificationDrawer } =
+    useNotifications();
 
   const [rhythmPeriod, setRhythmPeriod] = useState<RhythmPeriod>('week');
 
@@ -47,10 +50,11 @@ const PlanScreen: React.FC = () => {
     React.useCallback(() => {
       console.log('PlanScreen focused, refreshing plans...');
       refreshPlans();
-    }, [refreshPlans])
+    }, [refreshPlans]),
   );
 
-  const rhythmData = rhythmPeriod === 'week' ? mockWeekRhythmData : mockMonthRhythmData;
+  const rhythmData =
+    rhythmPeriod === 'week' ? mockWeekRhythmData : mockMonthRhythmData;
 
   const handleCreatePlan = () => {
     navigation.navigate('TemplateSelection' as never);

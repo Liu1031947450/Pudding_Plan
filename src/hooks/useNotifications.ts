@@ -3,7 +3,8 @@ import type { Notification } from '../types/domain';
 import { mockNotifications } from '../data/mockData';
 
 export const useNotifications = () => {
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
+  const [notifications, setNotifications] =
+    useState<Notification[]>(mockNotifications);
   const [notificationVisible, setNotificationVisible] = useState(false);
 
   const toggleNotificationDrawer = useCallback(() => {
@@ -12,16 +13,12 @@ export const useNotifications = () => {
 
   const markAsRead = useCallback((id: string) => {
     setNotifications(prev =>
-      prev.map(notif =>
-        notif.id === id ? { ...notif, read: true } : notif
-      )
+      prev.map(notif => (notif.id === id ? { ...notif, read: true } : notif)),
     );
   }, []);
 
   const markAllAsRead = useCallback(() => {
-    setNotifications(prev =>
-      prev.map(notif => ({ ...notif, read: true }))
-    );
+    setNotifications(prev => prev.map(notif => ({ ...notif, read: true })));
   }, []);
 
   const deleteNotification = useCallback((id: string) => {

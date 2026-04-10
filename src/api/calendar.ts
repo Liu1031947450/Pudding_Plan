@@ -23,11 +23,15 @@ export const calendarApi = {
   updateDay: async (
     day: number,
     hasActivity: boolean,
-    activityType?: 'primary' | 'secondary' | 'tertiary'
+    activityType?: 'primary' | 'secondary' | 'tertiary',
   ): Promise<ApiResponse<boolean>> => {
     if (USE_MOCK) {
       try {
-        const success = await mockApiServer.calendar.updateDay(day, hasActivity, activityType);
+        const success = await mockApiServer.calendar.updateDay(
+          day,
+          hasActivity,
+          activityType,
+        );
         if (!success) {
           return { success: false, error: 'Day not found' };
         }
@@ -36,7 +40,11 @@ export const calendarApi = {
         return { success: false, error: error.message };
       }
     }
-    return apiClient.patch<boolean>(API_ENDPOINTS.CALENDAR, { day, hasActivity, activityType });
+    return apiClient.patch<boolean>(API_ENDPOINTS.CALENDAR, {
+      day,
+      hasActivity,
+      activityType,
+    });
   },
 };
 

@@ -104,10 +104,10 @@ export const LetterSpacing = {
 };
 
 export const BorderRadius = {
-  sm: 8,      // 0.5rem = 8px
-  md: 16,     // 1rem = 16px
-  lg: 32,     // 2rem = 32px
-  xl: 48,     // 3rem = 48px
+  sm: 8, // 0.5rem = 8px
+  md: 16, // 1rem = 16px
+  lg: 32, // 2rem = 32px
+  xl: 48, // 3rem = 48px
   full: 9999,
 };
 

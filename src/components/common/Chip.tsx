@@ -1,5 +1,12 @@
 import React, { useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ViewStyle, Animated } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ViewStyle,
+  Animated,
+} from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize, BorderRadius } from '../../constants/theme';
 
@@ -56,7 +63,13 @@ export const Chip: React.FC<ChipProps> = ({
 
   const content = (
     <>
-      {icon && <MaterialIcons name={icon} size={16} color={selected ? Colors.onSecondary : Colors.onSurfaceVariant} />}
+      {icon && (
+        <MaterialIcons
+          name={icon}
+          size={16}
+          color={selected ? Colors.onSecondary : Colors.onSurfaceVariant}
+        />
+      )}
       <Text style={textStyles}>{label}</Text>
     </>
   );

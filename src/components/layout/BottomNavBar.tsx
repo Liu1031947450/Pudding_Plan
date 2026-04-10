@@ -1,5 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Platform,
+} from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -18,7 +24,12 @@ export const BottomNavBar: React.FC = () => {
 
   const items: NavItem[] = [
     { key: 'plan', label: '计划', icon: 'edit-note', routeName: 'Plan' },
-    { key: 'calendar', label: '日历', icon: 'calendar-today', routeName: 'Calendar' },
+    {
+      key: 'calendar',
+      label: '日历',
+      icon: 'calendar-today',
+      routeName: 'Calendar',
+    },
     { key: 'circles', label: '圈子', icon: 'group', routeName: 'Circles' },
     { key: 'profile', label: '我的', icon: 'person', routeName: 'Profile' },
   ];
@@ -31,7 +42,7 @@ export const BottomNavBar: React.FC = () => {
     <BlurView intensity={20} tint="light" style={styles.container}>
       <View style={styles.content}>
         <View style={styles.navContainer}>
-          {items.map((item) => {
+          {items.map(item => {
             const isActive = route.name === item.routeName;
             return (
               <TouchableOpacity
@@ -48,7 +59,11 @@ export const BottomNavBar: React.FC = () => {
                 <Text
                   style={[
                     styles.label,
-                    { color: isActive ? Colors.primary : Colors.onSurfaceVariant },
+                    {
+                      color: isActive
+                        ? Colors.primary
+                        : Colors.onSurfaceVariant,
+                    },
                     isActive && styles.activeLabel,
                   ]}
                 >

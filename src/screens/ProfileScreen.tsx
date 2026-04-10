@@ -1,10 +1,22 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize, BorderRadius } from '../constants/theme';
-import { BottomNavBar, TopAppBar, Avatar, Card, NotificationDrawer } from '../components';
+import {
+  BottomNavBar,
+  TopAppBar,
+  Avatar,
+  Card,
+  NotificationDrawer,
+} from '../components';
 
 interface Badge {
   id: string;
@@ -15,10 +27,34 @@ interface Badge {
 }
 
 const mockBadges: Badge[] = [
-  { id: '1', title: '早起达人', icon: 'wb-sunny', color: Colors.secondaryContainer, unlocked: true },
-  { id: '2', title: '冥想大师', icon: 'self-improvement', color: Colors.tertiaryContainer, unlocked: true },
-  { id: '3', title: '书海拾贝', icon: 'menu-book', color: Colors.primaryContainer, unlocked: true },
-  { id: '4', title: '运动健将', icon: 'fitness-center', color: Colors.surfaceContainer, unlocked: false },
+  {
+    id: '1',
+    title: '早起达人',
+    icon: 'wb-sunny',
+    color: Colors.secondaryContainer,
+    unlocked: true,
+  },
+  {
+    id: '2',
+    title: '冥想大师',
+    icon: 'self-improvement',
+    color: Colors.tertiaryContainer,
+    unlocked: true,
+  },
+  {
+    id: '3',
+    title: '书海拾贝',
+    icon: 'menu-book',
+    color: Colors.primaryContainer,
+    unlocked: true,
+  },
+  {
+    id: '4',
+    title: '运动健将',
+    icon: 'fitness-center',
+    color: Colors.surfaceContainer,
+    unlocked: false,
+  },
 ];
 
 const ProfileScreen: React.FC = () => {
@@ -50,7 +86,11 @@ const ProfileScreen: React.FC = () => {
               />
             </View>
             <View style={styles.avatarBadge}>
-              <MaterialIcons name="verified" size={16} color={Colors.onSecondary} />
+              <MaterialIcons
+                name="verified"
+                size={16}
+                color={Colors.onSecondary}
+              />
             </View>
           </View>
 
@@ -63,7 +103,11 @@ const ProfileScreen: React.FC = () => {
         <View style={styles.statsSection}>
           <Card style={styles.statsCardLarge}>
             <View style={styles.statsCardHeader}>
-              <MaterialIcons name="calendar-today" size={24} color={Colors.primary} />
+              <MaterialIcons
+                name="calendar-today"
+                size={24}
+                color={Colors.primary}
+              />
               <View style={styles.statsCardContent}>
                 <Text style={styles.statsNumber}>128</Text>
                 <Text style={styles.statsLabel}>坚持天数</Text>
@@ -75,7 +119,11 @@ const ProfileScreen: React.FC = () => {
             <Card style={styles.statsCardSmall}>
               <View style={styles.statsCardRow}>
                 <View style={styles.statsIconWrapper}>
-                  <MaterialIcons name="workspace-premium" size={16} color={Colors.onPrimaryContainer} />
+                  <MaterialIcons
+                    name="workspace-premium"
+                    size={16}
+                    color={Colors.onPrimaryContainer}
+                  />
                 </View>
                 <View>
                   <Text style={styles.statsSmallNumber}>452</Text>
@@ -86,8 +134,17 @@ const ProfileScreen: React.FC = () => {
 
             <Card style={styles.statsCardSmall}>
               <View style={styles.statsCardRow}>
-                <View style={[styles.statsIconWrapper, { backgroundColor: Colors.secondaryContainer }]}>
-                  <MaterialIcons name="spa" size={16} color={Colors.onSecondaryContainer} />
+                <View
+                  style={[
+                    styles.statsIconWrapper,
+                    { backgroundColor: Colors.secondaryContainer },
+                  ]}
+                >
+                  <MaterialIcons
+                    name="spa"
+                    size={16}
+                    color={Colors.onSecondaryContainer}
+                  />
                 </View>
                 <View>
                   <Text style={styles.statsSmallNumber}>12</Text>
@@ -111,7 +168,7 @@ const ProfileScreen: React.FC = () => {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.badgesContainer}
           >
-            {mockBadges.map((badge) => (
+            {mockBadges.map(badge => (
               <View key={badge.id} style={styles.badgeItem}>
                 <View
                   style={[
@@ -146,32 +203,71 @@ const ProfileScreen: React.FC = () => {
           <Card style={styles.menuCard}>
             <TouchableOpacity style={styles.menuItem}>
               <View style={styles.menuLeft}>
-                <View style={[styles.menuIcon, { backgroundColor: `${Colors.primary}10` }]}>
-                  <MaterialIcons name="event-available" size={20} color={Colors.primary} />
+                <View
+                  style={[
+                    styles.menuIcon,
+                    { backgroundColor: `${Colors.primary}10` },
+                  ]}
+                >
+                  <MaterialIcons
+                    name="event-available"
+                    size={20}
+                    color={Colors.primary}
+                  />
                 </View>
                 <Text style={styles.menuText}>打卡记录</Text>
               </View>
-              <MaterialIcons name="chevron-right" size={20} color={Colors.outlineVariant} />
+              <MaterialIcons
+                name="chevron-right"
+                size={20}
+                color={Colors.outlineVariant}
+              />
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.menuItem}>
               <View style={styles.menuLeft}>
-                <View style={[styles.menuIcon, { backgroundColor: `${Colors.secondary}10` }]}>
-                  <MaterialIcons name="favorite" size={20} color={Colors.secondary} />
+                <View
+                  style={[
+                    styles.menuIcon,
+                    { backgroundColor: `${Colors.secondary}10` },
+                  ]}
+                >
+                  <MaterialIcons
+                    name="favorite"
+                    size={20}
+                    color={Colors.secondary}
+                  />
                 </View>
                 <Text style={styles.menuText}>我的收藏</Text>
               </View>
-              <MaterialIcons name="chevron-right" size={20} color={Colors.outlineVariant} />
+              <MaterialIcons
+                name="chevron-right"
+                size={20}
+                color={Colors.outlineVariant}
+              />
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.menuItem}>
               <View style={styles.menuLeft}>
-                <View style={[styles.menuIcon, { backgroundColor: `${Colors.tertiary}10` }]}>
-                  <MaterialIcons name="help-outline" size={20} color={Colors.tertiary} />
+                <View
+                  style={[
+                    styles.menuIcon,
+                    { backgroundColor: `${Colors.tertiary}10` },
+                  ]}
+                >
+                  <MaterialIcons
+                    name="help-outline"
+                    size={20}
+                    color={Colors.tertiary}
+                  />
                 </View>
                 <Text style={styles.menuText}>帮助与反馈</Text>
               </View>
-              <MaterialIcons name="chevron-right" size={20} color={Colors.outlineVariant} />
+              <MaterialIcons
+                name="chevron-right"
+                size={20}
+                color={Colors.outlineVariant}
+              />
             </TouchableOpacity>
           </Card>
         </View>

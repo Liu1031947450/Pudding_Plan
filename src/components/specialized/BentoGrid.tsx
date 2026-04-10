@@ -17,7 +17,11 @@ export const BentoGrid: React.FC<BentoGridProps> = ({ children, style }) => {
   return <View style={[styles.grid, style]}>{children}</View>;
 };
 
-export const BentoItem: React.FC<BentoItemProps> = ({ children, span = 1, style }) => {
+export const BentoItem: React.FC<BentoItemProps> = ({
+  children,
+  span = 1,
+  style,
+}) => {
   const itemStyle = [
     styles.item,
     span === 2 && styles.span2,

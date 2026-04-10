@@ -11,7 +11,16 @@ module.exports = {
     alias: {
       'react-native$': 'react-native-web',
     },
-    extensions: ['.web.js', '.web.tsx', '.web.ts', '.js', '.jsx', '.ts', '.tsx', '.json'],
+    extensions: [
+      '.web.js',
+      '.web.tsx',
+      '.web.ts',
+      '.js',
+      '.jsx',
+      '.ts',
+      '.tsx',
+      '.json',
+    ],
     fullySpecified: false, // This fixes the module resolution issue
   },
   module: {

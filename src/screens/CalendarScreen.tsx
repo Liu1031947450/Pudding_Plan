@@ -9,7 +9,13 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize, BorderRadius } from '../constants/theme';
-import { BottomNavBar, TopAppBar, Card, Button, NotificationDrawer } from '../components';
+import {
+  BottomNavBar,
+  TopAppBar,
+  Card,
+  Button,
+  NotificationDrawer,
+} from '../components';
 
 interface DayData {
   day: number;
@@ -140,10 +146,18 @@ const CalendarScreen: React.FC = () => {
             </View>
             <View style={styles.monthNav}>
               <TouchableOpacity style={styles.navButton}>
-                <MaterialIcons name="chevron-left" size={24} color={Colors.onSurface} />
+                <MaterialIcons
+                  name="chevron-left"
+                  size={24}
+                  color={Colors.onSurface}
+                />
               </TouchableOpacity>
               <TouchableOpacity style={styles.navButton}>
-                <MaterialIcons name="chevron-right" size={24} color={Colors.onSurface} />
+                <MaterialIcons
+                  name="chevron-right"
+                  size={24}
+                  color={Colors.onSurface}
+                />
               </TouchableOpacity>
             </View>
           </View>
@@ -197,7 +211,11 @@ const CalendarScreen: React.FC = () => {
           <View style={styles.sectionHeader}>
             <View style={styles.sectionTitleRow}>
               <View style={styles.sectionIcon}>
-                <MaterialIcons name="check-circle" size={20} color={Colors.secondary} />
+                <MaterialIcons
+                  name="check-circle"
+                  size={20}
+                  color={Colors.secondary}
+                />
               </View>
               <Text style={styles.sectionTitle}>今日重点</Text>
             </View>
@@ -220,7 +238,11 @@ const CalendarScreen: React.FC = () => {
                     <MaterialIcons
                       name={habit.icon}
                       size={28}
-                      color={habit.completed ? Colors.tertiary : Colors.onSurfaceVariant}
+                      color={
+                        habit.completed
+                          ? Colors.tertiary
+                          : Colors.onSurfaceVariant
+                      }
                     />
                   </View>
                   <View style={styles.habitInfo}>
@@ -238,8 +260,16 @@ const CalendarScreen: React.FC = () => {
             ))}
           </View>
 
-          <Card style={styles.quoteCard} gradient gradientColors={[Colors.primary, Colors.primaryContainer]}>
-            <MaterialIcons name="format-quote" size={32} color={Colors.onPrimaryContainer} />
+          <Card
+            style={styles.quoteCard}
+            gradient
+            gradientColors={[Colors.primary, Colors.primaryContainer]}
+          >
+            <MaterialIcons
+              name="format-quote"
+              size={32}
+              color={Colors.onPrimaryContainer}
+            />
             <Text style={styles.quoteText}>
               "Taking a deep breath is the first step towards clarity."
             </Text>

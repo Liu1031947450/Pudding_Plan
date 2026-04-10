@@ -22,7 +22,10 @@ class PlanService {
   }
 
   // Update plan
-  async updatePlan(id: string, updates: Partial<Plan>): Promise<Plan | undefined> {
+  async updatePlan(
+    id: string,
+    updates: Partial<Plan>,
+  ): Promise<Plan | undefined> {
     const response = await plansApi.update(id, updates);
     return response.data;
   }

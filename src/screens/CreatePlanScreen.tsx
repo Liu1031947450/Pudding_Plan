@@ -30,7 +30,10 @@ type CreatePlanRouteProp = RouteProp<
 const CreatePlanScreen: React.FC = () => {
   // 启用 Android 的 LayoutAnimation
   useEffect(() => {
-    if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+    if (
+      Platform.OS === 'android' &&
+      UIManager.setLayoutAnimationEnabledExperimental
+    ) {
       UIManager.setLayoutAnimationEnabledExperimental(true);
     }
   }, []);
@@ -284,7 +287,9 @@ const CreatePlanScreen: React.FC = () => {
   };
 
   const handleConfirmTime = () => {
-    const timeString = `${selectedHour.toString().padStart(2, '0')}:${selectedMinute.toString().padStart(2, '0')}`;
+    const timeString = `${selectedHour
+      .toString()
+      .padStart(2, '0')}:${selectedMinute.toString().padStart(2, '0')}`;
 
     if (editingReminderId) {
       // 编辑模式：更新现有提醒
@@ -402,8 +407,8 @@ const CreatePlanScreen: React.FC = () => {
               {isEditMode
                 ? '编辑计划'
                 : templateData
-                  ? templateData.category
-                  : '开始新的旅程'}
+                ? templateData.category
+                : '开始新的旅程'}
             </Text>
             <Text style={styles.heroTitle}>{planName || '自定义计划'}</Text>
             {templateData && !isEditMode && (

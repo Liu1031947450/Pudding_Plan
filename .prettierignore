@@ -1,0 +1,11 @@
+node_modules
+vendor
+.expo
+dist
+build
+coverage
+android
+ios
+*.log
+*.lock
+stitch_puddingplan1.0

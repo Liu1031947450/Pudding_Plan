@@ -22,7 +22,9 @@ class TemplateService {
   }
 
   // Get templates by difficulty
-  async getTemplatesByDifficulty(difficulty: 'easy' | 'medium' | 'hard'): Promise<TemplateDetail[]> {
+  async getTemplatesByDifficulty(
+    difficulty: 'easy' | 'medium' | 'hard',
+  ): Promise<TemplateDetail[]> {
     const templates = await this.getAllTemplates();
     return templates.filter(template => template.difficulty === difficulty);
   }

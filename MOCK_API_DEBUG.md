@@ -21,7 +21,7 @@ useFocusEffect(
   React.useCallback(() => {
     console.log('PlanScreen focused, refreshing plans...');
     refreshPlans();
-  }, [refreshPlans])
+  }, [refreshPlans]),
 );
 ```
 
@@ -48,21 +48,27 @@ useFocusEffect(
 ## 常见问题
 
 ### 问题：创建后列表没有更新
+
 **可能原因**：
+
 - useFocusEffect 没有触发
 - refreshPlans 没有正确调用 API
 - Mock 数据库没有正确保存
 
 **解决方案**：
+
 - 检查 Console 日志
 - 确认 useFocusEffect 被触发
 - 验证 Mock 数据库单例是否正常工作
 
 ### 问题：数据在刷新后丢失
+
 **可能原因**：
+
 - 模块热重载导致单例重置
 - 应用完全重启
 
 **解决方案**：
+
 - 这是正常行为，Mock 数据只在应用运行期间持久化
 - 生产环境需要使用真实的持久化存储（如 AsyncStorage 或后端数据库）

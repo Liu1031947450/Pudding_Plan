@@ -71,7 +71,7 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
       onRequestClose={onClose}
     >
       <Pressable style={styles.overlay} onPress={onClose}>
-        <Pressable style={styles.drawer} onPress={(e) => e.stopPropagation()}>
+        <Pressable style={styles.drawer} onPress={e => e.stopPropagation()}>
           <View style={styles.handle} />
 
           <View style={styles.header}>
@@ -97,7 +97,7 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                 <Text style={styles.emptySubtext}>保持专注，继续前行</Text>
               </View>
             ) : (
-              notifications.map((notification) => (
+              notifications.map(notification => (
                 <TouchableOpacity
                   key={notification.id}
                   style={[
@@ -111,7 +111,9 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                     style={[
                       styles.notificationIcon,
                       {
-                        backgroundColor: `${getNotificationColor(notification.type)}15`,
+                        backgroundColor: `${getNotificationColor(
+                          notification.type,
+                        )}15`,
                       },
                     ]}
                   >
@@ -131,7 +133,9 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                     <Text style={styles.notificationMessage} numberOfLines={2}>
                       {notification.message}
                     </Text>
-                    <Text style={styles.notificationTime}>{notification.time}</Text>
+                    <Text style={styles.notificationTime}>
+                      {notification.time}
+                    </Text>
                   </View>
                 </TouchableOpacity>
               ))

@@ -24,29 +24,38 @@ export const usePlanManagement = () => {
     loadPlans();
   }, [loadPlans]);
 
-  const handleCreatePlan = useCallback(async (planData: Omit<Plan, 'id'>) => {
-    const newPlan = await planService.createPlan(planData);
-    if (newPlan) {
-      await loadPlans();
-    }
-    return newPlan;
-  }, [loadPlans]);
+  const handleCreatePlan = useCallback(
+    async (planData: Omit<Plan, 'id'>) => {
+      const newPlan = await planService.createPlan(planData);
+      if (newPlan) {
+        await loadPlans();
+      }
+      return newPlan;
+    },
+    [loadPlans],
+  );
 
-  const handleUpdatePlan = useCallback(async (id: string, planData: Partial<Plan>) => {
-    const updatedPlan = await planService.updatePlan(id, planData);
-    if (updatedPlan) {
-      await loadPlans();
-    }
-    return updatedPlan;
-  }, [loadPlans]);
+  const handleUpdatePlan = useCallback(
+    async (id: string, planData: Partial<Plan>) => {
+      const updatedPlan = await planService.updatePlan(id, planData);
+      if (updatedPlan) {
+        await loadPlans();
+      }
+      return updatedPlan;
+    },
+    [loadPlans],
+  );
 
-  const handleDeletePlan = useCallback(async (id: string) => {
-    const success = await planService.deletePlan(id);
-    if (success) {
-      await loadPlans();
-    }
-    return success;
-  }, [loadPlans]);
+  const handleDeletePlan = useCallback(
+    async (id: string) => {
+      const success = await planService.deletePlan(id);
+      if (success) {
+        await loadPlans();
+      }
+      return success;
+    },
+    [loadPlans],
+  );
 
   const handleDeleteSelected = useCallback(async () => {
     let deletedCount = 0;

@@ -32,7 +32,11 @@ export const CheckInMethodSelector: React.FC<CheckInMethodSelectorProps> = ({
           <MaterialIcons
             name="verified"
             size={24}
-            color={selectedMethod === 'stamp' ? Colors.onPrimary : Colors.onSurfaceVariant}
+            color={
+              selectedMethod === 'stamp'
+                ? Colors.onPrimary
+                : Colors.onSurfaceVariant
+            }
           />
           <Text
             style={[
@@ -54,7 +58,11 @@ export const CheckInMethodSelector: React.FC<CheckInMethodSelectorProps> = ({
           <MaterialIcons
             name="show-chart"
             size={24}
-            color={selectedMethod === 'number' ? Colors.onPrimary : Colors.onSurfaceVariant}
+            color={
+              selectedMethod === 'number'
+                ? Colors.onPrimary
+                : Colors.onSurfaceVariant
+            }
           />
           <Text
             style={[
@@ -76,7 +84,11 @@ export const CheckInMethodSelector: React.FC<CheckInMethodSelectorProps> = ({
           <MaterialIcons
             name="edit-note"
             size={24}
-            color={selectedMethod === 'diary' ? Colors.onPrimary : Colors.onSurfaceVariant}
+            color={
+              selectedMethod === 'diary'
+                ? Colors.onPrimary
+                : Colors.onSurfaceVariant
+            }
           />
           <Text
             style={[
