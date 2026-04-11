@@ -4,21 +4,20 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TouchableOpacity,
   Animated,
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { MaterialIcons } from '@expo/vector-icons';
-import { Colors, Spacing, FontSize, BorderRadius } from '../constants/theme';
+import { useFocusEffect } from '@react-navigation/native';
+import { Colors, Spacing } from '../constants/theme';
+import { BottomNavBar, TopAppBar } from '../components';
 import {
-  BottomNavBar,
-  TopAppBar,
-  Card,
-  Button,
+  CalendarHeader,
+  CalendarGrid,
+  TodayFocusSection,
+  DailyQuoteCard,
   NotificationDrawer,
-} from '../components';
+} from '../features/calendar';
 import { useNotificationState } from '../hooks/useNotificationState';
 import type { DayData } from '../types/domain';
 import { usePlanManagement } from '../hooks';
@@ -81,20 +80,6 @@ const CalendarScreen: React.FC = () => {
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth() + 1;
-  const CHINESE_MONTHS = [
-    '一月',
-    '二月',
-    '三月',
-    '四月',
-    '五月',
-    '六月',
-    '七月',
-    '八月',
-    '九月',
-    '十月',
-    '十一月',
-    '十二月',
-  ];
 
   const fetchCalendarData = React.useCallback(
     async (silent = false) => {
@@ -142,7 +127,7 @@ const CalendarScreen: React.FC = () => {
     }
   };
 
-  const getActivityColor = (type?: 'primary' | 'secondary' | 'tertiary') => {
+  const getActivityColor = (type?: string) => {
     switch (type) {
       case 'primary':
         return '#4CAF50'; // 协调生机的质感绿色
@@ -178,127 +163,27 @@ const CalendarScreen: React.FC = () => {
         ) : (
           <>
             <View style={styles.calendarSection}>
-              <View style={styles.monthHeader}>
-                <View>
-                  <Text style={styles.monthLabel}>{`${year}年`}</Text>
-                  <Text style={styles.monthTitle}>
-                    {CHINESE_MONTHS[month - 1]}
-                  </Text>
-                </View>
-                <View style={styles.monthNav}>
-                  <TouchableOpacity
-                    style={styles.navButton}
-                    onPress={() => {
-                      const today = new Date();
-                      setCurrentDate(today);
-                      setSelectedDay(today.getDate());
-                    }}
-                  >
-                    <MaterialIcons
-                      name="today"
-                      size={20}
-                      color={Colors.onSurface}
-                    />
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.navButton}
-                    onPress={() => setCurrentDate(new Date(year, month - 2, 1))}
-                  >
-                    <MaterialIcons
-                      name="chevron-left"
-                      size={24}
-                      color={Colors.onSurface}
-                    />
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.navButton}
-                    onPress={() => setCurrentDate(new Date(year, month, 1))}
-                  >
-                    <MaterialIcons
-                      name="chevron-right"
-                      size={24}
-                      color={Colors.onSurface}
-                    />
-                  </TouchableOpacity>
-                </View>
-              </View>
+              <CalendarHeader
+                year={year}
+                month={month}
+                onPrevMonth={() => setCurrentDate(new Date(year, month - 2, 1))}
+                onNextMonth={() => setCurrentDate(new Date(year, month, 1))}
+                onGoToToday={() => {
+                  const today = new Date();
+                  setCurrentDate(today);
+                  setSelectedDay(today.getDate());
+                }}
+              />
 
-              <Card style={styles.calendarCard}>
-                <View style={styles.weekDays}>
-                  {['一', '二', '三', '四', '五', '六', '日'].map(day => (
-                    <Text key={day} style={styles.weekDay}>
-                      {day}
-                    </Text>
-                  ))}
-                </View>
+              <CalendarGrid
+                year={year}
+                month={month}
+                calendarDays={calendarDays}
+                selectedDay={selectedDay}
+                onDayPress={setSelectedDay}
+                getActivityColor={getActivityColor}
+              />
 
-                <View style={styles.daysGrid}>
-                  {Array.from({
-                    length: (() => {
-                      const firstDay = new Date(year, month - 1, 1).getDay();
-                      return firstDay === 0 ? 6 : firstDay - 1;
-                    })(),
-                  }).map((_, index) => (
-                    <View
-                      key={`empty-${index}`}
-                      style={styles.dayCellContainer}
-                    />
-                  ))}
-
-                  {Array.from({
-                    length: new Date(year, month, 0).getDate(),
-                  }).map((_, index) => {
-                    const dayStr = index + 1;
-                    const dayObj = calendarDays.find(d => d.day === dayStr) || {
-                      day: dayStr,
-                      hasActivity: false,
-                      isToday: false,
-                      isSelected: false,
-                    };
-                    const isSelected = selectedDay === dayStr;
-
-                    return (
-                      <View
-                        key={`day-${dayStr}`}
-                        style={styles.dayCellContainer}
-                      >
-                        <TouchableOpacity
-                          style={[
-                            styles.dayCell,
-                            isSelected && styles.selectedDay,
-                            dayObj.isToday && !isSelected && styles.todayCell,
-                          ]}
-                          onPress={() => setSelectedDay(dayStr)}
-                        >
-                          <Text
-                            style={[
-                              styles.dayText,
-                              isSelected && styles.selectedDayText,
-                              dayObj.isToday && !isSelected && styles.todayText,
-                            ]}
-                          >
-                            {dayStr}
-                          </Text>
-                          {dayObj.hasActivity && (
-                            <View
-                              style={[
-                                styles.activityDot,
-                                {
-                                  backgroundColor: getActivityColor(
-                                    dayObj.activityType,
-                                  ),
-                                },
-                              ]}
-                            />
-                          )}
-                        </TouchableOpacity>
-                      </View>
-                    );
-                  })}
-                </View>
-              </Card>
-
-              {/* 盖章动画浮层紧贴着日历模块 */}
               <Animated.View
                 style={[
                   styles.stampOverlay,
@@ -315,108 +200,16 @@ const CalendarScreen: React.FC = () => {
               </Animated.View>
             </View>
 
-            <View style={styles.habitsSection}>
-              <View style={styles.sectionHeader}>
-                <View style={styles.sectionTitleRow}>
-                  <View style={styles.sectionIcon}>
-                    <MaterialIcons
-                      name="check-circle"
-                      size={20}
-                      color={Colors.secondary}
-                    />
-                  </View>
-                  <Text style={styles.sectionTitle}>今日重点</Text>
-                </View>
-              </View>
+            <TodayFocusSection
+              plans={plans}
+              selectedDay={selectedDay}
+              month={month}
+              year={year}
+              calendarDays={calendarDays}
+              onCheckIn={onCheckIn}
+            />
 
-              <View style={styles.habitsList}>
-                {plans.map(plan => {
-                  const selectedDayObj = calendarDays.find(
-                    d => d.day === selectedDay,
-                  );
-                  const isCompleted = selectedDayObj?.completedPlanIds
-                    ? selectedDayObj.completedPlanIds.includes(plan.id)
-                    : false;
-
-                  const now = new Date();
-                  const isTodaySelected =
-                    selectedDay === now.getDate() &&
-                    month === now.getMonth() + 1 &&
-                    year === now.getFullYear();
-
-                  let buttonTitle = '点击盖章';
-                  if (isCompleted) {
-                    buttonTitle = '已盖章';
-                  } else if (!isTodaySelected) {
-                    buttonTitle = '非今日';
-                  }
-
-                  return (
-                    <Card key={plan.id} style={styles.habitCard}>
-                      <View style={styles.habitContent}>
-                        <View
-                          style={[
-                            styles.habitIcon,
-                            {
-                              backgroundColor: isCompleted
-                                ? Colors.tertiaryContainer
-                                : plan.color || Colors.surfaceContainerHigh,
-                            },
-                          ]}
-                        >
-                          <MaterialIcons
-                            name={(plan.icon || 'stars') as any}
-                            size={28}
-                            color={
-                              isCompleted
-                                ? Colors.tertiary
-                                : Colors.onSurfaceVariant
-                            }
-                          />
-                        </View>
-                        <View style={styles.habitInfo}>
-                          <Text style={styles.habitTitle}>{plan.title}</Text>
-                          <Text style={styles.habitSubtitle}>
-                            {plan.totalDays
-                              ? `目标: ${plan.totalDays}天`
-                              : '通用计划'}
-                          </Text>
-                        </View>
-                      </View>
-                      <Button
-                        title={buttonTitle}
-                        onPress={() => onCheckIn(plan.id)}
-                        variant={
-                          isCompleted
-                            ? 'outline'
-                            : isTodaySelected
-                            ? 'primary'
-                            : 'outline'
-                        }
-                        size="small"
-                        disabled={isCompleted || !isTodaySelected}
-                      />
-                    </Card>
-                  );
-                })}
-              </View>
-
-              <Card
-                style={styles.quoteCard}
-                gradient
-                gradientColors={[Colors.primary, Colors.primaryContainer]}
-              >
-                <MaterialIcons
-                  name="format-quote"
-                  size={32}
-                  color={Colors.onPrimaryContainer}
-                />
-                <Text style={styles.quoteText}>
-                  "{quote.text}"{'\n'}
-                  <Text style={styles.quoteAuthor}>—— {quote.author}</Text>
-                </Text>
-              </Card>
-            </View>
+            <DailyQuoteCard quote={quote} />
           </>
         )}
       </ScrollView>
@@ -445,7 +238,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingTop: 24,
     paddingBottom: 120,
-    flexGrow: 1, // 确保 loading 状态下能居中
+    flexGrow: 1,
   },
   loadingContainer: {
     flex: 1,
@@ -460,105 +253,7 @@ const styles = StyleSheet.create({
   },
   calendarSection: {
     marginBottom: Spacing.xl,
-  },
-  monthHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    marginBottom: Spacing.md,
-  },
-  monthLabel: {
-    fontSize: FontSize.sm,
-    fontWeight: '600',
-    color: Colors.onSurfaceVariant,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginBottom: 4,
-  },
-  monthTitle: {
-    fontSize: FontSize.xxl,
-    fontWeight: '800',
-    color: Colors.onSurface,
-    letterSpacing: -0.5,
-  },
-  monthNav: {
-    flexDirection: 'row',
-    gap: Spacing.xs,
-  },
-  navButton: {
-    width: 36,
-    height: 36,
-    borderRadius: BorderRadius.full,
-    backgroundColor: Colors.surfaceContainerLow,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  navIcon: {
-    fontSize: 20,
-    color: Colors.onSurfaceVariant,
-  },
-  calendarCard: {
-    padding: Spacing.md,
-  },
-  weekDays: {
-    flexDirection: 'row',
-    marginBottom: Spacing.sm,
-  },
-  weekDay: {
-    flex: 1,
-    textAlign: 'center',
-    fontSize: FontSize.xs,
-    fontWeight: '600',
-    color: `${Colors.onSurfaceVariant}80`,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
-  daysGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  dayCellContainer: {
-    width: '14.28%',
-    height: 48,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  dayCell: {
-    width: 40,
-    height: 40,
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    paddingTop: 4,
     position: 'relative',
-    borderRadius: 20,
-  },
-  selectedDay: {
-    backgroundColor: Colors.primaryContainer,
-    borderRadius: BorderRadius.full,
-  },
-  todayCell: {
-    backgroundColor: `${Colors.primaryContainer}40`,
-    borderRadius: BorderRadius.full,
-  },
-  dayText: {
-    fontSize: FontSize.md,
-    fontWeight: '500',
-    color: Colors.onSurface,
-  },
-  selectedDayText: {
-    fontWeight: '700',
-    color: Colors.onPrimaryContainer,
-  },
-  todayText: {
-    fontWeight: '700',
-    color: Colors.primary,
-  },
-  activityDot: {
-    position: 'absolute',
-    bottom: 4,
-    width: 6,
-    height: 6,
-    borderRadius: 3,
   },
   stampOverlay: {
     ...StyleSheet.absoluteFillObject,
@@ -566,6 +261,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     zIndex: 1000,
     elevation: 20,
+    top: 60, // 避开 Header
   },
   stampInner: {
     borderWidth: 8,
@@ -581,97 +277,6 @@ const styles = StyleSheet.create({
     color: '#4CAF50',
     letterSpacing: 4,
     fontStyle: 'italic',
-  },
-  habitsSection: {
-    marginBottom: Spacing.xl,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: Spacing.md,
-  },
-  sectionTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  sectionIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: Colors.secondaryContainer,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: Spacing.sm,
-  },
-  sectionIconText: {
-    fontSize: 20,
-    color: Colors.secondary,
-  },
-  sectionTitle: {
-    fontSize: FontSize.xl,
-    fontWeight: '700',
-    color: Colors.onSurface,
-  },
-  habitsList: {
-    gap: Spacing.sm,
-    marginBottom: Spacing.md,
-  },
-  habitCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: Spacing.md,
-  },
-  habitContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  habitIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: BorderRadius.lg,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: Spacing.md,
-  },
-  habitIconText: {
-    fontSize: 28,
-  },
-  habitInfo: {},
-  habitTitle: {
-    fontSize: FontSize.lg,
-    fontWeight: '700',
-    color: Colors.onSurface,
-    marginBottom: 2,
-  },
-  habitSubtitle: {
-    fontSize: FontSize.sm,
-    color: Colors.onSurfaceVariant,
-  },
-  quoteCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.primaryContainer,
-    padding: Spacing.lg,
-    marginTop: Spacing.md,
-  },
-  quoteIcon: {
-    fontSize: 32,
-    color: Colors.onPrimaryContainer,
-    marginRight: Spacing.md,
-  },
-  quoteText: {
-    flex: 1,
-    fontSize: FontSize.lg,
-    fontWeight: '600',
-    color: Colors.onPrimaryContainer,
-    lineHeight: 24,
-  },
-  quoteAuthor: {
-    fontSize: FontSize.sm,
-    fontStyle: 'normal',
-    fontWeight: 'normal',
-    marginTop: 8,
   },
 });
 

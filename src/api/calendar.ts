@@ -14,13 +14,17 @@ export const calendarApi = {
   ): Promise<ApiResponse<DayData[]>> => {
     if (USE_MOCK) {
       try {
-        const data = await mockApiServer.calendar.getData(year, month, userId);
+        const response = await mockApiServer.calendar.getData(
+          year,
+          month,
+          userId,
+        );
         console.log(
           '[Mock API] calendarApi.getData - 获取日历数据',
           year,
           month,
         );
-        return { success: true, data };
+        return { success: true, data: response.data };
       } catch (error: any) {
         return { success: false, error: error.message };
       }
@@ -36,8 +40,8 @@ export const calendarApi = {
   > => {
     if (USE_MOCK) {
       try {
-        const data = await mockApiServer.calendar.getDailyQuote();
-        return { success: true, data };
+        const response = await mockApiServer.calendar.getDailyQuote();
+        return { success: true, data: response.data };
       } catch (error: any) {
         return { success: false, error: error.message };
       }
@@ -55,12 +59,12 @@ export const calendarApi = {
   ): Promise<ApiResponse<boolean>> => {
     if (USE_MOCK) {
       try {
-        const success = await mockApiServer.calendar.updateDay(
+        const response = await mockApiServer.calendar.updateDay(
           day,
           hasActivity,
           activityType,
         );
-        if (!success) {
+        if (!response.data) {
           return { success: false, error: '未找到日期' };
         }
         console.log(
@@ -87,9 +91,12 @@ export const habitsApi = {
   getAll: async (): Promise<ApiResponse<Habit[]>> => {
     if (USE_MOCK) {
       try {
-        const data = await mockApiServer.habits.getAll();
-        console.log('[Mock API] habitsApi.getAll - 获取所有习惯', data);
-        return { success: true, data };
+        const response = await mockApiServer.habits.getAll();
+        console.log(
+          '[Mock API] habitsApi.getAll - 获取所有习惯',
+          response.data,
+        );
+        return { success: true, data: response.data };
       } catch (error: any) {
         return { success: false, error: error.message };
       }
@@ -101,7 +108,8 @@ export const habitsApi = {
   toggle: async (id: string): Promise<ApiResponse<Habit>> => {
     if (USE_MOCK) {
       try {
-        const data = await mockApiServer.habits.toggle(id);
+        const response = await mockApiServer.habits.toggle(id);
+        const data = response.data;
         if (!data) {
           return { success: false, error: '未找到习惯' };
         }

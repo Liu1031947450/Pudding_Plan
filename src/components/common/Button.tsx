@@ -7,6 +7,7 @@ import {
   TextStyle,
   ActivityIndicator,
   Animated,
+  StyleProp,
 } from 'react-native';
 import { Colors, Spacing, FontSize, BorderRadius } from '../../constants/theme';
 
@@ -19,7 +20,7 @@ interface ButtonProps {
   iconPosition?: 'left' | 'right';
   disabled?: boolean;
   loading?: boolean;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
   textStyle?: TextStyle;
 }
 

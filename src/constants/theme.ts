@@ -57,6 +57,8 @@ export const Colors = {
   inverseSurface: '#0d0e0e',
   inverseOnSurface: '#9d9d9c',
   inversePrimary: '#f9d461',
+  white: '#ffffff',
+  black: '#000000',
 };
 
 export const Spacing = {

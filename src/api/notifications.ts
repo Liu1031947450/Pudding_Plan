@@ -10,9 +10,12 @@ export const notificationsApi = {
   getAll: async (userId?: string): Promise<ApiResponse<Notification[]>> => {
     if (USE_MOCK) {
       try {
-        const data = await mockApiServer.notifications.getAll(userId);
-        console.log('[Mock API] notificationsApi.getAll - 获取所有通知', data);
-        return { success: true, data };
+        const response = await mockApiServer.notifications.getAll(userId);
+        console.log(
+          '[Mock API] notificationsApi.getAll - 获取所有通知',
+          response.data,
+        );
+        return { success: true, data: response.data };
       } catch (error: any) {
         return { success: false, error: error.message };
       }
@@ -30,11 +33,11 @@ export const notificationsApi = {
   ): Promise<ApiResponse<boolean>> => {
     if (USE_MOCK) {
       try {
-        const success = await mockApiServer.notifications.markAsRead(
+        const response = await mockApiServer.notifications.markAsRead(
           id,
           userId,
         );
-        if (!success) {
+        if (!response.data) {
           return { success: false, error: '未找到通知' };
         }
         console.log(
@@ -58,9 +61,12 @@ export const badgesApi = {
   getAll: async (): Promise<ApiResponse<Badge[]>> => {
     if (USE_MOCK) {
       try {
-        const data = await mockApiServer.badges.getAll();
-        console.log('[Mock API] badgesApi.getAll - 获取所有成就', data);
-        return { success: true, data };
+        const response = await mockApiServer.badges.getAll();
+        console.log(
+          '[Mock API] badgesApi.getAll - 获取所有成就',
+          response.data,
+        );
+        return { success: true, data: response.data };
       } catch (error: any) {
         return { success: false, error: error.message };
       }

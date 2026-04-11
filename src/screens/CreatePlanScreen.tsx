@@ -1,24 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
-  Modal,
-  Switch,
-  ActivityIndicator,
-  LayoutAnimation,
-} from 'react-native';
+import { View, StyleSheet, ScrollView, LayoutAnimation } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import { MaterialIcons } from '@expo/vector-icons';
-import { Colors, Spacing, FontSize, BorderRadius } from '../constants/theme';
-import { TopAppBar, Card, Button, Toast, BottomDrawer } from '../components';
+import { Colors, Spacing } from '../constants/theme';
+import { TopAppBar, Toast, BottomDrawer } from '../components';
+import {
+  PlanFormHeader,
+  PlanGoalList,
+  PlanBasicInfoForm,
+  CheckInMethodSelector,
+  PlanReminderSection,
+  PlanMilestoneSection,
+  TimePickerModal,
+  MilestoneEditorDrawerContent,
+} from '../features/plan';
+import { PlanFormButton } from './components/PlanFormButton';
 import { templateDetails } from '../data/templates';
 import { usePlanManagement } from '../hooks';
 import { planService } from '../services/planService';
+import { formatTime } from '../utils';
 import type { TemplateDetail, Reminder, Plan } from '../types/domain';
 
 type CreatePlanRouteProp = RouteProp<
@@ -393,49 +393,6 @@ const CreatePlanScreen: React.FC = () => {
     );
   };
 
-  // 获取排序后的提醒列表
-  const getSortedReminders = () => {
-    const parseTime = (timeStr: string) => {
-      const [hours, minutes] = timeStr.split(':').map(Number);
-      return hours * 60 + minutes;
-    };
-
-    const enabled = reminders
-      .filter(r => r.enabled)
-      .sort((a, b) => {
-        const timeA = parseTime(
-          typeof a.time === 'string' ? a.time : formatTime(a.time),
-        );
-        const timeB = parseTime(
-          typeof b.time === 'string' ? b.time : formatTime(b.time),
-        );
-        return timeA - timeB;
-      });
-
-    const disabled = reminders
-      .filter(r => !r.enabled)
-      .sort((a, b) => {
-        const timeA = parseTime(
-          typeof a.time === 'string' ? a.time : formatTime(a.time),
-        );
-        const timeB = parseTime(
-          typeof b.time === 'string' ? b.time : formatTime(b.time),
-        );
-        return timeA - timeB;
-      });
-
-    return [...enabled, ...disabled];
-  };
-
-  const formatTime = (date: Date | string) => {
-    if (typeof date === 'string') {
-      return date;
-    }
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    return `${hours}:${minutes}`;
-  };
-
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <TopAppBar
@@ -449,324 +406,54 @@ const CreatePlanScreen: React.FC = () => {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.heroSection}>
-          <View style={styles.heroImage}>
-            <View
-              style={[
-                styles.heroImagePlaceholder,
-                { backgroundColor: `${planColor}20` },
-              ]}
-            >
-              <MaterialIcons
-                name={planIcon as any}
-                size={48}
-                color={Colors.primary}
-              />
-            </View>
-          </View>
-          <View style={styles.heroContent}>
-            <Text style={styles.heroLabel}>
-              {isEditMode
-                ? '编辑计划'
-                : templateData
-                ? templateData.category
-                : '开始新的旅程'}
-            </Text>
-            <Text style={styles.heroTitle}>{planName || '自定义计划'}</Text>
-            {templateData && !isEditMode && (
-              <Text style={styles.heroDescription}>
-                {templateData.description}
-              </Text>
-            )}
-          </View>
-        </View>
+        <PlanFormHeader
+          planName={planName}
+          planIcon={planIcon}
+          planColor={planColor}
+          isEditMode={isEditMode}
+          categoryLabel={templateData?.category}
+          description={!isEditMode ? templateData?.description : undefined}
+        />
 
-        {templateData && (
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <MaterialIcons name="flag" size={20} color={Colors.primary} />
-              <Text style={styles.sectionTitle}>计划目标</Text>
-            </View>
-            <View style={styles.goalsList}>
-              {templateData.goals.map((goal, index) => (
-                <View key={index} style={styles.goalItem}>
-                  <MaterialIcons
-                    name="check-circle"
-                    size={20}
-                    color={Colors.primary}
-                  />
-                  <Text style={styles.goalText}>{goal}</Text>
-                </View>
-              ))}
-            </View>
-          </View>
-        )}
+        <PlanGoalList goals={templateData?.goals || []} />
+
+        <PlanBasicInfoForm
+          planName={planName}
+          planDays={planDays}
+          onNameChange={setPlanName}
+          onDaysChange={setPlanDays}
+        />
 
         <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <MaterialIcons name="info" size={20} color={Colors.primary} />
-            <Text style={styles.sectionTitle}>基础信息</Text>
-          </View>
-
-          <View style={styles.inputGrid}>
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>计划名称</Text>
-              <View style={styles.inputWrapper}>
-                <TextInput
-                  style={styles.input}
-                  value={planName}
-                  onChangeText={setPlanName}
-                  placeholderTextColor={Colors.outline}
-                />
-              </View>
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>打卡周期</Text>
-              <View style={styles.inputWrapper}>
-                <TextInput
-                  style={styles.input}
-                  value={planDays}
-                  onChangeText={setPlanDays}
-                  keyboardType="number-pad"
-                  placeholderTextColor={Colors.outline}
-                />
-                <Text style={styles.inputSuffix}>天</Text>
-              </View>
-            </View>
-          </View>
+          <CheckInMethodSelector
+            selectedMethod={
+              checkInMethod === 0
+                ? 'stamp'
+                : checkInMethod === 1
+                ? 'number'
+                : 'diary'
+            }
+            onMethodChange={method =>
+              setCheckInMethod(
+                method === 'stamp' ? 0 : method === 'number' ? 1 : 2,
+              )
+            }
+          />
         </View>
 
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <MaterialIcons
-              name="check-circle"
-              size={20}
-              color={Colors.primary}
-            />
-            <Text style={styles.sectionTitle}>打卡方式</Text>
-          </View>
+        <PlanReminderSection
+          reminders={reminders}
+          onAddReminder={handleAddReminder}
+          onEditReminder={handleEditReminder}
+          onToggleReminder={toggleReminder}
+        />
 
-          <View style={styles.methodGrid}>
-            <TouchableOpacity
-              style={[
-                styles.methodButton,
-                checkInMethod === 0 && styles.methodButtonActive,
-              ]}
-              onPress={() => setCheckInMethod(0)}
-            >
-              <MaterialIcons
-                name="verified"
-                size={24}
-                color={
-                  checkInMethod === 0
-                    ? Colors.onPrimary
-                    : Colors.onSurfaceVariant
-                }
-              />
-              <Text
-                style={[
-                  styles.methodText,
-                  checkInMethod === 0 && styles.methodTextActive,
-                ]}
-              >
-                盖章打卡
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.methodButton,
-                checkInMethod === 1 && styles.methodButtonActive,
-              ]}
-              onPress={() => setCheckInMethod(1)}
-            >
-              <MaterialIcons
-                name="show-chart"
-                size={24}
-                color={
-                  checkInMethod === 1
-                    ? Colors.onPrimary
-                    : Colors.onSurfaceVariant
-                }
-              />
-              <Text
-                style={[
-                  styles.methodText,
-                  checkInMethod === 1 && styles.methodTextActive,
-                ]}
-              >
-                数值记录
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.methodButton,
-                checkInMethod === 2 && styles.methodButtonActive,
-              ]}
-              onPress={() => setCheckInMethod(2)}
-            >
-              <MaterialIcons
-                name="edit-note"
-                size={24}
-                color={
-                  checkInMethod === 2
-                    ? Colors.onPrimary
-                    : Colors.onSurfaceVariant
-                }
-              />
-              <Text
-                style={[
-                  styles.methodText,
-                  checkInMethod === 2 && styles.methodTextActive,
-                ]}
-              >
-                文字日记
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <MaterialIcons
-              name="notifications"
-              size={20}
-              color={Colors.primary}
-            />
-            <Text style={styles.sectionTitle}>提醒设置</Text>
-            <TouchableOpacity
-              style={[
-                styles.addButton,
-                reminders.length >= 5 && styles.addButtonDisabled,
-              ]}
-              onPress={handleAddReminder}
-              disabled={reminders.length >= 5}
-            >
-              <MaterialIcons
-                name="add"
-                size={16}
-                color={
-                  reminders.length >= 5
-                    ? Colors.outlineVariant
-                    : Colors.tertiary
-                }
-              />
-              <Text
-                style={[
-                  styles.addButtonText,
-                  reminders.length >= 5 && styles.addButtonTextDisabled,
-                ]}
-              >
-                添加 ({reminders.length}/5)
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.remindersList}>
-            {getSortedReminders().map(reminder => (
-              <Card key={reminder.id} style={styles.reminderCard}>
-                <TouchableOpacity
-                  style={styles.reminderLeft}
-                  onPress={() => handleEditReminder(reminder)}
-                >
-                  <MaterialIcons
-                    name="alarm"
-                    size={20}
-                    color={
-                      reminder.enabled
-                        ? Colors.primary
-                        : Colors.onSurfaceVariant
-                    }
-                  />
-                  <Text style={styles.reminderTime}>
-                    {formatTime(reminder.time)}
-                  </Text>
-                  <View
-                    style={[
-                      styles.reminderBadge,
-                      !reminder.enabled && styles.reminderBadgeGray,
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.reminderBadgeText,
-                        !reminder.enabled && styles.reminderBadgeTextGray,
-                      ]}
-                    >
-                      {reminder.label}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-                <Switch
-                  value={reminder.enabled}
-                  onValueChange={() => toggleReminder(reminder.id)}
-                  trackColor={{
-                    false: Colors.surfaceContainerHigh,
-                    true: Colors.primaryContainer,
-                  }}
-                  thumbColor={
-                    reminder.enabled ? Colors.primary : Colors.outline
-                  }
-                />
-              </Card>
-            ))}
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <MaterialIcons
-              name="emoji-events"
-              size={20}
-              color={Colors.primary}
-            />
-            <Text style={styles.sectionTitle}>阶段里程碑</Text>
-          </View>
-
-          <View style={styles.milestonesGrid}>
-            {_milestones.map((milestone, index) => (
-              <Card key={index} style={styles.milestoneCard}>
-                <View style={styles.milestoneNumber}>
-                  <Text style={styles.milestoneNumberText}>
-                    {milestone.times.toString().padStart(2, '0')}
-                  </Text>
-                </View>
-                <Text style={styles.milestoneTitle}>{milestone.title}</Text>
-                <Text style={styles.milestoneReward}>
-                  奖励：{milestone.description}
-                </Text>
-                <View style={styles.milestoneActions}>
-                  <TouchableOpacity onPress={() => handleEditMilestone(index)}>
-                    <Text style={styles.milestoneEdit}>修改奖励</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => handleDeleteMilestone(index)}
-                  >
-                    <MaterialIcons
-                      name="delete-outline"
-                      size={18}
-                      color={Colors.error}
-                    />
-                  </TouchableOpacity>
-                </View>
-              </Card>
-            ))}
-
-            <TouchableOpacity
-              style={styles.addMilestoneButton}
-              onPress={handleAddMilestone}
-            >
-              <MaterialIcons
-                name="add"
-                size={20}
-                color={Colors.onSurfaceVariant}
-              />
-              <Text style={styles.addMilestoneText}>添加里程碑阶段</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+        <PlanMilestoneSection
+          milestones={_milestones}
+          onAddMilestone={handleAddMilestone}
+          onEditMilestone={handleEditMilestone}
+          onDeleteMilestone={handleDeleteMilestone}
+        />
       </ScrollView>
 
       <Toast
@@ -776,111 +463,15 @@ const CreatePlanScreen: React.FC = () => {
         onHide={() => setToastVisible(false)}
       />
 
-      {showTimePicker && (
-        <Modal
-          visible={showTimePicker}
-          transparent
-          animationType="slide"
-          onRequestClose={() => setShowTimePicker(false)}
-        >
-          <TouchableOpacity
-            style={styles.modalOverlay}
-            activeOpacity={1}
-            onPress={() => setShowTimePicker(false)}
-          >
-            <TouchableOpacity
-              style={styles.timePickerModal}
-              activeOpacity={1}
-              onPress={e => e.stopPropagation()}
-            >
-              <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>选择提醒时间</Text>
-                <TouchableOpacity onPress={() => setShowTimePicker(false)}>
-                  <MaterialIcons
-                    name="close"
-                    size={24}
-                    color={Colors.onSurface}
-                  />
-                </TouchableOpacity>
-              </View>
-
-              <View style={styles.customPickerContainer}>
-                <View style={styles.pickerRow}>
-                  <ScrollView
-                    style={styles.pickerColumn}
-                    showsVerticalScrollIndicator={false}
-                  >
-                    {Array.from({ length: 24 }, (_, i) => i).map(hour => (
-                      <TouchableOpacity
-                        key={hour}
-                        style={[
-                          styles.pickerItem,
-                          selectedHour === hour && styles.pickerItemSelected,
-                        ]}
-                        onPress={() => setSelectedHour(hour)}
-                      >
-                        <Text
-                          style={[
-                            styles.pickerItemText,
-                            selectedHour === hour &&
-                              styles.pickerItemTextSelected,
-                          ]}
-                        >
-                          {hour.toString().padStart(2, '0')}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </ScrollView>
-
-                  <Text style={styles.pickerSeparator}>:</Text>
-
-                  <ScrollView
-                    style={styles.pickerColumn}
-                    showsVerticalScrollIndicator={false}
-                  >
-                    {Array.from({ length: 60 }, (_, i) => i).map(minute => (
-                      <TouchableOpacity
-                        key={minute}
-                        style={[
-                          styles.pickerItem,
-                          selectedMinute === minute &&
-                            styles.pickerItemSelected,
-                        ]}
-                        onPress={() => setSelectedMinute(minute)}
-                      >
-                        <Text
-                          style={[
-                            styles.pickerItemText,
-                            selectedMinute === minute &&
-                              styles.pickerItemTextSelected,
-                          ]}
-                        >
-                          {minute.toString().padStart(2, '0')}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </ScrollView>
-                </View>
-              </View>
-
-              <View style={styles.modalActions}>
-                <TouchableOpacity
-                  style={styles.modalCancelButton}
-                  onPress={() => setShowTimePicker(false)}
-                >
-                  <Text style={styles.modalCancelText}>取消</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.modalConfirmButton}
-                  onPress={handleConfirmTime}
-                >
-                  <Text style={styles.modalConfirmText}>确定</Text>
-                </TouchableOpacity>
-              </View>
-            </TouchableOpacity>
-          </TouchableOpacity>
-        </Modal>
-      )}
+      <TimePickerModal
+        visible={showTimePicker}
+        onClose={() => setShowTimePicker(false)}
+        selectedHour={selectedHour}
+        selectedMinute={selectedMinute}
+        onHourChange={setSelectedHour}
+        onMinuteChange={setSelectedMinute}
+        onConfirm={handleConfirmTime}
+      />
 
       <BottomDrawer
         visible={showMilestoneDrawer}
@@ -888,82 +479,25 @@ const CreatePlanScreen: React.FC = () => {
         title={editingMilestoneIndex !== null ? '编辑里程碑' : '添加里程碑'}
         height="75%"
       >
-        <View style={styles.drawerContent}>
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>天数</Text>
-            <View style={styles.inputWrapper}>
-              <TextInput
-                style={styles.input}
-                value={milestoneDay}
-                onChangeText={setMilestoneDay}
-                placeholder="输入天数"
-                placeholderTextColor={Colors.onSurfaceVariant}
-                keyboardType="number-pad"
-              />
-              <Text style={styles.inputSuffix}>天</Text>
-            </View>
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>里程碑名称</Text>
-            <View style={styles.inputWrapper}>
-              <TextInput
-                style={styles.input}
-                value={milestoneTitle}
-                onChangeText={setMilestoneTitle}
-                placeholder="例如：小有所成"
-                placeholderTextColor={Colors.onSurfaceVariant}
-              />
-            </View>
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>奖励内容</Text>
-            <View style={styles.inputWrapper}>
-              <TextInput
-                style={styles.input}
-                value={milestoneReward}
-                onChangeText={setMilestoneReward}
-                placeholder="例如：奖励一顿丰盛早餐"
-                placeholderTextColor={Colors.onSurfaceVariant}
-                multiline
-              />
-            </View>
-          </View>
-
-          <View style={styles.modalActions}>
-            <TouchableOpacity
-              style={styles.modalCancelButton}
-              onPress={() => setShowMilestoneDrawer(false)}
-            >
-              <Text style={styles.modalCancelText}>取消</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.modalConfirmButton}
-              onPress={handleSaveMilestone}
-            >
-              <Text style={styles.modalConfirmText}>保存</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+        <MilestoneEditorDrawerContent
+          milestoneDay={milestoneDay}
+          milestoneTitle={milestoneTitle}
+          milestoneReward={milestoneReward}
+          onDayChange={setMilestoneDay}
+          onTitleChange={setMilestoneTitle}
+          onRewardChange={setMilestoneReward}
+          onCancel={() => setShowMilestoneDrawer(false)}
+          onSave={handleSaveMilestone}
+        />
       </BottomDrawer>
 
       <View style={styles.bottomBar}>
-        <Button
+        <PlanFormButton
           title={isCreating ? '创建中...' : '完成'}
           onPress={handleComplete}
-          variant="primary"
-          size="large"
-          style={styles.completeButton}
           disabled={isCreating}
+          loading={isCreating}
         />
-        {isCreating && (
-          <ActivityIndicator
-            style={styles.loadingIndicator}
-            color={Colors.primary}
-            size="small"
-          />
-        )}
       </View>
     </SafeAreaView>
   );
@@ -982,406 +516,12 @@ const styles = StyleSheet.create({
     paddingTop: 32,
     paddingBottom: Spacing.md,
   },
-  heroSection: {
-    marginBottom: Spacing.xl,
-  },
-  heroImage: {
-    height: 120,
-    borderRadius: BorderRadius.lg,
-    overflow: 'hidden',
-    marginBottom: Spacing.md,
-  },
-  heroImagePlaceholder: {
-    flex: 1,
-    backgroundColor: `${Colors.primaryContainer}20`,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  heroImageText: {
-    fontSize: 48,
-  },
-  heroContent: {},
-  heroLabel: {
-    fontSize: FontSize.sm,
-    fontWeight: '500',
-    color: Colors.onSurfaceVariant,
-    marginBottom: 4,
-  },
-  heroTitle: {
-    fontSize: FontSize.xxl,
-    fontWeight: '700',
-    color: Colors.onSurface,
-  },
-  heroDescription: {
-    fontSize: FontSize.md,
-    color: Colors.onSurfaceVariant,
-    marginTop: Spacing.sm,
-    lineHeight: 22,
-  },
   section: {
     marginBottom: Spacing.xl,
   },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: Spacing.md,
-    gap: Spacing.xs,
-  },
-  goalsList: {
-    gap: Spacing.sm,
-  },
-  goalItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-    paddingVertical: Spacing.xs,
-  },
-  goalText: {
-    fontSize: FontSize.md,
-    color: Colors.onSurface,
-    flex: 1,
-  },
-  sectionIcon: {
-    fontSize: 20,
-    marginRight: Spacing.sm,
-  },
-  sectionTitle: {
-    fontSize: FontSize.lg,
-    fontWeight: '700',
-    color: Colors.onSurface,
-    flex: 1,
-  },
-  addButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: `${Colors.tertiaryContainer}20`,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
-    borderRadius: BorderRadius.full,
-    gap: 4,
-  },
-  addButtonText: {
-    fontSize: FontSize.sm,
-    fontWeight: '700',
-    color: Colors.tertiary,
-  },
-  addButtonDisabled: {
-    backgroundColor: `${Colors.outlineVariant}10`,
-  },
-  addButtonTextDisabled: {
-    color: Colors.outlineVariant,
-  },
-  inputGrid: {
-    gap: Spacing.md,
-  },
-  inputGroup: {},
-  inputLabel: {
-    fontSize: FontSize.xs,
-    fontWeight: '700',
-    color: Colors.onSurfaceVariant,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginBottom: Spacing.xs,
-    marginLeft: Spacing.md,
-  },
-  inputWrapper: {
-    backgroundColor: Colors.surfaceContainerHigh,
-    borderRadius: BorderRadius.lg,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.md,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  input: {
-    flex: 1,
-    fontSize: FontSize.lg,
-    fontWeight: '600',
-    color: Colors.onSurface,
-    padding: 0,
-  },
-  inputSuffix: {
-    fontSize: FontSize.md,
-    color: Colors.onSurfaceVariant,
-    fontWeight: '500',
-  },
-  methodGrid: {
-    flexDirection: 'row',
-    gap: Spacing.sm,
-  },
-  methodButton: {
-    flex: 1,
-    backgroundColor: Colors.surfaceContainerLowest,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.md,
-    alignItems: 'center',
-    gap: Spacing.xs,
-    borderWidth: 1,
-    borderColor: 'transparent',
-  },
-  methodButtonActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
-  },
-  methodIcon: {
-    fontSize: 28,
-    color: Colors.onSurfaceVariant,
-  },
-  methodText: {
-    fontSize: FontSize.xs,
-    fontWeight: '700',
-    color: Colors.onSurfaceVariant,
-  },
-  methodTextActive: {
-    color: Colors.onPrimary,
-  },
-  remindersList: {
-    gap: Spacing.sm,
-  },
-  reminderCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: Spacing.md,
-  },
-  reminderLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.md,
-  },
-  reminderIcon: {
-    fontSize: 20,
-    color: Colors.onSurfaceVariant,
-    marginRight: Spacing.md,
-  },
-  reminderTime: {
-    fontSize: FontSize.xxl,
-    fontWeight: '700',
-    color: Colors.onSurface,
-  },
-  reminderBadge: {
-    backgroundColor: Colors.secondaryContainer,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: 2,
-    borderRadius: BorderRadius.full,
-  },
-  reminderBadgeGray: {
-    backgroundColor: Colors.surfaceContainerHighEST,
-  },
-  reminderBadgeText: {
-    fontSize: FontSize.xs,
-    fontWeight: '700',
-    color: Colors.onSecondaryContainer,
-  },
-  reminderBadgeTextGray: {
-    color: Colors.onSurfaceVariant,
-  },
-  reminderToggle: {
-    width: 48,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: Colors.secondary,
-    padding: 2,
-  },
-  toggleActive: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: Colors.onSecondary,
-    alignSelf: 'flex-end',
-  },
-  toggleInactive: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: Colors.outline,
-    alignSelf: 'flex-start',
-  },
-  milestonesGrid: {
-    gap: Spacing.sm,
-  },
-  milestoneCard: {
-    alignItems: 'center',
-    padding: Spacing.md,
-    borderWidth: 2,
-    borderStyle: 'dashed',
-    borderColor: `${Colors.outlineVariant}30`,
-  },
-  milestoneNumber: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: Colors.primaryContainer,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: Spacing.sm,
-  },
-  milestoneNumberSecondary: {
-    backgroundColor: Colors.secondaryContainer,
-  },
-  milestoneNumberText: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: Colors.onPrimaryContainer,
-  },
-  milestoneNumberTextSecondary: {
-    color: Colors.onSecondaryContainer,
-  },
-  milestoneTitle: {
-    fontSize: FontSize.md,
-    fontWeight: '700',
-    color: Colors.onSurface,
-    marginBottom: 4,
-  },
-  milestoneReward: {
-    fontSize: FontSize.xs,
-    color: Colors.onSurfaceVariant,
-    marginBottom: Spacing.xs,
-    textAlign: 'center',
-  },
-  milestoneEdit: {
-    fontSize: FontSize.xs,
-    fontWeight: '600',
-    color: Colors.primary,
-    textDecorationLine: 'underline',
-  },
-  milestoneActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.md,
-    marginTop: Spacing.xs,
-  },
-  addMilestoneButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: Spacing.sm,
-    padding: Spacing.md,
-    borderWidth: 2,
-    borderStyle: 'dashed',
-    borderColor: `${Colors.outlineVariant}20`,
-    borderRadius: BorderRadius.lg,
-  },
-  addMilestoneIcon: {
-    fontSize: 20,
-    color: Colors.onSurfaceVariant,
-  },
-  addMilestoneText: {
-    fontSize: FontSize.sm,
-    fontWeight: '600',
-    color: Colors.onSurfaceVariant,
-  },
   bottomBar: {
     padding: Spacing.md,
-    paddingBottom: Spacing.md,
-    backgroundColor: Colors.background,
-  },
-  completeButton: {
-    paddingVertical: Spacing.sm,
-  },
-  loadingIndicator: {
-    position: 'absolute',
-    right: Spacing.xl,
-    top: '50%',
-    marginTop: -8,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-  },
-  timePickerModal: {
     backgroundColor: Colors.surface,
-    borderTopLeftRadius: BorderRadius.xl,
-    borderTopRightRadius: BorderRadius.xl,
-    paddingBottom: Spacing.xl,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: Spacing.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.outlineVariant,
-  },
-  modalTitle: {
-    fontSize: FontSize.xl,
-    fontWeight: '700',
-    color: Colors.onSurface,
-  },
-  modalActions: {
-    flexDirection: 'row',
-    gap: Spacing.md,
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.lg,
-  },
-  modalCancelButton: {
-    flex: 1,
-    paddingVertical: Spacing.md,
-    borderRadius: BorderRadius.md,
-    backgroundColor: Colors.surfaceContainerHigh,
-    alignItems: 'center',
-  },
-  modalCancelText: {
-    fontSize: FontSize.md,
-    fontWeight: '600',
-    color: Colors.onSurfaceVariant,
-  },
-  modalConfirmButton: {
-    flex: 1,
-    paddingVertical: Spacing.md,
-    borderRadius: BorderRadius.md,
-    backgroundColor: Colors.primary,
-    alignItems: 'center',
-  },
-  modalConfirmText: {
-    fontSize: FontSize.md,
-    fontWeight: '600',
-    color: Colors.onPrimary,
-  },
-  pickerContainer: {
-    paddingVertical: Spacing.lg,
-    minHeight: 200,
-  },
-  customPickerContainer: {
-    paddingVertical: Spacing.lg,
-    paddingHorizontal: Spacing.lg,
-  },
-  pickerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: Spacing.md,
-  },
-  pickerColumn: {
-    maxHeight: 200,
-  },
-  pickerItem: {
-    paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.lg,
-    alignItems: 'center',
-    borderRadius: BorderRadius.md,
-    marginVertical: 2,
-  },
-  pickerItemSelected: {
-    backgroundColor: Colors.primaryContainer,
-  },
-  pickerItemText: {
-    fontSize: FontSize.lg,
-    color: Colors.onSurfaceVariant,
-    fontWeight: '500',
-  },
-  pickerItemTextSelected: {
-    color: Colors.primary,
-    fontWeight: '700',
-  },
-  pickerSeparator: {
-    fontSize: FontSize.xxl,
-    fontWeight: '700',
-    color: Colors.onSurface,
-  },
-  drawerContent: {
-    padding: Spacing.lg,
-    gap: Spacing.md,
   },
 });
 

@@ -10,11 +10,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize, BorderRadius } from '../constants/theme';
+import { TopAppBar, Toast, BottomDrawer } from '../components';
 import {
-  TopAppBar,
-  Card,
-  Toast,
-  BottomDrawer,
+  SettingSection,
   ProfileEditSheet,
   PhoneBindSheet,
   NotificationSheet,
@@ -23,9 +21,9 @@ import {
   LegalDocSheet,
   FeedbackSheet,
   ConfirmSheet,
-} from '../components';
+} from '../features/settings';
 
-interface SettingItem {
+interface SettingItemData {
   id: string;
   title: string;
   value?: string;
@@ -35,12 +33,12 @@ interface SettingItem {
   onPress?: () => void;
 }
 
-interface SettingSection {
+interface SettingSectionData {
   title: string;
-  items: SettingItem[];
+  items: SettingItemData[];
 }
 
-const mockSettings: SettingSection[] = [
+const mockSettings: SettingSectionData[] = [
   {
     title: '账号与安全',
     items: [
@@ -314,58 +312,12 @@ const SettingsScreen: React.FC = () => {
         showsVerticalScrollIndicator={false}
       >
         {mockSettings.map(section => (
-          <View key={section.title} style={styles.section}>
-            <Text style={styles.sectionTitle}>{section.title}</Text>
-            <Card style={styles.sectionCard}>
-              {section.items.map((item, index) => (
-                <TouchableOpacity
-                  key={item.id}
-                  style={[
-                    styles.settingItem,
-                    index < section.items.length - 1 &&
-                      styles.settingItemBorder,
-                  ]}
-                  onPress={() => handleItemPress(item.id)}
-                  activeOpacity={0.7}
-                >
-                  <View style={styles.settingLeft}>
-                    <View
-                      style={[
-                        styles.settingIcon,
-                        { backgroundColor: `${item.iconColor}10` },
-                      ]}
-                    >
-                      <MaterialIcons
-                        name={item.icon}
-                        size={20}
-                        color={item.iconColor}
-                      />
-                    </View>
-                    <Text
-                      style={[
-                        styles.settingTitle,
-                        item.id === '9' && styles.settingTitleDanger,
-                      ]}
-                    >
-                      {item.title}
-                    </Text>
-                  </View>
-                  <View style={styles.settingRight}>
-                    {item.value && (
-                      <Text style={styles.settingValue}>{item.value}</Text>
-                    )}
-                    {item.showArrow && (
-                      <MaterialIcons
-                        name="chevron-right"
-                        size={20}
-                        color={Colors.outlineVariant}
-                      />
-                    )}
-                  </View>
-                </TouchableOpacity>
-              ))}
-            </Card>
-          </View>
+          <SettingSection
+            key={section.title}
+            title={section.title}
+            items={section.items as any}
+            onItemPress={handleItemPress}
+          />
         ))}
 
         <TouchableOpacity
@@ -406,70 +358,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingTop: 32,
     paddingBottom: Spacing.xl,
-  },
-  section: {
-    marginBottom: Spacing.lg,
-  },
-  sectionTitle: {
-    fontSize: FontSize.xs,
-    fontWeight: '700',
-    color: Colors.onSurfaceVariant,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginBottom: Spacing.sm,
-    marginLeft: Spacing.sm,
-  },
-  sectionCard: {
-    padding: 0,
-    overflow: 'hidden',
-  },
-  settingItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: Spacing.md,
-    backgroundColor: Colors.surfaceContainerLow,
-  },
-  settingItemBorder: {
-    borderBottomWidth: 1,
-    borderBottomColor: `${Colors.outlineVariant}10`,
-  },
-  settingLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  settingIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: BorderRadius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: Spacing.md,
-  },
-  settingIconText: {
-    fontSize: 20,
-  },
-  settingTitle: {
-    fontSize: FontSize.md,
-    fontWeight: '500',
-    color: Colors.onSurface,
-  },
-  settingTitleDanger: {
-    color: Colors.error,
-  },
-  settingRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  settingValue: {
-    fontSize: FontSize.sm,
-    color: Colors.onSurfaceVariant,
-    marginRight: Spacing.xs,
-  },
-  settingArrow: {
-    fontSize: 20,
-    color: Colors.outlineVariant,
   },
   logoutButton: {
     marginTop: Spacing.md,

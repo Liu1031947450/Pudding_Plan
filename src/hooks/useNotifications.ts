@@ -1,11 +1,19 @@
 import { useState, useCallback } from 'react';
 import type { Notification } from '../types/domain';
-import { mockNotifications } from '../data/mockData';
+import { notificationsApi } from '../api';
 
 export const useNotifications = () => {
-  const [notifications, setNotifications] =
-    useState<Notification[]>(mockNotifications);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [notificationVisible, setNotificationVisible] = useState(false);
+
+  // Initialize notifications from mock data API
+  useEffect(() => {
+    notificationsApi.getAll().then(response => {
+      if (response.success && response.data) {
+        setNotifications(response.data);
+      }
+    });
+  }, []);
 
   const toggleNotificationDrawer = useCallback(() => {
     setNotificationVisible(prev => !prev);

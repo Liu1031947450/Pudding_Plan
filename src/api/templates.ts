@@ -10,9 +10,12 @@ export const templatesApi = {
   getAll: async (): Promise<ApiResponse<TemplateDetail[]>> => {
     if (USE_MOCK) {
       try {
-        const data = await mockApiServer.templates.getAll();
-        console.log('[Mock API] templatesApi.getAll - 获取所有模板', data);
-        return { success: true, data };
+        const response = await mockApiServer.templates.getAll();
+        console.log(
+          '[Mock API] templatesApi.getAll - 获取所有模板',
+          response.data,
+        );
+        return { success: true, data: response.data };
       } catch (error: any) {
         return { success: false, error: error.message };
       }
@@ -24,7 +27,8 @@ export const templatesApi = {
   getById: async (id: string): Promise<ApiResponse<TemplateDetail>> => {
     if (USE_MOCK) {
       try {
-        const data = await mockApiServer.templates.getById(id);
+        const response = await mockApiServer.templates.getById(id);
+        const data = response.data;
         if (!data) {
           return { success: false, error: '未找到模板' };
         }
@@ -43,13 +47,13 @@ export const templatesApi = {
   ): Promise<ApiResponse<TemplateDetail[]>> => {
     if (USE_MOCK) {
       try {
-        const data = await mockApiServer.templates.getByCategory(category);
+        const response = await mockApiServer.templates.getByCategory(category);
         console.log(
           '[Mock API] templatesApi.getByCategory - 获取模板分类',
           category,
-          data,
+          response.data,
         );
-        return { success: true, data };
+        return { success: true, data: response.data };
       } catch (error: any) {
         return { success: false, error: error.message };
       }

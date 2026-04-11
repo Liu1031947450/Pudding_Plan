@@ -3,13 +3,9 @@ import { StyleSheet, ScrollView, View, Text } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors, Spacing, FontSize } from '../constants/theme';
-import {
-  BottomNavBar,
-  TopAppBar,
-  Card,
-  NotificationDrawer,
-} from '../components';
-import { BuddyList, CircleGrid } from '../components/circle';
+import { BottomNavBar, TopAppBar, Card } from '../components';
+import { BuddyList, CircleGrid } from '../features/circle';
+import { NotificationDrawer } from '../features/plan';
 import { useCircleData } from '../hooks';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNotificationState } from '../hooks/useNotificationState';

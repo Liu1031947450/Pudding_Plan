@@ -10,9 +10,12 @@ export const rhythmApi = {
   getWeek: async (userId?: string): Promise<ApiResponse<RhythmData[]>> => {
     if (USE_MOCK) {
       try {
-        const data = await mockApiServer.rhythm.getWeek(userId);
-        console.log('[Mock API] rhythmApi.getWeek - 获取周节奏数据', data);
-        return { success: true, data };
+        const response = await mockApiServer.rhythm.getWeek(userId);
+        console.log(
+          '[Mock API] rhythmApi.getWeek - 获取周节奏数据',
+          response.data,
+        );
+        return { success: true, data: response.data };
       } catch (error: any) {
         return { success: false, error: error.message };
       }
@@ -25,9 +28,12 @@ export const rhythmApi = {
   getMonth: async (userId?: string): Promise<ApiResponse<RhythmData[]>> => {
     if (USE_MOCK) {
       try {
-        const data = await mockApiServer.rhythm.getMonth(userId);
-        console.log('[Mock API] rhythmApi.getMonth - 获取月节奏数据', data);
-        return { success: true, data };
+        const response = await mockApiServer.rhythm.getMonth(userId);
+        console.log(
+          '[Mock API] rhythmApi.getMonth - 获取月节奏数据',
+          response.data,
+        );
+        return { success: true, data: response.data };
       } catch (error: any) {
         return { success: false, error: error.message };
       }

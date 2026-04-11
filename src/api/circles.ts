@@ -10,9 +10,12 @@ export const circlesApi = {
   getAll: async (): Promise<ApiResponse<Circle[]>> => {
     if (USE_MOCK) {
       try {
-        const data = await mockApiServer.circles.getAll();
-        console.log('[Mock API] circlesApi.getAll - 获取所有圈子', data);
-        return { success: true, data };
+        const response = await mockApiServer.circles.getAll();
+        console.log(
+          '[Mock API] circlesApi.getAll - 获取所有圈子',
+          response.data,
+        );
+        return { success: true, data: response.data };
       } catch (error: any) {
         return { success: false, error: error.message };
       }
@@ -24,7 +27,8 @@ export const circlesApi = {
   getById: async (id: string): Promise<ApiResponse<Circle>> => {
     if (USE_MOCK) {
       try {
-        const data = await mockApiServer.circles.getById(id);
+        const response = await mockApiServer.circles.getById(id);
+        const data = response.data;
         if (!data) {
           return { success: false, error: '未找到圈子' };
         }
@@ -41,8 +45,8 @@ export const circlesApi = {
   join: async (id: string): Promise<ApiResponse<boolean>> => {
     if (USE_MOCK) {
       try {
-        const success = await mockApiServer.circles.join(id);
-        if (!success) {
+        const response = await mockApiServer.circles.join(id);
+        if (!response.data) {
           return { success: false, error: '未找到圈子' };
         }
         console.log('[Mock API] circlesApi.join - 加入圈子', id);
@@ -60,9 +64,12 @@ export const buddiesApi = {
   getAll: async (): Promise<ApiResponse<Buddy[]>> => {
     if (USE_MOCK) {
       try {
-        const data = await mockApiServer.buddies.getAll();
-        console.log('[Mock API] buddiesApi.getAll - 获取所有伙伴', data);
-        return { success: true, data };
+        const response = await mockApiServer.buddies.getAll();
+        console.log(
+          '[Mock API] buddiesApi.getAll - 获取所有伙伴',
+          response.data,
+        );
+        return { success: true, data: response.data };
       } catch (error: any) {
         return { success: false, error: error.message };
       }

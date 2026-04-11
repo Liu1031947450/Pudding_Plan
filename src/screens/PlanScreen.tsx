@@ -10,12 +10,17 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Colors, Spacing } from '../constants/theme';
 import type { Plan, Badge, RhythmData } from '../types/domain';
-import { BottomNavBar, TopAppBar, NotificationDrawer } from '../components';
-import { PlanList, PlanEmptyState, RhythmChart } from '../components/plan';
-import { AchievementDrawer } from '../components/specialized/AchievementDrawer';
+import { BottomNavBar, TopAppBar } from '../components';
+import {
+  PlanList,
+  PlanEmptyState,
+  RhythmChart,
+  NotificationDrawer,
+  AchievementDrawer,
+} from '../features/plan';
 import { usePlanManagement } from '../hooks';
 import { useNotificationState } from '../hooks/useNotificationState';
-import { fetchBadges, rhythmApi } from '../api';
+import { badgesApi, rhythmApi } from '../api';
 
 type RhythmPeriod = 'week' | 'month';
 
@@ -80,9 +85,10 @@ const PlanScreen: React.FC = () => {
   const handleOpenAchievements = async () => {
     setBadgesLoading(true);
     try {
-      const userId = '1234567890';
-      const data = await fetchBadges(userId);
-      setBadges(data);
+      const response = await badgesApi.getAll();
+      if (response.success && response.data) {
+        setBadges(response.data);
+      }
     } catch (error) {
       console.error('Failed to fetch badges:', error);
     } finally {

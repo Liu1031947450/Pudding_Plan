@@ -11,9 +11,9 @@ export const plansApi = {
   getAll: async (userId?: string): Promise<ApiResponse<Plan[]>> => {
     if (USE_MOCK) {
       try {
-        const data = await mockApiServer.plans.getAll(userId);
-        console.log('[Mock API] plansApi.getAll - 获取所有计划', data);
-        return { success: true, data };
+        const response = await mockApiServer.plans.getAll(userId);
+        console.log('[Mock API] plansApi.getAll - 获取所有计划', response.data);
+        return { success: true, data: response.data };
       } catch (error: any) {
         return { success: false, error: error.message };
       }
@@ -28,7 +28,8 @@ export const plansApi = {
   getById: async (id: string, userId?: string): Promise<ApiResponse<Plan>> => {
     if (USE_MOCK) {
       try {
-        const data = await mockApiServer.plans.getById(id, userId);
+        const response = await mockApiServer.plans.getById(id, userId);
+        const data = response.data;
         if (!data) {
           return { success: false, error: '未找到计划' };
         }
@@ -56,9 +57,9 @@ export const plansApi = {
   ): Promise<ApiResponse<Plan>> => {
     if (USE_MOCK) {
       try {
-        const data = await mockApiServer.plans.create(plan, userId);
-        console.log('[Mock API] plansApi.create - 创建新计划', data);
-        return { success: true, data, message: '计划创建成功' };
+        const response = await mockApiServer.plans.create(plan, userId);
+        console.log('[Mock API] plansApi.create - 创建新计划', response.data);
+        return { success: true, data: response.data, message: '计划创建成功' };
       } catch (error: any) {
         return { success: false, error: error.message };
       }
@@ -77,7 +78,8 @@ export const plansApi = {
   ): Promise<ApiResponse<Plan>> => {
     if (USE_MOCK) {
       try {
-        const data = await mockApiServer.plans.update(id, updates, userId);
+        const response = await mockApiServer.plans.update(id, updates, userId);
+        const data = response.data;
         if (!data) {
           return { success: false, error: '未找到计划' };
         }
@@ -100,8 +102,8 @@ export const plansApi = {
   ): Promise<ApiResponse<boolean>> => {
     if (USE_MOCK) {
       try {
-        const success = await mockApiServer.plans.delete(id, userId);
-        if (!success) {
+        const response = await mockApiServer.plans.delete(id, userId);
+        if (!response.data) {
           return { success: false, error: '未找到计划' };
         }
         console.log('[Mock API] plansApi.delete - 删除计划', id);
@@ -124,7 +126,8 @@ export const plansApi = {
   ): Promise<ApiResponse<Plan>> => {
     if (USE_MOCK) {
       try {
-        const data = await mockApiServer.plans.checkIn(id, date, userId);
+        const response = await mockApiServer.plans.checkIn(id, date, userId);
+        const data = response.data;
         if (!data) {
           return { success: false, error: '未找到计划' };
         }

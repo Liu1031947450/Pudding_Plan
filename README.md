@@ -22,55 +22,101 @@ Pudding_Plan/
 │
 ├── src/                        # 源代码目录
 │   ├── api/                    # API 接口层
+│   │   ├── mock/               # Mock 数据
+│   │   │   └── data/           # Mock 数据文件
+│   │   │       ├── badgeData.ts      # 成就数据
+│   │   │       ├── calendarData.ts   # 日历数据
+│   │   │       ├── communityData.ts  # 社区数据
+│   │   │       ├── notificationData.ts # 通知数据
+│   │   │       └── planData.ts       # 计划数据
 │   │   ├── client.ts           # HTTP 客户端配置
+│   │   ├── config.ts           # API 配置
 │   │   ├── mock-server.ts      # Mock 数据服务
+│   │   ├── types.ts            # API 类型定义
 │   │   ├── plans.ts            # 计划相关 API
 │   │   ├── calendar.ts         # 日历相关 API
 │   │   ├── circles.ts          # 圈子相关 API
-│   │   └── notifications.ts    # 通知相关 API
+│   │   ├── notifications.ts    # 通知和成就 API
+│   │   ├── rhythm.ts           # 节奏数据 API
+│   │   └── templates.ts        # 模板 API
 │   │
-│   ├── components/             # 组件目录
-│   │   ├── common/             # 通用组件
+│   ├── components/             # 通用组件目录
+│   │   ├── common/             # 通用 UI 组件
+│   │   │   ├── Avatar.tsx      # 头像组件
+│   │   │   ├── BottomDrawer.tsx # 底部抽屉
 │   │   │   ├── Button.tsx      # 按钮组件
 │   │   │   ├── Card.tsx        # 卡片组件
 │   │   │   ├── Chip.tsx        # 标签组件
-│   │   │   ├── Avatar.tsx      # 头像组件
-│   │   │   ├── Toast.tsx       # 提示组件
-│   │   │   └── EmptyState.tsx  # 空状态组件
+│   │   │   ├── EmptyState.tsx  # 空状态组件
+│   │   │   └── Toast.tsx       # 提示组件
 │   │   │
 │   │   ├── layout/             # 布局组件
 │   │   │   ├── TopAppBar.tsx   # 顶部导航栏
 │   │   │   └── BottomNavBar.tsx # 底部导航栏
 │   │   │
-│   │   ├── plan/               # 计划相关组件
-│   │   │   ├── PlanCard.tsx    # 计划卡片
-│   │   │   ├── PlanList.tsx    # 计划列表
-│   │   │   ├── PlanEmptyState.tsx # 空状态
-│   │   │   ├── RhythmChart.tsx # 节奏图表
-│   │   │   ├── PlanHeroSection.tsx # 计划头部
-│   │   │   ├── PlanBasicInfoForm.tsx # 基本信息表单
-│   │   │   ├── CheckInMethodSelector.tsx # 打卡方式选择器
-│   │   │   └── ReminderManager.tsx # 提醒管理器
+│   │   └── progress/           # 进度组件
+│   │       ├── ProgressBar.tsx # 进度条
+│   │       └── BloomProgress.tsx # 圆形进度
+│   │
+│   ├── features/               # 业务功能模块（按领域组织）
+│   │   ├── plan/               # 计划功能模块
+│   │   │   ├── components/     # 计划相关组件
+│   │   │   │   ├── PlanCard.tsx    # 计划卡片
+│   │   │   │   ├── PlanList.tsx    # 计划列表
+│   │   │   │   ├── PlanEmptyState.tsx # 空状态
+│   │   │   │   ├── RhythmChart.tsx # 节奏图表
+│   │   │   │   ├── PlanHeroSection.tsx # 计划头部
+│   │   │   │   ├── PlanBasicInfoForm.tsx # 基本信息表单
+│   │   │   │   ├── PlanFormHeader.tsx # 表单头部
+│   │   │   │   ├── PlanGoalList.tsx # 目标列表
+│   │   │   │   ├── PlanReminderSection.tsx # 提醒设置
+│   │   │   │   ├── PlanMilestoneSection.tsx # 里程碑设置
+│   │   │   │   ├── CheckInMethodSelector.tsx # 打卡方式选择器
+│   │   │   │   ├── ReminderManager.tsx # 提醒管理器
+│   │   │   │   ├── TimePickerModal.tsx # 时间选择器
+│   │   │   │   ├── MilestoneEditorDrawerContent.tsx # 里程碑编辑器
+│   │   │   │   ├── NotificationDrawer.tsx # 通知抽屉
+│   │   │   │   └── AchievementDrawer.tsx  # 成就抽屉
+│   │   │   └── index.ts        # 统一导出
 │   │   │
-│   │   ├── circle/             # 圈子相关组件
-│   │   │   ├── CircleCard.tsx  # 圈子卡片
-│   │   │   ├── CircleGrid.tsx  # 圈子网格
-│   │   │   ├── BuddyCard.tsx   # 伙伴卡片
-│   │   │   └── BuddyList.tsx   # 伙伴列表
+│   │   ├── calendar/           # 日历功能模块
+│   │   │   ├── components/     # 日历相关组件
+│   │   │   │   ├── CalendarGrid.tsx # 日历网格
+│   │   │   │   ├── CalendarHeader.tsx # 日历头部
+│   │   │   │   ├── DayCell.tsx # 日期单元格
+│   │   │   │   ├── DailyQuoteCard.tsx # 每日金句
+│   │   │   │   └── TodayFocusSection.tsx # 今日焦点
+│   │   │   └── index.ts        # 统一导出
 │   │   │
-│   │   ├── progress/           # 进度组件
-│   │   │   ├── ProgressBar.tsx # 进度条
-│   │   │   └── BloomProgress.tsx # 圆形进度
+│   │   ├── circle/             # 圈子功能模块
+│   │   │   ├── components/     # 圈子相关组件
+│   │   │   │   ├── CircleCard.tsx  # 圈子卡片
+│   │   │   │   ├── CircleGrid.tsx  # 圈子网格
+│   │   │   │   ├── BuddyCard.tsx   # 伙伴卡片
+│   │   │   │   └── BuddyList.tsx   # 伙伴列表
+│   │   │   └── index.ts        # 统一导出
 │   │   │
-│   │   └── specialized/        # 专用组件
-│   │       ├── NotificationDrawer.tsx # 通知抽屉
-│   │       └── AchievementDrawer.tsx  # 成就抽屉
+│   │   ├── settings/           # 设置功能模块
+│   │   │   ├── components/     # 设置相关组件
+│   │   │   │   ├── SettingItem.tsx # 设置项
+│   │   │   │   ├── SettingSection.tsx # 设置分组
+│   │   │   │   ├── ProfileEditSheet.tsx # 个人资料编辑
+│   │   │   │   ├── PhoneBindSheet.tsx # 手机绑定
+│   │   │   │   ├── NotificationSheet.tsx # 通知设置
+│   │   │   │   ├── DNDSheet.tsx # 勿扰模式
+│   │   │   │   ├── AppearanceSheet.tsx # 外观设置
+│   │   │   │   ├── LegalDocSheet.tsx # 法律文档
+│   │   │   │   ├── FeedbackSheet.tsx # 意见反馈
+│   │   │   │   └── ConfirmSheet.tsx # 确认对话框
+│   │   │   └── index.ts        # 统一导出
+│   │   │
+│   │   └── profile/            # 个人中心模块（预留）
+│   │       └── components/     # 个人中心组件
 │   │
 │   ├── constants/              # 常量配置
 │   │   └── theme.ts            # 主题配置（颜色、间距、字体等）
 │   │
 │   ├── data/                   # 数据层
-│   │   ├── mockData.ts         # Mock 数据
 │   │   └── templates.ts        # 计划模板数据
 │   │
 │   ├── hooks/                  # 自定义 Hooks
@@ -258,7 +304,9 @@ lsof -ti:19001 | xargs kill -9
 ┌─────────────────────────────────────┐
 │         Screens (页面层)             │  用户界面和页面逻辑
 ├─────────────────────────────────────┤
-│       Components (组件层)            │  可复用的 UI 组件
+│    Features (业务功能模块层)         │  按业务域组织的组件和逻辑
+├─────────────────────────────────────┤
+│       Components (通用组件层)        │  可复用的 UI 组件
 ├─────────────────────────────────────┤
 │         Hooks (逻辑层)               │  业务逻辑和状态管理
 ├─────────────────────────────────────┤
@@ -272,10 +320,36 @@ lsof -ti:19001 | xargs kill -9
 
 ### 核心设计模式
 
-- **组件化**: 按功能和复用性组织组件（common/layout/plan/circle/specialized）
+- **Feature-Based 架构**: 按业务域（plan/calendar/circle/settings）组织代码，每个 feature 包含自己的组件、hooks 和逻辑
+- **组件分层**:
+  - `components/` - 通用 UI 组件（Button、Card、Avatar 等）
+  - `features/` - 业务功能模块，每个模块独立管理自己的组件
+- **统一导出**: 每个 feature 通过 `index.ts` 统一导出，提供清晰的 API 边界
 - **Hooks 模式**: 使用自定义 Hooks 封装业务逻辑和状态管理
 - **服务层模式**: 将业务逻辑从组件中抽离到 Service 层
 - **Mock 数据**: 使用 Mock Server 模拟后端 API，便于前端独立开发
+
+### 目录组织原则
+
+1. **通用组件** (`src/components/`)
+
+   - 只包含与业务无关的通用 UI 组件
+   - 可在任何 feature 中复用
+   - 例如：Button、Card、Toast、ProgressBar
+
+2. **业务功能模块** (`src/features/`)
+
+   - 按业务域组织（plan、calendar、circle、settings）
+   - 每个 feature 包含：
+     - `components/` - 该业务域的专用组件
+     - `index.ts` - 统一导出接口
+   - 未来可扩展：hooks、services、types
+
+3. **导入规则**
+   - Screen 从 `../features/xxx` 导入业务组件
+   - Screen 从 `../components` 导入通用组件
+   - Feature 内部组件从 `../../../components` 导入通用组件
+   - Feature 之间可以相互引用（如 calendar 引用 plan 的 NotificationDrawer）
 
 ## 📊 代码优化记录
 
@@ -306,6 +380,31 @@ lsof -ti:19001 | xargs kill -9
 - 优化后: 72 个 TypeScript 文件
 - 删除: 3 个文件
 - 清理: 9 处 console.log，2 处 Alert
+
+### 2026-04-11 Feature 架构重构
+
+**核心变更**:
+
+- **业务组件 Feature 化**: 将计划、日历、圈子、设置相关组件从 `src/components/` 迁移到 `src/features/`，按业务域组织代码。
+- **通用组件收口**: `src/components/` 现在只保留通用 UI 组件（common、layout、progress），不再承载业务组件。
+- **导出边界统一**: 每个 feature 模块通过 `index.ts` 统一导出，Screen 层统一从 `features/xxx` 导入业务组件。
+- **API 层整理**: 新增 `src/api/types.ts` 统一 API 类型；Mock 数据从 `src/data/mockData.ts` 拆分到 `src/api/mock/data/`。
+- **设置页组件化**: 提取 `SettingItem`、`SettingSection` 等设置页子组件，减少 `SettingsScreen` 复杂度。
+
+**目录结构调整**:
+
+- `src/components/plan/` → `src/features/plan/components/`
+- `src/components/circle/` → `src/features/circle/components/`
+- `src/components/settings/` → `src/features/settings/components/`
+- `src/components/specialized/` → `src/features/plan/components/`
+- `src/data/mockData.ts` → `src/api/mock/data/*.ts`
+
+**重构收益**:
+
+- 业务边界更清晰，降低目录混用
+- 通用组件与业务组件职责分离
+- 未来新增功能时更容易扩展 feature 模块
+- import 路径语义更明确
 
 ### 2026-04-10 数据架构升级
 
