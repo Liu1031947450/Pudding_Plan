@@ -8,15 +8,19 @@ export const usePlanManagement = () => {
   const [selectedPlans, setSelectedPlans] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
 
-  const loadPlans = useCallback(async (userId?: string) => {
-    setLoading(true);
+  const loadPlans = useCallback(async (userId?: string, silent = false) => {
+    if (!silent) {
+      setLoading(true);
+    }
     try {
       const data = await planService.getPlans(userId);
       setPlans(data);
     } catch (error) {
       console.error('Failed to load plans:', error);
     } finally {
-      setLoading(false);
+      if (!silent) {
+        setLoading(false);
+      }
     }
   }, []);
 

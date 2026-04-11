@@ -6,6 +6,7 @@ import {
   ScrollView,
   Animated,
   ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
@@ -33,6 +34,7 @@ const CalendarScreen: React.FC = () => {
     author: '尼采',
   });
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const { plans, refreshPlans, handleCheckIn } = usePlanManagement();
 
   // 盖章动画状态
@@ -116,6 +118,20 @@ const CalendarScreen: React.FC = () => {
     fetchCalendarData(true); // 切换日历静默刷新
   }, [fetchCalendarData]);
 
+  const handleRefresh = React.useCallback(async () => {
+    const userId = '1234567890';
+    setRefreshing(true);
+    try {
+      await Promise.all([
+        fetchCalendarData(true),
+        refreshPlans(userId, true),
+        refreshNotifications(userId),
+      ]);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [fetchCalendarData, refreshPlans, refreshNotifications]);
+
   const onCheckIn = async (planId: string) => {
     const selectedDateStr = `${year}-${String(month).padStart(2, '0')}-${String(
       selectedDay,
@@ -153,6 +169,15 @@ const CalendarScreen: React.FC = () => {
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            colors={[Colors.primary]}
+            tintColor={Colors.primary}
+            progressBackgroundColor={Colors.surface}
+          />
+        }
         showsVerticalScrollIndicator={false}
       >
         {loading ? (

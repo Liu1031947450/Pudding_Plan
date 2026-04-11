@@ -5,6 +5,7 @@ import {
   View,
   ActivityIndicator,
   Text,
+  RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -48,12 +49,13 @@ const PlanScreen: React.FC = () => {
   const [rhythmPeriod, setRhythmPeriod] = useState<RhythmPeriod>('week');
   const [rhythmData, setRhythmData] = useState<RhythmData[]>([]);
   const [rhythmLoading, setRhythmLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   // 当页面获得焦点时刷新数据
   useFocusEffect(
     React.useCallback(() => {
       const userId = '1234567890';
-      refreshPlans(userId);
+      refreshPlans(userId, true); // 静默刷新，不显示 loading
       refreshNotifications(userId);
     }, [refreshPlans, refreshNotifications]),
   );
@@ -81,6 +83,20 @@ const PlanScreen: React.FC = () => {
   useEffect(() => {
     fetchRhythmData(rhythmPeriod);
   }, [rhythmPeriod]);
+
+  const handleRefresh = React.useCallback(async () => {
+    const userId = '1234567890';
+    setRefreshing(true);
+    try {
+      await Promise.all([
+        refreshPlans(userId, true),
+        refreshNotifications(userId),
+        fetchRhythmData(rhythmPeriod),
+      ]);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refreshPlans, refreshNotifications, rhythmPeriod]);
 
   const handleOpenAchievements = async () => {
     setBadgesLoading(true);
@@ -130,6 +146,15 @@ const PlanScreen: React.FC = () => {
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            colors={[Colors.primary]}
+            tintColor={Colors.primary}
+            progressBackgroundColor={Colors.surface}
+          />
+        }
         showsVerticalScrollIndicator={false}
       >
         {loading ? (
