@@ -55,12 +55,20 @@ class ApiClient {
 
       clearTimeout(timeoutId);
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (parseError) {
+        return {
+          success: false,
+          error: response.ok ? '数据格式错误' : '服务器错误',
+        };
+      }
 
       if (!response.ok) {
         return {
           success: false,
-          error: data.error || 'Request failed',
+          error: data.error || '请求失败',
           message: data.message,
         };
       }
@@ -77,13 +85,13 @@ class ApiClient {
       if (error.name === 'AbortError') {
         return {
           success: false,
-          error: 'Request timeout',
+          error: '请求超时',
         };
       }
 
       return {
         success: false,
-        error: error.message || 'Network error',
+        error: '网络错误，请稍后重试',
       };
     }
   }

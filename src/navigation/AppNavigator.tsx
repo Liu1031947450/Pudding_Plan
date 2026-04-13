@@ -1,4 +1,5 @@
 import React from 'react';
+import { View, ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -11,9 +12,13 @@ import {
   CreatePlanScreen,
   PostMomentScreen,
   TemplateSelectionScreen,
+  AuthScreen,
 } from '../screens';
+import { useAuth } from '../contexts';
+import { Colors } from '../constants/theme';
 
 export type RootStackParamList = {
+  Auth: undefined;
   Main: undefined;
   Settings: undefined;
   TemplateSelection: undefined;
@@ -49,13 +54,25 @@ const MainNavigator: React.FC = () => {
 };
 
 const AppNavigator: React.FC = () => {
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.background }}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+      </View>
+    );
+  }
+
   return (
     <NavigationContainer>
       <Stack.Navigator
         screenOptions={{
           headerShown: false,
         }}
+        initialRouteName={user ? "Main" : "Auth"}
       >
+        <Stack.Screen name="Auth" component={AuthScreen} />
         <Stack.Screen name="Main" component={MainNavigator} />
         <Stack.Screen
           name="Settings"

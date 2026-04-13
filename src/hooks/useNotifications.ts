@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import type { Notification } from '../types/domain';
 import { notificationsApi } from '../api';
 
@@ -6,7 +6,7 @@ export const useNotifications = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [notificationVisible, setNotificationVisible] = useState(false);
 
-  // Initialize notifications from mock data API
+  // 初始化通知数据
   useEffect(() => {
     notificationsApi.getAll().then(response => {
       if (response.success && response.data) {

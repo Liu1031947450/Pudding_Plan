@@ -31,12 +31,12 @@ export const circlesApi = {
 
   // 获取附近推荐地点
   getNearbyLocations: async (): Promise<ApiResponse<any[]>> => {
-    return { success: true, data: [] };
+    return apiClient.get<any[]>(API_ENDPOINTS.CIRCLES + '/locations/nearby');
   },
 
   // 获取热门话题
   getTrendingTopics: async (): Promise<ApiResponse<string[]>> => {
-    return { success: true, data: [] };
+    return apiClient.get<string[]>(API_ENDPOINTS.CIRCLES + '/topics/trending');
   },
 
   // 点赞圈子动态

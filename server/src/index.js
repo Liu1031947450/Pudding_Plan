@@ -10,6 +10,7 @@ const habitsRoutes = require('./routes/habits');
 const notificationsRoutes = require('./routes/notifications');
 const badgesRoutes = require('./routes/badges');
 const rhythmRoutes = require('./routes/rhythm');
+const authRoutes = require('./routes/auth');
 
 const app = express();
 const PORT = 3000;
@@ -25,6 +26,7 @@ app.get('/', (req, res) => {
   res.json({ message: '布丁计划API服务' });
 });
 
+app.use('/api/auth', authRoutes);
 app.use('/api/plans', plansRoutes);
 app.use('/api/templates', templatesRoutes);
 app.use('/api/circles', circlesRoutes);

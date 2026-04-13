@@ -99,7 +99,7 @@ const PostMomentScreen: React.FC = () => {
 
     setIsPublishing(true);
     try {
-      // 1. 模拟上传所有图片
+      // 1. 上传所有图片
       const uploadedImageUrls: string[] = [];
       for (const uri of images) {
         const uploadRes = await circlesApi.uploadImage(uri);
@@ -108,7 +108,7 @@ const PostMomentScreen: React.FC = () => {
         }
       }
 
-      // 2. 调用标准 Mock 接口创建动态
+      // 2. 调用接口创建动态
       const postRes = await circlesApi.createMoment({
         title,
         content,
@@ -324,7 +324,7 @@ const PostMomentScreen: React.FC = () => {
               </View>
             )}
 
-            {/* Default Mock Section if searching or no nearby yet */}
+            {/* 地点列表 */}
             <View style={styles.sectionContainer}>
               <Text style={styles.sectionHeader}>{nearbyLocations.length > 0 ? '更多地点' : '推荐地点'}</Text>
               {filteredLocations.map((loc) => (

@@ -15,9 +15,9 @@ import {
   MilestoneEditorDrawerContent,
 } from '../features/plan';
 import { PlanFormButton } from './components/PlanFormButton';
-import { templateDetails } from '../data/templates';
 import { usePlanManagement } from '../hooks';
 import { planService } from '../services/planService';
+import { templateService } from '../services/templateService';
 import { formatTime } from '../utils';
 import type { TemplateDetail, Reminder, Plan } from '../types/domain';
 
@@ -34,12 +34,15 @@ const CreatePlanScreen: React.FC = () => {
   const { handleCreatePlan, handleUpdatePlan, plans } = usePlanManagement();
 
   const [existingPlan, setExistingPlan] = useState<Plan | undefined>(undefined);
+  const [templateData, setTemplateData] = useState<TemplateDetail | undefined>(undefined);
+  const [loading, setLoading] = useState(false);
   const isEditMode = !!planId;
 
   useEffect(() => {
     if (planId) {
       const fetchPlanDetail = async () => {
-        const userId = '1234567890'; // mock userId
+        // 实际应用中，userId应该从用户认证状态中获取
+        const userId = ''; // 留空，由后端处理
         const response = await planService.getPlanById(planId, userId);
         if (response.success && response.data) {
           setExistingPlan(response.data);
@@ -49,10 +52,23 @@ const CreatePlanScreen: React.FC = () => {
     }
   }, [planId]);
 
-  // 获取模板数据
-  const templateData: TemplateDetail | undefined = templateId
-    ? templateDetails[templateId]
-    : undefined;
+  // 从后端 API 获取模板数据
+  useEffect(() => {
+    if (templateId) {
+      const fetchTemplateDetail = async () => {
+        try {
+          setLoading(true);
+          const data = await templateService.getTemplateById(templateId);
+          setTemplateData(data);
+        } catch (error) {
+          console.error('Failed to fetch template:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchTemplateDetail();
+    }
+  }, [templateId]);
 
   const [planName, setPlanName] = useState(
     existingPlan?.title || templateData?.title || '',
@@ -216,7 +232,8 @@ const CreatePlanScreen: React.FC = () => {
       };
 
       // 调用 API 创建或更新计划
-      const userId = '1234567890'; // mock userId
+      // 实际应用中，userId应该从用户认证状态中获取
+      const userId = ''; // 留空，由后端处理
       const result = isEditMode
         ? await handleUpdatePlan(planId!, newPlanData, userId)
         : await handleCreatePlan(newPlanData, userId);

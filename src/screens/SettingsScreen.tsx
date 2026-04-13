@@ -11,6 +11,7 @@ import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize, BorderRadius } from '../constants/theme';
 import { TopAppBar, Toast, BottomDrawer } from '../components';
+import { useAuth } from '../contexts';
 import {
   SettingSection,
   ProfileEditSheet,
@@ -38,127 +39,20 @@ interface SettingSectionData {
   items: SettingItemData[];
 }
 
-const mockSettings: SettingSectionData[] = [
-  {
-    title: '账号与安全',
-    items: [
-      {
-        id: '1',
-        title: '个人资料修改',
-        icon: 'person',
-        iconColor: Colors.primary,
-        showArrow: true,
-      },
-      {
-        id: '2',
-        title: '手机号绑定',
-        value: '138****8888',
-        icon: 'phone',
-        iconColor: Colors.primary,
-        showArrow: true,
-      },
-    ],
-  },
-  {
-    title: '通知管理',
-    items: [
-      {
-        id: '3',
-        title: '每日提醒',
-        icon: 'notifications',
-        iconColor: Colors.secondary,
-        showArrow: false,
-        value: '开启',
-      },
-      {
-        id: '4',
-        title: '勿扰模式 (静谧时间)',
-        icon: 'do-not-disturb',
-        iconColor: Colors.secondary,
-        value: '22:00 - 07:00',
-      },
-    ],
-  },
-  {
-    title: '显示设置',
-    items: [
-      {
-        id: '5',
-        title: '深色模式',
-        icon: 'dark-mode',
-        iconColor: Colors.tertiary,
-        showArrow: false,
-        value: '关闭',
-      },
-      {
-        id: '6',
-        title: '字体大小',
-        icon: 'text-fields',
-        iconColor: Colors.tertiary,
-        value: '标准',
-      },
-    ],
-  },
-  {
-    title: '隐私与条款',
-    items: [
-      {
-        id: '7',
-        title: '隐私政策',
-        icon: 'privacy-tip',
-        iconColor: Colors.onSurfaceVariant,
-        showArrow: true,
-      },
-      {
-        id: '8',
-        title: '用户协议',
-        icon: 'description',
-        iconColor: Colors.onSurfaceVariant,
-        showArrow: true,
-      },
-      {
-        id: '9',
-        title: '清除所有数据',
-        icon: 'delete-forever',
-        iconColor: Colors.error,
-        showArrow: false,
-      },
-    ],
-  },
-  {
-    title: '关于',
-    items: [
-      {
-        id: '10',
-        title: '当前版本',
-        icon: 'info',
-        iconColor: Colors.onSurfaceVariant,
-        value: 'v2.4.0 (Stable)',
-      },
-      {
-        id: '11',
-        title: '意见反馈',
-        icon: 'feedback',
-        iconColor: Colors.onSurfaceVariant,
-        showArrow: true,
-      },
-    ],
-  },
-];
-
 const SettingsScreen: React.FC = () => {
   const navigation = useNavigation();
+  const { logout } = useAuth();
   const [activeDrawer, setActiveDrawer] = React.useState<string | null>(null);
   const [toastVisible, setToastVisible] = React.useState(false);
   const [toastMessage, setToastMessage] = React.useState('');
 
-  // 模拟本地状态
+  // 本地状态
   const [profile, setProfile] = React.useState({
-    nickname: '治愈小助手',
-    bio: '让每一天都充满阳光 ☀️',
+    nickname: '',
+    bio: '',
   });
-  const [phone, setPhone] = React.useState('138****8888');
-  const [notifEnabled, setNotifEnabled] = React.useState(true);
+  const [phone, setPhone] = React.useState('');
+  const [notifEnabled, setNotifEnabled] = React.useState(false);
   const [notifTime, setNotifTime] = React.useState('08:00');
   const [dndRange, setDndRange] = React.useState({
     start: '22:00',
@@ -278,9 +172,15 @@ const SettingsScreen: React.FC = () => {
             message="确定要退出当前账号吗？"
             confirmLabel="退出"
             isDestructive
-            onConfirm={() => {
+            onConfirm={async () => {
               setActiveDrawer(null);
+              await logout();
               showToast('已安全退出');
+              // 导航到登录注册页面
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'Auth' as never }],
+              });
             }}
             onCancel={() => setActiveDrawer(null)}
           />
@@ -292,15 +192,139 @@ const SettingsScreen: React.FC = () => {
 
   const getDrawerTitle = () => {
     if (activeDrawer === 'logout') return '安全退出';
-    const allItems = mockSettings.flatMap(s => s.items);
-    return allItems.find(i => i.id === activeDrawer)?.title || '设置';
+    const drawerTitles: Record<string, string> = {
+      '1': '个人资料修改',
+      '2': '手机号绑定',
+      '3': '每日提醒',
+      '4': '勿扰模式',
+      '5': '深色模式',
+      '6': '字体大小',
+      '7': '隐私政策',
+      '8': '用户协议',
+      '9': '清除所有数据',
+      '11': '意见反馈'
+    };
+    return drawerTitles[activeDrawer || ''] || '设置';
   };
 
   const getDrawerHeight = () => {
-    if (['9', 'logout'].includes(activeDrawer || '')) return 'auto';
+    if (['9', 'logout'].includes(activeDrawer || '')) return '30%';
     if (['7', '8', '11', '1', '3'].includes(activeDrawer || '')) return '85%';
     return '70%';
   };
+
+  // 配置项数据
+  const settingSections: SettingSectionData[] = [
+    {
+      title: '账号与安全',
+      items: [
+        {
+          id: '1',
+          title: '个人资料修改',
+          icon: 'person',
+          iconColor: Colors.primary,
+          showArrow: true,
+        },
+        {
+          id: '2',
+          title: '手机号绑定',
+          value: phone || '未绑定',
+          icon: 'phone',
+          iconColor: Colors.primary,
+          showArrow: true,
+        },
+      ],
+    },
+    {
+      title: '通知管理',
+      items: [
+        {
+          id: '3',
+          title: '每日提醒',
+          icon: 'notifications',
+          iconColor: Colors.secondary,
+          showArrow: false,
+          value: notifEnabled ? '开启' : '关闭',
+        },
+        {
+          id: '4',
+          title: '勿扰模式 (静谧时间)',
+          icon: 'do-not-disturb',
+          iconColor: Colors.secondary,
+          value: `${dndRange.start} - ${dndRange.end}`,
+        },
+      ],
+    },
+    {
+      title: '显示设置',
+      items: [
+        {
+          id: '5',
+          title: '深色模式',
+          icon: 'dark-mode',
+          iconColor: Colors.tertiary,
+          showArrow: false,
+          value: appearance.theme === 'dark' ? '开启' : '关闭',
+        },
+        {
+          id: '6',
+          title: '字体大小',
+          icon: 'text-fields',
+          iconColor: Colors.tertiary,
+          value: {
+            small: '小',
+            medium: '标准',
+            large: '大'
+          }[appearance.fontSize],
+        },
+      ],
+    },
+    {
+      title: '隐私与条款',
+      items: [
+        {
+          id: '7',
+          title: '隐私政策',
+          icon: 'privacy-tip',
+          iconColor: Colors.onSurfaceVariant,
+          showArrow: true,
+        },
+        {
+          id: '8',
+          title: '用户协议',
+          icon: 'description',
+          iconColor: Colors.onSurfaceVariant,
+          showArrow: true,
+        },
+        {
+          id: '9',
+          title: '清除所有数据',
+          icon: 'delete-forever',
+          iconColor: Colors.error,
+          showArrow: false,
+        },
+      ],
+    },
+    {
+      title: '关于',
+      items: [
+        {
+          id: '10',
+          title: '当前版本',
+          icon: 'info',
+          iconColor: Colors.onSurfaceVariant,
+          value: 'v2.4.0 (Stable)',
+        },
+        {
+          id: '11',
+          title: '意见反馈',
+          icon: 'feedback',
+          iconColor: Colors.onSurfaceVariant,
+          showArrow: true,
+        },
+      ],
+    },
+  ];
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -311,7 +335,7 @@ const SettingsScreen: React.FC = () => {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {mockSettings.map(section => (
+        {settingSections.map(section => (
           <SettingSection
             key={section.title}
             title={section.title}

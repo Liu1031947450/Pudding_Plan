@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -17,6 +18,7 @@ import {
   Card,
   NotificationDrawer,
 } from '../components';
+import { badgesApi } from '../api';
 
 interface Badge {
   id: string;
@@ -26,39 +28,28 @@ interface Badge {
   unlocked: boolean;
 }
 
-const mockBadges: Badge[] = [
-  {
-    id: '1',
-    title: '早起达人',
-    icon: 'wb-sunny',
-    color: Colors.secondaryContainer,
-    unlocked: true,
-  },
-  {
-    id: '2',
-    title: '冥想大师',
-    icon: 'self-improvement',
-    color: Colors.tertiaryContainer,
-    unlocked: true,
-  },
-  {
-    id: '3',
-    title: '书海拾贝',
-    icon: 'menu-book',
-    color: Colors.primaryContainer,
-    unlocked: true,
-  },
-  {
-    id: '4',
-    title: '运动健将',
-    icon: 'fitness-center',
-    color: Colors.surfaceContainer,
-    unlocked: false,
-  },
-];
-
 const ProfileScreen: React.FC = () => {
   const navigation = useNavigation();
+  const [badges, setBadges] = useState<Badge[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // 从API获取徽章数据
+    const fetchBadges = async () => {
+      try {
+        const response = await badgesApi.getAll();
+        if (response.success && response.data) {
+          setBadges(response.data);
+        }
+      } catch (error) {
+        console.error('获取徽章数据失败:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBadges();
+  }, []);
 
   const handleSettingsPress = () => {
     navigation.navigate('Settings' as never);
@@ -168,34 +159,44 @@ const ProfileScreen: React.FC = () => {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.badgesContainer}
           >
-            {mockBadges.map(badge => (
-              <View key={badge.id} style={styles.badgeItem}>
-                <View
-                  style={[
-                    styles.badgeIcon,
-                    {
-                      backgroundColor: badge.color,
-                      opacity: badge.unlocked ? 1 : 0.4,
-                    },
-                  ]}
-                >
-                  <MaterialIcons
-                    name={badge.icon}
-                    size={28}
-                    color={Colors.onSurface}
-                    style={[{ opacity: badge.unlocked ? 1 : 0.4 }]}
-                  />
-                </View>
-                <Text
-                  style={[
-                    styles.badgeTitle,
-                    { opacity: badge.unlocked ? 1 : 0.4 },
-                  ]}
-                >
-                  {badge.title}
-                </Text>
+            {loading ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="small" color={Colors.primary} />
               </View>
-            ))}
+            ) : badges.length > 0 ? (
+              badges.map(badge => (
+                <View key={badge.id} style={styles.badgeItem}>
+                  <View
+                    style={[
+                      styles.badgeIcon,
+                      {
+                        backgroundColor: badge.color,
+                        opacity: badge.unlocked ? 1 : 0.4,
+                      },
+                    ]}
+                  >
+                    <MaterialIcons
+                      name={badge.icon}
+                      size={28}
+                      color={Colors.onSurface}
+                      style={[{ opacity: badge.unlocked ? 1 : 0.4 }]}
+                    />
+                  </View>
+                  <Text
+                    style={[
+                      styles.badgeTitle,
+                      { opacity: badge.unlocked ? 1 : 0.4 },
+                    ]}
+                  >
+                    {badge.title}
+                  </Text>
+                </View>
+              ))
+            ) : (
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>暂无徽章</Text>
+              </View>
+            )}
           </ScrollView>
         </View>
 
@@ -477,6 +478,19 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: Colors.outlineVariant,
   },
+  loadingContainer: {
+    paddingVertical: Spacing.xl,
+    paddingHorizontal: Spacing.xl,
+  },
+  emptyContainer: {
+    paddingVertical: Spacing.xl,
+    paddingHorizontal: Spacing.xl,
+  },
+  emptyText: {
+    fontSize: FontSize.md,
+    color: Colors.onSurfaceVariant,
+    textAlign: 'center'
+  }
 });
 
 export default ProfileScreen;

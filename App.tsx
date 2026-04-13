@@ -4,6 +4,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Colors } from './src/constants/theme';
 import AppNavigator from './src/navigation/AppNavigator';
 import { SplashScreen } from './src/screens';
+import { AuthProvider } from './src/contexts';
 
 function App() {
   const [showSplash, setShowSplash] = useState(true);
@@ -14,21 +15,25 @@ function App() {
 
   if (showSplash) {
     return (
-      <SafeAreaProvider>
-        <StatusBar
-          barStyle="dark-content"
-          backgroundColor={Colors.background}
-        />
-        <SplashScreen onFinish={handleSplashFinish} />
-      </SafeAreaProvider>
+      <AuthProvider>
+        <SafeAreaProvider>
+          <StatusBar
+            barStyle="dark-content"
+            backgroundColor={Colors.background}
+          />
+          <SplashScreen onFinish={handleSplashFinish} />
+        </SafeAreaProvider>
+      </AuthProvider>
     );
   }
 
   return (
-    <SafeAreaProvider>
-      <StatusBar barStyle="dark-content" backgroundColor={Colors.surface} />
-      <AppNavigator />
-    </SafeAreaProvider>
+    <AuthProvider>
+      <SafeAreaProvider>
+        <StatusBar barStyle="dark-content" backgroundColor={Colors.surface} />
+        <AppNavigator />
+      </SafeAreaProvider>
+    </AuthProvider>
   );
 }
 

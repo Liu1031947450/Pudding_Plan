@@ -1,26 +1,44 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize, BorderRadius } from '../constants/theme';
 import { TopAppBar, Card } from '../components';
+import { templateService } from '../services/templateService';
+import type { TemplateDetail } from '../data/templates';
 
 type RootStackParamList = {
   CreatePlan: { templateId?: string } | undefined;
 };
 
-import { templateDetails } from '../data/templates';
-
 const TemplateSelectionScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const templates = Object.values(templateDetails);
+  const [templates, setTemplates] = useState<TemplateDetail[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTemplates = async () => {
+      try {
+        setLoading(true);
+        const data = await templateService.getAllTemplates();
+        setTemplates(data);
+      } catch (error) {
+        console.error('Failed to fetch templates:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTemplates();
+  }, []);
 
   const handleBack = () => {
     navigation.goBack();
@@ -33,6 +51,18 @@ const TemplateSelectionScreen: React.FC = () => {
   const handleCustomPlan = () => {
     navigation.navigate('CreatePlan');
   };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <TopAppBar title="选择模板" showBackButton onBackPress={handleBack} />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={Colors.primary} />
+          <Text style={styles.loadingText}>加载模板中...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -248,6 +278,16 @@ const styles = StyleSheet.create({
   },
   customSubtitle: {
     fontSize: FontSize.sm,
+    color: Colors.onSurfaceVariant,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: Spacing.md,
+    fontSize: FontSize.md,
     color: Colors.onSurfaceVariant,
   },
 });
