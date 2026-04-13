@@ -26,8 +26,10 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
   onClose,
   title,
   children,
-  height = '70%',
+  height = '75%',
 }) => {
+  const drawerHeight = height === 'auto' ? undefined : height;
+
   return (
     <Modal
       visible={visible}
@@ -37,7 +39,11 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
     >
       <View style={styles.overlay}>
         <Pressable style={styles.backdrop} onPress={onClose} />
-        <View style={[styles.drawer, { height: height as any }]}>
+        <View style={[
+          styles.drawer, 
+          { height: drawerHeight as any },
+          height === 'auto' && { minHeight: 400 }
+        ]}>
           <View style={styles.handle} />
 
           <View style={styles.header}>

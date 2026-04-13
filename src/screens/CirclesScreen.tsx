@@ -1,36 +1,52 @@
-import React, { useState } from 'react';
-import { StyleSheet, ScrollView, View, Text } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import React, { useState, useCallback } from 'react';
+import { StyleSheet, ScrollView, View, Text, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors, Spacing, FontSize } from '../constants/theme';
-import { BottomNavBar, TopAppBar, Card } from '../components';
-import { BuddyList, CircleGrid } from '../features/circle';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { BottomNavBar, TopAppBar, FloatingActionButton } from '../components';
+import { CircleWaterfall, CircleDetailModal } from '../features/circle';
 import { NotificationDrawer } from '../features/plan';
 import { useCircleData } from '../hooks';
-import { MaterialIcons } from '@expo/vector-icons';
 import { useNotificationState } from '../hooks/useNotificationState';
+import type { Circle } from '../types/domain';
 
 const CirclesScreen: React.FC = () => {
-  const { buddies, circles } = useCircleData();
+  const navigation = useNavigation<any>();
+  const { circles, refreshData, loading } = useCircleData();
   const [notificationDrawerVisible, setNotificationDrawerVisible] =
     useState(false);
+  const [selectedCircle, setSelectedCircle] = useState<Circle | null>(null);
+  const [detailVisible, setDetailVisible] = useState(false);
+
   const { notifications, markAsRead, refreshNotifications, unreadCount } =
     useNotificationState();
+
+  // 当页面获得焦点时（包括从发布页返回），自动刷新动态列表
+  useFocusEffect(
+    useCallback(() => {
+      refreshData();
+      refreshNotifications();
+    }, [refreshData, refreshNotifications])
+  );
 
   const handleOpenNotifications = () => {
     setNotificationDrawerVisible(true);
   };
 
-  // 页面初始化时加载通知
-  React.useEffect(() => {
-    refreshNotifications();
-  }, [refreshNotifications]);
+  const handleCirclePress = (circle: Circle) => {
+    setSelectedCircle(circle);
+    setDetailVisible(true);
+  };
+
+  const handleCreatePost = () => {
+    navigation.navigate('PostMoment');
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <TopAppBar
-        leftIcon="spa"
-        title="圈子"
+        leftIcon="menu"
+        title="发现圈子"
         rightIcon="notifications"
         rightIconShake={unreadCount > 0}
         onRightPress={handleOpenNotifications}
@@ -41,46 +57,23 @@ const CirclesScreen: React.FC = () => {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.heroSection}>
-          <LinearGradient
-            colors={[Colors.primary, Colors.primaryContainer]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 0.26, y: 1 }}
-            style={styles.heroGradient}
-          >
-            <Text style={styles.heroTitle}>社交净土</Text>
-            <Text style={styles.heroSubtitle}>
-              在他人陪伴下寻找你的从容节奏。没有压力，只有共在。
-            </Text>
-          </LinearGradient>
-        </View>
+        {/* <View style={styles.titleSection}>
+          <Text style={styles.mainTitle}>发现圈子</Text>
+          <Text style={styles.mainSubtitle}>
+            在温润的数字花园中，寻找志同道合的宁静灵魂。
+          </Text>
+        </View> */}
 
-        <BuddyList
-          buddies={buddies}
-          onViewAll={() => {}}
-          onBuddyPress={() => {}}
-        />
-
-        <CircleGrid circles={circles} onCirclePress={() => {}} />
-
-        <View style={styles.section}>
-          <Card style={styles.encouragementCard}>
-            <View style={styles.encouragementHeader}>
-              <View style={styles.encouragementIcon}>
-                <MaterialIcons
-                  name="favorite"
-                  size={20}
-                  color={Colors.onPrimaryContainer}
-                />
-              </View>
-              <Text style={styles.encouragementTitle}>每日鼓励</Text>
-            </View>
-            <Text style={styles.encouragementText}>
-              "成长不是一场竞赛，而是一段旅程。在这里，我们一起慢慢来。"
-            </Text>
-          </Card>
-        </View>
+        <CircleWaterfall circles={circles} onCirclePress={handleCirclePress} />
       </ScrollView>
+
+      <FloatingActionButton onPress={handleCreatePost} />
+
+      <CircleDetailModal
+        visible={detailVisible}
+        onClose={() => setDetailVisible(false)}
+        circle={selectedCircle}
+      />
 
       <NotificationDrawer
         visible={notificationDrawerVisible}
@@ -105,61 +98,23 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 100,
   },
-  heroSection: {
-    marginHorizontal: Spacing.md,
-    marginTop: Spacing.lg,
-    marginBottom: Spacing.xl,
-    borderRadius: 16,
-    overflow: 'hidden',
+  titleSection: {
+    paddingHorizontal: Spacing.md,
+    paddingTop: Spacing.xl,
+    paddingBottom: Spacing.lg,
   },
-  heroGradient: {
-    padding: Spacing.xl,
-    alignItems: 'center',
-  },
-  heroTitle: {
-    fontSize: FontSize.xxl,
+  mainTitle: {
+    fontSize: 48,
     fontWeight: '700',
-    color: Colors.onPrimary,
-    marginBottom: Spacing.sm,
-  },
-  heroSubtitle: {
-    fontSize: FontSize.md,
-    color: Colors.onPrimary,
-    textAlign: 'center',
-    opacity: 0.9,
-    lineHeight: 22,
-  },
-  section: {
-    marginHorizontal: Spacing.md,
-    marginBottom: Spacing.xl,
-  },
-  encouragementCard: {
-    padding: Spacing.lg,
-  },
-  encouragementHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: Spacing.md,
-    gap: Spacing.sm,
-  },
-  encouragementIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: Colors.primaryContainer,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  encouragementTitle: {
-    fontSize: FontSize.md,
-    fontWeight: '600',
     color: Colors.onSurface,
+    marginBottom: Spacing.md,
+    letterSpacing: -1,
   },
-  encouragementText: {
+  mainSubtitle: {
     fontSize: FontSize.md,
     color: Colors.onSurfaceVariant,
-    lineHeight: 22,
-    fontStyle: 'italic',
+    lineHeight: 24,
+    opacity: 0.8,
   },
 });
 

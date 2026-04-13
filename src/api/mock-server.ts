@@ -7,6 +7,7 @@ import {
   mockWeekRhythmData,
   mockMonthRhythmData,
 } from './mock/data/calendarData';
+import { mockLocations, mockTopics } from './mock/data/communityData';
 import { ApiResponse } from './types';
 import { getCompletedDays, getProgress } from '../utils/planUtils';
 import { templateDetails } from '../data/templates';
@@ -32,6 +33,8 @@ class MockDatabase {
   private circlesDB: Circle[];
   private calendarDB: DayData[];
   private habitsDB: Habit[];
+  private locationsDB: any[];
+  private topicsDB: string[];
 
   private constructor() {
     // 深拷贝计划数组，避免污染原始 mockData
@@ -45,6 +48,8 @@ class MockDatabase {
     this.circlesDB = [...mockCircles];
     this.calendarDB = [...mockCalendarData];
     this.habitsDB = [...mockHabits];
+    this.locationsDB = [...mockLocations];
+    this.topicsDB = [...mockTopics];
 
     // 初始化时，从 completedDate 派生 currentDays / progress（保持字段同步）
     for (const plan of this.plansDB) {
@@ -81,6 +86,12 @@ class MockDatabase {
   }
   getHabits(): Habit[] {
     return this.habitsDB;
+  }
+  getLocations(): any[] {
+    return this.locationsDB;
+  }
+  getTopics(): string[] {
+    return this.topicsDB;
   }
 }
 
@@ -262,6 +273,38 @@ export const mockApiServer = {
       await delay();
       const circle = db.getCircles().find(c => c.id === id);
       return wrapResponse(!!circle);
+    },
+
+    // 创建新动态 (Moment)
+    create: async (moment: Partial<Circle>): Promise<ApiResponse<Circle>> => {
+      await delay(1000); // 模拟网络延迟
+      const newMoment: Circle = {
+        ...moment,
+        id: `m_${Date.now()}`,
+        authorName: moment.authorName || '我',
+        authorAvatarUri: moment.authorAvatarUri || 'https://i.pravatar.cc/150?u=me',
+        likes: 0,
+        commentsCount: 0,
+        comments: [],
+        members: '1',
+        type: 'waterfall',
+      } as Circle;
+      
+      db.getCircles().unshift(newMoment); // 发布到最前面
+      console.log('[Mock API] circles.create - 发布成功:', newMoment);
+      return wrapResponse(newMoment);
+    },
+
+    // 获取附近地点
+    getNearby: async (): Promise<ApiResponse<any[]>> => {
+      await delay(500);
+      return wrapResponse(db.getLocations());
+    },
+
+    // 获取热门话题
+    getTrendingTopics: async (): Promise<ApiResponse<string[]>> => {
+      await delay(300);
+      return wrapResponse(db.getTopics());
     },
   },
 

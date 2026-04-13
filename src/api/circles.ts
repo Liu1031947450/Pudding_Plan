@@ -57,6 +57,55 @@ export const circlesApi = {
     }
     return apiClient.post<boolean>(API_ENDPOINTS.CIRCLE_JOIN(id));
   },
+
+  // 上传图片 (Mock)
+  uploadImage: async (uri: string): Promise<ApiResponse<string>> => {
+    // 模拟网络延迟
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    console.log('[Mock API] circlesApi.uploadImage - 上传图片成功:', uri);
+    // 返回传入的 uri 作为模拟的上传路径
+    return { success: true, data: uri };
+  },
+
+  // 创建动态 (Moment)
+  createMoment: async (data: Partial<Circle>): Promise<ApiResponse<Circle>> => {
+    if (USE_MOCK) {
+      try {
+        const response = await mockApiServer.circles.create(data);
+        return { success: true, data: response.data };
+      } catch (error: any) {
+        return { success: false, error: error.message };
+      }
+    }
+    return apiClient.post<Circle>(API_ENDPOINTS.CIRCLES, data);
+  },
+
+  // 获取附近推荐地点
+  getNearbyLocations: async (): Promise<ApiResponse<any[]>> => {
+    if (USE_MOCK) {
+      try {
+        const response = await mockApiServer.circles.getNearby();
+        return { success: true, data: response.data };
+      } catch (error: any) {
+        return { success: false, error: error.message };
+      }
+    }
+    // 实际项目中可能调用位置服务接口
+    return { success: true, data: [] };
+  },
+
+  // 获取热门话题
+  getTrendingTopics: async (): Promise<ApiResponse<string[]>> => {
+    if (USE_MOCK) {
+      try {
+        const response = await mockApiServer.circles.getTrendingTopics();
+        return { success: true, data: response.data };
+      } catch (error: any) {
+        return { success: false, error: error.message };
+      }
+    }
+    return { success: true, data: [] };
+  },
 };
 
 export const buddiesApi = {
