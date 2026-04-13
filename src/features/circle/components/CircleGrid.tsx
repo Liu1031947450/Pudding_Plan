@@ -2,11 +2,19 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { CircleCard } from './CircleCard';
 import { Colors, Spacing, FontSize } from '../../../constants/theme';
-import type { Circle } from '../../../types/domain';
+
+type LegacyCircleCardData = {
+  id: string;
+  title: string;
+  members: string;
+  type: 'large' | 'small' | 'medium';
+  imageUri?: string;
+  category?: string;
+};
 
 interface CircleGridProps {
-  circles: Circle[];
-  onCirclePress?: (circle: Circle) => void;
+  circles: LegacyCircleCardData[];
+  onCirclePress?: (circle: LegacyCircleCardData) => void;
 }
 
 export const CircleGrid: React.FC<CircleGridProps> = ({

@@ -3,6 +3,7 @@ export * from './CircleCard';
 export * from './CircleGrid';
 export * from './CircleWaterfall';
 export * from './CircleWaterfallItem';
+export * from './CircleTopicCard';
 export * from './CircleDetailModal';
 export * from './BuddyCard';
 export * from './BuddyList';

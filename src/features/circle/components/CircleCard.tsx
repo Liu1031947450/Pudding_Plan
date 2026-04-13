@@ -4,10 +4,18 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize } from '../../../constants/theme';
 import { Card } from '../../../components/common/Card';
 import { Avatar } from '../../../components/common/Avatar';
-import type { Circle } from '../../../types/domain';
+
+type LegacyCircleCardData = {
+  id: string;
+  title: string;
+  members: string;
+  type: 'large' | 'small' | 'medium';
+  imageUri?: string;
+  category?: string;
+};
 
 interface CircleCardProps {
-  circle: Circle;
+  circle: LegacyCircleCardData;
   onPress?: () => void;
 }
 

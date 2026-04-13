@@ -16,11 +16,11 @@ import type {
   Badge,
   Notification,
   Buddy,
-  Circle,
   DayData,
   Habit,
   RhythmData,
 } from '../types/domain';
+import type { CircleListItem, CircleMoment } from '../features/circle/types';
 import type { TemplateDetail } from '../data/templates';
 
 // Mock database - 使用单例模式保持数据持久化（在应用运行期间）
@@ -30,7 +30,7 @@ class MockDatabase {
   private badgesDB: Badge[];
   private notificationsDB: Notification[];
   private buddiesDB: Buddy[];
-  private circlesDB: Circle[];
+  private circlesDB: CircleListItem[];
   private calendarDB: DayData[];
   private habitsDB: Habit[];
   private locationsDB: any[];
@@ -78,7 +78,7 @@ class MockDatabase {
   getBuddies(): Buddy[] {
     return this.buddiesDB;
   }
-  getCircles(): Circle[] {
+  getCircles(): CircleListItem[] {
     return this.circlesDB;
   }
   getCalendar(): DayData[] {
@@ -255,14 +255,14 @@ export const mockApiServer = {
   // Circles API - 圈子相关接口
   circles: {
     // 获取所有圈子列表
-    getAll: async (): Promise<ApiResponse<Circle[]>> => {
+    getAll: async (): Promise<ApiResponse<CircleListItem[]>> => {
       await delay();
       const data = [...db.getCircles()];
       return wrapResponse(data);
     },
 
     // 获取单个圈子详情
-    getById: async (id: string): Promise<ApiResponse<Circle | null>> => {
+    getById: async (id: string): Promise<ApiResponse<CircleListItem | null>> => {
       await delay();
       const data = db.getCircles().find(c => c.id === id) || null;
       return wrapResponse(data);
@@ -276,21 +276,28 @@ export const mockApiServer = {
     },
 
     // 创建新动态 (Moment)
-    create: async (moment: Partial<Circle>): Promise<ApiResponse<Circle>> => {
-      await delay(1000); // 模拟网络延迟
-      const newMoment: Circle = {
-        ...moment,
+    create: async (moment: Partial<CircleMoment>): Promise<ApiResponse<CircleMoment>> => {
+      await delay(1000);
+      const newMoment: CircleMoment = {
         id: `m_${Date.now()}`,
+        title: moment.title || '',
+        description: moment.description,
+        content: moment.content,
+        members: moment.members || '1',
+        type: 'waterfall',
+        imageUri: moment.imageUri,
+        images: moment.images,
+        category: moment.category,
         authorName: moment.authorName || '我',
         authorAvatarUri: moment.authorAvatarUri || 'https://i.pravatar.cc/150?u=me',
         likes: 0,
         commentsCount: 0,
         comments: [],
-        members: '1',
-        type: 'waterfall',
-      } as Circle;
-      
-      db.getCircles().unshift(newMoment); // 发布到最前面
+        isLiked: false,
+        isCollected: false,
+      };
+
+      db.getCircles().unshift(newMoment);
       console.log('[Mock API] circles.create - 发布成功:', newMoment);
       return wrapResponse(newMoment);
     },

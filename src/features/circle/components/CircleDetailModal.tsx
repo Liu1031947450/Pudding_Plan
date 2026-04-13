@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -13,12 +13,15 @@ import {
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize, BorderRadius } from '../../../constants/theme';
-import type { Circle, Comment } from '../../../types/domain';
+import type { CircleListItem, CircleMoment } from '../types';
+import { DEFAULT_AVATAR } from '../constants';
+import { circleService } from '../../../services/circleService';
 
 interface CircleDetailModalProps {
   visible: boolean;
   onClose: () => void;
-  circle: Circle | null;
+  circleId: string | null;
+  onDataChange?: () => Promise<void>;
 }
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -26,11 +29,36 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 export const CircleDetailModal: React.FC<CircleDetailModalProps> = ({
   visible,
   onClose,
-  circle,
+  circleId,
+  onDataChange,
 }) => {
-  const [liked, setLiked] = useState(false);
-  const [collected, setCollected] = useState(false);
+  const [circle, setCircle] = useState<CircleListItem | null>(null);
+  const [loading, setLoading] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    if (!visible || !circleId) {
+      setCircle(null);
+      return;
+    }
+
+    const loadDetail = async () => {
+      setLoading(true);
+      try {
+        const detail = await circleService.getCircleById(circleId);
+        setCircle(detail || null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDetail();
+  }, [visible, circleId]);
+
+  const images = useMemo(() => {
+    if (!circle || circle.type === 'topic') return [];
+    return circle.images || (circle.imageUri ? [circle.imageUri] : []);
+  }, [circle]);
 
   if (!circle) return null;
 
@@ -40,7 +68,27 @@ export const CircleDetailModal: React.FC<CircleDetailModalProps> = ({
     setActiveIndex(index);
   };
 
-  const images = circle.images || (circle.imageUri ? [circle.imageUri] : []);
+  const handleToggleLike = async () => {
+    if (circle.type === 'topic') return;
+    const nextCircle: CircleMoment = {
+      ...circle,
+      isLiked: !circle.isLiked,
+      likes: Math.max(0, (circle.likes || 0) + (circle.isLiked ? -1 : 1)),
+    };
+    setCircle(nextCircle);
+    await circleService.toggleLikeCircle(nextCircle);
+    await onDataChange?.();
+  };
+
+  const handleToggleCollect = async () => {
+    const nextCircle = {
+      ...circle,
+      isCollected: !circle.isCollected,
+    };
+    setCircle(nextCircle);
+    await circleService.toggleCollectCircle(nextCircle);
+    await onDataChange?.();
+  };
 
   return (
     <Modal
@@ -55,8 +103,18 @@ export const CircleDetailModal: React.FC<CircleDetailModalProps> = ({
             <MaterialIcons name="expand-more" size={32} color={Colors.onSurface} />
           </TouchableOpacity>
           <View style={styles.authorInfo}>
-            <Image source={{ uri: circle.authorAvatarUri }} style={styles.authorAvatar} />
-            <Text style={styles.authorName}>{circle.authorName}</Text>
+            <Image
+              source={{
+                uri:
+                  circle.type === 'waterfall' && circle.authorAvatarUri
+                    ? circle.authorAvatarUri
+                    : DEFAULT_AVATAR,
+              }}
+              style={styles.authorAvatar}
+            />
+            <Text style={styles.authorName}>
+              {circle.type === 'waterfall' ? circle.authorName || '匿名用户' : '圈子话题'}
+            </Text>
           </View>
           <TouchableOpacity style={styles.followButton}>
             <Text style={styles.followButtonText}>关注</Text>
@@ -64,88 +122,99 @@ export const CircleDetailModal: React.FC<CircleDetailModalProps> = ({
         </View>
 
         <ScrollView showsVerticalScrollIndicator={false}>
-          {/* Image Slider */}
-          <View style={styles.sliderContainer}>
-            <ScrollView
-              horizontal
-              pagingEnabled
-              showsHorizontalScrollIndicator={false}
-              onScroll={handleScroll}
-              scrollEventThrottle={16}
-            >
-              {images.map((uri, index) => (
-                <Image key={index} source={{ uri }} style={styles.sliderImage} />
-              ))}
-            </ScrollView>
-            {images.length > 1 && (
-              <View style={styles.pagination}>
-                {images.map((_, index) => (
-                  <View
-                    key={index}
-                    style={[
-                      styles.paginationDot,
-                      activeIndex === index && styles.paginationDotActive,
-                    ]}
-                  />
+          {circle.type === 'waterfall' && images.length > 0 && (
+            <View style={styles.sliderContainer}>
+              <ScrollView
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                onScroll={handleScroll}
+                scrollEventThrottle={16}
+              >
+                {images.map((uri, index) => (
+                  <Image key={index} source={{ uri }} style={styles.sliderImage} />
                 ))}
-              </View>
-            )}
-          </View>
+              </ScrollView>
+              {images.length > 1 && (
+                <View style={styles.pagination}>
+                  {images.map((_, index) => (
+                    <View
+                      key={index}
+                      style={[
+                        styles.paginationDot,
+                        activeIndex === index && styles.paginationDotActive,
+                      ]}
+                    />
+                  ))}
+                </View>
+              )}
+            </View>
+          )}
 
-          {/* Content */}
           <View style={styles.contentSection}>
             <Text style={styles.title}>{circle.title}</Text>
-            <Text style={styles.content}>{circle.content || circle.description}</Text>
-            <Text style={styles.time}>编辑于 刚刚</Text>
+            <Text style={styles.content}>
+              {circle.type === 'waterfall'
+                ? circle.content || circle.description
+                : circle.description}
+            </Text>
+            <Text style={styles.time}>{loading ? '加载中...' : '编辑于 刚刚'}</Text>
           </View>
 
-          {/* Comments Section */}
-          <View style={styles.commentsSection}>
-            <View style={styles.commentsHeader}>
-              <Text style={styles.commentsTitle}>共 {circle.commentsCount || 0} 条评论</Text>
-            </View>
-            {circle.comments?.map((comment) => (
-              <View key={comment.id} style={styles.commentItem}>
-                <Image source={{ uri: comment.userAvatarUri || 'https://i.pravatar.cc/150?u=default' }} style={styles.commentAvatar} />
-                <View style={styles.commentContent}>
-                  <Text style={styles.commentUser}>{comment.userName}</Text>
-                  <Text style={styles.commentText}>{comment.text}</Text>
-                  <Text style={styles.commentTime}>{comment.time}</Text>
-                </View>
+          {circle.type === 'waterfall' && (
+            <View style={styles.commentsSection}>
+              <View style={styles.commentsHeader}>
+                <Text style={styles.commentsTitle}>共 {circle.commentsCount || 0} 条评论</Text>
               </View>
-            ))}
-            {(!circle.comments || circle.comments.length === 0) && (
-              <Text style={styles.emptyComments}>快来发表你的第一个评论吧 ~</Text>
-            )}
-          </View>
+              {circle.comments?.map(comment => (
+                <View key={comment.id} style={styles.commentItem}>
+                  <Image
+                    source={{ uri: comment.userAvatarUri || DEFAULT_AVATAR }}
+                    style={styles.commentAvatar}
+                  />
+                  <View style={styles.commentContent}>
+                    <Text style={styles.commentUser}>{comment.userName}</Text>
+                    <Text style={styles.commentText}>{comment.text}</Text>
+                    <Text style={styles.commentTime}>{comment.time}</Text>
+                  </View>
+                </View>
+              ))}
+              {(!circle.comments || circle.comments.length === 0) && (
+                <Text style={styles.emptyComments}>快来发表你的第一个评论吧 ~</Text>
+              )}
+            </View>
+          )}
         </ScrollView>
 
-        {/* Footer Interaction Bar */}
         <View style={styles.footer}>
           <View style={styles.inputPlaceholder}>
             <MaterialIcons name="edit" size={18} color={Colors.onSurfaceVariant} />
             <Text style={styles.inputPlaceholderText}>说点什么...</Text>
           </View>
           <View style={styles.interactionIcons}>
-            <TouchableOpacity onPress={() => setLiked(!liked)} style={styles.iconButton}>
+            <TouchableOpacity onPress={handleToggleLike} style={styles.iconButton}>
               <MaterialIcons
-                name={liked ? 'favorite' : 'favorite-border'}
+                name={circle.isLiked ? 'favorite' : 'favorite-border'}
                 size={24}
-                color={liked ? Colors.error : Colors.onSurface}
+                color={circle.isLiked ? Colors.error : Colors.onSurface}
               />
-              <Text style={styles.iconCount}>{circle.likes ? circle.likes + (liked ? 1 : 0) : ''}</Text>
+              <Text style={styles.iconCount}>
+                {circle.type === 'waterfall' ? circle.likes || 0 : ''}
+              </Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => setCollected(!collected)} style={styles.iconButton}>
+            <TouchableOpacity onPress={handleToggleCollect} style={styles.iconButton}>
               <MaterialIcons
-                name={collected ? 'star' : 'star-border'}
+                name={circle.isCollected ? 'star' : 'star-border'}
                 size={26}
-                color={collected ? Colors.primary : Colors.onSurface}
+                color={circle.isCollected ? Colors.primary : Colors.onSurface}
               />
               <Text style={styles.iconCount}>收藏</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.iconButton}>
               <MaterialIcons name="chat-bubble-outline" size={22} color={Colors.onSurface} />
-              <Text style={styles.iconCount}>{circle.commentsCount}</Text>
+              <Text style={styles.iconCount}>
+                {circle.type === 'waterfall' ? circle.commentsCount || 0 : ''}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>

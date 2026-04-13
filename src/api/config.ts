@@ -5,6 +5,8 @@ export const API_CONFIG = {
     : 'https://api.puddingplan.com',
   TIMEOUT: 10000,
   RETRY_ATTEMPTS: 3,
+  // Mock 开关：开发环境默认使用 mock，可通过环境变量覆盖
+  USE_MOCK: process.env.EXPO_PUBLIC_USE_MOCK === 'false' ? false : __DEV__,
 };
 
 // API Endpoints

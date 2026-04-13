@@ -1,4 +1,5 @@
-import type { Buddy, Circle } from '../../../types/domain';
+import type { Buddy } from '../../../types/domain';
+import type { CircleListItem } from '../../../features/circle/types';
 
 export const mockBuddies: Buddy[] = [
   {
@@ -17,7 +18,7 @@ export const mockBuddies: Buddy[] = [
   },
 ];
 
-export const mockCircles: Circle[] = [
+export const mockCircles: CircleListItem[] = [
   {
     id: '1',
     title: '清晨冥想室',

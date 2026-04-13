@@ -75,27 +75,6 @@ export interface Comment {
   time: string;
 }
 
-export interface Circle {
-  id: string;
-  title: string;
-  members: string;
-  type: 'large' | 'small' | 'medium' | 'waterfall' | 'topic';
-  imageUri?: string;
-  images?: string[]; // Multiple images for slider
-  category?: string;
-  description?: string;
-  content?: string; // Long content for detail modal
-  authorName?: string;
-  authorAvatarUri?: string;
-  isTopic?: boolean;
-  topicTag?: string;
-  participantsAvatars?: string[];
-  backgroundColor?: string;
-  likes?: number;
-  commentsCount?: number;
-  comments?: Comment[];
-}
-
 // Calendar types
 export interface DayData {
   day: number;

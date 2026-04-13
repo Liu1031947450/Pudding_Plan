@@ -1,27 +1,24 @@
 import React, { useState, useCallback } from 'react';
-import { StyleSheet, ScrollView, View, Text, RefreshControl } from 'react-native';
+import { StyleSheet, ScrollView, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Colors, Spacing, FontSize } from '../constants/theme';
+import { Colors } from '../constants/theme';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { BottomNavBar, TopAppBar, FloatingActionButton } from '../components';
 import { CircleWaterfall, CircleDetailModal } from '../features/circle';
 import { NotificationDrawer } from '../features/plan';
 import { useCircleData } from '../hooks';
 import { useNotificationState } from '../hooks/useNotificationState';
-import type { Circle } from '../types/domain';
 
 const CirclesScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const { circles, refreshData, loading } = useCircleData();
-  const [notificationDrawerVisible, setNotificationDrawerVisible] =
-    useState(false);
-  const [selectedCircle, setSelectedCircle] = useState<Circle | null>(null);
+  const [notificationDrawerVisible, setNotificationDrawerVisible] = useState(false);
+  const [selectedCircleId, setSelectedCircleId] = useState<string | null>(null);
   const [detailVisible, setDetailVisible] = useState(false);
 
   const { notifications, markAsRead, refreshNotifications, unreadCount } =
     useNotificationState();
 
-  // 当页面获得焦点时（包括从发布页返回），自动刷新动态列表
   useFocusEffect(
     useCallback(() => {
       refreshData();
@@ -33,13 +30,18 @@ const CirclesScreen: React.FC = () => {
     setNotificationDrawerVisible(true);
   };
 
-  const handleCirclePress = (circle: Circle) => {
-    setSelectedCircle(circle);
+  const handleCirclePress = (circleId: string) => {
+    setSelectedCircleId(circleId);
     setDetailVisible(true);
   };
 
   const handleCreatePost = () => {
     navigation.navigate('PostMoment');
+  };
+
+  const handleCloseDetail = () => {
+    setDetailVisible(false);
+    setSelectedCircleId(null);
   };
 
   return (
@@ -56,14 +58,10 @@ const CirclesScreen: React.FC = () => {
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={loading} onRefresh={refreshData} />
+        }
       >
-        {/* <View style={styles.titleSection}>
-          <Text style={styles.mainTitle}>发现圈子</Text>
-          <Text style={styles.mainSubtitle}>
-            在温润的数字花园中，寻找志同道合的宁静灵魂。
-          </Text>
-        </View> */}
-
         <CircleWaterfall circles={circles} onCirclePress={handleCirclePress} />
       </ScrollView>
 
@@ -71,8 +69,9 @@ const CirclesScreen: React.FC = () => {
 
       <CircleDetailModal
         visible={detailVisible}
-        onClose={() => setDetailVisible(false)}
-        circle={selectedCircle}
+        onClose={handleCloseDetail}
+        circleId={selectedCircleId}
+        onDataChange={refreshData}
       />
 
       <NotificationDrawer
@@ -97,24 +96,6 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: 100,
-  },
-  titleSection: {
-    paddingHorizontal: Spacing.md,
-    paddingTop: Spacing.xl,
-    paddingBottom: Spacing.lg,
-  },
-  mainTitle: {
-    fontSize: 48,
-    fontWeight: '700',
-    color: Colors.onSurface,
-    marginBottom: Spacing.md,
-    letterSpacing: -1,
-  },
-  mainSubtitle: {
-    fontSize: FontSize.md,
-    color: Colors.onSurfaceVariant,
-    lineHeight: 24,
-    opacity: 0.8,
   },
 });
 
