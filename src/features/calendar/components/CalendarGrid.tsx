@@ -4,7 +4,6 @@ import {
   Colors,
   Spacing,
   FontSize,
-  BorderRadius,
 } from '../../../constants/theme';
 import { Card } from '../../../components/common/Card';
 import { DayCell } from './DayCell';

@@ -1,6 +1,4 @@
-import type { DayData, RhythmData } from '../../../types/domain';
-
-export const mockCalendarData: DayData[] = [
+const mockCalendarData = [
   { day: 26, hasActivity: false, isToday: false, isSelected: false },
   { day: 27, hasActivity: false, isToday: false, isSelected: false },
   { day: 28, hasActivity: false, isToday: false, isSelected: false },
@@ -60,7 +58,7 @@ export const mockCalendarData: DayData[] = [
   { day: 17, hasActivity: false, isToday: false, isSelected: false },
 ];
 
-export const mockWeekRhythmData: RhythmData[] = [
+const mockWeekRhythmData = [
   { date: '周一', value: 100 },
   { date: '周二', value: 85 },
   { date: '周三', value: 100 },
@@ -70,7 +68,7 @@ export const mockWeekRhythmData: RhythmData[] = [
   { date: '周日', value: 80 },
 ];
 
-export const mockMonthRhythmData: RhythmData[] = Array.from(
+const mockMonthRhythmData = Array.from(
   { length: 30 },
   (_, i) => ({
     date: `${i + 1}`,
@@ -80,3 +78,5 @@ export const mockMonthRhythmData: RhythmData[] = Array.from(
     ),
   }),
 );
+
+module.exports = { mockCalendarData, mockWeekRhythmData, mockMonthRhythmData };

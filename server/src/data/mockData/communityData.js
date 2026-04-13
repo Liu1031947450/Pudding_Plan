@@ -1,7 +1,4 @@
-import type { Buddy } from '../../../types/domain';
-import type { CircleListItem } from '../../../features/circle/types';
-
-export const mockBuddies: Buddy[] = [
+const mockBuddies = [
   {
     id: '1',
     name: 'Elena R.',
@@ -18,7 +15,7 @@ export const mockBuddies: Buddy[] = [
   },
 ];
 
-export const mockCircles: CircleListItem[] = [
+const mockCircles = [
   {
     id: '1',
     title: '清晨冥想室',
@@ -113,7 +110,7 @@ export const mockCircles: CircleListItem[] = [
   },
 ];
 
-export const mockLocations = [
+const mockLocations = [
   { name: '上海 · 徐汇区', sub: '徐家汇街道', id: 'l1' },
   { name: '上海 · 陆家嘴', sub: '东方明珠周边', id: 'l2' },
   { name: '北京 · 朝阳公园', sub: '朝阳区朝阳公园南路', id: 'l3' },
@@ -122,10 +119,12 @@ export const mockLocations = [
   { name: '成都 · 春熙路', sub: '锦江区核心商圈', id: 'l6' },
 ];
 
-export const mockTopics = [
+const mockTopics = [
   '清晨冥想',
   '今日手账',
   '落日收集',
   '每日一善',
   '自习室',
 ];
+
+module.exports = { mockBuddies, mockCircles, mockLocations, mockTopics };

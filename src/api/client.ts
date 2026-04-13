@@ -41,7 +41,9 @@ class ApiClient {
     const timeoutId = setTimeout(() => controller.abort(), timeout);
 
     try {
-      const response = await fetch(`${this.baseURL}${endpoint}`, {
+      const url = `${this.baseURL}${endpoint}`;
+      
+      const response = await fetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
@@ -64,8 +66,9 @@ class ApiClient {
       }
 
       return {
-        success: true,
-        data: data.data || data,
+        success: data.success !== false,
+        data: data.data,
+        error: data.error,
         message: data.message,
       };
     } catch (error: any) {

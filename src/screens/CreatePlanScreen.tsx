@@ -40,9 +40,9 @@ const CreatePlanScreen: React.FC = () => {
     if (planId) {
       const fetchPlanDetail = async () => {
         const userId = '1234567890'; // mock userId
-        const planData = await planService.getPlanById(planId, userId);
-        if (planData) {
-          setExistingPlan(planData);
+        const response = await planService.getPlanById(planId, userId);
+        if (response.success && response.data) {
+          setExistingPlan(response.data);
         }
       };
       fetchPlanDetail();
@@ -221,7 +221,7 @@ const CreatePlanScreen: React.FC = () => {
         ? await handleUpdatePlan(planId!, newPlanData, userId)
         : await handleCreatePlan(newPlanData, userId);
 
-      if (result) {
+      if (result.success) {
         // 显示成功提示
         setToastMessage(isEditMode ? '计划更新成功！' : '计划创建成功！');
         setToastType('success');
@@ -241,7 +241,7 @@ const CreatePlanScreen: React.FC = () => {
       } else {
         setIsCreating(false);
         setToastMessage(
-          isEditMode ? '计划更新失败，请重试' : '计划创建失败，请重试',
+          result.error || (isEditMode ? '计划更新失败，请重试' : '计划创建失败，请重试'),
         );
         setToastType('error');
         setToastVisible(true);

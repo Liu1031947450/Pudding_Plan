@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, ViewStyle, StyleProp } from 'react-native';
-import { Colors, Spacing, FontSize, BorderRadius } from '../../../constants/theme';
+import { Spacing, FontSize, BorderRadius } from '../../../constants/theme';
 import { Card } from '../../../components/common/Card';
 import type { CircleTopic } from '../types';
 import { DEFAULT_TOPIC_BG_COLOR } from '../constants';
@@ -36,7 +36,7 @@ export const CircleTopicCard: React.FC<CircleTopicCardProps> = ({
             <Image
               key={index}
               source={{ uri }}
-              style={[styles.miniAvatar, { marginLeft: index > 0 ? -10 : 0 }]}
+              style={[styles.miniAvatar, index > 0 && styles.miniAvatarWithMargin]}
             />
           ))}
         </View>
@@ -92,5 +92,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 2,
     borderColor: '#DEF9CE',
+  },
+  miniAvatarWithMargin: {
+    marginLeft: -10,
   },
 });

@@ -1,5 +1,6 @@
 import type { DayData, Habit } from '../types/domain';
 import { calendarApi, habitsApi } from '../api';
+import type { ApiResponse } from '../api/client';
 
 // Calendar Service - handles calendar and habit operations
 class CalendarService {
@@ -8,21 +9,18 @@ class CalendarService {
     year: number,
     month: number,
     userId?: string,
-  ): Promise<DayData[]> {
-    const response = await calendarApi.getData(year, month, userId);
-    return response.data || [];
+  ): Promise<ApiResponse<DayData[]>> {
+    return await calendarApi.getData(year, month, userId);
   }
 
   // Get habits
-  async getHabits(): Promise<Habit[]> {
-    const response = await habitsApi.getAll();
-    return response.data || [];
+  async getHabits(): Promise<ApiResponse<Habit[]>> {
+    return await habitsApi.getAll();
   }
 
   // Toggle habit completion
-  async toggleHabit(habitId: string): Promise<Habit | undefined> {
-    const response = await habitsApi.toggle(habitId);
-    return response.data;
+  async toggleHabit(habitId: string): Promise<ApiResponse<Habit>> {
+    return await habitsApi.toggle(habitId);
   }
 
   // Update day activity
@@ -30,13 +28,12 @@ class CalendarService {
     day: number,
     hasActivity: boolean,
     activityType?: 'primary' | 'secondary' | 'tertiary',
-  ): Promise<boolean> {
-    const response = await calendarApi.updateDay(
+  ): Promise<ApiResponse<boolean>> {
+    return await calendarApi.updateDay(
       day,
       hasActivity,
       activityType,
     );
-    return response.success;
   }
 }
 

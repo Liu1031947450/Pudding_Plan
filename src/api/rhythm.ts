@@ -1,46 +1,21 @@
 import { apiClient, type ApiResponse } from './client';
-import { mockApiServer } from './mock-server';
+import { API_ENDPOINTS } from './config';
 import type { RhythmData } from '../types/domain';
-
-// 开发时使用 mock server
-const USE_MOCK = true;
 
 export const rhythmApi = {
   // 获取周节奏数据
   getWeek: async (userId?: string): Promise<ApiResponse<RhythmData[]>> => {
-    if (USE_MOCK) {
-      try {
-        const response = await mockApiServer.rhythm.getWeek(userId);
-        console.log(
-          '[Mock API] rhythmApi.getWeek - 获取周节奏数据',
-          response.data,
-        );
-        return { success: true, data: response.data };
-      } catch (error: any) {
-        return { success: false, error: error.message };
-      }
-    }
-    const endpoint = userId ? `/rhythm/week?userId=${userId}` : '/rhythm/week';
+    const endpoint = userId
+      ? `${API_ENDPOINTS.RHYTHM_WEEK}?userId=${userId}`
+      : API_ENDPOINTS.RHYTHM_WEEK;
     return apiClient.get<RhythmData[]>(endpoint);
   },
 
   // 获取月节奏数据
   getMonth: async (userId?: string): Promise<ApiResponse<RhythmData[]>> => {
-    if (USE_MOCK) {
-      try {
-        const response = await mockApiServer.rhythm.getMonth(userId);
-        console.log(
-          '[Mock API] rhythmApi.getMonth - 获取月节奏数据',
-          response.data,
-        );
-        return { success: true, data: response.data };
-      } catch (error: any) {
-        return { success: false, error: error.message };
-      }
-    }
     const endpoint = userId
-      ? `/rhythm/month?userId=${userId}`
-      : '/rhythm/month';
+      ? `${API_ENDPOINTS.RHYTHM_MONTH}?userId=${userId}`
+      : API_ENDPOINTS.RHYTHM_MONTH;
     return apiClient.get<RhythmData[]>(endpoint);
   },
 };

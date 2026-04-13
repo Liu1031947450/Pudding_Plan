@@ -8,7 +8,7 @@ import {
   Platform,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Colors, Spacing, BorderRadius } from '../../constants/theme';
+import { Colors, Spacing } from '../../constants/theme';
 
 interface FloatingActionButtonProps {
   onPress: () => void;

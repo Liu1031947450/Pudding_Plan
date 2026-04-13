@@ -1,23 +1,10 @@
 import { apiClient, type ApiResponse } from './client';
 import { API_ENDPOINTS } from './config';
-import { mockApiServer } from './mock-server';
 import type { Plan } from '../types/domain';
-
-// 开发时使用 mock server
-const USE_MOCK = true;
 
 export const plansApi = {
   // 获取所有计划
   getAll: async (userId?: string): Promise<ApiResponse<Plan[]>> => {
-    if (USE_MOCK) {
-      try {
-        const response = await mockApiServer.plans.getAll(userId);
-        console.log('[Mock API] plansApi.getAll - 获取所有计划', response.data);
-        return { success: true, data: response.data };
-      } catch (error: any) {
-        return { success: false, error: error.message };
-      }
-    }
     const endpoint = userId
       ? `${API_ENDPOINTS.PLANS}?userId=${userId}`
       : API_ENDPOINTS.PLANS;
@@ -26,24 +13,6 @@ export const plansApi = {
 
   // 根据 ID 获取单个计划
   getById: async (id: string, userId?: string): Promise<ApiResponse<Plan>> => {
-    if (USE_MOCK) {
-      try {
-        const response = await mockApiServer.plans.getById(id, userId);
-        const data = response.data;
-        if (!data) {
-          return { success: false, error: '未找到计划' };
-        }
-        console.log(
-          '[Mock API] plansApi.getById - 获取单个计划详情',
-          data,
-          'userId:',
-          userId,
-        );
-        return { success: true, data };
-      } catch (error: any) {
-        return { success: false, error: error.message };
-      }
-    }
     const endpoint = userId
       ? `${API_ENDPOINTS.PLAN_DETAIL(id)}?userId=${userId}`
       : API_ENDPOINTS.PLAN_DETAIL(id);
@@ -55,19 +24,15 @@ export const plansApi = {
     plan: Omit<Plan, 'id'>,
     userId?: string,
   ): Promise<ApiResponse<Plan>> => {
-    if (USE_MOCK) {
-      try {
-        const response = await mockApiServer.plans.create(plan, userId);
-        console.log('[Mock API] plansApi.create - 创建新计划', response.data);
-        return { success: true, data: response.data, message: '计划创建成功' };
-      } catch (error: any) {
-        return { success: false, error: error.message };
-      }
+    try {
+      const endpoint = userId
+        ? `${API_ENDPOINTS.PLANS}?userId=${userId}`
+        : API_ENDPOINTS.PLANS;
+      const response = await apiClient.post<Plan>(endpoint, plan);
+      return response;
+    } catch (error: any) {
+      return { success: false, error: error.message || '创建计划失败' };
     }
-    const endpoint = userId
-      ? `${API_ENDPOINTS.PLANS}?userId=${userId}`
-      : API_ENDPOINTS.PLANS;
-    return apiClient.post<Plan>(endpoint, plan);
   },
 
   // 更新计划
@@ -76,23 +41,15 @@ export const plansApi = {
     updates: Partial<Plan>,
     userId?: string,
   ): Promise<ApiResponse<Plan>> => {
-    if (USE_MOCK) {
-      try {
-        const response = await mockApiServer.plans.update(id, updates, userId);
-        const data = response.data;
-        if (!data) {
-          return { success: false, error: '未找到计划' };
-        }
-        console.log('[Mock API] plansApi.update - 更新计划', data);
-        return { success: true, data, message: '计划更新成功' };
-      } catch (error: any) {
-        return { success: false, error: error.message };
-      }
+    try {
+      const endpoint = userId
+        ? `${API_ENDPOINTS.PLAN_DETAIL(id)}?userId=${userId}`
+        : API_ENDPOINTS.PLAN_DETAIL(id);
+      const response = await apiClient.put<Plan>(endpoint, updates);
+      return response;
+    } catch (error: any) {
+      return { success: false, error: error.message || '更新计划失败' };
     }
-    const endpoint = userId
-      ? `${API_ENDPOINTS.PLAN_DETAIL(id)}?userId=${userId}`
-      : API_ENDPOINTS.PLAN_DETAIL(id);
-    return apiClient.put<Plan>(endpoint, updates);
   },
 
   // 删除计划
@@ -100,22 +57,15 @@ export const plansApi = {
     id: string,
     userId?: string,
   ): Promise<ApiResponse<boolean>> => {
-    if (USE_MOCK) {
-      try {
-        const response = await mockApiServer.plans.delete(id, userId);
-        if (!response.data) {
-          return { success: false, error: '未找到计划' };
-        }
-        console.log('[Mock API] plansApi.delete - 删除计划', id);
-        return { success: true, data: true, message: '计划删除成功' };
-      } catch (error: any) {
-        return { success: false, error: error.message };
-      }
+    try {
+      const endpoint = userId
+        ? `${API_ENDPOINTS.PLAN_DETAIL(id)}?userId=${userId}`
+        : API_ENDPOINTS.PLAN_DETAIL(id);
+      const response = await apiClient.delete<boolean>(endpoint);
+      return response;
+    } catch (error: any) {
+      return { success: false, error: error.message || '删除计划失败' };
     }
-    const endpoint = userId
-      ? `${API_ENDPOINTS.PLAN_DETAIL(id)}?userId=${userId}`
-      : API_ENDPOINTS.PLAN_DETAIL(id);
-    return apiClient.delete<boolean>(endpoint);
   },
 
   // 计划打卡
@@ -124,22 +74,14 @@ export const plansApi = {
     date: string,
     userId?: string,
   ): Promise<ApiResponse<Plan>> => {
-    if (USE_MOCK) {
-      try {
-        const response = await mockApiServer.plans.checkIn(id, date, userId);
-        const data = response.data;
-        if (!data) {
-          return { success: false, error: '未找到计划' };
-        }
-        console.log('[Mock API] plansApi.checkIn - 计划打卡', data, date);
-        return { success: true, data, message: '打卡成功' };
-      } catch (error: any) {
-        return { success: false, error: error.message };
-      }
+    try {
+      const endpoint = userId
+        ? `${API_ENDPOINTS.PLAN_CHECK_IN(id)}?date=${date}&userId=${userId}`
+        : `${API_ENDPOINTS.PLAN_CHECK_IN(id)}?date=${date}`;
+      const response = await apiClient.post<Plan>(endpoint);
+      return response;
+    } catch (error: any) {
+      return { success: false, error: error.message || '打卡失败' };
     }
-    const endpoint = userId
-      ? `${API_ENDPOINTS.PLAN_CHECK_IN(id)}?date=${date}&userId=${userId}`
-      : `${API_ENDPOINTS.PLAN_CHECK_IN(id)}?date=${date}`;
-    return apiClient.post<Plan>(endpoint);
   },
 };

@@ -19,8 +19,6 @@ interface BottomDrawerProps {
   height?: number | string;
 }
 
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
-
 export const BottomDrawer: React.FC<BottomDrawerProps> = ({
   visible,
   onClose,

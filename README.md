@@ -1,6 +1,6 @@
 # PuddingPlan (布丁计划)
 
-一个使用 [**React Native**](https://reactnative.dev) + [**Expo**](https://expo.dev) 构建的跨平台移动应用，专注于习惯养成和自律打卡。
+一个使用 [**React Native**](https://reactnative.dev) + [**Expo**](https://expo.dev) 构建的跨平台移动应用，专注于习惯养成和自律打卡，配备完整的后端 API 服务。
 
 ## ✨ 功能特性
 
@@ -12,6 +12,8 @@
 - **节奏图表**: 可视化展示打卡频率和坚持情况
 - **圈子功能**: 加入兴趣圈子，与伙伴共同进步
 - **提醒通知**: 自定义打卡提醒时间，不错过每一天
+- **完整后端**: Express.js 构建的 RESTful API 服务
+- **数据持久化**: 为数据库集成做好准备
 
 ## 📁 项目结构
 
@@ -19,19 +21,39 @@
 Pudding_Plan/
 ├── android/                    # Android 原生代码
 ├── ios/                        # iOS 原生代码
+├── public/                     # Web 静态资源
 │
-├── src/                        # 源代码目录
+├── server/                     # 后端 API 服务
+│   ├── src/                    # 后端源代码
+│   │   ├── data/               # 数据层
+│   │   │   ├── mockData/       # 模拟数据
+│   │   │   │   ├── badgeData.js      # 成就数据
+│   │   │   │   ├── calendarData.js   # 日历数据
+│   │   │   │   ├── communityData.js  # 社区数据
+│   │   │   │   ├── notificationData.js # 通知数据
+│   │   │   │   ├── planData.js       # 计划数据
+│   │   │   │   └── templates.js      # 模板数据
+│   │   │   └── database.js     # 内存数据库实现
+│   │   ├── routes/             # API 路由
+│   │   │   ├── badges.js       # 成就相关路由
+│   │   │   ├── buddies.js      # 伙伴相关路由
+│   │   │   ├── calendar.js     # 日历相关路由
+│   │   │   ├── circles.js      # 圈子相关路由
+│   │   │   ├── habits.js       # 习惯相关路由
+│   │   │   ├── notifications.js # 通知相关路由
+│   │   │   ├── plans.js        # 计划相关路由
+│   │   │   ├── rhythm.js       # 节奏数据路由
+│   │   │   └── templates.js    # 模板相关路由
+│   │   └── index.js            # 后端服务入口
+│   ├── package.json            # 后端依赖配置
+│   └── README.md               # 后端文档
+│
+├── src/                        # 前端源代码目录
 │   ├── api/                    # API 接口层
-│   │   ├── mock/               # Mock 数据
-│   │   │   └── data/           # Mock 数据文件
-│   │   │       ├── badgeData.ts      # 成就数据
-│   │   │       ├── calendarData.ts   # 日历数据
-│   │   │       ├── communityData.ts  # 社区数据
-│   │   │       ├── notificationData.ts # 通知数据
-│   │   │       └── planData.ts       # 计划数据
+│   │   ├── dto/                # 数据传输对象
+│   │   ├── mappers/            # 数据映射器
 │   │   ├── client.ts           # HTTP 客户端配置
 │   │   ├── config.ts           # API 配置
-│   │   ├── mock-server.ts      # Mock 数据服务
 │   │   ├── types.ts            # API 类型定义
 │   │   ├── plans.ts            # 计划相关 API
 │   │   ├── calendar.ts         # 日历相关 API
@@ -157,6 +179,7 @@ Pudding_Plan/
 │
 ├── App.tsx                     # 应用入口组件
 ├── index.js                    # React Native 入口文件
+├── index.web.js                # Web 入口文件
 ├── package.json                # 项目依赖配置
 ├── tsconfig.json               # TypeScript 配置
 └── README.md                   # 项目文档
@@ -168,7 +191,9 @@ Pudding_Plan/
 
 ### 第一步：安装依赖
 
-在项目根目录运行以下命令安装项目依赖：
+#### 前端依赖
+
+在项目根目录运行以下命令安装前端依赖：
 
 ```sh
 # 使用 npm
@@ -178,9 +203,41 @@ npm install
 yarn install
 ```
 
-### 第二步：启动 Expo Go 服务
+#### 后端依赖
 
-运行以下命令启动 Expo 开发服务器：
+在 `server` 目录运行以下命令安装后端依赖：
+
+```sh
+cd server
+# 使用 npm
+npm install
+
+# 或使用 Yarn
+yarn install
+cd ..
+```
+
+### 第二步：启动服务
+
+#### 启动后端 API 服务
+
+在 `server` 目录运行以下命令启动后端服务：
+
+```sh
+cd server
+# 使用 npm
+npm start
+
+# 或使用 Yarn
+yarn start
+cd ..
+```
+
+后端服务默认运行在 `http://192.168.0.120:3000`。
+
+#### 启动前端 Expo 服务
+
+在项目根目录运行以下命令启动 Expo 开发服务器：
 
 ```sh
 # 使用 npm
@@ -241,6 +298,8 @@ yarn ios
 
 ### 常用命令
 
+#### 前端命令
+
 ```sh
 # 启动开发服务器
 npm start
@@ -261,7 +320,21 @@ npm run lint
 npm test
 ```
 
-### 关闭 Expo Go 服务
+#### 后端命令
+
+```sh
+# 启动后端服务
+cd server
+npm start
+
+# 启动后端开发模式（自动重启）
+cd server
+npm run dev
+```
+
+### 关闭服务
+
+#### 关闭前端服务
 
 在运行 `npm start` 的终端窗口中：
 
@@ -278,7 +351,22 @@ lsof -ti:19000 | xargs kill -9
 lsof -ti:19001 | xargs kill -9
 ```
 
+#### 关闭后端服务
+
+在运行后端服务的终端窗口中：
+
+- 按 `Ctrl + C` 停止后端服务器
+
+如果端口被占用，可以手动清理：
+
+```sh
+# 查找占用 3000 端口的进程并终止
+lsof -ti:3000 | xargs kill -9
+```
+
 ## 🔧 技术栈
+
+### 前端
 
 - **框架**: React Native 0.85.0 + Expo 55.0.12
 - **语言**: TypeScript 5.8.3
@@ -292,13 +380,26 @@ lsof -ti:19001 | xargs kill -9
   - expo-linear-gradient (渐变效果)
   - react-native-svg (矢量图形)
 - **状态管理**: React Hooks + Custom Hooks
-- **数据持久化**: Mock Server (开发阶段)
+- **网络请求**: Fetch API (封装在 apiClient 中)
 - **构建工具**: Metro + Expo
 - **设计系统**: Material Design 3
 
+### 后端
+
+- **框架**: Express.js 4.19.2
+- **语言**: JavaScript
+- **中间件**:
+  - cors (跨域支持)
+  - body-parser (请求体解析)
+- **数据存储**: 内存数据库 (开发阶段，为数据库集成做准备)
+- **开发工具**: nodemon (自动重启)
+- **API 设计**: RESTful API
+
 ## 🏗️ 架构设计
 
-### 分层架构
+### 前端架构
+
+#### 分层架构
 
 ```
 ┌─────────────────────────────────────┐
@@ -318,7 +419,7 @@ lsof -ti:19001 | xargs kill -9
 └─────────────────────────────────────┘
 ```
 
-### 核心设计模式
+#### 核心设计模式
 
 - **Feature-Based 架构**: 按业务域（plan/calendar/circle/settings）组织代码，每个 feature 包含自己的组件、hooks 和逻辑
 - **组件分层**:
@@ -327,7 +428,28 @@ lsof -ti:19001 | xargs kill -9
 - **统一导出**: 每个 feature 通过 `index.ts` 统一导出，提供清晰的 API 边界
 - **Hooks 模式**: 使用自定义 Hooks 封装业务逻辑和状态管理
 - **服务层模式**: 将业务逻辑从组件中抽离到 Service 层
-- **Mock 数据**: 使用 Mock Server 模拟后端 API，便于前端独立开发
+- **API 客户端**: 封装统一的 API 调用逻辑，包含错误处理和超时机制
+
+### 后端架构
+
+#### 分层架构
+
+```
+┌─────────────────────────────────────┐
+│          Routes (路由层)             │  API 路由定义和请求处理
+├─────────────────────────────────────┤
+│        Database (数据层)             │  数据存储和访问
+└─────────────────────────────────────┘
+```
+
+#### 核心设计模式
+
+- **RESTful API 设计**: 遵循 REST 原则，使用标准 HTTP 方法
+- **统一响应格式**: 所有 API 响应使用统一的 JSON 格式
+- **错误处理**: 统一的错误处理机制
+- **数据验证**: 请求数据验证
+- **模块化路由**: 按业务域组织路由模块
+- **内存数据库**: 开发阶段使用内存数据库，为后续数据库集成做准备
 
 ### 目录组织原则
 
@@ -352,6 +474,36 @@ lsof -ti:19001 | xargs kill -9
    - Feature 之间可以相互引用（如 calendar 引用 plan 的 NotificationDrawer）
 
 ## 📊 代码优化记录
+
+### 2026-04-12 后端代码优化与架构整理
+
+**核心变更**:
+
+- **统一响应格式**: 在所有后端路由中实现统一的响应格式，确保 API 响应的一致性
+- **错误处理增强**: 添加 try-catch 错误处理，提高服务稳定性
+- **数据验证**: 为请求数据添加验证逻辑，确保数据完整性
+- **代码规范**: 统一代码风格，添加清晰的注释和文档
+- **功能扩展**: 为通知 API 添加标记所有通知为已读的功能
+
+**优化的文件**:
+
+- `server/src/routes/plans.js` - 优化计划相关路由，添加数据验证和错误处理
+- `server/src/routes/calendar.js` - 优化日历相关路由，添加参数验证和错误处理
+- `server/src/routes/notifications.js` - 优化通知相关路由，添加新功能和错误处理
+
+### 2026-04-12 前端代码优化
+
+**核心变更**:
+
+- **API 客户端优化**: 移除所有 `console.log` 调试语句，确保生产环境代码干净
+- **API 功能扩展**: 为 notifications API 添加标记所有通知为已读和删除通知的功能
+- **类型定义优化**: 确保类型定义的完整性和一致性
+- **代码规范**: 统一代码风格，提高代码可读性
+
+**优化的文件**:
+
+- `src/api/plans.ts` - 移除调试日志，优化错误处理
+- `src/api/notifications.ts` - 添加新功能，优化参数处理
 
 ### 2026-04-10 代码整理
 
@@ -423,7 +575,9 @@ lsof -ti:19001 | xargs kill -9
 
 ## 📝 开发指南
 
-### 添加新页面
+### 前端开发
+
+#### 添加新页面
 
 1. 在 `src/screens/` 目录下创建新的页面组件
 2. 在 `src/screens/index.ts` 中导出组件
@@ -455,7 +609,7 @@ import { NewScreen } from '../screens';
 <Stack.Screen name="NewScreen" component={NewScreen} />;
 ```
 
-### 添加新组件
+#### 添加新组件
 
 1. 在 `src/components/` 目录下创建组件文件
 2. 在 `src/components/index.ts` 中导出组件
@@ -493,7 +647,7 @@ const styles = StyleSheet.create({
 export { MyComponent } from './MyComponent';
 ```
 
-### 使用图标
+#### 使用图标
 
 项目使用 `@expo/vector-icons` 中的 Material Icons：
 
@@ -506,7 +660,7 @@ import { Colors } from '../constants/theme';
 
 查看所有可用图标：https://icons.expo.fyi/Index/MaterialIcons
 
-### 主题配置
+#### 主题配置
 
 主题相关配置位于 `src/constants/theme.ts`，包括：
 
@@ -521,7 +675,7 @@ import { Colors } from '../constants/theme';
 - **BorderRadius**: 圆角配置
   - `sm: 8`, `md: 16`, `lg: 32`, `xl: 48`, `full: 9999`
 
-### 响应式布局
+#### 响应式布局
 
 使用 flexWrap 和百分比宽度实现响应式布局：
 
@@ -538,6 +692,137 @@ const styles = StyleSheet.create({
   },
 });
 ```
+
+### 后端开发
+
+#### 添加新路由
+
+1. 在 `server/src/routes/` 目录下创建新的路由文件
+2. 在 `server/src/index.js` 中注册路由
+3. 使用统一的响应格式和错误处理
+
+示例：
+
+```javascript
+// server/src/routes/newRoute.js
+const express = require('express');
+const router = express.Router();
+const db = require('../data/database');
+
+// 统一响应格式函数
+const sendResponse = (res, success, data, message = '', error = null) => {
+  res.json({
+    success,
+    data,
+    message,
+    error
+  });
+};
+
+// 示例路由
+router.get('/', (req, res) => {
+  try {
+    sendResponse(res, true, db.someData, '获取数据成功');
+  } catch (error) {
+    sendResponse(res, false, null, '', '服务器内部错误');
+  }
+});
+
+module.exports = router;
+
+// server/src/index.js
+const newRoute = require('./routes/newRoute');
+app.use('/api/new-route', newRoute);
+```
+
+#### 数据模型扩展
+
+1. 在 `server/src/data/mockData/` 目录下添加新的模拟数据
+2. 在 `server/src/data/database.js` 中注册数据模型
+
+示例：
+
+```javascript
+// server/src/data/mockData/newData.js
+const mockNewData = [
+  { id: '1', name: '示例数据 1' },
+  { id: '2', name: '示例数据 2' }
+];
+
+module.exports = { mockNewData };
+
+// server/src/data/database.js
+const { mockNewData } = require('./mockData/newData');
+
+class Database {
+  constructor() {
+    // 其他数据...
+    this.newData = [...mockNewData];
+  }
+}
+```
+
+### API 开发规范
+
+#### 前端 API 调用
+
+1. 使用 `apiClient` 进行 API 调用
+2. 处理 API 响应和错误
+3. 使用服务层封装业务逻辑
+
+示例：
+
+```typescript
+// src/api/newApi.ts
+import { apiClient, type ApiResponse } from './client';
+import { API_ENDPOINTS } from './config';
+
+export const newApi = {
+  getAll: async (): Promise<ApiResponse<any[]>> => {
+    try {
+      return await apiClient.get<any[]>(API_ENDPOINTS.NEW_ENDPOINT);
+    } catch (error: any) {
+      return { success: false, error: error.message || '获取数据失败' };
+    }
+  },
+};
+
+// src/services/newService.ts
+import { newApi } from '../api';
+import type { ApiResponse } from '../api/client';
+
+export const newService = {
+  async getData() {
+    const response = await newApi.getAll();
+    if (response.success) {
+      return response.data;
+    }
+    throw new Error(response.error || '获取数据失败');
+  },
+};
+```
+
+#### 后端 API 设计
+
+1. 遵循 RESTful API 设计原则
+2. 使用标准 HTTP 方法
+3. 统一响应格式
+4. 实现错误处理和数据验证
+
+### 数据库集成准备
+
+项目当前使用内存数据库，为后续数据库集成做准备：
+
+1. 数据模型已标准化
+2. 数据访问逻辑已封装
+3. 路由和业务逻辑已分离
+
+后续集成数据库时，只需：
+
+1. 安装数据库驱动
+2. 配置数据库连接
+3. 实现数据库操作层
+4. 替换内存数据库实现
 
 ## 🎉 恭喜！
 

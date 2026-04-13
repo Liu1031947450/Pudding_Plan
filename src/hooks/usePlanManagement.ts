@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { Plan } from '../types/domain';
 import { planService } from '../services/planService';
+import type { ApiResponse } from '../api/client';
 
 export const usePlanManagement = () => {
   const [plans, setPlans] = useState<Plan[]>([]);
@@ -13,8 +14,10 @@ export const usePlanManagement = () => {
       setLoading(true);
     }
     try {
-      const data = await planService.getPlans(userId);
-      setPlans(data);
+      const response = await planService.getPlans(userId);
+      if (response.success && response.data) {
+        setPlans(response.data);
+      }
     } catch (error) {
       console.error('Failed to load plans:', error);
     } finally {
@@ -25,34 +28,34 @@ export const usePlanManagement = () => {
   }, []);
 
   const handleCreatePlan = useCallback(
-    async (planData: Omit<Plan, 'id'>, userId?: string) => {
-      const newPlan = await planService.createPlan(planData, userId);
-      if (newPlan) {
+    async (planData: Omit<Plan, 'id'>, userId?: string): Promise<ApiResponse<Plan>> => {
+      const response = await planService.createPlan(planData, userId);
+      if (response.success) {
         await loadPlans();
       }
-      return newPlan;
+      return response;
     },
     [loadPlans],
   );
 
   const handleUpdatePlan = useCallback(
-    async (id: string, planData: Partial<Plan>, userId?: string) => {
-      const updatedPlan = await planService.updatePlan(id, planData, userId);
-      if (updatedPlan) {
+    async (id: string, planData: Partial<Plan>, userId?: string): Promise<ApiResponse<Plan>> => {
+      const response = await planService.updatePlan(id, planData, userId);
+      if (response.success) {
         await loadPlans();
       }
-      return updatedPlan;
+      return response;
     },
     [loadPlans],
   );
 
   const handleDeletePlan = useCallback(
-    async (id: string, userId?: string) => {
-      const success = await planService.deletePlan(id, userId);
-      if (success) {
+    async (id: string, userId?: string): Promise<ApiResponse<boolean>> => {
+      const response = await planService.deletePlan(id, userId);
+      if (response.success) {
         await loadPlans(userId);
       }
-      return success;
+      return response;
     },
     [loadPlans],
   );
@@ -61,8 +64,8 @@ export const usePlanManagement = () => {
     async (userId?: string) => {
       let deletedCount = 0;
       for (const id of selectedPlans) {
-        const success = await planService.deletePlan(id, userId);
-        if (success) deletedCount++;
+        const response = await planService.deletePlan(id, userId);
+        if (response.success) deletedCount++;
       }
       if (deletedCount > 0) {
         await loadPlans(userId);
@@ -75,12 +78,12 @@ export const usePlanManagement = () => {
   );
 
   const handleCheckIn = useCallback(
-    async (id: string, date: string, userId?: string) => {
-      const plan = await planService.checkInPlan(id, date, userId);
-      if (plan) {
+    async (id: string, date: string, userId?: string): Promise<ApiResponse<Plan>> => {
+      const response = await planService.checkInPlan(id, date, userId);
+      if (response.success) {
         await loadPlans(userId);
       }
-      return plan;
+      return response;
     },
     [loadPlans],
   );

@@ -1,7 +1,10 @@
-import { Colors } from '../../../constants/theme';
-import type { Badge } from '../../../types/domain';
+const Colors = {
+  primaryContainer: '#E8DEF8',
+  secondaryContainer: '#E8DEF8',
+  tertiaryContainer: '#E8DEF8',
+};
 
-export const mockBadges: Badge[] = [
+const mockBadges = [
   {
     id: '1',
     title: '7天星火',
@@ -35,3 +38,5 @@ export const mockBadges: Badge[] = [
     unlocked: true,
   },
 ];
+
+module.exports = { mockBadges };

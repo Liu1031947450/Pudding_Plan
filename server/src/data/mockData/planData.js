@@ -1,6 +1,4 @@
-import type { Plan, Habit } from '../../../types/domain';
-
-export const mockPlans: Plan[] = [
+const mockPlans = [
   {
     id: '99',
     title: '测试数据01',
@@ -35,7 +33,7 @@ export const mockPlans: Plan[] = [
   },
 ];
 
-export const mockHabits: Habit[] = [
+const mockHabits = [
   {
     id: '1',
     title: '晨间补水',
@@ -61,3 +59,5 @@ export const mockHabits: Habit[] = [
     category: 'Reflection',
   },
 ];
+
+module.exports = { mockPlans, mockHabits };

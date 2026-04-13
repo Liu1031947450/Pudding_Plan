@@ -1,12 +1,10 @@
 // API Configuration
 export const API_CONFIG = {
   BASE_URL: __DEV__
-    ? 'http://localhost:3000/api'
+    ? 'http://192.168.0.120:3000/api'  // 使用局域网真实IP访问
     : 'https://api.puddingplan.com',
   TIMEOUT: 10000,
   RETRY_ATTEMPTS: 3,
-  // Mock 开关：开发环境默认使用 mock，可通过环境变量覆盖
-  USE_MOCK: process.env.EXPO_PUBLIC_USE_MOCK === 'false' ? false : __DEV__,
 };
 
 // API Endpoints

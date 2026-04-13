@@ -1,6 +1,4 @@
-import type { Notification } from '../../../types/domain';
-
-export const mockNotifications: Notification[] = [
+const mockNotifications = [
   {
     id: '1',
     type: 'reminder',
@@ -42,3 +40,5 @@ export const mockNotifications: Notification[] = [
     read: true,
   },
 ];
+
+module.exports = { mockNotifications };
