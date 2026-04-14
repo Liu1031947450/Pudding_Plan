@@ -14,13 +14,13 @@ class CalendarService {
   }
 
   // Get habits
-  async getHabits(): Promise<ApiResponse<Habit[]>> {
-    return await habitsApi.getAll();
+  async getHabits(userId?: string): Promise<ApiResponse<Habit[]>> {
+    return await habitsApi.getAll(userId);
   }
 
   // Toggle habit completion
-  async toggleHabit(habitId: string): Promise<ApiResponse<Habit>> {
-    return await habitsApi.toggle(habitId);
+  async toggleHabit(habitId: string, userId?: string): Promise<ApiResponse<Habit>> {
+    return await habitsApi.toggle(habitId, userId);
   }
 
   // Update day activity

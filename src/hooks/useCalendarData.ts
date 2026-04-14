@@ -1,31 +1,42 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { DayData, Habit } from '../types/domain';
 import { calendarService } from '../services/calendarService';
+import { useAuth } from '../contexts/AuthContext';
 
 export const useCalendarData = () => {
+  const { user } = useAuth();
+  const currentUserId = user?.id;
   const [calendarData, setCalendarData] = useState<DayData[]>([]);
   const [habits, setHabits] = useState<Habit[]>([]);
   const [loading, setLoading] = useState(true);
 
   const loadData = useCallback(async () => {
+    if (!currentUserId) {
+      setCalendarData([]);
+      setHabits([]);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
       const now = new Date();
       const year = now.getFullYear();
       const month = now.getMonth() + 1;
 
-      const [calendar, habitsData] = await Promise.all([
-        calendarService.getCalendarData(year, month),
-        calendarService.getHabits(),
+      const [calendarResponse, habitsResponse] = await Promise.all([
+        calendarService.getCalendarData(year, month, currentUserId),
+        calendarService.getHabits(currentUserId),
       ]);
-      setCalendarData(calendar);
-      setHabits(habitsData);
+
+      setCalendarData(calendarResponse.data || []);
+      setHabits(habitsResponse.data || []);
     } catch (error) {
       console.error('Failed to load calendar data:', error);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [currentUserId]);
 
   useEffect(() => {
     loadData();
@@ -33,13 +44,17 @@ export const useCalendarData = () => {
 
   const toggleHabit = useCallback(
     async (habitId: string) => {
-      const habit = await calendarService.toggleHabit(habitId);
-      if (habit) {
+      if (!currentUserId) {
+        return false;
+      }
+
+      const response = await calendarService.toggleHabit(habitId, currentUserId);
+      if (response.success) {
         await loadData();
       }
-      return !!habit;
+      return response.success;
     },
-    [loadData],
+    [currentUserId, loadData],
   );
 
   const updateDayActivity = useCallback(

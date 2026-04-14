@@ -1,9 +1,9 @@
 // API Configuration
 export const API_CONFIG = {
-  BASE_URL: process.env.REACT_APP_API_URL || (__DEV__
+  BASE_URL: __DEV__
     ? 'http://192.168.0.101:3000/api'
-    : 'https://api.puddingplan.com'),
-  TIMEOUT: parseInt(process.env.REACT_APP_TIMEOUT || '10000', 10),
+    : 'https://api.puddingplan.com',
+  TIMEOUT: 10000,
   RETRY_ATTEMPTS: 3,
 };
 

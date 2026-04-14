@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../data/database');
+const { authMiddleware } = require('../middleware/auth');
 
-// 统一响应格式函数
 const sendResponse = (res, success, data, message = '', error = null) => {
   res.json({
     success,
@@ -12,71 +12,52 @@ const sendResponse = (res, success, data, message = '', error = null) => {
   });
 };
 
-// 获取通知列表
-router.get('/', (req, res) => {
+router.get('/', authMiddleware, async (req, res) => {
   try {
     const { unreadOnly } = req.query;
-    
-    let notifications = [...db.notifications];
-    
-    // 过滤未读通知
+
+    let notifications = await db.getNotificationsByUserId(req.userId);
+
     if (unreadOnly === 'true') {
       notifications = notifications.filter(n => !n.read);
     }
-    
-    // 这里可以根据 userId 过滤通知
-    // 目前返回所有通知
-    
+
     sendResponse(res, true, notifications, '获取通知列表成功');
   } catch (error) {
+    console.error('获取通知列表失败:', error);
     sendResponse(res, false, null, '', '服务器内部错误');
   }
 });
 
-// 标记通知为已读
-router.patch('/:id/read', (req, res) => {
+router.patch('/:id/read', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
-    
-    const notification = db.notifications.find(n => n.id === id);
-    if (!notification) {
-      return sendResponse(res, false, null, '', '未找到通知');
-    }
-    
-    notification.read = true;
+    await db.markNotificationAsRead(req.userId, id);
     sendResponse(res, true, true, '通知已标记为已读');
   } catch (error) {
-    sendResponse(res, false, null, '', '服务器内部错误');
+    console.error('标记通知已读失败:', error);
+    sendResponse(res, false, null, '', error.message || '服务器内部错误');
   }
 });
 
-// 标记所有通知为已读
-router.patch('/read-all', (req, res) => {
+router.patch('/read-all', authMiddleware, async (req, res) => {
   try {
-    db.notifications.forEach(notification => {
-      notification.read = true;
-    });
-    
+    await db.markAllNotificationsAsRead(req.userId);
     sendResponse(res, true, true, '所有通知已标记为已读');
   } catch (error) {
-    sendResponse(res, false, null, '', '服务器内部错误');
+    console.error('全部标记已读失败:', error);
+    sendResponse(res, false, null, '', error.message || '服务器内部错误');
   }
 });
 
-// 删除通知
-router.delete('/:id', (req, res) => {
+router.delete('/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
-    
-    const index = db.notifications.findIndex(n => n.id === id);
-    if (index === -1) {
-      return sendResponse(res, false, null, '', '未找到通知');
-    }
-    
-    db.notifications.splice(index, 1);
+    await db.deleteNotification(req.userId, id);
     sendResponse(res, true, true, '通知删除成功');
   } catch (error) {
-    sendResponse(res, false, null, '', '服务器内部错误');
+    console.error('删除通知失败:', error);
+    sendResponse(res, false, null, '', error.message || '服务器内部错误');
   }
 });
 

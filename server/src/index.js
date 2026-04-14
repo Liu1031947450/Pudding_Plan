@@ -43,7 +43,7 @@ app.use('/api/rhythm', rhythmRoutes);
 initDatabase()
   .then(() => {
     app.listen(PORT, '0.0.0.0', () => {
-      console.log(`布丁计划后端服务已启动，监听端口 ${PORT}，可以通过 http://192.168.0.120:${PORT} 访问`);
+      console.log(`布丁计划后端服务已启动，监听端口 ${PORT}`);
     });
   })
   .catch((error) => {

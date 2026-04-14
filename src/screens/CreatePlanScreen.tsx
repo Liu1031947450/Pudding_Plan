@@ -16,6 +16,7 @@ import {
 } from '../features/plan';
 import { PlanFormButton } from './components/PlanFormButton';
 import { usePlanManagement } from '../hooks';
+import { useAuth } from '../contexts/AuthContext';
 import { planService } from '../services/planService';
 import { templateService } from '../services/templateService';
 import { formatTime } from '../utils';
@@ -29,9 +30,10 @@ type CreatePlanRouteProp = RouteProp<
 const CreatePlanScreen: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute<CreatePlanRouteProp>();
+  const { user } = useAuth();
   const templateId = route.params?.templateId;
   const planId = route.params?.planId;
-  const { handleCreatePlan, handleUpdatePlan, plans } = usePlanManagement();
+  const { handleCreatePlan, handleUpdatePlan } = usePlanManagement();
 
   const [existingPlan, setExistingPlan] = useState<Plan | undefined>(undefined);
   const [templateData, setTemplateData] = useState<TemplateDetail | undefined>(undefined);
@@ -39,20 +41,17 @@ const CreatePlanScreen: React.FC = () => {
   const isEditMode = !!planId;
 
   useEffect(() => {
-    if (planId) {
+    if (planId && user?.id) {
       const fetchPlanDetail = async () => {
-        // 实际应用中，userId应该从用户认证状态中获取
-        const userId = ''; // 留空，由后端处理
-        const response = await planService.getPlanById(planId, userId);
+        const response = await planService.getPlanById(planId, user.id);
         if (response.success && response.data) {
           setExistingPlan(response.data);
         }
       };
       fetchPlanDetail();
     }
-  }, [planId]);
+  }, [planId, user?.id]);
 
-  // 从后端 API 获取模板数据
   useEffect(() => {
     if (templateId) {
       const fetchTemplateDetail = async () => {
@@ -70,53 +69,25 @@ const CreatePlanScreen: React.FC = () => {
     }
   }, [templateId]);
 
-  const [planName, setPlanName] = useState(
-    existingPlan?.title || templateData?.title || '',
-  );
-  const [planDays, setPlanDays] = useState(
-    existingPlan?.totalDays.toString() ||
-      templateData?.duration.toString() ||
-      '',
-  );
+  const [planName, setPlanName] = useState('');
+  const [planDays, setPlanDays] = useState('');
   const [planIcon, setPlanIcon] = useState<string>('stars');
   const [planColor, setPlanColor] = useState<string>(Colors.primaryContainer);
-
-  // 根据模板获取图标
-  const getIconForPlan = (plan?: Plan, template?: TemplateDetail): string => {
-    if (plan?.icon) {
-      return plan.icon;
-    }
-    if (template?.icon) {
-      return template.icon;
-    }
-    // 自定义计划使用默认图标
-    return 'stars';
-  };
-
-  const [checkInMethod, setCheckInMethod] = useState<0 | 1 | 2>(
-    existingPlan?.type ?? 0,
-  );
-  const [reminders, setReminders] = useState<Reminder[]>(
-    existingPlan?.remindSetting.map((r, idx) => ({
-      id: `${idx + 1}`,
-      time: r.time,
+  const [checkInMethod, setCheckInMethod] = useState<0 | 1 | 2>(0);
+  const [reminders, setReminders] = useState<Reminder[]>([
+    {
+      id: '1',
+      time: new Date(2024, 0, 1, 7, 30),
       label: '每日',
-      enabled: r.status,
-    })) || [
-      {
-        id: '1',
-        time: new Date(2024, 0, 1, 7, 30),
-        label: '每日',
-        enabled: true,
-      },
-      {
-        id: '2',
-        time: new Date(2024, 0, 1, 22, 0),
-        label: '复盘',
-        enabled: false,
-      },
-    ],
-  );
+      enabled: true,
+    },
+    {
+      id: '2',
+      time: new Date(2024, 0, 1, 22, 0),
+      label: '复盘',
+      enabled: false,
+    },
+  ]);
   const [_milestones, _setMilestones] = useState<
     {
       times: number;
@@ -124,7 +95,7 @@ const CreatePlanScreen: React.FC = () => {
       description: string;
       status: boolean;
     }[]
-  >(existingPlan?.rewords || []);
+  >([]);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [selectedHour, setSelectedHour] = useState(9);
   const [selectedMinute, setSelectedMinute] = useState(0);
@@ -145,7 +116,17 @@ const CreatePlanScreen: React.FC = () => {
   const [milestoneTitle, setMilestoneTitle] = useState('');
   const [milestoneReward, setMilestoneReward] = useState('');
 
-  // 当 existingPlan 数据加载完成后，更新表单数据
+  const getIconForPlan = (plan?: Plan, template?: TemplateDetail): string => {
+    if (plan?.icon) {
+      return plan.icon;
+    }
+    if (template?.icon) {
+      return template.icon;
+    }
+    return 'stars';
+  };
+
+  // 当 existingPlan 或 templateData 数据加载完成后，更新表单数据
   useEffect(() => {
     if (existingPlan) {
       setPlanName(existingPlan.title);
@@ -156,7 +137,6 @@ const CreatePlanScreen: React.FC = () => {
         existingPlan.color || templateData?.color || Colors.primaryContainer,
       );
 
-      // 更新提醒设置
       if (existingPlan.remindSetting && existingPlan.remindSetting.length > 0) {
         setReminders(
           existingPlan.remindSetting.map((r, idx) => ({
@@ -168,14 +148,23 @@ const CreatePlanScreen: React.FC = () => {
         );
       }
 
-      // 更新里程碑
       if (existingPlan.rewords && existingPlan.rewords.length > 0) {
         _setMilestones(existingPlan.rewords);
       }
     } else if (templateData) {
-      // 如果是模板模式，设置模板的 icon 和 color
+      setPlanName(templateData.title);
+      setPlanDays(templateData.duration.toString());
       setPlanIcon(getIconForPlan(undefined, templateData));
       setPlanColor(templateData.color || Colors.primaryContainer);
+      _setMilestones(
+        templateData.checkpoints.map(checkpoint => ({
+          times: checkpoint.day,
+          title: checkpoint.title,
+          description: checkpoint.description,
+          status: false,
+        })),
+      );
+      setCheckInMethod(0);
     }
   }, [existingPlan, templateData]);
 
@@ -195,6 +184,13 @@ const CreatePlanScreen: React.FC = () => {
     const days = parseInt(planDays, 10);
     if (!days || days <= 0) {
       setToastMessage('请输入有效的打卡周期');
+      setToastType('error');
+      setToastVisible(true);
+      return;
+    }
+
+    if (!user?.id) {
+      setToastMessage('请先登录后再创建计划');
       setToastType('error');
       setToastVisible(true);
       return;
@@ -231,12 +227,9 @@ const CreatePlanScreen: React.FC = () => {
         color: planColor,
       };
 
-      // 调用 API 创建或更新计划
-      // 实际应用中，userId应该从用户认证状态中获取
-      const userId = ''; // 留空，由后端处理
       const result = isEditMode
-        ? await handleUpdatePlan(planId!, newPlanData, userId)
-        : await handleCreatePlan(newPlanData, userId);
+        ? await handleUpdatePlan(planId!, newPlanData, user.id)
+        : await handleCreatePlan(newPlanData, user.id);
 
       if (result.success) {
         // 显示成功提示
@@ -252,7 +245,7 @@ const CreatePlanScreen: React.FC = () => {
             navigation.goBack();
           } else {
             // 新建计划完成后，统一跳转到“计划”页面
-            navigation.navigate('Main' as never, { screen: 'Plan' } as never);
+            navigation.navigate('Main' as never);
           }
         }, 1500);
       } else {

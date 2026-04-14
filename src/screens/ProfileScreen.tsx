@@ -16,9 +16,8 @@ import {
   TopAppBar,
   Avatar,
   Card,
-  NotificationDrawer,
 } from '../components';
-import { badgesApi } from '../api';
+import { authApi, badgesApi } from '../api';
 import { useAuth } from '../contexts';
 
 interface Badge {
@@ -34,24 +33,45 @@ const ProfileScreen: React.FC = () => {
   const { user } = useAuth();
   const [badges, setBadges] = useState<Badge[]>([]);
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    streakDays: 0,
+    totalCheckIns: 0,
+    totalBadges: 0,
+    healingPlans: 0,
+  });
 
   useEffect(() => {
-    // 从API获取徽章数据
-    const fetchBadges = async () => {
+    const fetchProfileData = async () => {
       try {
-        const response = await badgesApi.getAll();
-        if (response.success && response.data) {
-          setBadges(response.data);
+        const [badgesResponse, statsResponse] = await Promise.all([
+          badgesApi.getAll(user?.id),
+          authApi.getCurrentUserStats(),
+        ]);
+
+        if (badgesResponse.success && badgesResponse.data) {
+          setBadges(badgesResponse.data);
+          const unlockedBadges = badgesResponse.data.filter(badge => badge.unlocked).length;
+          setStats(prev => ({ ...prev, totalBadges: unlockedBadges }));
+        }
+
+        if (statsResponse.success && statsResponse.data) {
+          const statsData = statsResponse.data;
+          setStats(prev => ({
+            ...prev,
+            streakDays: statsData.streakDays,
+            totalCheckIns: statsData.totalCheckIns,
+            healingPlans: statsData.healingPlans,
+          }));
         }
       } catch (error) {
-        console.error('获取徽章数据失败:', error);
+        console.error('获取个人中心数据失败:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchBadges();
-  }, []);
+    fetchProfileData();
+  }, [user?.id]);
 
   const handleSettingsPress = () => {
     navigation.navigate('Settings' as never);
@@ -74,7 +94,7 @@ const ProfileScreen: React.FC = () => {
           <View style={styles.avatarWrapper}>
             <View style={styles.avatarBorder}>
               <Avatar
-                uri={user?.avatar || "https://lh3.googleusercontent.com/aida-public/AB6AXuAKIKxyrX9s0nJefVvjBGd8CSyhpbf9-v4EJyrcIkNMFxfgFQvwGfb-MuYUo-s1RtWbMfIJZf3eR0OMoCXhwL9HvS20JQ3p9C0wxr2afcRx7raAEJnh2TysPvjzILk3vrRyYcZAlEJcqrJCLc9i4mkDOJSXA_iRvV4tZK1Y9DPscuYLSxN1_oYrkozPgdrg9A4VzKMRFdNVMCc8hdnTCVhZXQP0zN1OxWtTwZWa1NqK0QWGuuFW-VToLvMZ0wtrbgySHgiRL1-RIFQI"}
+                uri={user?.avatar || undefined}
                 size="xlarge"
               />
             </View>
@@ -89,7 +109,7 @@ const ProfileScreen: React.FC = () => {
 
           <View style={styles.userInfo}>
             <Text style={styles.userName}>{user?.username || '未登录'}</Text>
-            <Text style={styles.userBio}>{user?.bio || '"在自律中遇见更好的自己"'}</Text>
+            <Text style={styles.userBio}>{user?.bio || '这个人很懒，还没有填写简介'}</Text>
           </View>
         </View>
 
@@ -102,7 +122,7 @@ const ProfileScreen: React.FC = () => {
                 color={Colors.primary}
               />
               <View style={styles.statsCardContent}>
-                <Text style={styles.statsNumber}>128</Text>
+                <Text style={styles.statsNumber}>{stats.streakDays}</Text>
                 <Text style={styles.statsLabel}>坚持天数</Text>
               </View>
             </View>
@@ -119,7 +139,7 @@ const ProfileScreen: React.FC = () => {
                   />
                 </View>
                 <View>
-                  <Text style={styles.statsSmallNumber}>452</Text>
+                  <Text style={styles.statsSmallNumber}>{stats.totalCheckIns}</Text>
                   <Text style={styles.statsSmallLabel}>累计盖章</Text>
                 </View>
               </View>
@@ -140,7 +160,7 @@ const ProfileScreen: React.FC = () => {
                   />
                 </View>
                 <View>
-                  <Text style={styles.statsSmallNumber}>12</Text>
+                  <Text style={styles.statsSmallNumber}>{stats.healingPlans}</Text>
                   <Text style={styles.statsSmallLabel}>治愈计划</Text>
                 </View>
               </View>

@@ -114,9 +114,9 @@ const PostMomentScreen: React.FC = () => {
         content,
         images: uploadedImageUrls,
         imageUri: uploadedImageUrls[0],
-        topicTag: topic,
         category: topic.replace('#', ''),
         description: content.substring(0, 30),
+        type: 'waterfall',
       });
 
       if (postRes.success) {

@@ -8,11 +8,11 @@ export const notificationsApi = {
     let endpoint = userId
       ? `${API_ENDPOINTS.NOTIFICATIONS}?userId=${userId}`
       : API_ENDPOINTS.NOTIFICATIONS;
-    
+
     if (unreadOnly) {
       endpoint += `${userId ? '&' : '?'}unreadOnly=true`;
     }
-    
+
     return apiClient.get<Notification[]>(endpoint);
   },
 
@@ -49,7 +49,10 @@ export const notificationsApi = {
 
 export const badgesApi = {
   // 获取所有成就
-  getAll: async (): Promise<ApiResponse<Badge[]>> => {
-    return apiClient.get<Badge[]>(API_ENDPOINTS.BADGES);
+  getAll: async (userId?: string): Promise<ApiResponse<Badge[]>> => {
+    const endpoint = userId
+      ? `${API_ENDPOINTS.BADGES}?userId=${userId}`
+      : API_ENDPOINTS.BADGES;
+    return apiClient.get<Badge[]>(endpoint);
   },
 };

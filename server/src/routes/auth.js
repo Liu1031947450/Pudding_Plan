@@ -181,6 +181,24 @@ router.put('/me', authMiddleware, async (req, res) => {
   }
 });
 
+// 获取当前用户统计信息接口（需要认证）
+router.get('/stats', authMiddleware, async (req, res) => {
+  try {
+    const stats = await db.getUserStatsByUserId(req.userId);
+
+    return res.json({
+      success: true,
+      data: stats,
+    });
+  } catch (error) {
+    console.error('获取用户统计失败:', error);
+    return res.status(500).json({
+      success: false,
+      error: '获取用户统计失败，请稍后重试',
+    });
+  }
+});
+
 // 兼容旧接口：根据ID获取用户信息
 router.get('/user', async (req, res) => {
   const { id } = req.query;

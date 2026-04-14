@@ -25,6 +25,14 @@ export interface AuthResponse {
   user: User;
 }
 
+export interface UserStats {
+  streakDays: number;
+  totalCheckIns: number;
+  healingPlans: number;
+  totalHabits: number;
+  totalPlans: number;
+}
+
 export const authApi = {
   // 登录
   login: async (data: LoginRequest): Promise<ApiResponse<AuthResponse>> => {
@@ -59,6 +67,15 @@ export const authApi = {
       return await apiClient.put<User>('/auth/me', data);
     } catch (error: any) {
       return { success: false, error: error.message || '更新资料失败' };
+    }
+  },
+
+  // 获取当前用户统计
+  getCurrentUserStats: async (): Promise<ApiResponse<UserStats>> => {
+    try {
+      return await apiClient.get<UserStats>('/auth/stats');
+    } catch (error: any) {
+      return { success: false, error: error.message || '获取用户统计失败' };
     }
   },
 

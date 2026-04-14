@@ -2,10 +2,12 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import * as SecureStore from 'expo-secure-store';
 import { setAuthToken } from '../api';
 
-interface User {
+export interface User {
   id: string;
   username: string;
   phone: string;
+  avatar?: string | null;
+  bio?: string | null;
 }
 
 interface AuthContextType {
@@ -43,7 +45,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const now = Date.now();
 
         if (now < expiryTime) {
-          const parsedUser = JSON.parse(storedUser);
+          const parsedUser: User = JSON.parse(storedUser);
           setUser(parsedUser);
           setToken(storedToken);
           setAuthToken(storedToken);

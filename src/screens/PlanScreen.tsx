@@ -21,12 +21,15 @@ import {
 } from '../features/plan';
 import { usePlanManagement } from '../hooks';
 import { useNotificationState } from '../hooks/useNotificationState';
+import { useAuth } from '../contexts/AuthContext';
 import { badgesApi, rhythmApi } from '../api';
 
 type RhythmPeriod = 'week' | 'month';
 
 const PlanScreen: React.FC = () => {
   const navigation = useNavigation();
+  const { user } = useAuth();
+  const currentUserId = user?.id;
   const {
     plans,
     loading,
@@ -51,24 +54,26 @@ const PlanScreen: React.FC = () => {
   const [rhythmLoading, setRhythmLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
-  // 当页面获得焦点时刷新数据
   useFocusEffect(
     React.useCallback(() => {
-      const userId = '1234567890';
-      refreshPlans(userId, true); // 静默刷新，不显示 loading
-      refreshNotifications(userId);
-    }, [refreshPlans, refreshNotifications]),
+      if (!currentUserId) return;
+      refreshPlans(currentUserId, true);
+      refreshNotifications(currentUserId);
+    }, [currentUserId, refreshPlans, refreshNotifications]),
   );
 
-  // 根据周期获取节奏数据
-  const fetchRhythmData = async (period: RhythmPeriod) => {
+  const fetchRhythmData = React.useCallback(async (period: RhythmPeriod) => {
+    if (!currentUserId) {
+      setRhythmData([]);
+      return;
+    }
+
     setRhythmLoading(true);
     try {
-      const userId = '1234567890';
       const response =
         period === 'week'
-          ? await rhythmApi.getWeek(userId)
-          : await rhythmApi.getMonth(userId);
+          ? await rhythmApi.getWeek(currentUserId)
+          : await rhythmApi.getMonth(currentUserId);
       if (response.success && response.data) {
         setRhythmData(response.data);
       }
@@ -77,31 +82,35 @@ const PlanScreen: React.FC = () => {
     } finally {
       setRhythmLoading(false);
     }
-  };
+  }, [currentUserId]);
 
   // 监听周期变化，自动请求对应数据
   useEffect(() => {
     fetchRhythmData(rhythmPeriod);
-  }, [rhythmPeriod]);
+  }, [rhythmPeriod, fetchRhythmData]);
 
   const handleRefresh = React.useCallback(async () => {
-    const userId = '1234567890';
+    if (!currentUserId) {
+      setRefreshing(false);
+      return;
+    }
+
     setRefreshing(true);
     try {
       await Promise.all([
-        refreshPlans(userId, true),
-        refreshNotifications(userId),
+        refreshPlans(currentUserId, true),
+        refreshNotifications(currentUserId),
         fetchRhythmData(rhythmPeriod),
       ]);
     } finally {
       setRefreshing(false);
     }
-  }, [refreshPlans, refreshNotifications, rhythmPeriod]);
+  }, [currentUserId, refreshPlans, refreshNotifications, rhythmPeriod, fetchRhythmData]);
 
   const handleOpenAchievements = async () => {
     setBadgesLoading(true);
     try {
-      const response = await badgesApi.getAll();
+      const response = await badgesApi.getAll(currentUserId);
       if (response.success && response.data) {
         setBadges(response.data);
       }
@@ -172,7 +181,7 @@ const PlanScreen: React.FC = () => {
               selectedPlans={selectedPlans}
               onToggleManage={toggleManageMode}
               onToggleSelect={togglePlanSelection}
-              onDeleteSelected={() => handleDeleteSelected('1234567890')}
+              onDeleteSelected={() => handleDeleteSelected(currentUserId)}
               onMovePlan={movePlan}
               onCreatePlan={handleCreatePlan}
               onPlanPress={handlePlanPress}
@@ -192,7 +201,7 @@ const PlanScreen: React.FC = () => {
         visible={notificationVisible}
         onClose={() => setNotificationVisible(false)}
         notifications={notifications}
-        onNotificationPress={id => markAsRead(id, '1234567890')}
+        onNotificationPress={id => currentUserId && markAsRead(id, currentUserId)}
       />
 
       <AchievementDrawer

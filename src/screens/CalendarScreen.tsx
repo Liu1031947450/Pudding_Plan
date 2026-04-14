@@ -22,10 +22,12 @@ import {
 import { useNotificationState } from '../hooks/useNotificationState';
 import type { DayData } from '../types/domain';
 import { usePlanManagement } from '../hooks';
-
+import { useAuth } from '../contexts/AuthContext';
 import { calendarApi } from '../api/calendar';
 
 const CalendarScreen: React.FC = () => {
+  const { user } = useAuth();
+  const currentUserId = user?.id;
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState(new Date().getDate());
   const [calendarDays, setCalendarDays] = useState<DayData[]>([]);
@@ -85,14 +87,19 @@ const CalendarScreen: React.FC = () => {
 
   const fetchCalendarData = React.useCallback(
     async (silent = false) => {
+      if (!currentUserId) {
+        setCalendarDays([]);
+        setLoading(false);
+        return;
+      }
+
       if (!silent) setLoading(true);
       try {
-        const res = await calendarApi.getData(year, month, '1234567890');
+        const res = await calendarApi.getData(year, month, currentUserId);
         if (res.success && res.data) {
           setCalendarDays(res.data);
         }
 
-        // 获取当天的金句
         const quoteRes = await calendarApi.getDailyQuote();
         if (quoteRes.success && quoteRes.data) {
           setQuote(quoteRes.data);
@@ -101,17 +108,17 @@ const CalendarScreen: React.FC = () => {
         setLoading(false);
       }
     },
-    [year, month],
+    [year, month, currentUserId],
   );
 
   // 当页面获得焦点时刷新通知、计划列表和日历数据
   useFocusEffect(
     React.useCallback(() => {
-      const userId = '1234567890';
-      refreshNotifications(userId);
-      refreshPlans(userId);
-      fetchCalendarData(true); // 每次切回来静默刷新
-    }, [refreshNotifications, refreshPlans, fetchCalendarData]),
+      if (!currentUserId) return;
+      refreshNotifications(currentUserId);
+      refreshPlans(currentUserId);
+      fetchCalendarData(true);
+    }, [currentUserId, refreshNotifications, refreshPlans, fetchCalendarData]),
   );
 
   React.useEffect(() => {
@@ -119,27 +126,35 @@ const CalendarScreen: React.FC = () => {
   }, [fetchCalendarData]);
 
   const handleRefresh = React.useCallback(async () => {
-    const userId = '1234567890';
+    if (!currentUserId) {
+      setRefreshing(false);
+      return;
+    }
+
     setRefreshing(true);
     try {
       await Promise.all([
         fetchCalendarData(true),
-        refreshPlans(userId, true),
-        refreshNotifications(userId),
+        refreshPlans(currentUserId, true),
+        refreshNotifications(currentUserId),
       ]);
     } finally {
       setRefreshing(false);
     }
-  }, [fetchCalendarData, refreshPlans, refreshNotifications]);
+  }, [currentUserId, fetchCalendarData, refreshPlans, refreshNotifications]);
 
   const onCheckIn = async (planId: string) => {
+    if (!currentUserId) {
+      return;
+    }
+
     const selectedDateStr = `${year}-${String(month).padStart(2, '0')}-${String(
       selectedDay,
     ).padStart(2, '0')}`;
-    const result = await handleCheckIn(planId, selectedDateStr, '1234567890');
-    if (result) {
-      playStampAnimation(); // 如果打卡成功，播放动画
-      fetchCalendarData(true); // 静默刷新，不触发全屏 loading
+    const result = await handleCheckIn(planId, selectedDateStr, currentUserId);
+    if (result.success) {
+      playStampAnimation();
+      fetchCalendarData(true);
     }
   };
 
@@ -243,7 +258,7 @@ const CalendarScreen: React.FC = () => {
         visible={notificationDrawerVisible}
         onClose={() => setNotificationDrawerVisible(false)}
         notifications={notifications}
-        onNotificationPress={markAsRead}
+        onNotificationPress={id => currentUserId && markAsRead(id, currentUserId)}
       />
 
       <BottomNavBar />

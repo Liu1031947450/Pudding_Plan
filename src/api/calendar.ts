@@ -39,12 +39,18 @@ export const calendarApi = {
 
 export const habitsApi = {
   // 获取所有习惯
-  getAll: async (): Promise<ApiResponse<Habit[]>> => {
-    return apiClient.get<Habit[]>(API_ENDPOINTS.HABITS);
+  getAll: async (userId?: string): Promise<ApiResponse<Habit[]>> => {
+    const endpoint = userId
+      ? `${API_ENDPOINTS.HABITS}?userId=${userId}`
+      : API_ENDPOINTS.HABITS;
+    return apiClient.get<Habit[]>(endpoint);
   },
 
   // 切换习惯完成状态
-  toggle: async (id: string): Promise<ApiResponse<Habit>> => {
-    return apiClient.post<Habit>(API_ENDPOINTS.HABIT_TOGGLE(id));
+  toggle: async (id: string, userId?: string): Promise<ApiResponse<Habit>> => {
+    const endpoint = userId
+      ? `${API_ENDPOINTS.HABIT_TOGGLE(id)}?userId=${userId}`
+      : API_ENDPOINTS.HABIT_TOGGLE(id);
+    return apiClient.post<Habit>(endpoint);
   },
 };

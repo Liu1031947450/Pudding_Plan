@@ -67,7 +67,7 @@ const SettingsScreen: React.FC = () => {
 
   React.useEffect(() => {
     if (user) {
-      setProfile({ nickname: user.username, bio: '' });
+      setProfile({ nickname: user.username, bio: user.bio || '' });
       setPhone(user.phone);
     }
   }, [user]);
@@ -88,10 +88,14 @@ const SettingsScreen: React.FC = () => {
   const handleProfileSave = async (data: { nickname: string; bio: string }) => {
     setLoading(true);
     try {
-      const response = await authApi.updateProfile({ username: data.nickname });
+      const response = await authApi.updateProfile({
+        username: data.nickname,
+        bio: data.bio,
+        avatar: user?.avatar || undefined,
+      });
       if (response.success && response.data) {
         await updateUser(response.data);
-        setProfile(prev => ({ ...prev, nickname: data.nickname }));
+        setProfile({ nickname: response.data.username, bio: response.data.bio || '' });
         setActiveDrawer(null);
         showToast('个人资料已更新');
       } else {

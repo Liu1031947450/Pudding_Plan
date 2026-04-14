@@ -7,6 +7,11 @@ export const useNotificationState = () => {
   const [loading, setLoading] = useState(false);
 
   const loadNotifications = useCallback(async (userId?: string) => {
+    if (!userId) {
+      setNotifications([]);
+      return;
+    }
+
     setLoading(true);
     try {
       const response = await notificationsApi.getAll(userId);
@@ -21,6 +26,10 @@ export const useNotificationState = () => {
   }, []);
 
   const markAsRead = useCallback(async (id: string, userId?: string) => {
+    if (!userId) {
+      return;
+    }
+
     try {
       const response = await notificationsApi.markAsRead(id, userId);
       if (response.success) {
@@ -37,8 +46,11 @@ export const useNotificationState = () => {
 
   const markAllAsRead = useCallback(
     async (userId?: string) => {
+      if (!userId) {
+        return;
+      }
+
       try {
-        // 批量标记所有未读通知
         const unreadIds = notifications.filter(n => !n.read).map(n => n.id);
         await Promise.all(
           unreadIds.map(id => notificationsApi.markAsRead(id, userId)),

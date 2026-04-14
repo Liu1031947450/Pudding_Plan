@@ -1,11 +1,11 @@
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'pudding-plan-secret-key-2024';
+const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '30d';
 
-if (!process.env.JWT_SECRET) {
-  console.warn('⚠️  警告: 未设置 JWT_SECRET 环境变量，使用默认值（不安全）');
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET 环境变量未配置，拒绝启动以避免使用不安全默认值');
 }
 
 function generateToken(userId) {
