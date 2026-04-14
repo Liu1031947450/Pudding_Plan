@@ -72,8 +72,8 @@ const PlanScreen: React.FC = () => {
     try {
       const response =
         period === 'week'
-          ? await rhythmApi.getWeek(currentUserId)
-          : await rhythmApi.getMonth(currentUserId);
+          ? await rhythmApi.getWeek()
+          : await rhythmApi.getMonth();
       if (response.success && response.data) {
         setRhythmData(response.data);
       }
@@ -110,7 +110,7 @@ const PlanScreen: React.FC = () => {
   const handleOpenAchievements = async () => {
     setBadgesLoading(true);
     try {
-      const response = await badgesApi.getAll(currentUserId);
+      const response = await badgesApi.getAll();
       if (response.success && response.data) {
         setBadges(response.data);
       }

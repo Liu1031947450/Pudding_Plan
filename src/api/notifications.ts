@@ -3,56 +3,38 @@ import { API_ENDPOINTS } from './config';
 import type { Notification, Badge } from '../types/domain';
 
 export const notificationsApi = {
-  // 获取所有通知
-  getAll: async (userId?: string, unreadOnly?: boolean): Promise<ApiResponse<Notification[]>> => {
-    let endpoint = userId
-      ? `${API_ENDPOINTS.NOTIFICATIONS}?userId=${userId}`
+  // 获取所有通知（依赖 token 鉴权）
+  getAll: async (unreadOnly?: boolean): Promise<ApiResponse<Notification[]>> => {
+    const endpoint = unreadOnly
+      ? `${API_ENDPOINTS.NOTIFICATIONS}?unreadOnly=true`
       : API_ENDPOINTS.NOTIFICATIONS;
-
-    if (unreadOnly) {
-      endpoint += `${userId ? '&' : '?'}unreadOnly=true`;
-    }
 
     return apiClient.get<Notification[]>(endpoint);
   },
 
-  // 标记通知为已读
+  // 标记通知为已读（依赖 token 鉴权）
   markAsRead: async (
     id: string,
-    userId?: string,
   ): Promise<ApiResponse<boolean>> => {
-    const endpoint = userId
-      ? `${API_ENDPOINTS.NOTIFICATIONS}/${id}/read?userId=${userId}`
-      : `${API_ENDPOINTS.NOTIFICATIONS}/${id}/read`;
-    return apiClient.patch<boolean>(endpoint);
+    return apiClient.patch<boolean>(`${API_ENDPOINTS.NOTIFICATIONS}/${id}/read`);
   },
 
-  // 标记所有通知为已读
-  markAllAsRead: async (userId?: string): Promise<ApiResponse<boolean>> => {
-    const endpoint = userId
-      ? `${API_ENDPOINTS.NOTIFICATIONS}/read-all?userId=${userId}`
-      : `${API_ENDPOINTS.NOTIFICATIONS}/read-all`;
-    return apiClient.patch<boolean>(endpoint);
+  // 标记所有通知为已读（依赖 token 鉴权）
+  markAllAsRead: async (): Promise<ApiResponse<boolean>> => {
+    return apiClient.patch<boolean>(`${API_ENDPOINTS.NOTIFICATIONS}/read-all`);
   },
 
-  // 删除通知
+  // 删除通知（依赖 token 鉴权）
   delete: async (
     id: string,
-    userId?: string,
   ): Promise<ApiResponse<boolean>> => {
-    const endpoint = userId
-      ? `${API_ENDPOINTS.NOTIFICATIONS}/${id}?userId=${userId}`
-      : `${API_ENDPOINTS.NOTIFICATIONS}/${id}`;
-    return apiClient.delete<boolean>(endpoint);
+    return apiClient.delete<boolean>(`${API_ENDPOINTS.NOTIFICATIONS}/${id}`);
   },
 };
 
 export const badgesApi = {
-  // 获取所有成就
-  getAll: async (userId?: string): Promise<ApiResponse<Badge[]>> => {
-    const endpoint = userId
-      ? `${API_ENDPOINTS.BADGES}?userId=${userId}`
-      : API_ENDPOINTS.BADGES;
-    return apiClient.get<Badge[]>(endpoint);
+  // 获取所有成就（依赖 token 鉴权）
+  getAll: async (): Promise<ApiResponse<Badge[]>> => {
+    return apiClient.get<Badge[]>(API_ENDPOINTS.BADGES);
   },
 };

@@ -1,5 +1,6 @@
 // API Configuration
 export const API_CONFIG = {
+  // 本地ip地址
   BASE_URL: __DEV__
     ? 'http://192.168.0.101:3000/api'
     : 'https://api.puddingplan.com',

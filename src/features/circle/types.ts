@@ -24,6 +24,7 @@ export interface CircleMoment extends CircleBase {
   type: 'waterfall';
   content?: string;
   images?: string[];
+  authorUserId?: string;
   authorName?: string;
   authorAvatarUri?: string;
   likes?: number;

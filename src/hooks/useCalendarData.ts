@@ -25,8 +25,8 @@ export const useCalendarData = () => {
       const month = now.getMonth() + 1;
 
       const [calendarResponse, habitsResponse] = await Promise.all([
-        calendarService.getCalendarData(year, month, currentUserId),
-        calendarService.getHabits(currentUserId),
+        calendarService.getCalendarData(year, month),
+        calendarService.getHabits(),
       ]);
 
       setCalendarData(calendarResponse.data || []);
@@ -48,7 +48,7 @@ export const useCalendarData = () => {
         return false;
       }
 
-      const response = await calendarService.toggleHabit(habitId, currentUserId);
+      const response = await calendarService.toggleHabit(habitId);
       if (response.success) {
         await loadData();
       }
@@ -63,15 +63,15 @@ export const useCalendarData = () => {
       hasActivity: boolean,
       activityType?: 'primary' | 'secondary' | 'tertiary',
     ) => {
-      const success = await calendarService.updateDayActivity(
+      const response = await calendarService.updateDayActivity(
         day,
         hasActivity,
         activityType,
       );
-      if (success) {
+      if (response.success) {
         await loadData();
       }
-      return success;
+      return response.success;
     },
     [loadData],
   );

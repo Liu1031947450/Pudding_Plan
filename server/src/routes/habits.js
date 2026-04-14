@@ -3,6 +3,11 @@ const router = express.Router();
 const db = require('../data/database');
 const { authMiddleware } = require('../middleware/auth');
 
+async function getUserInternalId(userId) {
+  const user = await db.getUserByUserId(userId);
+  return user ? String(user.id) : null;
+}
+
 // 获取所有习惯（需要认证）
 router.get('/', authMiddleware, async (req, res) => {
   try {
@@ -37,7 +42,15 @@ router.post('/:id/toggle', authMiddleware, async (req, res) => {
     }
 
     // 验证习惯所有权
-    if (habit.userId !== req.userId) {
+    const internalUserId = await getUserInternalId(req.userId);
+    if (!internalUserId) {
+      return res.status(404).json({
+        success: false,
+        data: null,
+        error: '当前用户不存在'
+      });
+    }
+    if (String(habit.userId) !== internalUserId) {
       return res.status(403).json({
         success: false,
         data: null,
@@ -111,7 +124,15 @@ router.delete('/:id', authMiddleware, async (req, res) => {
     }
 
     // 验证习惯所有权
-    if (habit.userId !== req.userId) {
+    const internalUserId = await getUserInternalId(req.userId);
+    if (!internalUserId) {
+      return res.status(404).json({
+        success: false,
+        data: null,
+        error: '当前用户不存在'
+      });
+    }
+    if (String(habit.userId) !== internalUserId) {
       return res.status(403).json({
         success: false,
         data: null,

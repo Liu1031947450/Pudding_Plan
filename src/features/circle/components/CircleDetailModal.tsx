@@ -16,6 +16,7 @@ import { Colors, Spacing, FontSize, BorderRadius } from '../../../constants/them
 import type { CircleListItem, CircleMoment } from '../types';
 import { DEFAULT_AVATAR } from '../constants';
 import { circleService } from '../../../services/circleService';
+import { useAuth } from '../../../contexts/AuthContext';
 
 interface CircleDetailModalProps {
   visible: boolean;
@@ -32,6 +33,8 @@ export const CircleDetailModal: React.FC<CircleDetailModalProps> = ({
   circleId,
   onDataChange,
 }) => {
+  const { user } = useAuth();
+  const currentUserId = user?.id;
   const [circle, setCircle] = useState<CircleListItem | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -59,6 +62,15 @@ export const CircleDetailModal: React.FC<CircleDetailModalProps> = ({
     if (!circle || circle.type === 'topic') return [];
     return circle.images || (circle.imageUri ? [circle.imageUri] : []);
   }, [circle]);
+
+  const displayAuthorName = useMemo(() => {
+    if (!circle || circle.type !== 'waterfall') return '圈子话题';
+    const isOwn =
+      !!currentUserId &&
+      !!circle.authorUserId &&
+      String(circle.authorUserId) === String(currentUserId);
+    return isOwn ? '我' : circle.authorName || '匿名用户';
+  }, [circle, currentUserId]);
 
   if (!circle) return null;
 
@@ -112,9 +124,7 @@ export const CircleDetailModal: React.FC<CircleDetailModalProps> = ({
               }}
               style={styles.authorAvatar}
             />
-            <Text style={styles.authorName}>
-              {circle.type === 'waterfall' ? circle.authorName || '匿名用户' : '圈子话题'}
-            </Text>
+            <Text style={styles.authorName}>{displayAuthorName}</Text>
           </View>
           <TouchableOpacity style={styles.followButton}>
             <Text style={styles.followButtonText}>关注</Text>

@@ -31,6 +31,7 @@ export interface UserStats {
   healingPlans: number;
   totalHabits: number;
   totalPlans: number;
+  checkInRecords?: { date: string; planTitles: string[]; count: number }[];
 }
 
 export const authApi = {

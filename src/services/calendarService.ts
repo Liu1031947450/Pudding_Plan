@@ -4,23 +4,22 @@ import type { ApiResponse } from '../api/client';
 
 // Calendar Service - handles calendar and habit operations
 class CalendarService {
-  // Get calendar data
+  // Get calendar data（依赖 token 鉴权）
   async getCalendarData(
     year: number,
     month: number,
-    userId?: string,
   ): Promise<ApiResponse<DayData[]>> {
-    return await calendarApi.getData(year, month, userId);
+    return await calendarApi.getData(year, month);
   }
 
-  // Get habits
-  async getHabits(userId?: string): Promise<ApiResponse<Habit[]>> {
-    return await habitsApi.getAll(userId);
+  // Get habits（依赖 token 鉴权）
+  async getHabits(): Promise<ApiResponse<Habit[]>> {
+    return await habitsApi.getAll();
   }
 
-  // Toggle habit completion
-  async toggleHabit(habitId: string, userId?: string): Promise<ApiResponse<Habit>> {
-    return await habitsApi.toggle(habitId, userId);
+  // Toggle habit completion（依赖 token 鉴权）
+  async toggleHabit(habitId: string): Promise<ApiResponse<Habit>> {
+    return await habitsApi.toggle(habitId);
   }
 
   // Update day activity

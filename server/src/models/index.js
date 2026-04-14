@@ -4,6 +4,7 @@ const Plan = require('./Plan');
 const Habit = require('./Habit');
 const Notification = require('./Notification');
 const Badge = require('./Badge');
+const CircleMoment = require('./CircleMoment');
 
 // 定义关联关系
 User.hasMany(Plan, { foreignKey: 'userId', as: 'plans' });
@@ -18,10 +19,14 @@ Notification.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 User.hasMany(Badge, { foreignKey: 'userId', as: 'badges' });
 Badge.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
+User.hasMany(CircleMoment, { foreignKey: 'authorId', as: 'circleMoments' });
+CircleMoment.belongsTo(User, { foreignKey: 'authorId', as: 'author' });
+
 module.exports = {
   User,
   Plan,
   Habit,
   Notification,
   Badge,
+  CircleMoment,
 };

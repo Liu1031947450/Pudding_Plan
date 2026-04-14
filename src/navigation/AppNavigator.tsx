@@ -13,6 +13,8 @@ import {
   PostMomentScreen,
   TemplateSelectionScreen,
   AuthScreen,
+  CheckInHistoryScreen,
+  AllBadgesScreen,
 } from '../screens';
 import { useAuth } from '../contexts';
 import { Colors } from '../constants/theme';
@@ -24,6 +26,8 @@ export type RootStackParamList = {
   TemplateSelection: undefined;
   CreatePlan: { templateId?: string } | undefined;
   PostMoment: undefined;
+  Badges: undefined;
+  CheckInRecords: undefined;
 };
 
 export type MainTabParamList = {
@@ -100,6 +104,20 @@ const AppNavigator: React.FC = () => {
           component={PostMomentScreen}
           options={{
             presentation: 'modal',
+          }}
+        />
+        <Stack.Screen
+          name="Badges"
+          component={AllBadgesScreen}
+          options={{
+            presentation: 'card',
+          }}
+        />
+        <Stack.Screen
+          name="CheckInRecords"
+          component={CheckInHistoryScreen}
+          options={{
+            presentation: 'card',
           }}
         />
       </Stack.Navigator>

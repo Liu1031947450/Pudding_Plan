@@ -1,5 +1,5 @@
-import { apiClient, type ApiResponse } from './client';
-import { API_ENDPOINTS } from './config';
+import { apiClient, type ApiResponse, getAuthToken } from './client';
+import { API_ENDPOINTS, API_CONFIG } from './config';
 import type { CircleListItem, CircleMoment } from '../features/circle/types';
 import type { Buddy } from '../types/domain';
 
@@ -21,7 +21,34 @@ export const circlesApi = {
 
   // 上传图片
   uploadImage: async (uri: string): Promise<ApiResponse<string>> => {
-    return { success: true, data: uri };
+    try {
+      const formData = new FormData();
+      const filename = uri.split('/').pop() || 'photo.jpg';
+      const match = /\.(\w+)$/.exec(filename);
+      const type = match ? `image/${match[1]}` : 'image/jpeg';
+
+      formData.append('image', {
+        uri,
+        name: filename,
+        type,
+      } as any);
+
+      const response = await fetch(
+        `${API_CONFIG.BASE_URL.replace('/api', '')}/api/circles/upload`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${getAuthToken()}`,
+          },
+          body: formData,
+        },
+      );
+
+      const data = await response.json();
+      return data;
+    } catch (error: any) {
+      return { success: false, error: error.message || '图片上传失败' };
+    }
   },
 
   // 创建动态 (Moment)

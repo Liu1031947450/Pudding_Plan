@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize, BorderRadius } from '../constants/theme';
 import {
@@ -16,23 +16,19 @@ import {
   TopAppBar,
   Avatar,
   Card,
+  BottomDrawer,
 } from '../components';
 import { authApi, badgesApi } from '../api';
 import { useAuth } from '../contexts';
-
-interface Badge {
-  id: string;
-  title: string;
-  icon: keyof typeof MaterialIcons.glyphMap;
-  color: string;
-  unlocked: boolean;
-}
+import { FeedbackSheet } from '../features/settings';
+import type { Badge } from '../types/domain';
 
 const ProfileScreen: React.FC = () => {
   const navigation = useNavigation();
   const { user } = useAuth();
   const [badges, setBadges] = useState<Badge[]>([]);
   const [loading, setLoading] = useState(true);
+  const [feedbackVisible, setFeedbackVisible] = useState(false);
   const [stats, setStats] = useState({
     streakDays: 0,
     totalCheckIns: 0,
@@ -40,48 +36,49 @@ const ProfileScreen: React.FC = () => {
     healingPlans: 0,
   });
 
-  useEffect(() => {
-    const fetchProfileData = async () => {
-      try {
-        const [badgesResponse, statsResponse] = await Promise.all([
-          badgesApi.getAll(user?.id),
-          authApi.getCurrentUserStats(),
-        ]);
+  const fetchProfileData = useCallback(async () => {
+    if (!user?.id) return;
+    try {
+      const [badgesResponse, statsResponse] = await Promise.all([
+        badgesApi.getAll(),
+        authApi.getCurrentUserStats(),
+      ]);
 
-        if (badgesResponse.success && badgesResponse.data) {
-          setBadges(badgesResponse.data);
-          const unlockedBadges = badgesResponse.data.filter(badge => badge.unlocked).length;
-          setStats(prev => ({ ...prev, totalBadges: unlockedBadges }));
-        }
-
-        if (statsResponse.success && statsResponse.data) {
-          const statsData = statsResponse.data;
-          setStats(prev => ({
-            ...prev,
-            streakDays: statsData.streakDays,
-            totalCheckIns: statsData.totalCheckIns,
-            healingPlans: statsData.healingPlans,
-          }));
-        }
-      } catch (error) {
-        console.error('获取个人中心数据失败:', error);
-      } finally {
-        setLoading(false);
+      if (badgesResponse.success && badgesResponse.data) {
+        setBadges(badgesResponse.data);
+        setStats(prev => ({
+          ...prev,
+          totalBadges: badgesResponse.data!.filter(b => b.unlocked).length,
+        }));
       }
-    };
 
-    fetchProfileData();
+      if (statsResponse.success && statsResponse.data) {
+        const d = statsResponse.data;
+        setStats(prev => ({
+          ...prev,
+          streakDays: d.streakDays,
+          totalCheckIns: d.totalCheckIns,
+          healingPlans: d.healingPlans,
+        }));
+      }
+    } catch (error) {
+      console.error('获取个人中心数据失败:', error);
+    } finally {
+      setLoading(false);
+    }
   }, [user?.id]);
 
-  const handleSettingsPress = () => {
-    navigation.navigate('Settings' as never);
-  };
+  useFocusEffect(
+    useCallback(() => {
+      fetchProfileData();
+    }, [fetchProfileData]),
+  );
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <TopAppBar
         leftIcon="settings"
-        onLeftPress={handleSettingsPress}
+        onLeftPress={() => navigation.navigate('Settings' as never)}
         rightIcon="more-vert"
       />
 
@@ -93,20 +90,12 @@ const ProfileScreen: React.FC = () => {
         <View style={styles.profileSection}>
           <View style={styles.avatarWrapper}>
             <View style={styles.avatarBorder}>
-              <Avatar
-                uri={user?.avatar || undefined}
-                size="xlarge"
-              />
+              <Avatar uri={user?.avatar || undefined} size="xlarge" />
             </View>
             <View style={styles.avatarBadge}>
-              <MaterialIcons
-                name="verified"
-                size={16}
-                color={Colors.onSecondary}
-              />
+              <MaterialIcons name="verified" size={16} color={Colors.onSecondary} />
             </View>
           </View>
-
           <View style={styles.userInfo}>
             <Text style={styles.userName}>{user?.username || '未登录'}</Text>
             <Text style={styles.userBio}>{user?.bio || '这个人很懒，还没有填写简介'}</Text>
@@ -116,11 +105,7 @@ const ProfileScreen: React.FC = () => {
         <View style={styles.statsSection}>
           <Card style={styles.statsCardLarge}>
             <View style={styles.statsCardHeader}>
-              <MaterialIcons
-                name="calendar-today"
-                size={24}
-                color={Colors.primary}
-              />
+              <MaterialIcons name="calendar-today" size={24} color={Colors.primary} />
               <View style={styles.statsCardContent}>
                 <Text style={styles.statsNumber}>{stats.streakDays}</Text>
                 <Text style={styles.statsLabel}>坚持天数</Text>
@@ -132,11 +117,7 @@ const ProfileScreen: React.FC = () => {
             <Card style={styles.statsCardSmall}>
               <View style={styles.statsCardRow}>
                 <View style={styles.statsIconWrapper}>
-                  <MaterialIcons
-                    name="workspace-premium"
-                    size={16}
-                    color={Colors.onPrimaryContainer}
-                  />
+                  <MaterialIcons name="workspace-premium" size={16} color={Colors.onPrimaryContainer} />
                 </View>
                 <View>
                   <Text style={styles.statsSmallNumber}>{stats.totalCheckIns}</Text>
@@ -144,20 +125,10 @@ const ProfileScreen: React.FC = () => {
                 </View>
               </View>
             </Card>
-
             <Card style={styles.statsCardSmall}>
               <View style={styles.statsCardRow}>
-                <View
-                  style={[
-                    styles.statsIconWrapper,
-                    { backgroundColor: Colors.secondaryContainer },
-                  ]}
-                >
-                  <MaterialIcons
-                    name="spa"
-                    size={16}
-                    color={Colors.onSecondaryContainer}
-                  />
+                <View style={[styles.statsIconWrapper, { backgroundColor: Colors.secondaryContainer }]}>
+                  <MaterialIcons name="spa" size={16} color={Colors.onSecondaryContainer} />
                 </View>
                 <View>
                   <Text style={styles.statsSmallNumber}>{stats.healingPlans}</Text>
@@ -171,16 +142,12 @@ const ProfileScreen: React.FC = () => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>勋章墙</Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate('Badges' as never)}>
               <Text style={styles.viewAllText}>全部</Text>
             </TouchableOpacity>
           </View>
 
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.badgesContainer}
-          >
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.badgesContainer}>
             {loading ? (
               <View style={styles.loadingContainer}>
                 <ActivityIndicator size="small" color={Colors.primary} />
@@ -188,28 +155,19 @@ const ProfileScreen: React.FC = () => {
             ) : badges.length > 0 ? (
               badges.map(badge => (
                 <View key={badge.id} style={styles.badgeItem}>
-                  <View
-                    style={[
-                      styles.badgeIcon,
-                      {
-                        backgroundColor: badge.color,
-                        opacity: badge.unlocked ? 1 : 0.4,
-                      },
-                    ]}
-                  >
+                  <View style={[styles.badgeIcon, { backgroundColor: badge.unlocked ? badge.color : Colors.surfaceVariant }]}>
                     <MaterialIcons
                       name={badge.icon}
                       size={28}
-                      color={Colors.onSurface}
-                      style={[{ opacity: badge.unlocked ? 1 : 0.4 }]}
+                      color={badge.unlocked ? Colors.white : Colors.outlineVariant}
                     />
+                    {!badge.unlocked && (
+                      <View style={styles.lockOverlay}>
+                        <MaterialIcons name="lock" size={10} color={Colors.outlineVariant} />
+                      </View>
+                    )}
                   </View>
-                  <Text
-                    style={[
-                      styles.badgeTitle,
-                      { opacity: badge.unlocked ? 1 : 0.4 },
-                    ]}
-                  >
+                  <Text style={[styles.badgeTitle, !badge.unlocked && styles.lockedText]}>
                     {badge.title}
                   </Text>
                 </View>
@@ -224,77 +182,51 @@ const ProfileScreen: React.FC = () => {
 
         <View style={styles.section}>
           <Card style={styles.menuCard}>
-            <TouchableOpacity style={styles.menuItem}>
+            <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('CheckInRecords' as never)}>
               <View style={styles.menuLeft}>
-                <View
-                  style={[
-                    styles.menuIcon,
-                    { backgroundColor: `${Colors.primary}10` },
-                  ]}
-                >
-                  <MaterialIcons
-                    name="event-available"
-                    size={20}
-                    color={Colors.primary}
-                  />
+                <View style={[styles.menuIcon, { backgroundColor: `${Colors.primary}10` }]}>
+                  <MaterialIcons name="event-available" size={20} color={Colors.primary} />
                 </View>
                 <Text style={styles.menuText}>打卡记录</Text>
               </View>
-              <MaterialIcons
-                name="chevron-right"
-                size={20}
-                color={Colors.outlineVariant}
-              />
+              <MaterialIcons name="chevron-right" size={20} color={Colors.outlineVariant} />
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.menuItem}>
               <View style={styles.menuLeft}>
-                <View
-                  style={[
-                    styles.menuIcon,
-                    { backgroundColor: `${Colors.secondary}10` },
-                  ]}
-                >
-                  <MaterialIcons
-                    name="favorite"
-                    size={20}
-                    color={Colors.secondary}
-                  />
+                <View style={[styles.menuIcon, { backgroundColor: `${Colors.secondary}10` }]}>
+                  <MaterialIcons name="favorite" size={20} color={Colors.secondary} />
                 </View>
                 <Text style={styles.menuText}>我的收藏</Text>
               </View>
-              <MaterialIcons
-                name="chevron-right"
-                size={20}
-                color={Colors.outlineVariant}
-              />
+              <MaterialIcons name="chevron-right" size={20} color={Colors.outlineVariant} />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.menuItem}>
+            <TouchableOpacity style={styles.menuItem} onPress={() => setFeedbackVisible(true)}>
               <View style={styles.menuLeft}>
-                <View
-                  style={[
-                    styles.menuIcon,
-                    { backgroundColor: `${Colors.tertiary}10` },
-                  ]}
-                >
-                  <MaterialIcons
-                    name="help-outline"
-                    size={20}
-                    color={Colors.tertiary}
-                  />
+                <View style={[styles.menuIcon, { backgroundColor: `${Colors.tertiary}10` }]}>
+                  <MaterialIcons name="help-outline" size={20} color={Colors.tertiary} />
                 </View>
                 <Text style={styles.menuText}>帮助与反馈</Text>
               </View>
-              <MaterialIcons
-                name="chevron-right"
-                size={20}
-                color={Colors.outlineVariant}
-              />
+              <MaterialIcons name="chevron-right" size={20} color={Colors.outlineVariant} />
             </TouchableOpacity>
           </Card>
         </View>
       </ScrollView>
+
+      <BottomDrawer
+        visible={feedbackVisible}
+        onClose={() => setFeedbackVisible(false)}
+        title="意见反馈"
+        height="85%"
+      >
+        <FeedbackSheet
+          onSubmit={() => {
+            setFeedbackVisible(false);
+          }}
+        />
+      </BottomDrawer>
 
       <BottomNavBar />
     </SafeAreaView>
@@ -512,7 +444,18 @@ const styles = StyleSheet.create({
     fontSize: FontSize.md,
     color: Colors.onSurfaceVariant,
     textAlign: 'center'
-  }
+  },
+  lockOverlay: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    backgroundColor: Colors.surface,
+    borderRadius: 8,
+    padding: 2,
+  },
+  lockedText: {
+    color: Colors.outlineVariant,
+  },
 });
 
 export default ProfileScreen;

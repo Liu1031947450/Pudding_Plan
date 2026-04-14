@@ -8,3 +8,5 @@ export { default as SettingsScreen } from './SettingsScreen';
 export { default as CreatePlanScreen } from './CreatePlanScreen';
 export { default as PostMomentScreen } from './PostMomentScreen';
 export { default as TemplateSelectionScreen } from './TemplateSelectionScreen';
+export { default as CheckInHistoryScreen } from './CheckInHistoryScreen';
+export { default as AllBadgesScreen } from './AllBadgesScreen';

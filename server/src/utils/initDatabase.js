@@ -1,6 +1,7 @@
 const sequelize = require('../config/database');
-const { User, Plan, Habit, Notification, Badge } = require('../models');
+const { User, Plan, Habit, Notification, Badge, CircleMoment } = require('../models');
 const { v4: uuidv4 } = require('uuid');
+const { mockCircles } = require('../data/mockData/communityData');
 
 async function ensureUsersTableMigration() {
   const userTableExists = await sequelize.getQueryInterface().showAllTables()
@@ -38,6 +39,54 @@ async function ensureUsersTableMigration() {
   }
 }
 
+async function seedCircleMoments() {
+  const count = await CircleMoment.count();
+  if (count > 0) {
+    return;
+  }
+
+  const bcrypt = require('bcrypt');
+  const authorMap = new Map();
+
+  for (const item of mockCircles) {
+    if (item.type !== 'waterfall' || !item.authorName) continue;
+
+    if (!authorMap.has(item.authorName)) {
+      let author = await User.findOne({ where: { username: item.authorName } });
+
+      if (!author) {
+        const hashedPassword = await bcrypt.hash('123456', 10);
+        author = await User.create({
+          username: item.authorName,
+          phone: `00${String(authorMap.size).padStart(9, '0')}`,
+          password: hashedPassword,
+          avatar: item.authorAvatarUri || null,
+        });
+      }
+
+      authorMap.set(item.authorName, author);
+    }
+  }
+
+  const momentsToCreate = mockCircles
+    .filter(item => item.type === 'waterfall' && item.authorName)
+    .map(item => ({
+      authorId: authorMap.get(item.authorName).id,
+      title: item.title || '',
+      description: item.description || '',
+      content: item.content || '',
+      category: item.category || '',
+      imageUri: item.imageUri || null,
+      images: item.images || [],
+      likes: item.likes || 0,
+      commentsCount: item.commentsCount || 0,
+    }));
+
+  if (momentsToCreate.length > 0) {
+    await CircleMoment.bulkCreate(momentsToCreate);
+  }
+}
+
 async function initDatabase() {
   try {
     await sequelize.authenticate();
@@ -47,6 +96,8 @@ async function initDatabase() {
 
     await sequelize.sync();
     console.log('数据库表同步成功！');
+
+    await seedCircleMoments();
 
     return true;
   } catch (error) {

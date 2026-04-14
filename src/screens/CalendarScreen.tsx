@@ -95,7 +95,7 @@ const CalendarScreen: React.FC = () => {
 
       if (!silent) setLoading(true);
       try {
-        const res = await calendarApi.getData(year, month, currentUserId);
+        const res = await calendarApi.getData(year, month);
         if (res.success && res.data) {
           setCalendarDays(res.data);
         }

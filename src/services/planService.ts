@@ -4,45 +4,42 @@ import type { ApiResponse } from '../api/client';
 
 // Plan Service - handles all plan-related operations
 class PlanService {
-  // Get all plans
-  async getPlans(userId?: string): Promise<ApiResponse<Plan[]>> {
-    return await plansApi.getAll(userId);
+  // Get all plans（依赖 token 鉴权）
+  async getPlans(): Promise<ApiResponse<Plan[]>> {
+    return await plansApi.getAll();
   }
 
-  // Get plan by ID
-  async getPlanById(id: string, userId?: string): Promise<ApiResponse<Plan>> {
-    return await plansApi.getById(id, userId);
+  // Get plan by ID（依赖 token 鉴权）
+  async getPlanById(id: string): Promise<ApiResponse<Plan>> {
+    return await plansApi.getById(id);
   }
 
-  // Create new plan
+  // Create new plan（依赖 token 鉴权）
   async createPlan(
     plan: Omit<Plan, 'id'>,
-    userId?: string,
   ): Promise<ApiResponse<Plan>> {
-    return await plansApi.create(plan, userId);
+    return await plansApi.create(plan);
   }
 
-  // Update plan
+  // Update plan（依赖 token 鉴权）
   async updatePlan(
     id: string,
     updates: Partial<Plan>,
-    userId?: string,
   ): Promise<ApiResponse<Plan>> {
-    return await plansApi.update(id, updates, userId);
+    return await plansApi.update(id, updates);
   }
 
-  // Delete plan
-  async deletePlan(id: string, userId?: string): Promise<ApiResponse<boolean>> {
-    return await plansApi.delete(id, userId);
+  // Delete plan（依赖 token 鉴权）
+  async deletePlan(id: string): Promise<ApiResponse<boolean>> {
+    return await plansApi.delete(id);
   }
 
-  // Check in plan
+  // Check in plan（依赖 token 鉴权）
   async checkInPlan(
     id: string,
     date: string,
-    userId?: string,
   ): Promise<ApiResponse<Plan>> {
-    return await plansApi.checkIn(id, date, userId);
+    return await plansApi.checkIn(id, date);
   }
 }
 

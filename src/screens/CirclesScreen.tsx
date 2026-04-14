@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { StyleSheet, ScrollView, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../constants/theme';
@@ -8,9 +8,12 @@ import { CircleWaterfall, CircleDetailModal } from '../features/circle';
 import { NotificationDrawer } from '../features/plan';
 import { useCircleData } from '../hooks';
 import { useNotificationState } from '../hooks/useNotificationState';
+import { useAuth } from '../contexts/AuthContext';
 
 const CirclesScreen: React.FC = () => {
   const navigation = useNavigation<any>();
+  const { user } = useAuth();
+  const currentUserId = user?.id;
   const { circles, refreshData, loading } = useCircleData();
   const [notificationDrawerVisible, setNotificationDrawerVisible] = useState(false);
   const [selectedCircleId, setSelectedCircleId] = useState<string | null>(null);
@@ -19,11 +22,35 @@ const CirclesScreen: React.FC = () => {
   const { notifications, markAsRead, refreshNotifications, unreadCount } =
     useNotificationState();
 
+  const displayCircles = useMemo(
+    () =>
+      circles.map(circle => {
+        if (circle.type !== 'waterfall') {
+          return circle;
+        }
+
+        const isOwn =
+          !!currentUserId &&
+          !!circle.authorUserId &&
+          String(circle.authorUserId) === String(currentUserId);
+
+        return {
+          ...circle,
+          authorName: isOwn ? '我' : circle.authorName,
+        };
+      }),
+    [circles, currentUserId],
+  );
+
   useFocusEffect(
     useCallback(() => {
+      if (!currentUserId) {
+        return;
+      }
+
       refreshData();
-      refreshNotifications();
-    }, [refreshData, refreshNotifications])
+      refreshNotifications(currentUserId);
+    }, [currentUserId, refreshData, refreshNotifications])
   );
 
   const handleOpenNotifications = () => {
@@ -62,7 +89,7 @@ const CirclesScreen: React.FC = () => {
           <RefreshControl refreshing={loading} onRefresh={refreshData} />
         }
       >
-        <CircleWaterfall circles={circles} onCirclePress={handleCirclePress} />
+        <CircleWaterfall circles={displayCircles} onCirclePress={handleCirclePress} />
       </ScrollView>
 
       <FloatingActionButton onPress={handleCreatePost} />
@@ -78,7 +105,7 @@ const CirclesScreen: React.FC = () => {
         visible={notificationDrawerVisible}
         onClose={() => setNotificationDrawerVisible(false)}
         notifications={notifications}
-        onNotificationPress={markAsRead}
+        onNotificationPress={id => markAsRead(id, currentUserId)}
       />
 
       <BottomNavBar />

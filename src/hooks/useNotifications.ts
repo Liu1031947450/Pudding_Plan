@@ -15,7 +15,7 @@ export const useNotifications = () => {
       return;
     }
 
-    notificationsApi.getAll(currentUserId).then(response => {
+    notificationsApi.getAll().then(response => {
       if (response.success && response.data) {
         setNotifications(response.data);
       }
@@ -31,7 +31,7 @@ export const useNotifications = () => {
       return;
     }
 
-    const response = await notificationsApi.markAsRead(id, currentUserId);
+    const response = await notificationsApi.markAsRead(id);
     if (response.success) {
       setNotifications(prev =>
         prev.map(notif => (notif.id === id ? { ...notif, read: true } : notif)),
@@ -44,7 +44,7 @@ export const useNotifications = () => {
       return;
     }
 
-    const response = await notificationsApi.markAllAsRead(currentUserId);
+    const response = await notificationsApi.markAllAsRead();
     if (response.success) {
       setNotifications(prev => prev.map(notif => ({ ...notif, read: true })));
     }
@@ -55,7 +55,7 @@ export const useNotifications = () => {
       return;
     }
 
-    const response = await notificationsApi.delete(id, currentUserId);
+    const response = await notificationsApi.delete(id);
     if (response.success) {
       setNotifications(prev => prev.filter(notif => notif.id !== id));
     }

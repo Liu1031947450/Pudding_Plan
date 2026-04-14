@@ -14,7 +14,7 @@ export const useNotificationState = () => {
 
     setLoading(true);
     try {
-      const response = await notificationsApi.getAll(userId);
+      const response = await notificationsApi.getAll();
       if (response.success && response.data) {
         setNotifications(response.data);
       }
@@ -31,7 +31,7 @@ export const useNotificationState = () => {
     }
 
     try {
-      const response = await notificationsApi.markAsRead(id, userId);
+      const response = await notificationsApi.markAsRead(id);
       if (response.success) {
         setNotifications(prev =>
           prev.map(notif =>
@@ -51,16 +51,15 @@ export const useNotificationState = () => {
       }
 
       try {
-        const unreadIds = notifications.filter(n => !n.read).map(n => n.id);
-        await Promise.all(
-          unreadIds.map(id => notificationsApi.markAsRead(id, userId)),
-        );
-        setNotifications(prev => prev.map(notif => ({ ...notif, read: true })));
+        const response = await notificationsApi.markAllAsRead();
+        if (response.success) {
+          setNotifications(prev => prev.map(notif => ({ ...notif, read: true })));
+        }
       } catch (error) {
         console.error('Failed to mark all notifications as read:', error);
       }
     },
-    [notifications],
+    [],
   );
 
   const unreadCount = notifications.filter(n => !n.read).length;

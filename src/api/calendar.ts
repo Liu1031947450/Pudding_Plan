@@ -3,16 +3,12 @@ import { API_ENDPOINTS } from './config';
 import type { DayData, Habit } from '../types/domain';
 
 export const calendarApi = {
-  // 获取日历数据
+  // 获取日历数据（依赖 token 鉴权）
   getData: async (
     year: number,
     month: number,
-    userId?: string,
   ): Promise<ApiResponse<DayData[]>> => {
-    const endpoint = userId
-      ? `${API_ENDPOINTS.CALENDAR}?year=${year}&month=${month}&userId=${userId}`
-      : `${API_ENDPOINTS.CALENDAR}?year=${year}&month=${month}`;
-    return apiClient.get<DayData[]>(endpoint);
+    return apiClient.get<DayData[]>(`${API_ENDPOINTS.CALENDAR}?year=${year}&month=${month}`);
   },
   // 获取每日金句
   getDailyQuote: async (): Promise<
@@ -38,19 +34,13 @@ export const calendarApi = {
 };
 
 export const habitsApi = {
-  // 获取所有习惯
-  getAll: async (userId?: string): Promise<ApiResponse<Habit[]>> => {
-    const endpoint = userId
-      ? `${API_ENDPOINTS.HABITS}?userId=${userId}`
-      : API_ENDPOINTS.HABITS;
-    return apiClient.get<Habit[]>(endpoint);
+  // 获取所有习惯（依赖 token 鉴权）
+  getAll: async (): Promise<ApiResponse<Habit[]>> => {
+    return apiClient.get<Habit[]>(API_ENDPOINTS.HABITS);
   },
 
-  // 切换习惯完成状态
-  toggle: async (id: string, userId?: string): Promise<ApiResponse<Habit>> => {
-    const endpoint = userId
-      ? `${API_ENDPOINTS.HABIT_TOGGLE(id)}?userId=${userId}`
-      : API_ENDPOINTS.HABIT_TOGGLE(id);
-    return apiClient.post<Habit>(endpoint);
+  // 切换习惯完成状态（依赖 token 鉴权）
+  toggle: async (id: string): Promise<ApiResponse<Habit>> => {
+    return apiClient.post<Habit>(API_ENDPOINTS.HABIT_TOGGLE(id));
   },
 };

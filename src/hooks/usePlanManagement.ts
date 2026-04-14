@@ -13,8 +13,7 @@ export const usePlanManagement = () => {
   const [loading, setLoading] = useState(false);
 
   const loadPlans = useCallback(async (userId?: string, silent = false) => {
-    const effectiveUserId = userId || currentUserId;
-    if (!effectiveUserId) {
+    if (!userId && !currentUserId) {
       setPlans([]);
       return;
     }
@@ -23,7 +22,7 @@ export const usePlanManagement = () => {
       setLoading(true);
     }
     try {
-      const response = await planService.getPlans(effectiveUserId);
+      const response = await planService.getPlans();
       if (response.success && response.data) {
         setPlans(response.data);
       }
@@ -38,14 +37,13 @@ export const usePlanManagement = () => {
 
   const handleCreatePlan = useCallback(
     async (planData: Omit<Plan, 'id'>, userId?: string): Promise<ApiResponse<Plan>> => {
-      const effectiveUserId = userId || currentUserId;
-      if (!effectiveUserId) {
+      if (!userId && !currentUserId) {
         return { success: false, error: '当前用户未登录' };
       }
 
-      const response = await planService.createPlan(planData, effectiveUserId);
+      const response = await planService.createPlan(planData);
       if (response.success) {
-        await loadPlans(effectiveUserId);
+        await loadPlans(currentUserId);
       }
       return response;
     },
@@ -54,14 +52,13 @@ export const usePlanManagement = () => {
 
   const handleUpdatePlan = useCallback(
     async (id: string, planData: Partial<Plan>, userId?: string): Promise<ApiResponse<Plan>> => {
-      const effectiveUserId = userId || currentUserId;
-      if (!effectiveUserId) {
+      if (!userId && !currentUserId) {
         return { success: false, error: '当前用户未登录' };
       }
 
-      const response = await planService.updatePlan(id, planData, effectiveUserId);
+      const response = await planService.updatePlan(id, planData);
       if (response.success) {
-        await loadPlans(effectiveUserId);
+        await loadPlans(currentUserId);
       }
       return response;
     },
@@ -70,14 +67,13 @@ export const usePlanManagement = () => {
 
   const handleDeletePlan = useCallback(
     async (id: string, userId?: string): Promise<ApiResponse<boolean>> => {
-      const effectiveUserId = userId || currentUserId;
-      if (!effectiveUserId) {
+      if (!userId && !currentUserId) {
         return { success: false, error: '当前用户未登录' };
       }
 
-      const response = await planService.deletePlan(id, effectiveUserId);
+      const response = await planService.deletePlan(id);
       if (response.success) {
-        await loadPlans(effectiveUserId);
+        await loadPlans(currentUserId);
       }
       return response;
     },
@@ -86,18 +82,17 @@ export const usePlanManagement = () => {
 
   const handleDeleteSelected = useCallback(
     async (userId?: string) => {
-      const effectiveUserId = userId || currentUserId;
-      if (!effectiveUserId) {
+      if (!userId && !currentUserId) {
         return 0;
       }
 
       let deletedCount = 0;
       for (const id of selectedPlans) {
-        const response = await planService.deletePlan(id, effectiveUserId);
+        const response = await planService.deletePlan(id);
         if (response.success) deletedCount++;
       }
       if (deletedCount > 0) {
-        await loadPlans(effectiveUserId);
+        await loadPlans(currentUserId);
         setSelectedPlans(new Set());
         setIsManaging(false);
       }
@@ -108,14 +103,13 @@ export const usePlanManagement = () => {
 
   const handleCheckIn = useCallback(
     async (id: string, date: string, userId?: string): Promise<ApiResponse<Plan>> => {
-      const effectiveUserId = userId || currentUserId;
-      if (!effectiveUserId) {
+      if (!userId && !currentUserId) {
         return { success: false, error: '当前用户未登录' };
       }
 
-      const response = await planService.checkInPlan(id, date, effectiveUserId);
+      const response = await planService.checkInPlan(id, date);
       if (response.success) {
-        await loadPlans(effectiveUserId);
+        await loadPlans(currentUserId);
       }
       return response;
     },
