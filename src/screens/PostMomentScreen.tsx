@@ -49,7 +49,9 @@ const PostMomentScreen: React.FC = () => {
 
   // Drawer states
   const [drawerVisible, setDrawerVisible] = useState(false);
-  const [drawerType, setDrawerType] = useState<'location' | 'topic' | 'visibility' | null>(null);
+  const [drawerType, setDrawerType] = useState<
+    'location' | 'topic' | 'visibility' | null
+  >(null);
 
   // Toast state
   const [toastConfig, setToastConfig] = useState<{
@@ -62,7 +64,10 @@ const PostMomentScreen: React.FC = () => {
     type: 'success',
   });
 
-  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+  const showToast = (
+    message: string,
+    type: 'success' | 'error' | 'info' = 'success',
+  ) => {
     setToastConfig({ visible: true, message, type });
   };
 
@@ -162,18 +167,21 @@ const PostMomentScreen: React.FC = () => {
 
       // 3. 优先尝试快速获取上一次的已知位置（瞬间响应）
       let locResult = await Location.getLastKnownPositionAsync({});
-      
+
       if (!locResult) {
         // 4. 如果没有缓存位置，再发起真实的 GPS 搜索，并增加超时控制
         const locationPromise = Location.getCurrentPositionAsync({
           accuracy: Location.Accuracy.Balanced,
         });
-        
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('TIMEOUT')), 8000)
+
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('TIMEOUT')), 8000),
         );
 
-        locResult = await Promise.race([locationPromise, timeoutPromise]) as Location.LocationObject;
+        locResult = (await Promise.race([
+          locationPromise,
+          timeoutPromise,
+        ])) as Location.LocationObject;
       }
 
       if (locResult) {
@@ -185,19 +193,27 @@ const PostMomentScreen: React.FC = () => {
         if (address) {
           const city = address.city || address.region || '';
           const district = address.district || '';
-          
+
           // 根据真实城市动态生成“附近”地点推荐
           const spots = [
-            { name: `${city} · ${district} (当前位置)`, sub: `${address.street || ''}${address.name || ''}`, id: 'current' },
-            { name: `${district}中心广场`, sub: `${address.street || ''}108号`, id: 'p1' },
+            {
+              name: `${city} · ${district} (当前位置)`,
+              sub: `${address.street || ''}${address.name || ''}`,
+              id: 'current',
+            },
+            {
+              name: `${district}中心广场`,
+              sub: `${address.street || ''}108号`,
+              id: 'p1',
+            },
             { name: `${city}市民公园`, sub: '近绿化路', id: 'p2' },
             { name: `${district}创意园区`, sub: '文化路22号', id: 'p3' },
             { name: `星巴克 (${district}店)`, sub: '近地铁站', id: 'p4' },
             { name: `${city}图书馆`, sub: '文渊北路', id: 'p5' },
           ];
-          
+
           setNearbyLocations(spots);
-          
+
           // 如果逆地理编码非常完整，直接更新当前位置（可选，这里保持不自动关闭）
           const addrText = `${city}${district}${address.street || ''}`;
           if (addrText) setLocation(addrText);
@@ -251,15 +267,21 @@ const PostMomentScreen: React.FC = () => {
 
   const renderDrawerContent = () => {
     if (drawerType === 'location') {
-      const filteredLocations = allLocations.filter(item => 
-        item.name.includes(locationSearch) || item.sub.includes(locationSearch)
+      const filteredLocations = allLocations.filter(
+        item =>
+          item.name.includes(locationSearch) ||
+          item.sub.includes(locationSearch),
       );
 
       return (
         <View style={styles.drawerList}>
           {/* Search Bar */}
           <View style={styles.searchBar}>
-            <MaterialIcons name="search" size={20} color={Colors.onSurfaceVariant} />
+            <MaterialIcons
+              name="search"
+              size={20}
+              color={Colors.onSurfaceVariant}
+            />
             <TextInput
               style={styles.searchInput}
               placeholder="搜索地点..."
@@ -270,29 +292,50 @@ const PostMomentScreen: React.FC = () => {
           </View>
 
           {/* Special Actions */}
-          <TouchableOpacity 
-            style={styles.drawerItem} 
-            onPress={() => { setLocation(''); setDrawerVisible(false); }}
+          <TouchableOpacity
+            style={styles.drawerItem}
+            onPress={() => {
+              setLocation('');
+              setDrawerVisible(false);
+            }}
           >
             <View style={styles.drawerItemLeft}>
-              <MaterialIcons name="location-off" size={20} color={Colors.error} style={styles.drawerItemIcon} />
-              <Text style={[styles.drawerItemText, { color: Colors.error }]}>不显示地点</Text>
+              <MaterialIcons
+                name="location-off"
+                size={20}
+                color={Colors.error}
+                style={styles.drawerItemIcon}
+              />
+              <Text style={[styles.drawerItemText, { color: Colors.error }]}>
+                不显示地点
+              </Text>
             </View>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.drawerItem} onPress={fetchRealLocation} disabled={isLocating}>
+          <TouchableOpacity
+            style={styles.drawerItem}
+            onPress={fetchRealLocation}
+            disabled={isLocating}
+          >
             <View style={styles.drawerItemLeft}>
-              <MaterialIcons name="my-location" size={20} color={Colors.primary} style={styles.drawerItemIcon} />
+              <MaterialIcons
+                name="my-location"
+                size={20}
+                color={Colors.primary}
+                style={styles.drawerItemIcon}
+              />
               <Text style={[styles.drawerItemText, { color: Colors.primary }]}>
                 {isLocating ? '正在精准定位中...' : '定位当前所在位置'}
               </Text>
             </View>
-            {isLocating && <ActivityIndicator size="small" color={Colors.primary} />}
+            {isLocating && (
+              <ActivityIndicator size="small" color={Colors.primary} />
+            )}
           </TouchableOpacity>
 
           {/* Locations List */}
-          <ScrollView 
-            style={styles.locationListScroll} 
+          <ScrollView
+            style={styles.locationListScroll}
             contentContainerStyle={styles.locationListContent}
             showsVerticalScrollIndicator={false}
           >
@@ -300,7 +343,7 @@ const PostMomentScreen: React.FC = () => {
             {nearbyLocations.length > 0 && (
               <View style={styles.sectionContainer}>
                 <Text style={styles.sectionHeader}>附近地点推荐</Text>
-                {nearbyLocations.map((loc) => (
+                {nearbyLocations.map(loc => (
                   <TouchableOpacity
                     key={loc.id}
                     style={styles.drawerItem}
@@ -310,15 +353,34 @@ const PostMomentScreen: React.FC = () => {
                     }}
                   >
                     <View style={styles.drawerItemLeft}>
-                      <MaterialIcons name="place" size={20} color={Colors.primary} style={styles.drawerItemIcon} />
+                      <MaterialIcons
+                        name="place"
+                        size={20}
+                        color={Colors.primary}
+                        style={styles.drawerItemIcon}
+                      />
                       <View>
-                        <Text style={[styles.drawerItemText, location === loc.name && { color: Colors.primary, fontWeight: '600' }]}>
+                        <Text
+                          style={[
+                            styles.drawerItemText,
+                            location === loc.name && {
+                              color: Colors.primary,
+                              fontWeight: '600',
+                            },
+                          ]}
+                        >
                           {loc.name}
                         </Text>
                         <Text style={styles.drawerItemSubText}>{loc.sub}</Text>
                       </View>
                     </View>
-                    {location === loc.name && <MaterialIcons name="check" size={20} color={Colors.primary} />}
+                    {location === loc.name && (
+                      <MaterialIcons
+                        name="check"
+                        size={20}
+                        color={Colors.primary}
+                      />
+                    )}
                   </TouchableOpacity>
                 ))}
               </View>
@@ -326,8 +388,10 @@ const PostMomentScreen: React.FC = () => {
 
             {/* 地点列表 */}
             <View style={styles.sectionContainer}>
-              <Text style={styles.sectionHeader}>{nearbyLocations.length > 0 ? '更多地点' : '推荐地点'}</Text>
-              {filteredLocations.map((loc) => (
+              <Text style={styles.sectionHeader}>
+                {nearbyLocations.length > 0 ? '更多地点' : '推荐地点'}
+              </Text>
+              {filteredLocations.map(loc => (
                 <TouchableOpacity
                   key={loc.id}
                   style={styles.drawerItem}
@@ -337,13 +401,24 @@ const PostMomentScreen: React.FC = () => {
                   }}
                 >
                   <View style={styles.drawerItemLeft}>
-                    <MaterialIcons name="place" size={20} color={Colors.onSurfaceVariant} style={styles.drawerItemIcon} />
+                    <MaterialIcons
+                      name="place"
+                      size={20}
+                      color={Colors.onSurfaceVariant}
+                      style={styles.drawerItemIcon}
+                    />
                     <View>
                       <Text style={styles.drawerItemText}>{loc.name}</Text>
                       <Text style={styles.drawerItemSubText}>{loc.sub}</Text>
                     </View>
                   </View>
-                  {location === loc.name && <MaterialIcons name="check" size={20} color={Colors.primary} />}
+                  {location === loc.name && (
+                    <MaterialIcons
+                      name="check"
+                      size={20}
+                      color={Colors.primary}
+                    />
+                  )}
                 </TouchableOpacity>
               ))}
             </View>
@@ -373,8 +448,8 @@ const PostMomentScreen: React.FC = () => {
             />
           </View>
 
-          <ScrollView 
-            style={styles.topicListScroll} 
+          <ScrollView
+            style={styles.topicListScroll}
             contentContainerStyle={styles.locationListContent}
             showsVerticalScrollIndicator={false}
           >
@@ -389,8 +464,18 @@ const PostMomentScreen: React.FC = () => {
                 }}
               >
                 <View style={styles.drawerItemLeft}>
-                  <MaterialIcons name="add-circle-outline" size={20} color={Colors.primary} style={styles.drawerItemIcon} />
-                  <Text style={[styles.drawerItemText, { color: Colors.primary, fontWeight: '600' }]}>
+                  <MaterialIcons
+                    name="add-circle-outline"
+                    size={20}
+                    color={Colors.primary}
+                    style={styles.drawerItemIcon}
+                  />
+                  <Text
+                    style={[
+                      styles.drawerItemText,
+                      { color: Colors.primary, fontWeight: '600' },
+                    ]}
+                  >
                     创建新话题: #{topicSearch}
                   </Text>
                 </View>
@@ -407,13 +492,18 @@ const PostMomentScreen: React.FC = () => {
               }}
             >
               <View style={styles.drawerItemLeft}>
-                <MaterialIcons name="label-off" size={20} color={Colors.onSurfaceVariant} style={styles.drawerItemIcon} />
+                <MaterialIcons
+                  name="label-off"
+                  size={20}
+                  color={Colors.onSurfaceVariant}
+                  style={styles.drawerItemIcon}
+                />
                 <Text style={styles.drawerItemText}>无话题</Text>
               </View>
             </TouchableOpacity>
 
             {/* List existing topics */}
-            {filteredTopics.map((t) => (
+            {filteredTopics.map(t => (
               <TouchableOpacity
                 key={t}
                 style={styles.drawerItem}
@@ -424,12 +514,35 @@ const PostMomentScreen: React.FC = () => {
                 }}
               >
                 <View style={styles.drawerItemLeft}>
-                  <MaterialIcons name="label" size={20} color={topic === `#${t}` ? Colors.primary : Colors.onSurfaceVariant} style={styles.drawerItemIcon} />
-                  <Text style={[styles.drawerItemText, topic === `#${t}` && { color: Colors.primary, fontWeight: '600' }]}>
+                  <MaterialIcons
+                    name="label"
+                    size={20}
+                    color={
+                      topic === `#${t}`
+                        ? Colors.primary
+                        : Colors.onSurfaceVariant
+                    }
+                    style={styles.drawerItemIcon}
+                  />
+                  <Text
+                    style={[
+                      styles.drawerItemText,
+                      topic === `#${t}` && {
+                        color: Colors.primary,
+                        fontWeight: '600',
+                      },
+                    ]}
+                  >
                     #{t}
                   </Text>
                 </View>
-                {topic === `#${t}` && <MaterialIcons name="check" size={20} color={Colors.primary} />}
+                {topic === `#${t}` && (
+                  <MaterialIcons
+                    name="check"
+                    size={20}
+                    color={Colors.primary}
+                  />
+                )}
               </TouchableOpacity>
             ))}
           </ScrollView>
@@ -440,7 +553,7 @@ const PostMomentScreen: React.FC = () => {
       const options = ['公开', '仅好友', '私密'];
       return (
         <View style={styles.drawerList}>
-          {options.map((opt) => (
+          {options.map(opt => (
             <TouchableOpacity
               key={opt}
               style={styles.drawerItem}
@@ -450,7 +563,9 @@ const PostMomentScreen: React.FC = () => {
               }}
             >
               <Text style={styles.drawerItemText}>{opt}</Text>
-              {visibility === opt && <MaterialIcons name="check" size={20} color={Colors.primary} />}
+              {visibility === opt && (
+                <MaterialIcons name="check" size={20} color={Colors.primary} />
+              )}
             </TouchableOpacity>
           ))}
         </View>
@@ -499,19 +614,29 @@ const PostMomentScreen: React.FC = () => {
                 <Image source={{ uri }} style={styles.selectedImage} />
                 <TouchableOpacity
                   style={styles.removeImage}
-                  onPress={() => setImages(images.filter((_, i) => i !== index))}
+                  onPress={() =>
+                    setImages(images.filter((_, i) => i !== index))
+                  }
                 >
                   <MaterialIcons name="cancel" size={20} color={Colors.white} />
                 </TouchableOpacity>
               </View>
             ))}
             {images.length < 9 && (
-              <TouchableOpacity style={styles.addImageButton} onPress={handleChooseImage} disabled={isUploading}>
+              <TouchableOpacity
+                style={styles.addImageButton}
+                onPress={handleChooseImage}
+                disabled={isUploading}
+              >
                 {isUploading ? (
                   <ActivityIndicator size="small" color={Colors.primary} />
                 ) : (
                   <>
-                    <MaterialIcons name="add-photo-alternate" size={32} color={Colors.onSurfaceVariant} />
+                    <MaterialIcons
+                      name="add-photo-alternate"
+                      size={32}
+                      color={Colors.onSurfaceVariant}
+                    />
                     <Text style={styles.addImageText}>添加图片</Text>
                   </>
                 )}
@@ -521,18 +646,47 @@ const PostMomentScreen: React.FC = () => {
         </View>
 
         <View style={styles.optionsSection}>
-          <TouchableOpacity style={styles.optionItem} onPress={() => openDrawer('location')}>
-            <MaterialIcons name="place" size={20} color={Colors.onSurfaceVariant} />
+          <TouchableOpacity
+            style={styles.optionItem}
+            onPress={() => openDrawer('location')}
+          >
+            <MaterialIcons
+              name="place"
+              size={20}
+              color={Colors.onSurfaceVariant}
+            />
             <Text style={styles.optionText}>{location || '添加地点'}</Text>
-            <MaterialIcons name="chevron-right" size={20} color={Colors.outlineVariant} />
+            <MaterialIcons
+              name="chevron-right"
+              size={20}
+              color={Colors.outlineVariant}
+            />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.optionItem} onPress={() => openDrawer('topic')}>
-            <MaterialIcons name="label" size={20} color={Colors.onSurfaceVariant} />
+          <TouchableOpacity
+            style={styles.optionItem}
+            onPress={() => openDrawer('topic')}
+          >
+            <MaterialIcons
+              name="label"
+              size={20}
+              color={Colors.onSurfaceVariant}
+            />
             <Text style={styles.optionText}>{topic || '选择话题'}</Text>
-            <MaterialIcons name="chevron-right" size={20} color={Colors.outlineVariant} />
+            <MaterialIcons
+              name="chevron-right"
+              size={20}
+              color={Colors.outlineVariant}
+            />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.optionItem} onPress={() => openDrawer('visibility')}>
-            <MaterialIcons name="public" size={20} color={Colors.onSurfaceVariant} />
+          <TouchableOpacity
+            style={styles.optionItem}
+            onPress={() => openDrawer('visibility')}
+          >
+            <MaterialIcons
+              name="public"
+              size={20}
+              color={Colors.onSurfaceVariant}
+            />
             <Text style={styles.optionText}>可见范围</Text>
             <Text style={styles.optionValue}>{visibility}</Text>
           </TouchableOpacity>
@@ -541,7 +695,10 @@ const PostMomentScreen: React.FC = () => {
 
       <View style={styles.footer}>
         <TouchableOpacity
-          style={[styles.publishButton, (!content && images.length === 0) && styles.publishButtonDisabled]}
+          style={[
+            styles.publishButton,
+            !content && images.length === 0 && styles.publishButtonDisabled,
+          ]}
           disabled={!content && images.length === 0}
           onPress={handlePublish}
         >
@@ -553,14 +710,21 @@ const PostMomentScreen: React.FC = () => {
         visible={drawerVisible}
         onClose={() => setDrawerVisible(false)}
         title={
-          drawerType === 'location' ? '选择地点' : 
-          drawerType === 'topic' ? '选择话题' : '可见范围'
+          drawerType === 'location'
+            ? '选择地点'
+            : drawerType === 'topic'
+            ? '选择话题'
+            : '可见范围'
         }
-        height={drawerType === 'location' ? '80%' : drawerType === 'topic' ? '75%' : 'auto'}
+        height={
+          drawerType === 'location'
+            ? '80%'
+            : drawerType === 'topic'
+            ? '75%'
+            : 'auto'
+        }
       >
-        <View style={styles.drawerContent}>
-          {renderDrawerContent()}
-        </View>
+        <View style={styles.drawerContent}>{renderDrawerContent()}</View>
       </BottomDrawer>
 
       {/* 全屏发布遮罩 */}

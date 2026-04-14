@@ -1,5 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, ViewStyle, StyleProp } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  ViewStyle,
+  StyleProp,
+} from 'react-native';
 import { Spacing, FontSize, BorderRadius } from '../../../constants/theme';
 import { Card } from '../../../components/common/Card';
 import type { CircleTopic } from '../types';
@@ -18,12 +25,18 @@ export const CircleTopicCard: React.FC<CircleTopicCardProps> = ({
 }) => {
   return (
     <Card
-      style={[styles.topicCard, { backgroundColor: circle.backgroundColor || DEFAULT_TOPIC_BG_COLOR }, style]}
+      style={[
+        styles.topicCard,
+        { backgroundColor: circle.backgroundColor || DEFAULT_TOPIC_BG_COLOR },
+        style,
+      ]}
       onPress={onPress}
     >
       <View style={styles.topicHeader}>
         <View style={styles.topicTagContainer}>
-          <Text style={styles.topicTagText}>{circle.topicTag || '精选话题'}</Text>
+          <Text style={styles.topicTagText}>
+            {circle.topicTag || '精选话题'}
+          </Text>
         </View>
       </View>
       <Text style={styles.topicTitle} numberOfLines={4}>
@@ -36,7 +49,10 @@ export const CircleTopicCard: React.FC<CircleTopicCardProps> = ({
             <Image
               key={index}
               source={{ uri }}
-              style={[styles.miniAvatar, index > 0 && styles.miniAvatarWithMargin]}
+              style={[
+                styles.miniAvatar,
+                index > 0 && styles.miniAvatarWithMargin,
+              ]}
             />
           ))}
         </View>

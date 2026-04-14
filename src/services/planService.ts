@@ -15,9 +15,7 @@ class PlanService {
   }
 
   // Create new plan（依赖 token 鉴权）
-  async createPlan(
-    plan: Omit<Plan, 'id'>,
-  ): Promise<ApiResponse<Plan>> {
+  async createPlan(plan: Omit<Plan, 'id'>): Promise<ApiResponse<Plan>> {
     return await plansApi.create(plan);
   }
 
@@ -35,10 +33,7 @@ class PlanService {
   }
 
   // Check in plan（依赖 token 鉴权）
-  async checkInPlan(
-    id: string,
-    date: string,
-  ): Promise<ApiResponse<Plan>> {
+  async checkInPlan(id: string, date: string): Promise<ApiResponse<Plan>> {
     return await plansApi.checkIn(id, date);
   }
 }

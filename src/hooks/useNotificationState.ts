@@ -44,23 +44,20 @@ export const useNotificationState = () => {
     }
   }, []);
 
-  const markAllAsRead = useCallback(
-    async (userId?: string) => {
-      if (!userId) {
-        return;
-      }
+  const markAllAsRead = useCallback(async (userId?: string) => {
+    if (!userId) {
+      return;
+    }
 
-      try {
-        const response = await notificationsApi.markAllAsRead();
-        if (response.success) {
-          setNotifications(prev => prev.map(notif => ({ ...notif, read: true })));
-        }
-      } catch (error) {
-        console.error('Failed to mark all notifications as read:', error);
+    try {
+      const response = await notificationsApi.markAllAsRead();
+      if (response.success) {
+        setNotifications(prev => prev.map(notif => ({ ...notif, read: true })));
       }
-    },
-    [],
-  );
+    } catch (error) {
+      console.error('Failed to mark all notifications as read:', error);
+    }
+  }, []);
 
   const unreadCount = notifications.filter(n => !n.read).length;
 

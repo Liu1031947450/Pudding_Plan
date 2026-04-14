@@ -34,6 +34,12 @@ const ProfileScreen: React.FC = () => {
     totalCheckIns: 0,
     totalBadges: 0,
     healingPlans: 0,
+    socialStats: {
+      moments: 0,
+      likes: 0,
+      collects: 0,
+      friends: 0,
+    },
   });
 
   const fetchProfileData = useCallback(async () => {
@@ -59,6 +65,7 @@ const ProfileScreen: React.FC = () => {
           streakDays: d.streakDays,
           totalCheckIns: d.totalCheckIns,
           healingPlans: d.healingPlans,
+          socialStats: d.socialStats || prev.socialStats,
         }));
       }
     } catch (error) {
@@ -93,19 +100,48 @@ const ProfileScreen: React.FC = () => {
               <Avatar uri={user?.avatar || undefined} size="xlarge" />
             </View>
             <View style={styles.avatarBadge}>
-              <MaterialIcons name="verified" size={16} color={Colors.onSecondary} />
+              <MaterialIcons name="verified" size={16} color={Colors.white} />
             </View>
           </View>
           <View style={styles.userInfo}>
             <Text style={styles.userName}>{user?.username || '未登录'}</Text>
-            <Text style={styles.userBio}>{user?.bio || '这个人很懒，还没有填写简介'}</Text>
+            <Text style={styles.userBio}>
+              {user?.bio || '用布丁装点生活的每一天'}
+            </Text>
+          </View>
+
+          <View style={styles.socialStatsRow}>
+            <View style={styles.socialStatItem}>
+              <Text style={styles.socialStatNumber}>
+                {stats.socialStats.moments}
+              </Text>
+              <Text style={styles.socialStatLabel}>动态</Text>
+            </View>
+            <View style={styles.socialStatDivider} />
+            <View style={styles.socialStatItem}>
+              <Text style={styles.socialStatNumber}>
+                {stats.socialStats.friends}
+              </Text>
+              <Text style={styles.socialStatLabel}>关注</Text>
+            </View>
+            <View style={styles.socialStatDivider} />
+            <View style={styles.socialStatItem}>
+              <Text style={styles.socialStatNumber}>
+                {stats.socialStats.collects}
+              </Text>
+              <Text style={styles.socialStatLabel}>粉丝</Text>
+            </View>
           </View>
         </View>
 
         <View style={styles.statsSection}>
           <Card style={styles.statsCardLarge}>
             <View style={styles.statsCardHeader}>
-              <MaterialIcons name="calendar-today" size={24} color={Colors.primary} />
+              <MaterialIcons
+                name="calendar-today"
+                size={24}
+                color={Colors.primary}
+              />
               <View style={styles.statsCardContent}>
                 <Text style={styles.statsNumber}>{stats.streakDays}</Text>
                 <Text style={styles.statsLabel}>坚持天数</Text>
@@ -117,21 +153,38 @@ const ProfileScreen: React.FC = () => {
             <Card style={styles.statsCardSmall}>
               <View style={styles.statsCardRow}>
                 <View style={styles.statsIconWrapper}>
-                  <MaterialIcons name="workspace-premium" size={16} color={Colors.onPrimaryContainer} />
+                  <MaterialIcons
+                    name="workspace-premium"
+                    size={16}
+                    color={Colors.onPrimaryContainer}
+                  />
                 </View>
                 <View>
-                  <Text style={styles.statsSmallNumber}>{stats.totalCheckIns}</Text>
+                  <Text style={styles.statsSmallNumber}>
+                    {stats.totalCheckIns}
+                  </Text>
                   <Text style={styles.statsSmallLabel}>累计盖章</Text>
                 </View>
               </View>
             </Card>
             <Card style={styles.statsCardSmall}>
               <View style={styles.statsCardRow}>
-                <View style={[styles.statsIconWrapper, { backgroundColor: Colors.secondaryContainer }]}>
-                  <MaterialIcons name="spa" size={16} color={Colors.onSecondaryContainer} />
+                <View
+                  style={[
+                    styles.statsIconWrapper,
+                    { backgroundColor: Colors.secondaryContainer },
+                  ]}
+                >
+                  <MaterialIcons
+                    name="spa"
+                    size={16}
+                    color={Colors.onSecondaryContainer}
+                  />
                 </View>
                 <View>
-                  <Text style={styles.statsSmallNumber}>{stats.healingPlans}</Text>
+                  <Text style={styles.statsSmallNumber}>
+                    {stats.healingPlans}
+                  </Text>
                   <Text style={styles.statsSmallLabel}>治愈计划</Text>
                 </View>
               </View>
@@ -142,12 +195,18 @@ const ProfileScreen: React.FC = () => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>勋章墙</Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Badges' as never)}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Badges' as never)}
+            >
               <Text style={styles.viewAllText}>全部</Text>
             </TouchableOpacity>
           </View>
 
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.badgesContainer}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.badgesContainer}
+          >
             {loading ? (
               <View style={styles.loadingContainer}>
                 <ActivityIndicator size="small" color={Colors.primary} />
@@ -155,19 +214,39 @@ const ProfileScreen: React.FC = () => {
             ) : badges.length > 0 ? (
               badges.map(badge => (
                 <View key={badge.id} style={styles.badgeItem}>
-                  <View style={[styles.badgeIcon, { backgroundColor: badge.unlocked ? badge.color : Colors.surfaceVariant }]}>
+                  <View
+                    style={[
+                      styles.badgeIcon,
+                      {
+                        backgroundColor: badge.unlocked
+                          ? badge.color
+                          : Colors.surfaceVariant,
+                      },
+                    ]}
+                  >
                     <MaterialIcons
                       name={badge.icon}
                       size={28}
-                      color={badge.unlocked ? Colors.white : Colors.outlineVariant}
+                      color={
+                        badge.unlocked ? Colors.white : Colors.outlineVariant
+                      }
                     />
                     {!badge.unlocked && (
                       <View style={styles.lockOverlay}>
-                        <MaterialIcons name="lock" size={10} color={Colors.outlineVariant} />
+                        <MaterialIcons
+                          name="lock"
+                          size={10}
+                          color={Colors.outlineVariant}
+                        />
                       </View>
                     )}
                   </View>
-                  <Text style={[styles.badgeTitle, !badge.unlocked && styles.lockedText]}>
+                  <Text
+                    style={[
+                      styles.badgeTitle,
+                      !badge.unlocked && styles.lockedText,
+                    ]}
+                  >
                     {badge.title}
                   </Text>
                 </View>
@@ -182,34 +261,84 @@ const ProfileScreen: React.FC = () => {
 
         <View style={styles.section}>
           <Card style={styles.menuCard}>
-            <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('CheckInRecords' as never)}>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => navigation.navigate('CheckInRecords' as never)}
+            >
               <View style={styles.menuLeft}>
-                <View style={[styles.menuIcon, { backgroundColor: `${Colors.primary}10` }]}>
-                  <MaterialIcons name="event-available" size={20} color={Colors.primary} />
+                <View
+                  style={[
+                    styles.menuIcon,
+                    { backgroundColor: `${Colors.primary}10` },
+                  ]}
+                >
+                  <MaterialIcons
+                    name="event-available"
+                    size={20}
+                    color={Colors.primary}
+                  />
                 </View>
                 <Text style={styles.menuText}>打卡记录</Text>
               </View>
-              <MaterialIcons name="chevron-right" size={20} color={Colors.outlineVariant} />
+              <MaterialIcons
+                name="chevron-right"
+                size={20}
+                color={Colors.outlineVariant}
+              />
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.menuItem}>
               <View style={styles.menuLeft}>
-                <View style={[styles.menuIcon, { backgroundColor: `${Colors.secondary}10` }]}>
-                  <MaterialIcons name="favorite" size={20} color={Colors.secondary} />
+                <View
+                  style={[
+                    styles.menuIcon,
+                    { backgroundColor: `${Colors.secondary}10` },
+                  ]}
+                >
+                  <MaterialIcons
+                    name="favorite"
+                    size={20}
+                    color={Colors.secondary}
+                  />
                 </View>
                 <Text style={styles.menuText}>我的收藏</Text>
               </View>
-              <MaterialIcons name="chevron-right" size={20} color={Colors.outlineVariant} />
+              <View style={styles.menuRight}>
+                <Text style={styles.menuBadgeText}>
+                  {stats.socialStats.collects}
+                </Text>
+                <MaterialIcons
+                  name="chevron-right"
+                  size={20}
+                  color={Colors.outlineVariant}
+                />
+              </View>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.menuItem} onPress={() => setFeedbackVisible(true)}>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => setFeedbackVisible(true)}
+            >
               <View style={styles.menuLeft}>
-                <View style={[styles.menuIcon, { backgroundColor: `${Colors.tertiary}10` }]}>
-                  <MaterialIcons name="help-outline" size={20} color={Colors.tertiary} />
+                <View
+                  style={[
+                    styles.menuIcon,
+                    { backgroundColor: `${Colors.tertiary}10` },
+                  ]}
+                >
+                  <MaterialIcons
+                    name="help-outline"
+                    size={20}
+                    color={Colors.tertiary}
+                  />
                 </View>
                 <Text style={styles.menuText}>帮助与反馈</Text>
               </View>
-              <MaterialIcons name="chevron-right" size={20} color={Colors.outlineVariant} />
+              <MaterialIcons
+                name="chevron-right"
+                size={20}
+                color={Colors.outlineVariant}
+              />
             </TouchableOpacity>
           </Card>
         </View>
@@ -286,6 +415,35 @@ const styles = StyleSheet.create({
     fontSize: FontSize.sm,
     color: Colors.onSurfaceVariant,
     fontStyle: 'italic',
+    marginTop: 4,
+  },
+  socialStatsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: Spacing.lg,
+    paddingHorizontal: Spacing.xl,
+    width: '100%',
+  },
+  socialStatItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  socialStatNumber: {
+    fontSize: FontSize.lg,
+    fontWeight: '700',
+    color: Colors.onSurface,
+  },
+  socialStatLabel: {
+    fontSize: 12,
+    color: Colors.onSurfaceVariant,
+    marginTop: 2,
+  },
+  socialStatDivider: {
+    width: 1,
+    height: 16,
+    backgroundColor: Colors.outlineVariant,
+    opacity: 0.3,
   },
   statsSection: {
     flexDirection: 'row',
@@ -428,6 +586,21 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: Colors.onSurface,
   },
+  menuRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  menuBadgeText: {
+    fontSize: FontSize.sm,
+    fontWeight: '600',
+    color: Colors.primary,
+    backgroundColor: `${Colors.primary}10`,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: BorderRadius.sm,
+    overflow: 'hidden',
+  },
   menuArrow: {
     fontSize: 20,
     color: Colors.outlineVariant,
@@ -443,7 +616,7 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: FontSize.md,
     color: Colors.onSurfaceVariant,
-    textAlign: 'center'
+    textAlign: 'center',
   },
   lockOverlay: {
     position: 'absolute',

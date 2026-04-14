@@ -31,6 +31,12 @@ export interface UserStats {
   healingPlans: number;
   totalHabits: number;
   totalPlans: number;
+  socialStats?: {
+    moments: number;
+    likes: number;
+    collects: number;
+    friends: number;
+  };
   checkInRecords?: { date: string; planTitles: string[]; count: number }[];
 }
 
@@ -38,16 +44,22 @@ export const authApi = {
   // 登录
   login: async (data: LoginRequest): Promise<ApiResponse<AuthResponse>> => {
     try {
-      return await apiClient.post<AuthResponse>('/auth/login', data, { skipAuth: true });
+      return await apiClient.post<AuthResponse>('/auth/login', data, {
+        skipAuth: true,
+      });
     } catch (error: any) {
       return { success: false, error: error.message || '登录失败' };
     }
   },
 
   // 注册
-  register: async (data: RegisterRequest): Promise<ApiResponse<AuthResponse>> => {
+  register: async (
+    data: RegisterRequest,
+  ): Promise<ApiResponse<AuthResponse>> => {
     try {
-      return await apiClient.post<AuthResponse>('/auth/register', data, { skipAuth: true });
+      return await apiClient.post<AuthResponse>('/auth/register', data, {
+        skipAuth: true,
+      });
     } catch (error: any) {
       return { success: false, error: error.message || '注册失败' };
     }
@@ -63,7 +75,11 @@ export const authApi = {
   },
 
   // 更新用户资料
-  updateProfile: async (data: { username: string; avatar?: string; bio?: string }): Promise<ApiResponse<User>> => {
+  updateProfile: async (data: {
+    username: string;
+    avatar?: string;
+    bio?: string;
+  }): Promise<ApiResponse<User>> => {
     try {
       return await apiClient.put<User>('/auth/me', data);
     } catch (error: any) {
@@ -83,7 +99,9 @@ export const authApi = {
   // 兼容旧接口：根据ID获取用户信息
   getUserInfo: async (id: string): Promise<ApiResponse<User>> => {
     try {
-      return await apiClient.get<User>(`/auth/user?id=${id}`, { skipAuth: true });
+      return await apiClient.get<User>(`/auth/user?id=${id}`, {
+        skipAuth: true,
+      });
     } catch (error: any) {
       return { success: false, error: error.message || '获取用户信息失败' };
     }

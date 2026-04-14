@@ -31,8 +31,20 @@ const AllBadgesScreen: React.FC = () => {
   const locked = badges.filter(b => !b.unlocked);
 
   const renderBadge = (badge: Badge) => (
-    <Card key={badge.id} style={[styles.badgeCard, !badge.unlocked && styles.badgeCardLocked]}>
-      <View style={[styles.badgeIcon, { backgroundColor: badge.unlocked ? badge.color : Colors.surfaceVariant }]}>
+    <Card
+      key={badge.id}
+      style={[styles.badgeCard, !badge.unlocked && styles.badgeCardLocked]}
+    >
+      <View
+        style={[
+          styles.badgeIcon,
+          {
+            backgroundColor: badge.unlocked
+              ? badge.color
+              : Colors.surfaceVariant,
+          },
+        ]}
+      >
         <MaterialIcons
           name={badge.icon}
           size={32}
@@ -40,12 +52,21 @@ const AllBadgesScreen: React.FC = () => {
         />
         {!badge.unlocked && (
           <View style={styles.lockOverlay}>
-            <MaterialIcons name="lock" size={14} color={Colors.outlineVariant} />
+            <MaterialIcons
+              name="lock"
+              size={14}
+              color={Colors.outlineVariant}
+            />
           </View>
         )}
       </View>
-      <Text style={[styles.badgeTitle, !badge.unlocked && styles.lockedText]}>{badge.title}</Text>
-      <Text style={[styles.badgeDesc, !badge.unlocked && styles.lockedText]} numberOfLines={2}>
+      <Text style={[styles.badgeTitle, !badge.unlocked && styles.lockedText]}>
+        {badge.title}
+      </Text>
+      <Text
+        style={[styles.badgeDesc, !badge.unlocked && styles.lockedText]}
+        numberOfLines={2}
+      >
         {badge.description}
       </Text>
     </Card>
@@ -67,8 +88,14 @@ const AllBadgesScreen: React.FC = () => {
           {unlocked.length > 0 && (
             <>
               <View style={styles.sectionHeader}>
-                <MaterialIcons name="emoji-events" size={18} color={Colors.primary} />
-                <Text style={styles.sectionTitle}>已解锁 ({unlocked.length})</Text>
+                <MaterialIcons
+                  name="emoji-events"
+                  size={18}
+                  color={Colors.primary}
+                />
+                <Text style={styles.sectionTitle}>
+                  已解锁 ({unlocked.length})
+                </Text>
               </View>
               <View style={styles.grid}>{unlocked.map(renderBadge)}</View>
             </>
@@ -76,8 +103,17 @@ const AllBadgesScreen: React.FC = () => {
           {locked.length > 0 && (
             <>
               <View style={styles.sectionHeader}>
-                <MaterialIcons name="lock" size={18} color={Colors.outlineVariant} />
-                <Text style={[styles.sectionTitle, { color: Colors.outlineVariant }]}>
+                <MaterialIcons
+                  name="lock"
+                  size={18}
+                  color={Colors.outlineVariant}
+                />
+                <Text
+                  style={[
+                    styles.sectionTitle,
+                    { color: Colors.outlineVariant },
+                  ]}
+                >
                   未解锁 ({locked.length})
                 </Text>
               </View>
@@ -101,7 +137,11 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
     marginTop: Spacing.md,
   },
-  sectionTitle: { fontSize: FontSize.md, fontWeight: '700', color: Colors.onSurface },
+  sectionTitle: {
+    fontSize: FontSize.md,
+    fontWeight: '700',
+    color: Colors.onSurface,
+  },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },
   badgeCard: { width: '47%', alignItems: 'center', padding: Spacing.md },
   badgeCardLocked: { opacity: 0.6 },
@@ -122,8 +162,19 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 2,
   },
-  badgeTitle: { fontSize: FontSize.sm, fontWeight: '600', color: Colors.onSurface, textAlign: 'center', marginBottom: 4 },
-  badgeDesc: { fontSize: FontSize.xs, color: Colors.onSurfaceVariant, textAlign: 'center', lineHeight: 16 },
+  badgeTitle: {
+    fontSize: FontSize.sm,
+    fontWeight: '600',
+    color: Colors.onSurface,
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  badgeDesc: {
+    fontSize: FontSize.xs,
+    color: Colors.onSurfaceVariant,
+    textAlign: 'center',
+    lineHeight: 16,
+  },
   lockedText: { color: Colors.outlineVariant },
 });
 

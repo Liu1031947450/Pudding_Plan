@@ -19,11 +19,13 @@ const PORT = process.env.PORT || 3000;
 
 const path = require('path');
 
-app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+app.use(
+  cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  }),
+);
 app.use(bodyParser.json());
 
 // 静态文件服务：图片上传目录
@@ -51,7 +53,7 @@ initDatabase()
       console.log(`布丁计划后端服务已启动，监听端口 ${PORT}`);
     });
   })
-  .catch((error) => {
+  .catch(error => {
     console.error('服务启动失败:', error);
     process.exit(1);
   });

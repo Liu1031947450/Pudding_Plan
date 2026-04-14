@@ -62,7 +62,14 @@ const AppNavigator: React.FC = () => {
 
   if (isLoading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.background }}>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: Colors.background,
+        }}
+      >
         <ActivityIndicator size="large" color={Colors.primary} />
       </View>
     );
@@ -74,7 +81,7 @@ const AppNavigator: React.FC = () => {
         screenOptions={{
           headerShown: false,
         }}
-        initialRouteName={user ? "Main" : "Auth"}
+        initialRouteName={user ? 'Main' : 'Auth'}
       >
         <Stack.Screen name="Auth" component={AuthScreen} />
         <Stack.Screen name="Main" component={MainNavigator} />

@@ -36,14 +36,16 @@ const CreatePlanScreen: React.FC = () => {
   const { handleCreatePlan, handleUpdatePlan } = usePlanManagement();
 
   const [existingPlan, setExistingPlan] = useState<Plan | undefined>(undefined);
-  const [templateData, setTemplateData] = useState<TemplateDetail | undefined>(undefined);
+  const [templateData, setTemplateData] = useState<TemplateDetail | undefined>(
+    undefined,
+  );
   const [loading, setLoading] = useState(false);
   const isEditMode = !!planId;
 
   useEffect(() => {
     if (planId && user?.id) {
       const fetchPlanDetail = async () => {
-        const response = await planService.getPlanById(planId, user.id);
+        const response = await planService.getPlanById(planId);
         if (response.success && response.data) {
           setExistingPlan(response.data);
         }
@@ -251,7 +253,8 @@ const CreatePlanScreen: React.FC = () => {
       } else {
         setIsCreating(false);
         setToastMessage(
-          result.error || (isEditMode ? '计划更新失败，请重试' : '计划创建失败，请重试'),
+          result.error ||
+            (isEditMode ? '计划更新失败，请重试' : '计划创建失败，请重试'),
         );
         setToastType('error');
         setToastVisible(true);

@@ -20,10 +20,12 @@ const mockCircles = [
     id: '1',
     title: '清晨冥想室',
     description: '在第一缕阳光落下时，我们共同开启心跳与宁静的共鸣。',
-    content: '在这个快节奏的世界里，寻找片刻的宁静是如此珍贵。每天清晨，我们在这里汇聚，通过冥想来唤醒身体，平复思绪。无论你身在何处，那一抹阳光总能触达内心。',
+    content:
+      '在这个快节奏的世界里，寻找片刻的宁静是如此珍贵。每天清晨，我们在这里汇聚，通过冥想来唤醒身体，平复思绪。无论你身在何处，那一抹阳光总能触达内心。',
     members: '1.2k',
     type: 'waterfall',
-    imageUri: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
+    imageUri:
+      'https://images.unsplash.com/photo-1506126613408-eca07ce68773?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
     images: [
       'https://images.unsplash.com/photo-1506126613408-eca07ce68773?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       'https://images.unsplash.com/photo-1545389336-cf090694435e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
@@ -33,18 +35,30 @@ const mockCircles = [
     likes: 342,
     commentsCount: 12,
     comments: [
-      { id: 'c1', userName: '月下独酌', text: '今天的冥想引导非常棒，感觉整个人都通透了。', time: '2小时前' },
-      { id: 'c2', userName: '小橘子', text: '打卡！坚持第15天。', time: '1小时前' },
+      {
+        id: 'c1',
+        userName: '月下独酌',
+        text: '今天的冥想引导非常棒，感觉整个人都通透了。',
+        time: '2小时前',
+      },
+      {
+        id: 'c2',
+        userName: '小橘子',
+        text: '打卡！坚持第15天。',
+        time: '1小时前',
+      },
     ],
   },
   {
     id: '2',
     title: '手账记录本',
     description: '用笔尖触碰生活的烦理。不仅是记录，更是一场温柔的告白。',
-    content: '每一张手账纸都承载着一天的温度。从拼贴到书写，手账让我们慢下来，去观察那些被忽略的生活细节。它可以是凌乱的灵感，也可以是精美的排版。',
+    content:
+      '每一张手账纸都承载着一天的温度。从拼贴到书写，手账让我们慢下来，去观察那些被忽略的生活细节。它可以是凌乱的灵感，也可以是精美的排版。',
     members: '850',
     type: 'waterfall',
-    imageUri: 'https://images.unsplash.com/photo-1517842645767-c639042777db?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
+    imageUri:
+      'https://images.unsplash.com/photo-1517842645767-c639042777db?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
     images: [
       'https://images.unsplash.com/photo-1517842645767-c639042777db?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       'https://images.unsplash.com/photo-1508833319283-fcf372b7bbac?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
@@ -54,17 +68,24 @@ const mockCircles = [
     likes: 156,
     commentsCount: 8,
     comments: [
-      { id: 'c3', userName: '纸上谈情', text: '这页的色系好舒服呀！', time: '3小时前' },
+      {
+        id: 'c3',
+        userName: '纸上谈情',
+        text: '这页的色系好舒服呀！',
+        time: '3小时前',
+      },
     ],
   },
   {
     id: '3',
     title: '落日收集者',
     description: '捕捉世界各地的余晖。今天你的窗外是否也有一抹温柔？',
-    content: '全世界的落日都是大自然的告别吻。我们收集来自五湖四海的余晖，在忙碌的工作之余，别忘了抬头看看云端的那抹绯红。每一场落日都是独一无二的。',
+    content:
+      '全世界的落日都是大自然的告别吻。我们收集来自五湖四海的余晖，在忙碌的工作之余，别忘了抬头看看云端的那抹绯红。每一场落日都是独一无二的。',
     members: '2.1k',
     type: 'waterfall',
-    imageUri: 'https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
+    imageUri:
+      'https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
     images: [
       'https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
@@ -94,10 +115,12 @@ const mockCircles = [
     id: '5',
     title: '都市绿植社',
     description: '把森林搬进公寓。分享你的植物成长日记。',
-    content: '在水泥森林里种下一片绿意。无论是羞涩的龟背竹还是活泼的虎皮兰，它们都在静静地陪伴着我们成长。分享你的养护技巧，让我们一起把家变成小森林。',
+    content:
+      '在水泥森林里种下一片绿意。无论是羞涩的龟背竹还是活泼的虎皮兰，它们都在静静地陪伴着我们成长。分享你的养护技巧，让我们一起把家变成小森林。',
     members: '3.4k',
     type: 'waterfall',
-    imageUri: 'https://images.unsplash.com/photo-1485955900006-10f4d324d411?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
+    imageUri:
+      'https://images.unsplash.com/photo-1485955900006-10f4d324d411?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
     images: [
       'https://images.unsplash.com/photo-1485955900006-10f4d324d411?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       'https://images.unsplash.com/photo-1463453091185-61582044d556?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
@@ -119,12 +142,6 @@ const mockLocations = [
   { name: '成都 · 春熙路', sub: '锦江区核心商圈', id: 'l6' },
 ];
 
-const mockTopics = [
-  '清晨冥想',
-  '今日手账',
-  '落日收集',
-  '每日一善',
-  '自习室',
-];
+const mockTopics = ['清晨冥想', '今日手账', '落日收集', '每日一善', '自习室'];
 
 module.exports = { mockBuddies, mockCircles, mockLocations, mockTopics };

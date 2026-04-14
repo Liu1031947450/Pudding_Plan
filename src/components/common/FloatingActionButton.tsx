@@ -49,11 +49,7 @@ export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
 
   return (
     <Animated.View
-      style={[
-        styles.container,
-        { transform: [{ scale: scaleAnim }] },
-        style,
-      ]}
+      style={[styles.container, { transform: [{ scale: scaleAnim }] }, style]}
     >
       <TouchableOpacity
         style={[

@@ -15,14 +15,14 @@ router.get('/', authMiddleware, async (req, res) => {
     res.json({
       success: true,
       data: habits,
-      message: 'success'
+      message: 'success',
     });
   } catch (error) {
     console.error('获取习惯列表失败:', error);
     res.status(500).json({
       success: false,
       data: null,
-      error: '服务器内部错误'
+      error: '服务器内部错误',
     });
   }
 });
@@ -37,7 +37,7 @@ router.post('/:id/toggle', authMiddleware, async (req, res) => {
       return res.status(404).json({
         success: false,
         data: null,
-        error: 'Habit not found'
+        error: 'Habit not found',
       });
     }
 
@@ -47,30 +47,32 @@ router.post('/:id/toggle', authMiddleware, async (req, res) => {
       return res.status(404).json({
         success: false,
         data: null,
-        error: '当前用户不存在'
+        error: '当前用户不存在',
       });
     }
     if (String(habit.userId) !== internalUserId) {
       return res.status(403).json({
         success: false,
         data: null,
-        error: '无权操作此习惯'
+        error: '无权操作此习惯',
       });
     }
 
-    const updatedHabit = await db.updateHabit(id, { completed: !habit.completed });
+    const updatedHabit = await db.updateHabit(id, {
+      completed: !habit.completed,
+    });
 
     res.json({
       success: true,
       data: updatedHabit,
-      message: 'success'
+      message: 'success',
     });
   } catch (error) {
     console.error('切换习惯状态失败:', error);
     res.status(500).json({
       success: false,
       data: null,
-      error: '服务器内部错误'
+      error: '服务器内部错误',
     });
   }
 });
@@ -84,27 +86,27 @@ router.post('/', authMiddleware, async (req, res) => {
       return res.status(400).json({
         success: false,
         data: null,
-        error: '习惯标题不能为空'
+        error: '习惯标题不能为空',
       });
     }
 
     const newHabit = await db.createHabit({
       ...habitData,
       userId: req.userId,
-      completed: habitData.completed || false
+      completed: habitData.completed || false,
     });
 
     res.status(201).json({
       success: true,
       data: newHabit,
-      message: '习惯创建成功'
+      message: '习惯创建成功',
     });
   } catch (error) {
     console.error('创建习惯失败:', error);
     res.status(500).json({
       success: false,
       data: null,
-      error: '服务器内部错误'
+      error: '服务器内部错误',
     });
   }
 });
@@ -119,7 +121,7 @@ router.delete('/:id', authMiddleware, async (req, res) => {
       return res.status(404).json({
         success: false,
         data: null,
-        error: 'Habit not found'
+        error: 'Habit not found',
       });
     }
 
@@ -129,14 +131,14 @@ router.delete('/:id', authMiddleware, async (req, res) => {
       return res.status(404).json({
         success: false,
         data: null,
-        error: '当前用户不存在'
+        error: '当前用户不存在',
       });
     }
     if (String(habit.userId) !== internalUserId) {
       return res.status(403).json({
         success: false,
         data: null,
-        error: '无权删除此习惯'
+        error: '无权删除此习惯',
       });
     }
 
@@ -145,14 +147,14 @@ router.delete('/:id', authMiddleware, async (req, res) => {
     res.json({
       success: true,
       data: true,
-      message: '习惯删除成功'
+      message: '习惯删除成功',
     });
   } catch (error) {
     console.error('删除习惯失败:', error);
     res.status(500).json({
       success: false,
       data: null,
-      error: '服务器内部错误'
+      error: '服务器内部错误',
     });
   }
 });

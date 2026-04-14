@@ -43,8 +43,8 @@ router.post('/login', async (req, res) => {
           username: user.username,
           phone: user.phone,
           avatar: user.avatar,
-          bio: user.bio
-        }
+          bio: user.bio,
+        },
       },
       message: '登录成功',
     });
@@ -103,8 +103,8 @@ router.post('/register', async (req, res) => {
           username: newUser.username,
           phone: newUser.phone,
           avatar: newUser.avatar,
-          bio: newUser.bio
-        }
+          bio: newUser.bio,
+        },
       },
       message: '注册成功',
     });
@@ -135,7 +135,7 @@ router.get('/me', authMiddleware, async (req, res) => {
         username: user.username,
         phone: user.phone,
         avatar: user.avatar,
-        bio: user.bio
+        bio: user.bio,
       },
     });
   } catch (error) {
@@ -159,7 +159,11 @@ router.put('/me', authMiddleware, async (req, res) => {
   }
 
   try {
-    const updatedUser = await db.updateUserByUserId(req.userId, { username, avatar, bio });
+    const updatedUser = await db.updateUserByUserId(req.userId, {
+      username,
+      avatar,
+      bio,
+    });
 
     return res.json({
       success: true,
@@ -168,7 +172,7 @@ router.put('/me', authMiddleware, async (req, res) => {
         username: updatedUser.username,
         phone: updatedUser.phone,
         avatar: updatedUser.avatar,
-        bio: updatedUser.bio
+        bio: updatedUser.bio,
       },
       message: '资料更新成功',
     });
@@ -233,6 +237,43 @@ router.get('/user', async (req, res) => {
       success: false,
       error: '获取用户信息失败，请稍后重试',
     });
+  }
+});
+
+// 关注某人
+router.post('/follow/:targetUserId', authMiddleware, async (req, res) => {
+  try {
+    const { targetUserId } = req.params;
+    if (req.userId === targetUserId) {
+      return res.status(400).json({ success: false, error: '不能关注你自己' });
+    }
+
+    const { Friendship } = require('../models');
+    await Friendship.findOrCreate({
+      where: { userId: req.userId, friendId: targetUserId },
+    });
+
+    res.json({ success: true, message: '关注成功' });
+  } catch (error) {
+    console.error('关注失败:', error);
+    res.status(500).json({ success: false, error: '服务器内部错误' });
+  }
+});
+
+// 取消关注某人
+router.delete('/follow/:targetUserId', authMiddleware, async (req, res) => {
+  try {
+    const { targetUserId } = req.params;
+    const { Friendship } = require('../models');
+
+    await Friendship.destroy({
+      where: { userId: req.userId, friendId: targetUserId },
+    });
+
+    res.json({ success: true, message: '取消关注成功' });
+  } catch (error) {
+    console.error('取消关注失败:', error);
+    res.status(500).json({ success: false, error: '服务器内部错误' });
   }
 });
 

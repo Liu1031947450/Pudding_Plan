@@ -9,13 +9,13 @@ router.get('/', authMiddleware, async (req, res) => {
     res.json({
       success: true,
       data: badges,
-      message: 'success'
+      message: 'success',
     });
   } catch (error) {
     console.error('获取徽章失败:', error);
     res.status(500).json({
       success: false,
-      error: '获取徽章失败'
+      error: '获取徽章失败',
     });
   }
 });

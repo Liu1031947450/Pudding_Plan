@@ -31,9 +31,14 @@ const AuthScreen: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
-  const [toastType, setToastType] = useState<'success' | 'error' | 'info'>('error');
+  const [toastType, setToastType] = useState<'success' | 'error' | 'info'>(
+    'error',
+  );
 
-  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'error') => {
+  const showToast = (
+    message: string,
+    type: 'success' | 'error' | 'info' = 'error',
+  ) => {
     setToastMessage(message);
     setToastType(type);
     setToastVisible(true);
@@ -42,7 +47,7 @@ const AuthScreen: React.FC = () => {
   const startCountdown = () => {
     setCountdown(60);
     const timer = setInterval(() => {
-      setCountdown((prev) => {
+      setCountdown(prev => {
         if (prev <= 1) {
           clearInterval(timer);
           return 0;
@@ -109,7 +114,7 @@ const AuthScreen: React.FC = () => {
           username: name,
           phone,
           password,
-          confirmPassword
+          confirmPassword,
         });
         if (response.success) {
           showToast('注册成功，请登录', 'success');
@@ -119,7 +124,10 @@ const AuthScreen: React.FC = () => {
           setVerificationCode('');
         } else {
           // 检查是否是手机号已注册的错误
-          if (response.error?.includes('已注册') || response.error?.includes('已存在')) {
+          if (
+            response.error?.includes('已注册') ||
+            response.error?.includes('已存在')
+          ) {
             showToast('该手机号已注册，请直接登录', 'info');
             setIsLogin(true);
             setPassword('');
@@ -150,7 +158,9 @@ const AuthScreen: React.FC = () => {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.header}>
-            <Text style={styles.title}>{isLogin ? '欢迎回来' : '创建账号'}</Text>
+            <Text style={styles.title}>
+              {isLogin ? '欢迎回来' : '创建账号'}
+            </Text>
             <Text style={styles.subtitle}>
               {isLogin
                 ? '登录后继续使用布丁计划'
@@ -205,7 +215,9 @@ const AuthScreen: React.FC = () => {
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>验证码</Text>
                 <View style={styles.verificationCodeContainer}>
-                  <View style={[styles.inputWrapper, styles.verificationCodeInput]}>
+                  <View
+                    style={[styles.inputWrapper, styles.verificationCodeInput]}
+                  >
                     <TextInput
                       style={styles.input}
                       placeholder="请输入验证码"
@@ -217,16 +229,26 @@ const AuthScreen: React.FC = () => {
                     />
                   </View>
                   <TouchableOpacity
-                    style={[styles.getCodeButton, countdown > 0 && styles.getCodeButtonDisabled]}
+                    style={[
+                      styles.getCodeButton,
+                      countdown > 0 && styles.getCodeButtonDisabled,
+                    ]}
                     onPress={handleGetVerificationCode}
                     disabled={countdown > 0}
                   >
-                    <Text style={[styles.getCodeButtonText, countdown > 0 && styles.getCodeButtonTextDisabled]}>
+                    <Text
+                      style={[
+                        styles.getCodeButtonText,
+                        countdown > 0 && styles.getCodeButtonTextDisabled,
+                      ]}
+                    >
                       {countdown > 0 ? `${countdown}s` : '获取验证码'}
                     </Text>
                   </TouchableOpacity>
                 </View>
-                <Text style={styles.verificationCodeHint}>提示：请输入验证码 0000</Text>
+                <Text style={styles.verificationCodeHint}>
+                  提示：请输入验证码 0000
+                </Text>
               </View>
             )}
 
@@ -272,8 +294,11 @@ const AuthScreen: React.FC = () => {
               </View>
             )}
 
-            <TouchableOpacity 
-              style={[styles.submitButton, loading && styles.submitButtonDisabled]} 
+            <TouchableOpacity
+              style={[
+                styles.submitButton,
+                loading && styles.submitButtonDisabled,
+              ]}
               onPress={handleSubmit}
               disabled={loading}
             >

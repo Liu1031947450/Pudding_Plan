@@ -1,6 +1,18 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, ViewStyle, StyleProp } from 'react-native';
-import { Colors, Spacing, FontSize, BorderRadius } from '../../../constants/theme';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  ViewStyle,
+  StyleProp,
+} from 'react-native';
+import {
+  Colors,
+  Spacing,
+  FontSize,
+  BorderRadius,
+} from '../../../constants/theme';
 import { Card } from '../../../components/common/Card';
 import type { CircleMoment } from '../types';
 
@@ -34,7 +46,10 @@ export const CircleWaterfallItem: React.FC<CircleWaterfallItemProps> = ({
         <View style={styles.footer}>
           <View style={styles.author}>
             {circle.authorAvatarUri && (
-              <Image source={{ uri: circle.authorAvatarUri }} style={styles.authorAvatar} />
+              <Image
+                source={{ uri: circle.authorAvatarUri }}
+                style={styles.authorAvatar}
+              />
             )}
             <Text style={styles.authorName}>{circle.authorName}</Text>
           </View>

@@ -8,7 +8,9 @@ export const calendarApi = {
     year: number,
     month: number,
   ): Promise<ApiResponse<DayData[]>> => {
-    return apiClient.get<DayData[]>(`${API_ENDPOINTS.CALENDAR}?year=${year}&month=${month}`);
+    return apiClient.get<DayData[]>(
+      `${API_ENDPOINTS.CALENDAR}?year=${year}&month=${month}`,
+    );
   },
   // 获取每日金句
   getDailyQuote: async (): Promise<

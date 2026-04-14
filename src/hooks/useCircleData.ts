@@ -39,54 +39,61 @@ export const useCircleData = () => {
     [loadData],
   );
 
-  const toggleLikeCircle = useCallback(async (circleId: string): Promise<CircleListItem | null> => {
-    const targetCircle = circles.find(circle => circle.id === circleId);
-    if (!targetCircle) return null;
+  const toggleLikeCircle = useCallback(
+    async (circleId: string): Promise<CircleListItem | null> => {
+      const targetCircle = circles.find(circle => circle.id === circleId);
+      if (!targetCircle) return null;
 
-    const nextLiked = !targetCircle.isLiked;
-    const success = await circleService.toggleLikeCircle(targetCircle);
-    if (!success) return null;
+      const nextLiked = !targetCircle.isLiked;
+      const success = await circleService.toggleLikeCircle(targetCircle);
+      if (!success) return null;
 
-    let updatedCircle: CircleListItem | null = null;
-    setCircles(prev =>
-      prev.map(circle => {
-        if (circle.id !== circleId) return circle;
-        updatedCircle = {
-          ...circle,
-          isLiked: nextLiked,
-          likes: circle.type === 'waterfall'
-            ? Math.max(0, (circle.likes || 0) + (nextLiked ? 1 : -1))
-            : undefined,
-        } as CircleListItem;
-        return updatedCircle;
-      }),
-    );
+      let updatedCircle: CircleListItem | null = null;
+      setCircles(prev =>
+        prev.map(circle => {
+          if (circle.id !== circleId) return circle;
+          updatedCircle = {
+            ...circle,
+            isLiked: nextLiked,
+            likes:
+              circle.type === 'waterfall'
+                ? Math.max(0, (circle.likes || 0) + (nextLiked ? 1 : -1))
+                : undefined,
+          } as CircleListItem;
+          return updatedCircle;
+        }),
+      );
 
-    return updatedCircle;
-  }, [circles]);
+      return updatedCircle;
+    },
+    [circles],
+  );
 
-  const toggleCollectCircle = useCallback(async (circleId: string): Promise<CircleListItem | null> => {
-    const targetCircle = circles.find(circle => circle.id === circleId);
-    if (!targetCircle) return null;
+  const toggleCollectCircle = useCallback(
+    async (circleId: string): Promise<CircleListItem | null> => {
+      const targetCircle = circles.find(circle => circle.id === circleId);
+      if (!targetCircle) return null;
 
-    const nextCollected = !targetCircle.isCollected;
-    const success = await circleService.toggleCollectCircle(targetCircle);
-    if (!success) return null;
+      const nextCollected = !targetCircle.isCollected;
+      const success = await circleService.toggleCollectCircle(targetCircle);
+      if (!success) return null;
 
-    let updatedCircle: CircleListItem | null = null;
-    setCircles(prev =>
-      prev.map(circle => {
-        if (circle.id !== circleId) return circle;
-        updatedCircle = {
-          ...circle,
-          isCollected: nextCollected,
-        };
-        return updatedCircle;
-      }),
-    );
+      let updatedCircle: CircleListItem | null = null;
+      setCircles(prev =>
+        prev.map(circle => {
+          if (circle.id !== circleId) return circle;
+          updatedCircle = {
+            ...circle,
+            isCollected: nextCollected,
+          };
+          return updatedCircle;
+        }),
+      );
 
-    return updatedCircle;
-  }, [circles]);
+      return updatedCircle;
+    },
+    [circles],
+  );
 
   return {
     buddies,

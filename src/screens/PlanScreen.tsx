@@ -62,27 +62,30 @@ const PlanScreen: React.FC = () => {
     }, [currentUserId, refreshPlans, refreshNotifications]),
   );
 
-  const fetchRhythmData = React.useCallback(async (period: RhythmPeriod) => {
-    if (!currentUserId) {
-      setRhythmData([]);
-      return;
-    }
-
-    setRhythmLoading(true);
-    try {
-      const response =
-        period === 'week'
-          ? await rhythmApi.getWeek()
-          : await rhythmApi.getMonth();
-      if (response.success && response.data) {
-        setRhythmData(response.data);
+  const fetchRhythmData = React.useCallback(
+    async (period: RhythmPeriod) => {
+      if (!currentUserId) {
+        setRhythmData([]);
+        return;
       }
-    } catch (error) {
-      console.error('Failed to fetch rhythm data:', error);
-    } finally {
-      setRhythmLoading(false);
-    }
-  }, [currentUserId]);
+
+      setRhythmLoading(true);
+      try {
+        const response =
+          period === 'week'
+            ? await rhythmApi.getWeek()
+            : await rhythmApi.getMonth();
+        if (response.success && response.data) {
+          setRhythmData(response.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch rhythm data:', error);
+      } finally {
+        setRhythmLoading(false);
+      }
+    },
+    [currentUserId],
+  );
 
   // 监听周期变化，自动请求对应数据
   useEffect(() => {
@@ -105,7 +108,13 @@ const PlanScreen: React.FC = () => {
     } finally {
       setRefreshing(false);
     }
-  }, [currentUserId, refreshPlans, refreshNotifications, rhythmPeriod, fetchRhythmData]);
+  }, [
+    currentUserId,
+    refreshPlans,
+    refreshNotifications,
+    rhythmPeriod,
+    fetchRhythmData,
+  ]);
 
   const handleOpenAchievements = async () => {
     setBadgesLoading(true);
@@ -201,7 +210,9 @@ const PlanScreen: React.FC = () => {
         visible={notificationVisible}
         onClose={() => setNotificationVisible(false)}
         notifications={notifications}
-        onNotificationPress={id => currentUserId && markAsRead(id, currentUserId)}
+        onNotificationPress={id =>
+          currentUserId && markAsRead(id, currentUserId)
+        }
       />
 
       <AchievementDrawer

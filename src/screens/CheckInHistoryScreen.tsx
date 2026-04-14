@@ -36,7 +36,11 @@ const CheckInHistoryScreen: React.FC = () => {
   const renderItem = ({ item }: { item: CheckInRecord }) => (
     <View style={styles.item}>
       <View style={styles.dateCol}>
-        <MaterialIcons name="event-available" size={20} color={Colors.primary} />
+        <MaterialIcons
+          name="event-available"
+          size={20}
+          color={Colors.primary}
+        />
         <Text style={styles.date}>{item.date}</Text>
       </View>
       <View style={styles.plansCol}>
@@ -65,9 +69,15 @@ const CheckInHistoryScreen: React.FC = () => {
         </View>
       ) : records.length === 0 ? (
         <View style={styles.center}>
-          <MaterialIcons name="event-busy" size={64} color={Colors.outlineVariant} />
+          <MaterialIcons
+            name="event-busy"
+            size={64}
+            color={Colors.outlineVariant}
+          />
           <Text style={styles.emptyText}>暂无打卡记录</Text>
-          <Text style={styles.emptySubtext}>完成第一次打卡后，记录将在这里显示</Text>
+          <Text style={styles.emptySubtext}>
+            完成第一次打卡后，记录将在这里显示
+          </Text>
         </View>
       ) : (
         <FlatList
@@ -83,9 +93,23 @@ const CheckInHistoryScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.surface },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: Spacing.sm },
-  emptyText: { fontSize: FontSize.lg, color: Colors.onSurfaceVariant, fontWeight: '600' },
-  emptySubtext: { fontSize: FontSize.sm, color: Colors.outlineVariant, textAlign: 'center', paddingHorizontal: Spacing.xl },
+  center: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.sm,
+  },
+  emptyText: {
+    fontSize: FontSize.lg,
+    color: Colors.onSurfaceVariant,
+    fontWeight: '600',
+  },
+  emptySubtext: {
+    fontSize: FontSize.sm,
+    color: Colors.outlineVariant,
+    textAlign: 'center',
+    paddingHorizontal: Spacing.xl,
+  },
   list: { padding: Spacing.md, gap: Spacing.sm },
   item: {
     flexDirection: 'row',
@@ -95,7 +119,12 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
     gap: Spacing.sm,
   },
-  dateCol: { flexDirection: 'row', alignItems: 'center', gap: 6, minWidth: 120 },
+  dateCol: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    minWidth: 120,
+  },
   date: { fontSize: FontSize.sm, color: Colors.onSurface, fontWeight: '600' },
   plansCol: { flex: 1, gap: 2 },
   planTitle: { fontSize: FontSize.xs, color: Colors.onSurfaceVariant },
@@ -107,7 +136,11 @@ const styles = StyleSheet.create({
     minWidth: 28,
     alignItems: 'center',
   },
-  countText: { fontSize: FontSize.xs, color: Colors.primary, fontWeight: '700' },
+  countText: {
+    fontSize: FontSize.xs,
+    color: Colors.primary,
+    fontWeight: '700',
+  },
 });
 
 export default CheckInHistoryScreen;

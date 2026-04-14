@@ -37,11 +37,13 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
     >
       <View style={styles.overlay}>
         <Pressable style={styles.backdrop} onPress={onClose} />
-        <View style={[
-          styles.drawer, 
-          { height: drawerHeight as any },
-          height === 'auto' && { minHeight: 400 }
-        ]}>
+        <View
+          style={[
+            styles.drawer,
+            { height: drawerHeight as any },
+            height === 'auto' && { minHeight: 400 },
+          ]}
+        >
           <View style={styles.handle} />
 
           <View style={styles.header}>

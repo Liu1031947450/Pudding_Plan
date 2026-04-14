@@ -21,7 +21,9 @@ const BadgesScreen: React.FC = () => {
   const { user } = useAuth();
   const [badges, setBadges] = useState<Badge[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'all' | 'unlocked' | 'locked'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'unlocked' | 'locked'>(
+    'all',
+  );
 
   useEffect(() => {
     fetchBadges();
@@ -54,11 +56,7 @@ const BadgesScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <TopAppBar
-        title="我的勋章"
-        showBackButton
-        onBackPress={handleBack}
-      />
+      <TopAppBar title="我的勋章" showBackButton onBackPress={handleBack} />
 
       <ScrollView
         style={styles.scrollView}
@@ -70,7 +68,12 @@ const BadgesScreen: React.FC = () => {
             style={[styles.tab, activeTab === 'all' && styles.activeTab]}
             onPress={() => setActiveTab('all')}
           >
-            <Text style={[styles.tabText, activeTab === 'all' && styles.activeTabText]}>
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === 'all' && styles.activeTabText,
+              ]}
+            >
               全部
             </Text>
           </TouchableOpacity>
@@ -78,7 +81,12 @@ const BadgesScreen: React.FC = () => {
             style={[styles.tab, activeTab === 'unlocked' && styles.activeTab]}
             onPress={() => setActiveTab('unlocked')}
           >
-            <Text style={[styles.tabText, activeTab === 'unlocked' && styles.activeTabText]}>
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === 'unlocked' && styles.activeTabText,
+              ]}
+            >
               已获得
             </Text>
           </TouchableOpacity>
@@ -86,7 +94,12 @@ const BadgesScreen: React.FC = () => {
             style={[styles.tab, activeTab === 'locked' && styles.activeTab]}
             onPress={() => setActiveTab('locked')}
           >
-            <Text style={[styles.tabText, activeTab === 'locked' && styles.activeTabText]}>
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === 'locked' && styles.activeTabText,
+              ]}
+            >
               未获得
             </Text>
           </TouchableOpacity>
@@ -119,9 +132,13 @@ const BadgesScreen: React.FC = () => {
                     />
                   </View>
                   <Text style={styles.badgeTitle}>{badge.title}</Text>
-                  <Text style={styles.badgeDescription}>{badge.description}</Text>
+                  <Text style={styles.badgeDescription}>
+                    {badge.description}
+                  </Text>
                   {!badge.unlocked && (
-                    <Text style={styles.lockedHint}>继续努力，解锁此勋章！</Text>
+                    <Text style={styles.lockedHint}>
+                      继续努力，解锁此勋章！
+                    </Text>
                   )}
                 </View>
               </Card>

@@ -95,7 +95,10 @@ const SettingsScreen: React.FC = () => {
       });
       if (response.success && response.data) {
         await updateUser(response.data);
-        setProfile({ nickname: response.data.username, bio: response.data.bio || '' });
+        setProfile({
+          nickname: response.data.username,
+          bio: response.data.bio || '',
+        });
         setActiveDrawer(null);
         showToast('个人资料已更新');
       } else {
@@ -112,10 +115,7 @@ const SettingsScreen: React.FC = () => {
     switch (activeDrawer) {
       case '1':
         return (
-          <ProfileEditSheet
-            initialData={profile}
-            onSave={handleProfileSave}
-          />
+          <ProfileEditSheet initialData={profile} onSave={handleProfileSave} />
         );
       case '2':
         return (
@@ -229,7 +229,7 @@ const SettingsScreen: React.FC = () => {
       '7': '隐私政策',
       '8': '用户协议',
       '9': '清除所有数据',
-      '11': '意见反馈'
+      '11': '意见反馈',
     };
     return drawerTitles[activeDrawer || ''] || '设置';
   };
@@ -301,7 +301,7 @@ const SettingsScreen: React.FC = () => {
           value: {
             small: '小',
             medium: '标准',
-            large: '大'
+            large: '大',
           }[appearance.fontSize],
         },
       ],

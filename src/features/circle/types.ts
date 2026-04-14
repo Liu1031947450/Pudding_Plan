@@ -10,6 +10,7 @@ export interface CircleBase {
   imageUri?: string;
   isLiked?: boolean;
   isCollected?: boolean;
+  isFollowing?: boolean;
 }
 
 export interface CircleTopic extends CircleBase {

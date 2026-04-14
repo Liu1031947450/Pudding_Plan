@@ -28,11 +28,7 @@ class CalendarService {
     hasActivity: boolean,
     activityType?: 'primary' | 'secondary' | 'tertiary',
   ): Promise<ApiResponse<boolean>> {
-    return await calendarApi.updateDay(
-      day,
-      hasActivity,
-      activityType,
-    );
+    return await calendarApi.updateDay(day, hasActivity, activityType);
   }
 }
 

@@ -12,31 +12,37 @@ export const usePlanManagement = () => {
   const [selectedPlans, setSelectedPlans] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
 
-  const loadPlans = useCallback(async (userId?: string, silent = false) => {
-    if (!userId && !currentUserId) {
-      setPlans([]);
-      return;
-    }
+  const loadPlans = useCallback(
+    async (userId?: string, silent = false) => {
+      if (!userId && !currentUserId) {
+        setPlans([]);
+        return;
+      }
 
-    if (!silent) {
-      setLoading(true);
-    }
-    try {
-      const response = await planService.getPlans();
-      if (response.success && response.data) {
-        setPlans(response.data);
-      }
-    } catch (error) {
-      console.error('Failed to load plans:', error);
-    } finally {
       if (!silent) {
-        setLoading(false);
+        setLoading(true);
       }
-    }
-  }, [currentUserId]);
+      try {
+        const response = await planService.getPlans();
+        if (response.success && response.data) {
+          setPlans(response.data);
+        }
+      } catch (error) {
+        console.error('Failed to load plans:', error);
+      } finally {
+        if (!silent) {
+          setLoading(false);
+        }
+      }
+    },
+    [currentUserId],
+  );
 
   const handleCreatePlan = useCallback(
-    async (planData: Omit<Plan, 'id'>, userId?: string): Promise<ApiResponse<Plan>> => {
+    async (
+      planData: Omit<Plan, 'id'>,
+      userId?: string,
+    ): Promise<ApiResponse<Plan>> => {
       if (!userId && !currentUserId) {
         return { success: false, error: '当前用户未登录' };
       }
@@ -51,7 +57,11 @@ export const usePlanManagement = () => {
   );
 
   const handleUpdatePlan = useCallback(
-    async (id: string, planData: Partial<Plan>, userId?: string): Promise<ApiResponse<Plan>> => {
+    async (
+      id: string,
+      planData: Partial<Plan>,
+      userId?: string,
+    ): Promise<ApiResponse<Plan>> => {
       if (!userId && !currentUserId) {
         return { success: false, error: '当前用户未登录' };
       }
@@ -102,7 +112,11 @@ export const usePlanManagement = () => {
   );
 
   const handleCheckIn = useCallback(
-    async (id: string, date: string, userId?: string): Promise<ApiResponse<Plan>> => {
+    async (
+      id: string,
+      date: string,
+      userId?: string,
+    ): Promise<ApiResponse<Plan>> => {
       if (!userId && !currentUserId) {
         return { success: false, error: '当前用户未登录' };
       }

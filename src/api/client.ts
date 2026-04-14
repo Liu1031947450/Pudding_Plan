@@ -56,10 +56,14 @@ class ApiClient {
     try {
       const url = `${this.baseURL}${endpoint}`;
 
+      const isFormData = body instanceof FormData;
       const requestHeaders: Record<string, string> = {
-        'Content-Type': 'application/json',
         ...headers,
       };
+
+      if (!isFormData) {
+        requestHeaders['Content-Type'] = 'application/json';
+      }
 
       if (!skipAuth && authToken) {
         requestHeaders['Authorization'] = `Bearer ${authToken}`;
@@ -68,7 +72,7 @@ class ApiClient {
       const response = await fetch(url, {
         method,
         headers: requestHeaders,
-        body: body ? JSON.stringify(body) : undefined,
+        body: isFormData ? body : body ? JSON.stringify(body) : undefined,
         signal: controller.signal,
       });
 

@@ -1,4 +1,14 @@
-const { User, Plan, Habit, Notification, Badge } = require('../models');
+const {
+  User,
+  Plan,
+  Habit,
+  Notification,
+  Badge,
+  CircleMoment,
+  Like,
+  Collect,
+  Friendship,
+} = require('../models');
 const { mockNotifications } = require('./mockData/notificationData');
 const { mockBadges } = require('./mockData/badgeData');
 const { mockCircles } = require('./mockData/communityData');
@@ -21,7 +31,7 @@ class Database {
     const newUser = await User.create({
       username: userData.username,
       phone: userData.phone,
-      password: userData.password
+      password: userData.password,
     });
     return newUser;
   }
@@ -50,8 +60,21 @@ class Database {
       throw new Error('用户不存在');
     }
 
-    const plans = await Plan.findAll({ where: { userId: user.id } });
-    const habits = await Habit.findAll({ where: { userId: user.id } });
+    const [
+      plans,
+      habits,
+      momentsCount,
+      likesCount,
+      collectsCount,
+      friendsCount,
+    ] = await Promise.all([
+      Plan.findAll({ where: { userId: user.id } }),
+      Habit.findAll({ where: { userId: user.id } }),
+      CircleMoment.count({ where: { authorId: user.id } }),
+      Like.count({ where: { userId: user.userId } }),
+      Collect.count({ where: { userId: user.userId } }),
+      Friendship.count({ where: { userId: user.userId } }),
+    ]);
 
     const allCheckInDates = plans.flatMap(plan => plan.completedDate || []);
     const uniqueCheckInDates = [...new Set(allCheckInDates)].sort();
@@ -69,7 +92,8 @@ class Database {
         planTitles: plans
           .filter(plan => (plan.completedDate || []).includes(date))
           .map(plan => plan.title),
-        count: plans.filter(plan => (plan.completedDate || []).includes(date)).length,
+        count: plans.filter(plan => (plan.completedDate || []).includes(date))
+          .length,
       }));
 
     return {
@@ -79,6 +103,12 @@ class Database {
       totalHabits,
       totalPlans: plans.length,
       checkInRecords,
+      socialStats: {
+        moments: momentsCount,
+        likes: likesCount,
+        collects: collectsCount,
+        friends: friendsCount,
+      },
     };
   }
 
@@ -96,7 +126,9 @@ class Database {
 
     return Array.from({ length: daysInMonth }, (_, index) => {
       const day = index + 1;
-      const dateStr = `${yearInt}-${String(monthInt).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      const dateStr = `${yearInt}-${String(monthInt).padStart(2, '0')}-${String(
+        day,
+      ).padStart(2, '0')}`;
       const completedPlanIds = plans
         .filter(plan => (plan.completedDate || []).includes(dateStr))
         .map(plan => String(plan.id));
@@ -225,7 +257,10 @@ class Database {
       plan_3: () => stats.healingPlans >= 3,
       plan_5: () => stats.healingPlans >= 5,
       social_post_1: () => circlesCount >= 1,
-      all_rounder: () => stats.streakDays >= 7 && stats.totalCheckIns >= 10 && stats.healingPlans >= 3,
+      all_rounder: () =>
+        stats.streakDays >= 7 &&
+        stats.totalCheckIns >= 10 &&
+        stats.healingPlans >= 3,
     };
 
     for (const badge of badges) {
@@ -263,7 +298,9 @@ class Database {
       targetDate.setDate(today.getDate() - diff + index);
       const dateStr = targetDate.toISOString().split('T')[0];
 
-      const completedCount = plans.filter(plan => (plan.completedDate || []).includes(dateStr)).length;
+      const completedCount = plans.filter(plan =>
+        (plan.completedDate || []).includes(dateStr),
+      ).length;
       return {
         date: label,
         value: completedCount > 0 ? Math.min(100, completedCount * 50) : 0,
@@ -283,8 +320,12 @@ class Database {
 
     return Array.from({ length: daysInMonth }, (_, i) => {
       const day = i + 1;
-      const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-      const completedCount = plans.filter(plan => (plan.completedDate || []).includes(dateStr)).length;
+      const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(
+        day,
+      ).padStart(2, '0')}`;
+      const completedCount = plans.filter(plan =>
+        (plan.completedDate || []).includes(dateStr),
+      ).length;
       return {
         date: `${day}`,
         value: completedCount > 0 ? Math.min(100, completedCount * 50) : 0,

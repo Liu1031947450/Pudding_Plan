@@ -715,7 +715,7 @@ const sendResponse = (res, success, data, message = '', error = null) => {
     success,
     data,
     message,
-    error
+    error,
   });
 };
 
@@ -746,7 +746,7 @@ app.use('/api/new-route', newRoute);
 // server/src/data/mockData/newData.js
 const mockNewData = [
   { id: '1', name: '示例数据 1' },
-  { id: '2', name: '示例数据 2' }
+  { id: '2', name: '示例数据 2' },
 ];
 
 module.exports = { mockNewData };

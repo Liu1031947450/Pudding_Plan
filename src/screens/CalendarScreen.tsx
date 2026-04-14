@@ -258,7 +258,9 @@ const CalendarScreen: React.FC = () => {
         visible={notificationDrawerVisible}
         onClose={() => setNotificationDrawerVisible(false)}
         notifications={notifications}
-        onNotificationPress={id => currentUserId && markAsRead(id, currentUserId)}
+        onNotificationPress={id =>
+          currentUserId && markAsRead(id, currentUserId)
+        }
       />
 
       <BottomNavBar />

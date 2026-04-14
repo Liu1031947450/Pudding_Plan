@@ -26,7 +26,7 @@ function authMiddleware(req, res, next) {
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({
       success: false,
-      error: '未提供认证令牌'
+      error: '未提供认证令牌',
     });
   }
 
@@ -36,7 +36,7 @@ function authMiddleware(req, res, next) {
   if (!decoded) {
     return res.status(401).json({
       success: false,
-      error: '认证令牌无效或已过期'
+      error: '认证令牌无效或已过期',
     });
   }
 
@@ -47,5 +47,5 @@ function authMiddleware(req, res, next) {
 module.exports = {
   generateToken,
   verifyToken,
-  authMiddleware
+  authMiddleware,
 };

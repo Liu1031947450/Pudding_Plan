@@ -43,6 +43,17 @@ class CircleService {
       : await circlesApi.collectCircle(circle.id);
     return response.success;
   }
+
+  // Toggle follow status
+  async toggleFollowBuddy(
+    userId: string,
+    isFollowing: boolean,
+  ): Promise<boolean> {
+    const response = isFollowing
+      ? await circlesApi.unfollowUser(userId)
+      : await circlesApi.followUser(userId);
+    return response.success;
+  }
 }
 
 // Export singleton instance

@@ -8,7 +8,7 @@ const sendResponse = (res, success, data, message = '', error = null) => {
     success,
     data,
     message,
-    error
+    error,
   });
 };
 
@@ -28,7 +28,11 @@ router.get('/', authMiddleware, async (req, res) => {
       return sendResponse(res, false, null, '', '请提供有效的年份和月份');
     }
 
-    const calendarData = await db.getCalendarMonthDataByUserId(req.userId, year, month);
+    const calendarData = await db.getCalendarMonthDataByUserId(
+      req.userId,
+      year,
+      month,
+    );
     sendResponse(res, true, calendarData, '获取日历数据成功');
   } catch (error) {
     console.error('获取日历数据失败:', error);
@@ -69,11 +73,16 @@ router.patch('/', authMiddleware, (req, res) => {
       return sendResponse(res, false, null, '', '请提供日期');
     }
 
-    sendResponse(res, true, {
-      day,
-      hasActivity,
-      activityType,
-    }, '日历数据更新成功');
+    sendResponse(
+      res,
+      true,
+      {
+        day,
+        hasActivity,
+        activityType,
+      },
+      '日历数据更新成功',
+    );
   } catch (error) {
     sendResponse(res, false, null, '', '服务器内部错误');
   }

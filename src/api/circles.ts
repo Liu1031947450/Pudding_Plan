@@ -1,5 +1,5 @@
-import { apiClient, type ApiResponse, getAuthToken } from './client';
-import { API_ENDPOINTS, API_CONFIG } from './config';
+import { apiClient, type ApiResponse } from './client';
+import { API_ENDPOINTS } from './config';
 import type { CircleListItem, CircleMoment } from '../features/circle/types';
 import type { Buddy } from '../types/domain';
 
@@ -33,26 +33,19 @@ export const circlesApi = {
         type,
       } as any);
 
-      const response = await fetch(
-        `${API_CONFIG.BASE_URL.replace('/api', '')}/api/circles/upload`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${getAuthToken()}`,
-          },
-          body: formData,
-        },
+      return apiClient.post<string>(
+        API_ENDPOINTS.CIRCLES + '/upload',
+        formData,
       );
-
-      const data = await response.json();
-      return data;
     } catch (error: any) {
       return { success: false, error: error.message || '图片上传失败' };
     }
   },
 
   // 创建动态 (Moment)
-  createMoment: async (data: Partial<CircleMoment>): Promise<ApiResponse<CircleMoment>> => {
+  createMoment: async (
+    data: Partial<CircleMoment>,
+  ): Promise<ApiResponse<CircleMoment>> => {
     return apiClient.post<CircleMoment>(API_ENDPOINTS.CIRCLES, data);
   },
 
@@ -78,12 +71,26 @@ export const circlesApi = {
 
   // 收藏圈子动态
   collectCircle: async (id: string): Promise<ApiResponse<boolean>> => {
-    return apiClient.post<boolean>(API_ENDPOINTS.CIRCLE_DETAIL(id) + '/collect');
+    return apiClient.post<boolean>(
+      API_ENDPOINTS.CIRCLE_DETAIL(id) + '/collect',
+    );
   },
 
   // 取消收藏
   uncollectCircle: async (id: string): Promise<ApiResponse<boolean>> => {
-    return apiClient.delete<boolean>(API_ENDPOINTS.CIRCLE_DETAIL(id) + '/collect');
+    return apiClient.delete<boolean>(
+      API_ENDPOINTS.CIRCLE_DETAIL(id) + '/collect',
+    );
+  },
+
+  // 关注用户
+  followUser: async (userId: string): Promise<ApiResponse<boolean>> => {
+    return apiClient.post<boolean>(`/auth/follow/${userId}`);
+  },
+
+  // 取消关注
+  unfollowUser: async (userId: string): Promise<ApiResponse<boolean>> => {
+    return apiClient.delete<boolean>(`/auth/follow/${userId}`);
   },
 };
 

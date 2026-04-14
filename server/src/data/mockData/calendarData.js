@@ -68,15 +68,12 @@ const mockWeekRhythmData = [
   { date: '周日', value: 80 },
 ];
 
-const mockMonthRhythmData = Array.from(
-  { length: 30 },
-  (_, i) => ({
-    date: `${i + 1}`,
-    value: Math.max(
-      40,
-      Math.min(100, 65 + Math.sin(i / 4) * 25 + (Math.random() - 0.5) * 15),
-    ),
-  }),
-);
+const mockMonthRhythmData = Array.from({ length: 30 }, (_, i) => ({
+  date: `${i + 1}`,
+  value: Math.max(
+    40,
+    Math.min(100, 65 + Math.sin(i / 4) * 25 + (Math.random() - 0.5) * 15),
+  ),
+}));
 
 module.exports = { mockCalendarData, mockWeekRhythmData, mockMonthRhythmData };

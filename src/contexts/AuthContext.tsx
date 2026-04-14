@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from 'react';
 import * as SecureStore from 'expo-secure-store';
 import { setAuthToken } from '../api';
 
@@ -25,7 +31,9 @@ const AUTH_STORAGE_KEY = 'pudding_plan_auth';
 const AUTH_EXPIRY_KEY = 'pudding_plan_auth_expiry';
 const AUTH_TOKEN_KEY = 'pudding_plan_auth_token';
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -64,7 +72,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const login = async (tokenValue: string, userData: User) => {
     try {
       const expiryTime = Date.now() + 30 * 24 * 60 * 60 * 1000;
-      await SecureStore.setItemAsync(AUTH_STORAGE_KEY, JSON.stringify(userData));
+      await SecureStore.setItemAsync(
+        AUTH_STORAGE_KEY,
+        JSON.stringify(userData),
+      );
       await SecureStore.setItemAsync(AUTH_EXPIRY_KEY, expiryTime.toString());
       await SecureStore.setItemAsync(AUTH_TOKEN_KEY, tokenValue);
       setUser(userData);
@@ -78,7 +89,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const updateUser = async (userData: User) => {
     try {
-      await SecureStore.setItemAsync(AUTH_STORAGE_KEY, JSON.stringify(userData));
+      await SecureStore.setItemAsync(
+        AUTH_STORAGE_KEY,
+        JSON.stringify(userData),
+      );
       setUser(userData);
     } catch (error) {
       console.error('更新用户信息失败:', error);
@@ -106,7 +120,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, isLoading, login, logout, updateUser }}>
+    <AuthContext.Provider
+      value={{ user, token, isLoading, login, logout, updateUser }}
+    >
       {children}
     </AuthContext.Provider>
   );

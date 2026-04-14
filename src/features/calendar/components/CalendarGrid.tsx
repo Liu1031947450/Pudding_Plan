@@ -1,10 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import {
-  Colors,
-  Spacing,
-  FontSize,
-} from '../../../constants/theme';
+import { Colors, Spacing, FontSize } from '../../../constants/theme';
 import { Card } from '../../../components/common/Card';
 import { DayCell } from './DayCell';
 import type { DayData } from '../../../types/domain';

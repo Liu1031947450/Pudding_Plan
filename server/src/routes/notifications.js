@@ -8,7 +8,7 @@ const sendResponse = (res, success, data, message = '', error = null) => {
     success,
     data,
     message,
-    error
+    error,
   });
 };
 

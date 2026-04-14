@@ -59,11 +59,7 @@ const CheckInRecordsScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <TopAppBar
-        title="打卡记录"
-        showBackButton
-        onBackPress={handleBack}
-      />
+      <TopAppBar title="打卡记录" showBackButton onBackPress={handleBack} />
 
       <ScrollView
         style={styles.scrollView}
@@ -105,7 +101,9 @@ const CheckInRecordsScreen: React.FC = () => {
               color={Colors.outlineVariant}
             />
             <Text style={styles.emptyText}>暂无打卡记录</Text>
-            <Text style={styles.emptySubtext}>完成计划后，这里会显示你的打卡记录</Text>
+            <Text style={styles.emptySubtext}>
+              完成计划后，这里会显示你的打卡记录
+            </Text>
           </View>
         )}
       </ScrollView>

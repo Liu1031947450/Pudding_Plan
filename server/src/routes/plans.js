@@ -4,17 +4,24 @@ const db = require('../data/database');
 const { authMiddleware } = require('../middleware/auth');
 
 // 统一响应格式函数
-const sendResponse = (res, statusCode, success, data, message = '', error = null) => {
+const sendResponse = (
+  res,
+  statusCode,
+  success,
+  data,
+  message = '',
+  error = null,
+) => {
   res.status(statusCode).json({
     success,
     data,
     message,
-    error
+    error,
   });
 };
 
 // 验证计划数据
-const validatePlanData = (plan) => {
+const validatePlanData = plan => {
   if (!plan.title || !plan.totalDays) {
     return { valid: false, error: '计划标题和总天数为必填项' };
   }
@@ -25,7 +32,7 @@ const validatePlanData = (plan) => {
 };
 
 // 计算派生字段
-const calculateDerivedFields = (plan) => {
+const calculateDerivedFields = plan => {
   const currentDays = plan.completedDate ? plan.completedDate.length : 0;
   const progress = Math.round((currentDays / plan.totalDays) * 100);
   return {
@@ -33,7 +40,7 @@ const calculateDerivedFields = (plan) => {
     id: String(plan.id),
     currentDays,
     progress,
-    days: currentDays
+    days: currentDays,
   };
 };
 
@@ -106,7 +113,7 @@ router.post('/', authMiddleware, async (req, res) => {
       remindSetting: planData.remindSetting || [],
       rewords: planData.rewords || [],
       icon: planData.icon || 'flag',
-      color: planData.color || null
+      color: planData.color || null,
     });
 
     const planWithDerived = calculateDerivedFields(newPlan);

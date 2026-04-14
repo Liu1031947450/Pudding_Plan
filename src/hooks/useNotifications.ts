@@ -26,18 +26,23 @@ export const useNotifications = () => {
     setNotificationVisible(prev => !prev);
   }, []);
 
-  const markAsRead = useCallback(async (id: string) => {
-    if (!currentUserId) {
-      return;
-    }
+  const markAsRead = useCallback(
+    async (id: string) => {
+      if (!currentUserId) {
+        return;
+      }
 
-    const response = await notificationsApi.markAsRead(id);
-    if (response.success) {
-      setNotifications(prev =>
-        prev.map(notif => (notif.id === id ? { ...notif, read: true } : notif)),
-      );
-    }
-  }, [currentUserId]);
+      const response = await notificationsApi.markAsRead(id);
+      if (response.success) {
+        setNotifications(prev =>
+          prev.map(notif =>
+            notif.id === id ? { ...notif, read: true } : notif,
+          ),
+        );
+      }
+    },
+    [currentUserId],
+  );
 
   const markAllAsRead = useCallback(async () => {
     if (!currentUserId) {
@@ -50,16 +55,19 @@ export const useNotifications = () => {
     }
   }, [currentUserId]);
 
-  const deleteNotification = useCallback(async (id: string) => {
-    if (!currentUserId) {
-      return;
-    }
+  const deleteNotification = useCallback(
+    async (id: string) => {
+      if (!currentUserId) {
+        return;
+      }
 
-    const response = await notificationsApi.delete(id);
-    if (response.success) {
-      setNotifications(prev => prev.filter(notif => notif.id !== id));
-    }
-  }, [currentUserId]);
+      const response = await notificationsApi.delete(id);
+      if (response.success) {
+        setNotifications(prev => prev.filter(notif => notif.id !== id));
+      }
+    },
+    [currentUserId],
+  );
 
   const unreadCount = notifications.filter(n => !n.read).length;
 

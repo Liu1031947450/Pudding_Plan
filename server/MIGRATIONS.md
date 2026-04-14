@@ -9,6 +9,7 @@
 ## 当前说明
 
 当前项目已建立最小可用的 Sequelize migration 结构，包括：
+
 - `server/.sequelizerc`
 - `server/config/config.js`
 - `server/migrations/`

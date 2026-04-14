@@ -5,7 +5,7 @@ const Colors = {
 };
 
 const templateDetails = {
-  '1': {
+  1: {
     id: '1',
     title: '晨间瑜伽与冥想',
     subtitle: '开启活力一天',
@@ -42,7 +42,7 @@ const templateDetails = {
     difficulty: 'easy',
     frequency: '每天早晨',
   },
-  '2': {
+  2: {
     id: '2',
     title: '早起挑战',
     subtitle: '养成早睡早起习惯',
@@ -79,7 +79,7 @@ const templateDetails = {
     difficulty: 'medium',
     frequency: '每天',
   },
-  '3': {
+  3: {
     id: '3',
     title: '阅读计划',
     subtitle: '每天阅读30分钟',
@@ -116,7 +116,7 @@ const templateDetails = {
     difficulty: 'easy',
     frequency: '每天30分钟',
   },
-  '4': {
+  4: {
     id: '4',
     title: '健身减脂',
     subtitle: '科学运动塑形',
@@ -152,7 +152,7 @@ const templateDetails = {
     difficulty: 'hard',
     frequency: '每周5次',
   },
-  '5': {
+  5: {
     id: '5',
     title: '戒糖挑战',
     subtitle: '远离高糖食物',
@@ -188,7 +188,7 @@ const templateDetails = {
     difficulty: 'medium',
     frequency: '每天',
   },
-  '6': {
+  6: {
     id: '6',
     title: '学习新技能',
     subtitle: '每天练习1小时',

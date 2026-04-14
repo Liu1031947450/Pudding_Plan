@@ -12,7 +12,12 @@ import {
   Platform,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Colors, Spacing, FontSize, BorderRadius } from '../../../constants/theme';
+import {
+  Colors,
+  Spacing,
+  FontSize,
+  BorderRadius,
+} from '../../../constants/theme';
 import type { CircleListItem, CircleMoment } from '../types';
 import { DEFAULT_AVATAR } from '../constants';
 import { circleService } from '../../../services/circleService';
@@ -102,6 +107,26 @@ export const CircleDetailModal: React.FC<CircleDetailModalProps> = ({
     await onDataChange?.();
   };
 
+  const handleToggleFollow = async () => {
+    if (!circle || circle.type !== 'waterfall' || !circle.authorUserId) return;
+    const authorId = String(circle.authorUserId);
+    const nextFollowing = !circle.isFollowing;
+    const nextCircle = {
+      ...circle,
+      isFollowing: nextFollowing,
+    };
+    setCircle(nextCircle);
+    const success = await circleService.toggleFollowBuddy(
+      authorId,
+      !nextFollowing,
+    );
+    if (!success) {
+      // Revert on failure
+      setCircle({ ...circle, isFollowing: !nextFollowing });
+    }
+    await onDataChange?.();
+  };
+
   return (
     <Modal
       visible={visible}
@@ -112,7 +137,11 @@ export const CircleDetailModal: React.FC<CircleDetailModalProps> = ({
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <MaterialIcons name="expand-more" size={32} color={Colors.onSurface} />
+            <MaterialIcons
+              name="expand-more"
+              size={32}
+              color={Colors.onSurface}
+            />
           </TouchableOpacity>
           <View style={styles.authorInfo}>
             <Image
@@ -126,9 +155,26 @@ export const CircleDetailModal: React.FC<CircleDetailModalProps> = ({
             />
             <Text style={styles.authorName}>{displayAuthorName}</Text>
           </View>
-          <TouchableOpacity style={styles.followButton}>
-            <Text style={styles.followButtonText}>关注</Text>
-          </TouchableOpacity>
+          {circle.type === 'waterfall' &&
+            circle.authorUserId &&
+            String(circle.authorUserId) !== String(currentUserId) && (
+              <TouchableOpacity
+                style={[
+                  styles.followButton,
+                  circle.isFollowing && styles.followedButton,
+                ]}
+                onPress={handleToggleFollow}
+              >
+                <Text
+                  style={[
+                    styles.followButtonText,
+                    circle.isFollowing && styles.followedButtonText,
+                  ]}
+                >
+                  {circle.isFollowing ? '已关注' : '关注'}
+                </Text>
+              </TouchableOpacity>
+            )}
         </View>
 
         <ScrollView showsVerticalScrollIndicator={false}>
@@ -142,7 +188,11 @@ export const CircleDetailModal: React.FC<CircleDetailModalProps> = ({
                 scrollEventThrottle={16}
               >
                 {images.map((uri, index) => (
-                  <Image key={index} source={{ uri }} style={styles.sliderImage} />
+                  <Image
+                    key={index}
+                    source={{ uri }}
+                    style={styles.sliderImage}
+                  />
                 ))}
               </ScrollView>
               {images.length > 1 && (
@@ -168,13 +218,17 @@ export const CircleDetailModal: React.FC<CircleDetailModalProps> = ({
                 ? circle.content || circle.description
                 : circle.description}
             </Text>
-            <Text style={styles.time}>{loading ? '加载中...' : '编辑于 刚刚'}</Text>
+            <Text style={styles.time}>
+              {loading ? '加载中...' : '编辑于 刚刚'}
+            </Text>
           </View>
 
           {circle.type === 'waterfall' && (
             <View style={styles.commentsSection}>
               <View style={styles.commentsHeader}>
-                <Text style={styles.commentsTitle}>共 {circle.commentsCount || 0} 条评论</Text>
+                <Text style={styles.commentsTitle}>
+                  共 {circle.commentsCount || 0} 条评论
+                </Text>
               </View>
               {circle.comments?.map(comment => (
                 <View key={comment.id} style={styles.commentItem}>
@@ -190,7 +244,9 @@ export const CircleDetailModal: React.FC<CircleDetailModalProps> = ({
                 </View>
               ))}
               {(!circle.comments || circle.comments.length === 0) && (
-                <Text style={styles.emptyComments}>快来发表你的第一个评论吧 ~</Text>
+                <Text style={styles.emptyComments}>
+                  快来发表你的第一个评论吧 ~
+                </Text>
               )}
             </View>
           )}
@@ -198,11 +254,18 @@ export const CircleDetailModal: React.FC<CircleDetailModalProps> = ({
 
         <View style={styles.footer}>
           <View style={styles.inputPlaceholder}>
-            <MaterialIcons name="edit" size={18} color={Colors.onSurfaceVariant} />
+            <MaterialIcons
+              name="edit"
+              size={18}
+              color={Colors.onSurfaceVariant}
+            />
             <Text style={styles.inputPlaceholderText}>说点什么...</Text>
           </View>
           <View style={styles.interactionIcons}>
-            <TouchableOpacity onPress={handleToggleLike} style={styles.iconButton}>
+            <TouchableOpacity
+              onPress={handleToggleLike}
+              style={styles.iconButton}
+            >
               <MaterialIcons
                 name={circle.isLiked ? 'favorite' : 'favorite-border'}
                 size={24}
@@ -212,7 +275,10 @@ export const CircleDetailModal: React.FC<CircleDetailModalProps> = ({
                 {circle.type === 'waterfall' ? circle.likes || 0 : ''}
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleToggleCollect} style={styles.iconButton}>
+            <TouchableOpacity
+              onPress={handleToggleCollect}
+              style={styles.iconButton}
+            >
               <MaterialIcons
                 name={circle.isCollected ? 'star' : 'star-border'}
                 size={26}
@@ -221,7 +287,11 @@ export const CircleDetailModal: React.FC<CircleDetailModalProps> = ({
               <Text style={styles.iconCount}>收藏</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.iconButton}>
-              <MaterialIcons name="chat-bubble-outline" size={22} color={Colors.onSurface} />
+              <MaterialIcons
+                name="chat-bubble-outline"
+                size={22}
+                color={Colors.onSurface}
+              />
               <Text style={styles.iconCount}>
                 {circle.type === 'waterfall' ? circle.commentsCount || 0 : ''}
               </Text>
@@ -271,12 +341,20 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: BorderRadius.full,
     borderWidth: 1,
+    borderColor: Colors.primary,
+    backgroundColor: `${Colors.primary}10`,
+  },
+  followedButton: {
     borderColor: Colors.outlineVariant,
+    backgroundColor: Colors.white,
   },
   followButtonText: {
     fontSize: FontSize.sm,
     fontWeight: '600',
-    color: Colors.onSurface,
+    color: Colors.primary,
+  },
+  followedButtonText: {
+    color: Colors.onSurfaceVariant,
   },
   sliderContainer: {
     width: SCREEN_WIDTH,

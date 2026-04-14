@@ -15,7 +15,8 @@ const CirclesScreen: React.FC = () => {
   const { user } = useAuth();
   const currentUserId = user?.id;
   const { circles, refreshData, loading } = useCircleData();
-  const [notificationDrawerVisible, setNotificationDrawerVisible] = useState(false);
+  const [notificationDrawerVisible, setNotificationDrawerVisible] =
+    useState(false);
   const [selectedCircleId, setSelectedCircleId] = useState<string | null>(null);
   const [detailVisible, setDetailVisible] = useState(false);
 
@@ -50,7 +51,7 @@ const CirclesScreen: React.FC = () => {
 
       refreshData();
       refreshNotifications(currentUserId);
-    }, [currentUserId, refreshData, refreshNotifications])
+    }, [currentUserId, refreshData, refreshNotifications]),
   );
 
   const handleOpenNotifications = () => {
@@ -89,7 +90,10 @@ const CirclesScreen: React.FC = () => {
           <RefreshControl refreshing={loading} onRefresh={refreshData} />
         }
       >
-        <CircleWaterfall circles={displayCircles} onCirclePress={handleCirclePress} />
+        <CircleWaterfall
+          circles={displayCircles}
+          onCirclePress={handleCirclePress}
+        />
       </ScrollView>
 
       <FloatingActionButton onPress={handleCreatePost} />
