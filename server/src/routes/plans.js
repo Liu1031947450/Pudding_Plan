@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../data/database');
+const { authMiddleware } = require('../middleware/auth');
 
 // 统一响应格式函数
-const sendResponse = (res, success, data, message = '', error = null) => {
-  res.json({
+const sendResponse = (res, statusCode, success, data, message = '', error = null) => {
+  res.status(statusCode).json({
     success,
     data,
     message,
@@ -23,132 +24,173 @@ const validatePlanData = (plan) => {
   return { valid: true };
 };
 
-// 获取所有计划
-router.get('/', (req, res) => {
+// 计算派生字段
+const calculateDerivedFields = (plan) => {
+  const currentDays = plan.completedDate ? plan.completedDate.length : 0;
+  const progress = Math.round((currentDays / plan.totalDays) * 100);
+  return {
+    ...plan.toJSON(),
+    currentDays,
+    progress,
+    days: currentDays
+  };
+};
+
+// 获取所有计划（需要认证）
+router.get('/', authMiddleware, async (req, res) => {
   try {
-    sendResponse(res, true, db.plans, '获取计划列表成功');
+    const plans = await db.getPlansByUserId(req.userId);
+    const plansWithDerived = plans.map(calculateDerivedFields);
+    sendResponse(res, 200, true, plansWithDerived, '获取计划列表成功');
   } catch (error) {
-    sendResponse(res, false, null, '', '服务器内部错误');
+    console.error('获取计划列表失败:', error);
+    sendResponse(res, 500, false, null, '', '服务器内部错误');
   }
 });
 
-// 获取单个计划
-router.get('/:id', (req, res) => {
+// 获取单个计划（需要认证）
+router.get('/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
-    const plan = db.plans.find(p => p.id === id);
+    const plan = await db.getPlanById(id);
+
     if (!plan) {
-      return sendResponse(res, false, null, '', '未找到计划');
+      return sendResponse(res, 404, false, null, '', '未找到计划');
     }
-    sendResponse(res, true, plan, '获取计划详情成功');
+
+    // 验证计划所有权
+    if (plan.userId !== req.userId) {
+      return sendResponse(res, 403, false, null, '', '无权访问此计划');
+    }
+
+    const planWithDerived = calculateDerivedFields(plan);
+    sendResponse(res, 200, true, planWithDerived, '获取计划详情成功');
   } catch (error) {
-    sendResponse(res, false, null, '', '服务器内部错误');
+    console.error('获取计划详情失败:', error);
+    sendResponse(res, 500, false, null, '', '服务器内部错误');
   }
 });
 
-// 创建计划
-router.post('/', (req, res) => {
+// 创建计划（需要认证）
+router.post('/', authMiddleware, async (req, res) => {
   try {
-    const plan = req.body;
-    
+    const planData = req.body;
+
     // 验证数据
-    const validation = validatePlanData(plan);
+    const validation = validatePlanData(planData);
     if (!validation.valid) {
-      return sendResponse(res, false, null, '', validation.error);
+      return sendResponse(res, 400, false, null, '', validation.error);
     }
-    
-    const newPlan = {
-      ...plan,
-      id: Date.now().toString(),
-      completedDate: plan.completedDate || [],
-      currentDays: 0,
-      progress: 0,
-      days: 0
-    };
-    
-    db.plans.push(newPlan);
-    sendResponse(res, true, newPlan, '计划创建成功');
+
+    const newPlan = await db.createPlan({
+      ...planData,
+      userId: req.userId,
+      completedDate: planData.completedDate || [],
+      type: planData.type || 0,
+      remindSetting: planData.remindSetting || [],
+      rewords: planData.rewords || [],
+      icon: planData.icon || 'flag',
+      color: planData.color || null
+    });
+
+    const planWithDerived = calculateDerivedFields(newPlan);
+    sendResponse(res, 201, true, planWithDerived, '计划创建成功');
   } catch (error) {
-    sendResponse(res, false, null, '', '服务器内部错误');
+    console.error('创建计划失败:', error);
+    sendResponse(res, 500, false, null, '', '服务器内部错误');
   }
 });
 
-// 更新计划
-router.put('/:id', (req, res) => {
+// 更新计划（需要认证）
+router.put('/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
-    
-    const index = db.plans.findIndex(p => p.id === id);
-    if (index === -1) {
-      return sendResponse(res, false, null, '', '未找到计划');
+
+    const plan = await db.getPlanById(id);
+    if (!plan) {
+      return sendResponse(res, 404, false, null, '', '未找到计划');
     }
-    
+
+    // 验证计划所有权
+    if (plan.userId !== req.userId) {
+      return sendResponse(res, 403, false, null, '', '无权修改此计划');
+    }
+
     // 验证更新数据
     if (updates.title || updates.totalDays) {
-      const validation = validatePlanData({ ...db.plans[index], ...updates });
+      const validation = validatePlanData({ ...plan.toJSON(), ...updates });
       if (!validation.valid) {
-        return sendResponse(res, false, null, '', validation.error);
+        return sendResponse(res, 400, false, null, '', validation.error);
       }
     }
-    
-    db.plans[index] = { ...db.plans[index], ...updates };
-    
-    // 重新计算进度
-    if (updates.completedDate || updates.totalDays) {
-      const updatedPlan = db.plans[index];
-      updatedPlan.currentDays = updatedPlan.completedDate.length;
-      updatedPlan.days = updatedPlan.currentDays;
-      updatedPlan.progress = Math.round((updatedPlan.currentDays / updatedPlan.totalDays) * 100);
-    }
-    
-    sendResponse(res, true, db.plans[index], '计划更新成功');
+
+    const updatedPlan = await db.updatePlan(id, updates);
+    const planWithDerived = calculateDerivedFields(updatedPlan);
+
+    sendResponse(res, 200, true, planWithDerived, '计划更新成功');
   } catch (error) {
-    sendResponse(res, false, null, '', '服务器内部错误');
+    console.error('更新计划失败:', error);
+    sendResponse(res, 500, false, null, '', '服务器内部错误');
   }
 });
 
-// 删除计划
-router.delete('/:id', (req, res) => {
+// 删除计划（需要认证）
+router.delete('/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
-    const index = db.plans.findIndex(p => p.id === id);
-    if (index === -1) {
-      return sendResponse(res, false, null, '', '未找到计划');
+
+    const plan = await db.getPlanById(id);
+    if (!plan) {
+      return sendResponse(res, 404, false, null, '', '未找到计划');
     }
-    
-    db.plans.splice(index, 1);
-    sendResponse(res, true, true, '计划删除成功');
+
+    // 验证计划所有权
+    if (plan.userId !== req.userId) {
+      return sendResponse(res, 403, false, null, '', '无权删除此计划');
+    }
+
+    await db.deletePlan(id);
+    sendResponse(res, 200, true, true, '计划删除成功');
   } catch (error) {
-    sendResponse(res, false, null, '', '服务器内部错误');
+    console.error('删除计划失败:', error);
+    sendResponse(res, 500, false, null, '', '服务器内部错误');
   }
 });
 
-// 计划打卡
-router.post('/:id/check-in', (req, res) => {
+// 计划打卡（需要认证）
+router.post('/:id/check-in', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     const { date } = req.query;
-    
+
     if (!date) {
-      return sendResponse(res, false, null, '', '打卡日期为必填项');
+      return sendResponse(res, 400, false, null, '', '打卡日期为必填项');
     }
-    
-    const plan = db.plans.find(p => p.id === id);
+
+    const plan = await db.getPlanById(id);
     if (!plan) {
-      return sendResponse(res, false, null, '', '未找到计划');
+      return sendResponse(res, 404, false, null, '', '未找到计划');
     }
-    
-    if (!plan.completedDate.includes(date)) {
-      plan.completedDate.push(date);
-      plan.currentDays = plan.completedDate.length;
-      plan.days = plan.currentDays;
-      plan.progress = Math.round((plan.currentDays / plan.totalDays) * 100);
+
+    // 验证计划所有权
+    if (plan.userId !== req.userId) {
+      return sendResponse(res, 403, false, null, '', '无权操作此计划');
     }
-    
-    sendResponse(res, true, plan, '打卡成功');
+
+    const completedDate = plan.completedDate || [];
+    if (!completedDate.includes(date)) {
+      completedDate.push(date);
+      const updatedPlan = await db.updatePlan(id, { completedDate });
+      const planWithDerived = calculateDerivedFields(updatedPlan);
+      sendResponse(res, 200, true, planWithDerived, '打卡成功');
+    } else {
+      const planWithDerived = calculateDerivedFields(plan);
+      sendResponse(res, 200, true, planWithDerived, '今日已打卡');
+    }
   } catch (error) {
-    sendResponse(res, false, null, '', '服务器内部错误');
+    console.error('打卡失败:', error);
+    sendResponse(res, 500, false, null, '', '服务器内部错误');
   }
 });
 

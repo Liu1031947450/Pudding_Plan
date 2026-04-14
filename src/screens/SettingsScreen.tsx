@@ -12,6 +12,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize, BorderRadius } from '../constants/theme';
 import { TopAppBar, Toast, BottomDrawer } from '../components';
 import { useAuth } from '../contexts';
+import { authApi } from '../api';
 import {
   SettingSection,
   ProfileEditSheet,
@@ -41,17 +42,18 @@ interface SettingSectionData {
 
 const SettingsScreen: React.FC = () => {
   const navigation = useNavigation();
-  const { logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
   const [activeDrawer, setActiveDrawer] = React.useState<string | null>(null);
   const [toastVisible, setToastVisible] = React.useState(false);
   const [toastMessage, setToastMessage] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
 
   // 本地状态
   const [profile, setProfile] = React.useState({
-    nickname: '',
+    nickname: user?.username || '',
     bio: '',
   });
-  const [phone, setPhone] = React.useState('');
+  const [phone, setPhone] = React.useState(user?.phone || '');
   const [notifEnabled, setNotifEnabled] = React.useState(false);
   const [notifTime, setNotifTime] = React.useState('08:00');
   const [dndRange, setDndRange] = React.useState({
@@ -62,6 +64,13 @@ const SettingsScreen: React.FC = () => {
     theme: 'light' | 'dark' | 'system';
     fontSize: 'small' | 'medium' | 'large';
   }>({ theme: 'system', fontSize: 'medium' });
+
+  React.useEffect(() => {
+    if (user) {
+      setProfile({ nickname: user.username, bio: '' });
+      setPhone(user.phone);
+    }
+  }, [user]);
 
   const showToast = (message: string) => {
     setToastMessage(message);
@@ -76,17 +85,32 @@ const SettingsScreen: React.FC = () => {
     setActiveDrawer(itemId);
   };
 
+  const handleProfileSave = async (data: { nickname: string; bio: string }) => {
+    setLoading(true);
+    try {
+      const response = await authApi.updateProfile({ username: data.nickname });
+      if (response.success && response.data) {
+        await updateUser(response.data);
+        setProfile(prev => ({ ...prev, nickname: data.nickname }));
+        setActiveDrawer(null);
+        showToast('个人资料已更新');
+      } else {
+        showToast(response.error || '更新失败');
+      }
+    } catch (error) {
+      showToast('更新失败，请稍后重试');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const renderDrawerContent = () => {
     switch (activeDrawer) {
       case '1':
         return (
           <ProfileEditSheet
             initialData={profile}
-            onSave={data => {
-              setProfile(prev => ({ ...prev, ...data }));
-              setActiveDrawer(null);
-              showToast('个人资料已更新');
-            }}
+            onSave={handleProfileSave}
           />
         );
       case '2':
@@ -176,7 +200,6 @@ const SettingsScreen: React.FC = () => {
               setActiveDrawer(null);
               await logout();
               showToast('已安全退出');
-              // 导航到登录注册页面
               navigation.reset({
                 index: 0,
                 routes: [{ name: 'Auth' as never }],
@@ -208,7 +231,7 @@ const SettingsScreen: React.FC = () => {
   };
 
   const getDrawerHeight = () => {
-    if (['9', 'logout'].includes(activeDrawer || '')) return '30%';
+    if (['9', 'logout'].includes(activeDrawer || '')) return '65%';
     if (['7', '8', '11', '1', '3'].includes(activeDrawer || '')) return '85%';
     return '70%';
   };

@@ -1,9 +1,9 @@
 // API Configuration
 export const API_CONFIG = {
-  BASE_URL: __DEV__
-    ? 'http://192.168.0.120:3000/api'  // 使用局域网真实IP访问
-    : 'https://api.puddingplan.com',
-  TIMEOUT: 10000,
+  BASE_URL: process.env.REACT_APP_API_URL || (__DEV__
+    ? 'http://192.168.0.101:3000/api'
+    : 'https://api.puddingplan.com'),
+  TIMEOUT: parseInt(process.env.REACT_APP_TIMEOUT || '10000', 10),
   RETRY_ATTEMPTS: 3,
 };
 

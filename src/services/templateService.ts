@@ -1,24 +1,51 @@
 import type { TemplateDetail } from '../data/templates';
+import { templateDetails } from '../data/templates';
 import { templatesApi } from '../api';
 
 // Template Service - handles template operations
 class TemplateService {
   // Get all templates
   async getAllTemplates(): Promise<TemplateDetail[]> {
-    const response = await templatesApi.getAll();
-    return response.data || [];
+    try {
+      const response = await templatesApi.getAll();
+      if (response.success && response.data && response.data.length > 0) {
+        return response.data;
+      }
+    } catch (error) {
+      console.error('获取远程模板失败，回退到本地系统模板:', error);
+    }
+
+    return Object.values(templateDetails);
   }
 
   // Get template by ID
   async getTemplateById(id: string): Promise<TemplateDetail | undefined> {
-    const response = await templatesApi.getById(id);
-    return response.data;
+    try {
+      const response = await templatesApi.getById(id);
+      if (response.success && response.data) {
+        return response.data;
+      }
+    } catch (error) {
+      console.error('获取远程模板详情失败，回退到本地系统模板:', error);
+    }
+
+    return templateDetails[id];
   }
 
   // Get templates by category
   async getTemplatesByCategory(category: string): Promise<TemplateDetail[]> {
-    const response = await templatesApi.getByCategory(category);
-    return response.data || [];
+    try {
+      const response = await templatesApi.getByCategory(category);
+      if (response.success && response.data) {
+        return response.data;
+      }
+    } catch (error) {
+      console.error('按分类获取远程模板失败，回退到本地系统模板:', error);
+    }
+
+    return Object.values(templateDetails).filter(
+      template => template.category === category,
+    );
   }
 
   // Get templates by difficulty

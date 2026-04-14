@@ -14,6 +14,18 @@ interface RequestOptions {
   headers?: Record<string, string>;
   body?: any;
   timeout?: number;
+  skipAuth?: boolean;
+}
+
+// Token storage
+let authToken: string | null = null;
+
+export function setAuthToken(token: string | null) {
+  authToken = token;
+}
+
+export function getAuthToken(): string | null {
+  return authToken;
 }
 
 // API Client
@@ -35,6 +47,7 @@ class ApiClient {
       headers = {},
       body,
       timeout = this.timeout,
+      skipAuth = false,
     } = options;
 
     const controller = new AbortController();
@@ -42,13 +55,19 @@ class ApiClient {
 
     try {
       const url = `${this.baseURL}${endpoint}`;
-      
+
+      const requestHeaders: Record<string, string> = {
+        'Content-Type': 'application/json',
+        ...headers,
+      };
+
+      if (!skipAuth && authToken) {
+        requestHeaders['Authorization'] = `Bearer ${authToken}`;
+      }
+
       const response = await fetch(url, {
         method,
-        headers: {
-          'Content-Type': 'application/json',
-          ...headers,
-        },
+        headers: requestHeaders,
         body: body ? JSON.stringify(body) : undefined,
         signal: controller.signal,
       });
@@ -66,6 +85,9 @@ class ApiClient {
       }
 
       if (!response.ok) {
+        if (response.status === 401) {
+          authToken = null;
+        }
         return {
           success: false,
           error: data.error || '请求失败',

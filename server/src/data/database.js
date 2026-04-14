@@ -1,68 +1,118 @@
-const { mockPlans, mockHabits } = require('./mockData/planData');
-const { mockBadges } = require('./mockData/badgeData');
-const { mockNotifications } = require('./mockData/notificationData');
-const { mockBuddies, mockCircles, mockLocations, mockTopics } = require('./mockData/communityData');
-const { mockCalendarData, mockWeekRhythmData, mockMonthRhythmData } = require('./mockData/calendarData');
-const { templateDetails } = require('./mockData/templates');
-const { mockUsers } = require('./mockData/userData');
+const { User, Plan, Habit } = require('../models');
 
 class Database {
-  constructor() {
-    this.plans = JSON.parse(JSON.stringify(mockPlans));
-    this.badges = [...mockBadges];
-    this.notifications = [...mockNotifications];
-    this.buddies = [...mockBuddies];
-    this.circles = [...mockCircles];
-    this.calendar = [...mockCalendarData];
-    this.habits = [...mockHabits];
-    this.locations = [...mockLocations];
-    this.topics = [...mockTopics];
-    this.templates = templateDetails;
-    this.weekRhythmData = [...mockWeekRhythmData];
-    this.monthRhythmData = [...mockMonthRhythmData];
-    this.users = [...mockUsers];
-    
-    this._initPlans();
-  }
-
-  _initPlans() {
-    for (const plan of this.plans) {
-      plan.currentDays = plan.completedDate.length;
-      plan.days = plan.currentDays;
-      plan.progress = Math.round((plan.currentDays / plan.totalDays) * 100);
-    }
-  }
-
-  _getCompletedDays(plan) {
-    return plan.completedDate.length;
-  }
-
-  _getProgress(plan) {
-    return Math.round((this._getCompletedDays(plan) / plan.totalDays) * 100);
-  }
-
   // 用户相关方法
-  getUserByPhone(phone) {
-    return this.users.find(user => user.phone === phone);
+  async getUserByPhone(phone) {
+    return await User.findOne({ where: { phone } });
   }
 
-  getUserById(id) {
-    return this.users.find(user => user.id === id);
+  async getUserById(id) {
+    return await User.findByPk(id);
   }
 
-  addUser(userData) {
-    const newUser = {
-      id: Date.now().toString(),
-      ...userData,
-      createdAt: new Date().toISOString(),
-    };
-    this.users.push(newUser);
+  async getUserByUserId(userId) {
+    return await User.findOne({ where: { userId } });
+  }
+
+  async addUser(userData) {
+    const newUser = await User.create({
+      username: userData.username,
+      phone: userData.phone,
+      password: userData.password
+    });
     return newUser;
   }
 
-  validatePassword(phone, password) {
-    const user = this.getUserByPhone(phone);
-    return user && user.password === password;
+  async updateUser(id, userData) {
+    const user = await User.findByPk(id);
+    if (!user) {
+      throw new Error('用户不存在');
+    }
+    await user.update(userData);
+    return user;
+  }
+
+  async updateUserByUserId(userId, userData) {
+    const user = await User.findOne({ where: { userId } });
+    if (!user) {
+      throw new Error('用户不存在');
+    }
+    await user.update(userData);
+    return user;
+  }
+
+  // Plan 相关方法
+  async getPlansByUserId(userId) {
+    const user = await User.findOne({ where: { userId } });
+    if (!user) return [];
+    return await Plan.findAll({ where: { userId: user.id } });
+  }
+
+  async getPlanById(id) {
+    return await Plan.findByPk(id);
+  }
+
+  async createPlan(planData) {
+    const user = await User.findOne({ where: { userId: planData.userId } });
+    if (!user) {
+      throw new Error('用户不存在');
+    }
+    return await Plan.create({ ...planData, userId: user.id });
+  }
+
+  async updatePlan(id, updates) {
+    const plan = await Plan.findByPk(id);
+    if (!plan) {
+      throw new Error('计划不存在');
+    }
+    await plan.update(updates);
+    return plan;
+  }
+
+  async deletePlan(id) {
+    const plan = await Plan.findByPk(id);
+    if (!plan) {
+      throw new Error('计划不存在');
+    }
+    await plan.destroy();
+    return true;
+  }
+
+  // Habit 相关方法
+  async getHabitsByUserId(userId) {
+    const user = await User.findOne({ where: { userId } });
+    if (!user) return [];
+    return await Habit.findAll({ where: { userId: user.id } });
+  }
+
+  async getHabitById(id) {
+    return await Habit.findByPk(id);
+  }
+
+  async createHabit(habitData) {
+    const user = await User.findOne({ where: { userId: habitData.userId } });
+    if (!user) {
+      throw new Error('用户不存在');
+    }
+    return await Habit.create({ ...habitData, userId: user.id });
+  }
+
+  async updateHabit(id, updates) {
+    const habit = await Habit.findByPk(id);
+    if (!habit) {
+      throw new Error('习惯不存在');
+    }
+    await habit.update(updates);
+    return habit;
+  }
+
+  async deleteHabit(id) {
+    const habit = await Habit.findByPk(id);
+    if (!habit) {
+      throw new Error('习惯不存在');
+    }
+    await habit.destroy();
+    return true;
   }
 }
 

@@ -8,7 +8,7 @@
     "lint": "eslint .",
     "format": "prettier --write . --ignore-unknown",
     "format:check": "prettier --check . --ignore-unknown",
-    "start": "expo start ",
+    "start": "expo start --tunnel",
     "test": "jest",
     "web": "webpack serve --mode development",
     "web:build": "webpack --mode production"

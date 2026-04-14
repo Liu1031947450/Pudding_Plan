@@ -93,11 +93,7 @@ const AuthScreen: React.FC = () => {
       if (isLogin) {
         const response = await authApi.login({ phone, password });
         if (response.success && response.data) {
-          await login({
-            id: response.data.id,
-            username: response.data.username,
-            phone: response.data.phone
-          });
+          await login(response.data.token, response.data.user);
           showToast('登录成功', 'success');
           setTimeout(() => {
             navigation.reset({
@@ -109,17 +105,29 @@ const AuthScreen: React.FC = () => {
           showToast(response.error || '请检查手机号和密码', 'error');
         }
       } else {
-        const response = await authApi.register({ 
-          username: name, 
-          phone, 
-          password, 
-          confirmPassword 
+        const response = await authApi.register({
+          username: name,
+          phone,
+          password,
+          confirmPassword
         });
         if (response.success) {
-          showToast('注册成功，请使用新账号登录', 'success');
+          showToast('注册成功，请登录', 'success');
           setIsLogin(true);
+          setPassword('');
+          setConfirmPassword('');
+          setVerificationCode('');
         } else {
-          showToast(response.error || '注册失败，请重试', 'error');
+          // 检查是否是手机号已注册的错误
+          if (response.error?.includes('已注册') || response.error?.includes('已存在')) {
+            showToast('该手机号已注册，请直接登录', 'info');
+            setIsLogin(true);
+            setPassword('');
+            setConfirmPassword('');
+            setVerificationCode('');
+          } else {
+            showToast(response.error || '注册失败，请重试', 'error');
+          }
         }
       }
     } catch (error) {

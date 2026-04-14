@@ -19,6 +19,7 @@ import {
   NotificationDrawer,
 } from '../components';
 import { badgesApi } from '../api';
+import { useAuth } from '../contexts';
 
 interface Badge {
   id: string;
@@ -30,6 +31,7 @@ interface Badge {
 
 const ProfileScreen: React.FC = () => {
   const navigation = useNavigation();
+  const { user } = useAuth();
   const [badges, setBadges] = useState<Badge[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -72,7 +74,7 @@ const ProfileScreen: React.FC = () => {
           <View style={styles.avatarWrapper}>
             <View style={styles.avatarBorder}>
               <Avatar
-                uri="https://lh3.googleusercontent.com/aida-public/AB6AXuAKIKxyrX9s0nJefVvjBGd8CSyhpbf9-v4EJyrcIkNMFxfgFQvwGfb-MuYUo-s1RtWbMfIJZf3eR0OMoCXhwL9HvS20JQ3p9C0wxr2afcRx7raAEJnh2TysPvjzILk3vrRyYcZAlEJcqrJCLc9i4mkDOJSXA_iRvV4tZK1Y9DPscuYLSxN1_oYrkozPgdrg9A4VzKMRFdNVMCc8hdnTCVhZXQP0zN1OxWtTwZWa1NqK0QWGuuFW-VToLvMZ0wtrbgySHgiRL1-RIFQI"
+                uri={user?.avatar || "https://lh3.googleusercontent.com/aida-public/AB6AXuAKIKxyrX9s0nJefVvjBGd8CSyhpbf9-v4EJyrcIkNMFxfgFQvwGfb-MuYUo-s1RtWbMfIJZf3eR0OMoCXhwL9HvS20JQ3p9C0wxr2afcRx7raAEJnh2TysPvjzILk3vrRyYcZAlEJcqrJCLc9i4mkDOJSXA_iRvV4tZK1Y9DPscuYLSxN1_oYrkozPgdrg9A4VzKMRFdNVMCc8hdnTCVhZXQP0zN1OxWtTwZWa1NqK0QWGuuFW-VToLvMZ0wtrbgySHgiRL1-RIFQI"}
                 size="xlarge"
               />
             </View>
@@ -86,8 +88,8 @@ const ProfileScreen: React.FC = () => {
           </View>
 
           <View style={styles.userInfo}>
-            <Text style={styles.userName}>林小布</Text>
-            <Text style={styles.userBio}>"在自律中遇见更好的自己"</Text>
+            <Text style={styles.userName}>{user?.username || '未登录'}</Text>
+            <Text style={styles.userBio}>{user?.bio || '"在自律中遇见更好的自己"'}</Text>
           </View>
         </View>
 

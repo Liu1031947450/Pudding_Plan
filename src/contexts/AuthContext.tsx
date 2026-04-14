@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import * as SecureStore from 'expo-secure-store';
+import { setAuthToken } from '../api';
 
 interface User {
   id: string;
@@ -9,18 +10,22 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
+  token: string | null;
   isLoading: boolean;
-  login: (user: User) => Promise<void>;
+  login: (token: string, user: User) => Promise<void>;
   logout: () => Promise<void>;
+  updateUser: (user: User) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const AUTH_STORAGE_KEY = 'pudding_plan_auth';
 const AUTH_EXPIRY_KEY = 'pudding_plan_auth_expiry';
+const AUTH_TOKEN_KEY = 'pudding_plan_auth_token';
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -31,13 +36,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       const storedUser = await SecureStore.getItemAsync(AUTH_STORAGE_KEY);
       const storedExpiry = await SecureStore.getItemAsync(AUTH_EXPIRY_KEY);
+      const storedToken = await SecureStore.getItemAsync(AUTH_TOKEN_KEY);
 
-      if (storedUser && storedExpiry) {
+      if (storedUser && storedExpiry && storedToken) {
         const expiryTime = parseInt(storedExpiry, 10);
         const now = Date.now();
 
         if (now < expiryTime) {
-          setUser(JSON.parse(storedUser));
+          const parsedUser = JSON.parse(storedUser);
+          setUser(parsedUser);
+          setToken(storedToken);
+          setAuthToken(storedToken);
         } else {
           await clearAuth();
         }
@@ -50,14 +59,27 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const login = async (userData: User) => {
+  const login = async (tokenValue: string, userData: User) => {
     try {
       const expiryTime = Date.now() + 30 * 24 * 60 * 60 * 1000;
       await SecureStore.setItemAsync(AUTH_STORAGE_KEY, JSON.stringify(userData));
       await SecureStore.setItemAsync(AUTH_EXPIRY_KEY, expiryTime.toString());
+      await SecureStore.setItemAsync(AUTH_TOKEN_KEY, tokenValue);
       setUser(userData);
+      setToken(tokenValue);
+      setAuthToken(tokenValue);
     } catch (error) {
       console.error('保存登录信息失败:', error);
+      throw error;
+    }
+  };
+
+  const updateUser = async (userData: User) => {
+    try {
+      await SecureStore.setItemAsync(AUTH_STORAGE_KEY, JSON.stringify(userData));
+      setUser(userData);
+    } catch (error) {
+      console.error('更新用户信息失败:', error);
       throw error;
     }
   };
@@ -66,6 +88,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       await clearAuth();
       setUser(null);
+      setToken(null);
+      setAuthToken(null);
     } catch (error) {
       console.error('退出登录失败:', error);
       throw error;
@@ -75,10 +99,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const clearAuth = async () => {
     await SecureStore.deleteItemAsync(AUTH_STORAGE_KEY);
     await SecureStore.deleteItemAsync(AUTH_EXPIRY_KEY);
+    await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
+    setAuthToken(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ user, token, isLoading, login, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

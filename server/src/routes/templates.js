@@ -1,19 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../data/database');
+const { templateDetails } = require('../data/mockData/templates');
 
 router.get('/', (req, res) => {
-  const data = Object.values(db.templates);
-  res.json({
-    success: true,
-    data,
-    message: 'success'
-  });
-});
-
-router.get('/:id', (req, res) => {
-  const { id } = req.params;
-  const data = db.templates[id] || null;
+  const data = Object.values(templateDetails);
   res.json({
     success: true,
     data,
@@ -23,7 +13,19 @@ router.get('/:id', (req, res) => {
 
 router.get('/category/:category', (req, res) => {
   const { category } = req.params;
-  const data = Object.values(db.templates).filter(t => t.category === category);
+  const data = Object.values(templateDetails).filter(
+    template => template.category === category,
+  );
+  res.json({
+    success: true,
+    data,
+    message: 'success'
+  });
+});
+
+router.get('/:id', (req, res) => {
+  const { id } = req.params;
+  const data = templateDetails[id] || null;
   res.json({
     success: true,
     data,

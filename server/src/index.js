@@ -1,6 +1,8 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const initDatabase = require('./utils/initDatabase');
 const plansRoutes = require('./routes/plans');
 const templatesRoutes = require('./routes/templates');
 const circlesRoutes = require('./routes/circles');
@@ -13,7 +15,7 @@ const rhythmRoutes = require('./routes/rhythm');
 const authRoutes = require('./routes/auth');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors({
   origin: '*',
@@ -37,6 +39,14 @@ app.use('/api/notifications', notificationsRoutes);
 app.use('/api/badges', badgesRoutes);
 app.use('/api/rhythm', rhythmRoutes);
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`布丁计划后端服务已启动，监听端口 ${PORT}，可以通过 http://192.168.0.120:${PORT} 访问`);
-});
+// 初始化数据库并启动服务器
+initDatabase()
+  .then(() => {
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`布丁计划后端服务已启动，监听端口 ${PORT}，可以通过 http://192.168.0.120:${PORT} 访问`);
+    });
+  })
+  .catch((error) => {
+    console.error('服务启动失败:', error);
+    process.exit(1);
+  });

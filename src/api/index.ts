@@ -8,3 +8,4 @@ export * from './rhythm';
 export * from './auth';
 export * from './config';
 export * from './client';
+export { setAuthToken, getAuthToken } from './client';
