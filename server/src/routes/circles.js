@@ -400,4 +400,32 @@ router.delete('/:id/collect', authMiddleware, async (req, res) => {
   }
 });
 
+// 获取用户收藏列表
+router.get('/collections', authMiddleware, async (req, res) => {
+  try {
+    const collects = await Collect.findAll({
+      where: { userId: req.userId },
+      include: [{
+        model: CircleMoment,
+        include: [{
+          model: User,
+          as: 'author',
+          attributes: ['userId', 'username', 'avatar'],
+        }],
+      }],
+      order: [['createdAt', 'DESC']],
+    });
+
+    const collectedMoments = collects.map(c => c.circleMoment || c.moment).filter(Boolean);
+    const data = collectedMoments.map(m => {
+      return serializeMoment(m, req.userId, new Set(), new Set([m.id]));
+    });
+
+    sendResponse(res, true, data, '获取收藏列表成功');
+  } catch (error) {
+    console.error('获取收藏列表失败:', error);
+    sendResponse(res, false, null, '', '服务器内部错误');
+  }
+});
+
 module.exports = router;

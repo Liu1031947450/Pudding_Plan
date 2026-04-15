@@ -74,6 +74,12 @@ class CircleService {
     const response = await circlesApi.postComment(id, content, parentId);
     return response;
   }
+
+  // Get user collections
+  async getCollections() {
+    const response = await circlesApi.getCollections();
+    return response;
+  }
 }
 
 // Export singleton instance

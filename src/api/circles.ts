@@ -125,6 +125,11 @@ export const circlesApi = {
       { content, parentId },
     );
   },
+
+  // 获取用户收藏列表
+  getCollections: async (): Promise<ApiResponse<CircleListItem[]>> => {
+    return apiClient.get<CircleListItem[]>(API_ENDPOINTS.CIRCLES + '/collections');
+  },
 };
 
 export const buddiesApi = {

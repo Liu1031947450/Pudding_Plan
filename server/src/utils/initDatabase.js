@@ -1,15 +1,5 @@
 const sequelize = require('../config/database');
-const {
-  User,
-  Plan,
-  Habit,
-  Notification,
-  Badge,
-  CircleMoment,
-  Template,
-  Friendship,
-  Comment,
-} = require('../models');
+const {  User,  Plan,  Habit,  Notification,  Badge,  CircleMoment,  Template,  Like,  Collect,  Friendship,  Comment,} = require('../models');
 const { v4: uuidv4 } = require('uuid');
 const { mockCircles, mockBuddies } = require('../data/mockData/communityData');
 const { templateDetails } = require('../data/mockData/templates');

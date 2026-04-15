@@ -221,26 +221,43 @@ const ProfileScreen: React.FC = () => {
                 <ActivityIndicator size="small" color={Colors.primary} />
               </View>
             ) : badges.length > 0 ? (
-              badges.map(badge => (
-                <View key={badge.id} style={styles.badgeItem}>
-                  <View
-                    style={[
-                      styles.badgeIcon,
-                      {
-                        backgroundColor: badge.unlocked
-                          ? badge.color
-                          : Colors.surfaceVariant,
-                      },
-                    ]}
-                  >
-                    <MaterialIcons
-                      name={badge.icon}
-                      size={28}
-                      color={
-                        badge.unlocked ? Colors.white : Colors.outlineVariant
-                      }
-                    />
-                    {!badge.unlocked && (
+              <>
+                {badges.filter(b => b.unlocked).map(badge => (
+                  <View key={badge.id} style={styles.badgeItem}>
+                    <View
+                      style={[
+                        styles.badgeIcon,
+                        {
+                          backgroundColor: badge.color,
+                        },
+                      ]}
+                    >
+                      <MaterialIcons
+                        name={badge.icon}
+                        size={28}
+                        color={Colors.white}
+                      />
+                    </View>
+                    <Text style={styles.badgeTitle}>
+                      {badge.title}
+                    </Text>
+                  </View>
+                ))}
+                {badges.filter(b => !b.unlocked).map(badge => (
+                  <View key={badge.id} style={styles.badgeItem}>
+                    <View
+                      style={[
+                        styles.badgeIcon,
+                        {
+                          backgroundColor: Colors.surfaceVariant,
+                        },
+                      ]}
+                    >
+                      <MaterialIcons
+                        name={badge.icon}
+                        size={28}
+                        color={Colors.outlineVariant}
+                      />
                       <View style={styles.lockOverlay}>
                         <MaterialIcons
                           name="lock"
@@ -248,18 +265,13 @@ const ProfileScreen: React.FC = () => {
                           color={Colors.outlineVariant}
                         />
                       </View>
-                    )}
+                    </View>
+                    <Text style={[styles.badgeTitle, styles.lockedText]}>
+                      {badge.title}
+                    </Text>
                   </View>
-                  <Text
-                    style={[
-                      styles.badgeTitle,
-                      !badge.unlocked && styles.lockedText,
-                    ]}
-                  >
-                    {badge.title}
-                  </Text>
-                </View>
-              ))
+                ))}
+              </>
             ) : (
               <View style={styles.emptyContainer}>
                 <Text style={styles.emptyText}>暂无徽章</Text>
@@ -296,7 +308,10 @@ const ProfileScreen: React.FC = () => {
               />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.menuItem}>
+            <TouchableOpacity 
+              style={styles.menuItem}
+              onPress={() => navigation.navigate('MyCollections' as never)}
+            >
               <View style={styles.menuLeft}>
                 <View
                   style={[

@@ -132,32 +132,108 @@ export const AchievementDrawer: React.FC<AchievementDrawerProps> = ({
                 <Text style={styles.emptySubtext}>完成更多计划解锁成就吧</Text>
               </View>
             ) : (
-              <View style={styles.badgesGrid}>
-                {badges.map(badge => (
-                  <Card
-                    key={badge.id}
-                    style={styles.badgeCard}
-                    onPress={
-                      onBadgePress ? () => onBadgePress(badge) : undefined
-                    }
-                  >
-                    <View
-                      style={[
-                        styles.badgeIcon,
-                        { backgroundColor: badge.color },
-                      ]}
-                    >
+              <>
+                {badges.filter(b => b.unlocked).length > 0 && (
+                  <>
+                    <View style={styles.sectionHeader}>
                       <MaterialIcons
-                        name={badge.icon}
-                        size={32}
-                        color={Colors.surface}
+                        name="emoji-events"
+                        size={18}
+                        color={Colors.primary}
                       />
+                      <Text style={styles.sectionTitle}>
+                        已解锁 ({badges.filter(b => b.unlocked).length})
+                      </Text>
                     </View>
-                    <Text style={styles.badgeTitle}>{badge.title}</Text>
-                    <Text style={styles.badgeDesc}>{badge.description}</Text>
-                  </Card>
-                ))}
-              </View>
+                    <View style={styles.badgesGrid}>
+                      {badges
+                        .filter(b => b.unlocked)
+                        .map(badge => (
+                          <Card
+                            key={badge.id}
+                            style={styles.badgeCard}
+                            onPress={
+                              onBadgePress ? () => onBadgePress(badge) : undefined
+                            }
+                          >
+                            <View
+                              style={[
+                                styles.badgeIcon,
+                                { backgroundColor: badge.color },
+                              ]}
+                            >
+                              <MaterialIcons
+                                name={badge.icon}
+                                size={32}
+                                color={Colors.surface}
+                              />
+                            </View>
+                            <Text style={styles.badgeTitle}>{badge.title}</Text>
+                            <Text style={styles.badgeDesc}>{badge.description}</Text>
+                          </Card>
+                        ))}
+                    </View>
+                  </>
+                )}
+                {badges.filter(b => !b.unlocked).length > 0 && (
+                  <>
+                    <View style={styles.sectionHeader}>
+                      <MaterialIcons
+                        name="lock"
+                        size={18}
+                        color={Colors.outlineVariant}
+                      />
+                      <Text
+                        style={[
+                          styles.sectionTitle,
+                          { color: Colors.outlineVariant },
+                        ]}
+                      >
+                        未解锁 ({badges.filter(b => !b.unlocked).length})
+                      </Text>
+                    </View>
+                    <View style={styles.badgesGrid}>
+                      {badges
+                        .filter(b => !b.unlocked)
+                        .map(badge => (
+                          <Card
+                            key={badge.id}
+                            style={[styles.badgeCard, styles.badgeCardLocked]}
+                            onPress={
+                              onBadgePress ? () => onBadgePress(badge) : undefined
+                            }
+                          >
+                            <View
+                              style={[
+                                styles.badgeIcon,
+                                { backgroundColor: Colors.surfaceVariant },
+                              ]}
+                            >
+                              <MaterialIcons
+                                name={badge.icon}
+                                size={32}
+                                color={Colors.outlineVariant}
+                              />
+                              <View style={styles.lockOverlay}>
+                                <MaterialIcons
+                                  name="lock"
+                                  size={14}
+                                  color={Colors.outlineVariant}
+                                />
+                              </View>
+                            </View>
+                            <Text style={[styles.badgeTitle, styles.lockedText]}>
+                              {badge.title}
+                            </Text>
+                            <Text style={[styles.badgeDesc, styles.lockedText]}>
+                              {badge.description}
+                            </Text>
+                          </Card>
+                        ))}
+                    </View>
+                  </>
+                )}
+              </>
             )}
           </ScrollView>
         </Animated.View>
@@ -217,6 +293,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.lg,
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: Spacing.sm,
+    marginTop: Spacing.md,
+  },
+  sectionTitle: {
+    fontSize: FontSize.md,
+    fontWeight: '700',
+    color: Colors.onSurface,
+  },
   badgesGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -229,6 +317,9 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
     marginBottom: Spacing.md,
   },
+  badgeCardLocked: {
+    opacity: 0.6,
+  },
   badgeIcon: {
     width: 56,
     height: 56,
@@ -236,6 +327,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: Spacing.sm,
+    position: 'relative',
+  },
+  lockOverlay: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    backgroundColor: Colors.surface,
+    borderRadius: 10,
+    padding: 2,
   },
   badgeTitle: {
     fontSize: FontSize.md,
@@ -249,6 +349,9 @@ const styles = StyleSheet.create({
     color: Colors.onSurfaceVariant,
     textAlign: 'center',
     lineHeight: 16,
+  },
+  lockedText: {
+    color: Colors.outlineVariant,
   },
   loadingContainer: {
     flex: 1,
