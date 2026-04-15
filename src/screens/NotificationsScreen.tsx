@@ -13,6 +13,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize, BorderRadius } from '../constants/theme';
 import { TopAppBar } from '../components/layout/TopAppBar';
 import { notificationsApi } from '../api/notifications';
+import { websocketService } from '../services/websocketService';
 import { DEFAULT_AVATAR } from '../features/circle/constants';
 import type { Notification } from '../types/domain';
 
@@ -39,6 +40,15 @@ const NotificationsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     );
   };
 
+  const handleNotificationPress = (notification: Notification) => {
+    handleMarkAsRead(notification.id);
+
+    // 如果是动态相关通知，跳转到圈子页面
+    if (notification.targetType === 'moment' && notification.targetId) {
+      navigation.navigate('Circles' as never);
+    }
+  };
+
   const handleReadAll = async () => {
     await notificationsApi.markAllAsRead();
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
@@ -46,6 +56,17 @@ const NotificationsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   useEffect(() => {
     loadNotifications();
+
+    // 监听 WebSocket 实时通知
+    const handleNewNotification = (data: any) => {
+      setNotifications(prev => [data, ...prev]);
+    };
+
+    websocketService.on('new_notification', handleNewNotification);
+
+    return () => {
+      websocketService.off('new_notification', handleNewNotification);
+    };
   }, []);
 
   const getIconConfig = (type: string) => {
@@ -70,7 +91,7 @@ const NotificationsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     return (
       <TouchableOpacity
         style={[styles.notificationItem, !item.read && styles.unreadItem]}
-        onPress={() => handleMarkAsRead(item.id)}
+        onPress={() => handleNotificationPress(item)}
       >
         <View style={styles.iconContainer}>
           {isSocial && item.sender ? (

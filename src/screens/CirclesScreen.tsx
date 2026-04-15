@@ -8,6 +8,7 @@ import { CircleWaterfall, CircleDetailModal } from '../features/circle';
 import { NotificationDrawer } from '../features/plan';
 import { useCircleData } from '../hooks';
 import { useNotificationState } from '../hooks/useNotificationState';
+import { useNotificationPolling } from '../hooks/useNotificationPolling';
 import { useAuth } from '../contexts/AuthContext';
 
 const CirclesScreen: React.FC = () => {
@@ -19,9 +20,17 @@ const CirclesScreen: React.FC = () => {
     useState(false);
   const [selectedCircleId, setSelectedCircleId] = useState<string | null>(null);
   const [detailVisible, setDetailVisible] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
-  const { notifications, markAsRead, refreshNotifications, unreadCount } =
+  const { notifications, markAsRead, refreshNotifications } =
     useNotificationState();
+
+  // 使用轮询 hook 获取未读消息数量
+  useNotificationPolling({
+    interval: 10000,
+    onCountChange: (count: number) => setUnreadCount(count),
+    enabled: true,
+  });
 
   const displayCircles = useMemo(
     () =>
@@ -50,7 +59,7 @@ const CirclesScreen: React.FC = () => {
       }
 
       refreshData();
-      refreshNotifications(currentUserId);
+      refreshNotifications();
     }, [currentUserId, refreshData, refreshNotifications]),
   );
 
@@ -79,6 +88,7 @@ const CirclesScreen: React.FC = () => {
         title="发现圈子"
         rightIcon="notifications"
         rightIconShake={unreadCount > 0}
+        notificationCount={unreadCount}
         onRightPress={handleOpenNotifications}
       />
 
@@ -109,7 +119,8 @@ const CirclesScreen: React.FC = () => {
         visible={notificationDrawerVisible}
         onClose={() => setNotificationDrawerVisible(false)}
         notifications={notifications}
-        onNotificationPress={id => markAsRead(id, currentUserId)}
+        onNotificationPress={id => markAsRead(id)}
+        navigation={navigation}
       />
 
       <BottomNavBar />

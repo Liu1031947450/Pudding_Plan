@@ -3,8 +3,8 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "backend": "cd server && npm run dev", 
-    "frontend": "npm start", 
+    "backend": "cd server && npm run dev",
+    "frontend": "npm start",
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "lint": "eslint .",
@@ -46,6 +46,7 @@
     "react-native-screens": "~4.23.0",
     "react-native-svg": "15.15.3",
     "react-native-web": "^0.21.2",
+    "socket.io-client": "^4.8.3",
     "webpack": "^5.106.0",
     "webpack-cli": "^7.0.2",
     "webpack-dev-server": "^5.2.3"

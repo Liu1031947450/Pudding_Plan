@@ -13,11 +13,7 @@ function generateToken(userId) {
 }
 
 function verifyToken(token) {
-  try {
-    return jwt.verify(token, JWT_SECRET);
-  } catch (error) {
-    return null;
-  }
+  return jwt.verify(token, JWT_SECRET);
 }
 
 function authMiddleware(req, res, next) {
@@ -31,17 +27,16 @@ function authMiddleware(req, res, next) {
   }
 
   const token = authHeader.substring(7);
-  const decoded = verifyToken(token);
-
-  if (!decoded) {
+  try {
+    const decoded = verifyToken(token);
+    req.userId = decoded.userId;
+    next();
+  } catch (error) {
     return res.status(401).json({
       success: false,
       error: '认证令牌无效或已过期',
     });
   }
-
-  req.userId = decoded.userId;
-  next();
 }
 
 module.exports = {

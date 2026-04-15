@@ -146,8 +146,14 @@ class Database {
   }
 
   async getNotificationsByUserId(userId) {
+    console.log(`[Database] 开始查询通知: UserUUID: ${userId}`);
     const user = await User.findOne({ where: { userId } });
-    if (!user) return [];
+    if (!user) {
+      console.warn(`[Database] 未找到 UUID 为 ${userId} 的用户`);
+      return [];
+    }
+
+    console.log(`[Database] 找到用户: ${user.username} (intID: ${user.id})`);
 
     let notifications = await Notification.findAll({
       where: { userId: user.id },
@@ -158,6 +164,8 @@ class Database {
       }],
       order: [['createdAt', 'DESC']],
     });
+
+    console.log(`[Database] 用户 ${user.id} 共有 ${notifications.length} 条通知数据`);
 
     if (notifications.length === 0) {
       const stats = await this.getUserStatsByUserId(userId);

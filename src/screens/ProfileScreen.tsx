@@ -18,9 +18,10 @@ import {
   Card,
   BottomDrawer,
 } from '../components';
-import { authApi, badgesApi, notificationsApi } from '../api';
+import { authApi, badgesApi } from '../api';
 import { useAuth } from '../contexts';
 import { FeedbackSheet } from '../features/settings';
+import { useNotificationPolling } from '../hooks/useNotificationPolling';
 import type { Badge } from '../types/domain';
 
 const ProfileScreen: React.FC = () => {
@@ -41,6 +42,20 @@ const ProfileScreen: React.FC = () => {
       collects: 0,
       friends: 0,
     },
+  });
+
+  // 使用轮询 hook 获取未读消息数量
+  useNotificationPolling({
+    interval: 10000,
+    onCountChange: (count) => setUnreadNotifications(count),
+    enabled: true,
+  });
+
+  // 使用轮询 hook 获取未读消息数量
+  useNotificationPolling({
+    interval: 10000,
+    onCountChange: (count) => setUnreadNotifications(count),
+    enabled: true,
   });
 
   const fetchProfileData = useCallback(async () => {
@@ -69,12 +84,6 @@ const ProfileScreen: React.FC = () => {
           socialStats: d.socialStats || prev.socialStats,
         }));
       }
-
-      // 获取未读通知数
-      const notifyRes = await notificationsApi.getAll(true);
-      if (notifyRes.success) {
-        setUnreadNotifications(notifyRes.data?.length || 0);
-      }
     } catch (error) {
       console.error('获取个人中心数据失败:', error);
     } finally {
@@ -93,6 +102,10 @@ const ProfileScreen: React.FC = () => {
       <TopAppBar
         leftIcon="settings"
         onLeftPress={() => navigation.navigate('Settings' as never)}
+        rightIcon="notifications"
+        onRightPress={() => navigation.navigate('Notifications' as never)}
+        notificationCount={unreadNotifications}
+        rightIconShake={unreadNotifications > 0}
       />
 
       <ScrollView

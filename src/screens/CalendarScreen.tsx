@@ -9,7 +9,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useFocusEffect } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Colors, Spacing } from '../constants/theme';
 import { BottomNavBar, TopAppBar, Toast } from '../components';
 import {
@@ -26,6 +26,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { calendarApi } from '../api/calendar';
 
 const CalendarScreen: React.FC = () => {
+  const navigation = useNavigation();
   const { user } = useAuth();
   const currentUserId = user?.id;
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -118,7 +119,7 @@ const CalendarScreen: React.FC = () => {
   useFocusEffect(
     React.useCallback(() => {
       if (!currentUserId) return;
-      refreshNotifications(currentUserId);
+      refreshNotifications();
       refreshPlans(currentUserId);
       fetchCalendarData(true);
     }, [currentUserId, refreshNotifications, refreshPlans, fetchCalendarData]),
@@ -139,7 +140,7 @@ const CalendarScreen: React.FC = () => {
       await Promise.all([
         fetchCalendarData(true),
         refreshPlans(currentUserId, true),
-        refreshNotifications(currentUserId),
+        refreshNotifications(),
       ]);
     } finally {
       setRefreshing(false);
@@ -276,9 +277,8 @@ const CalendarScreen: React.FC = () => {
         visible={notificationDrawerVisible}
         onClose={() => setNotificationDrawerVisible(false)}
         notifications={notifications}
-        onNotificationPress={id =>
-          currentUserId && markAsRead(id, currentUserId)
-        }
+        onNotificationPress={id => markAsRead(id)}
+        navigation={navigation}
       />
 
       <Toast

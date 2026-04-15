@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
 import { BlurView } from 'expo-blur';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize, BorderRadius } from '../../constants/theme';
+import { NotificationBadge } from '../common/NotificationBadge';
 
 interface TopAppBarProps {
   title?: string;
@@ -19,6 +20,8 @@ interface TopAppBarProps {
   leftIcon?: keyof typeof MaterialIcons.glyphMap;
   onLeftPress?: () => void;
   rightIconShake?: boolean;
+  notificationCount?: number;
+  showNewMessageAnimation?: boolean;
 }
 
 export const TopAppBar: React.FC<TopAppBarProps> = ({
@@ -30,8 +33,12 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({
   leftIcon,
   onLeftPress,
   rightIconShake = false,
+  notificationCount = 0,
+  showNewMessageAnimation = false,
 }) => {
   const shakeAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const [hasNewMessage, setHasNewMessage] = useState(false);
 
   useEffect(() => {
     if (rightIconShake) {
@@ -71,6 +78,30 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({
       shakeAnim.setValue(0);
     }
   }, [rightIconShake, shakeAnim]);
+
+  useEffect(() => {
+    if (showNewMessageAnimation && !hasNewMessage) {
+      setHasNewMessage(true);
+      // 新消息动画：缩放效果
+      Animated.sequence([
+        Animated.timing(scaleAnim, {
+          toValue: 1.3,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(scaleAnim, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        // 动画结束后重置状态
+        setTimeout(() => {
+          setHasNewMessage(false);
+        }, 1000);
+      });
+    }
+  }, [showNewMessageAnimation, hasNewMessage, scaleAnim]);
 
   return (
     <BlurView intensity={20} tint="light" style={styles.container}>
@@ -118,6 +149,9 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({
                         outputRange: ['-8deg', '8deg'],
                       }),
                     },
+                    {
+                      scale: scaleAnim,
+                    },
                   ],
                 }}
               >
@@ -127,6 +161,9 @@ export const TopAppBar: React.FC<TopAppBarProps> = ({
                   color={Colors.primary}
                 />
               </Animated.View>
+              {rightIcon === 'notifications' && notificationCount > 0 && (
+                <NotificationBadge count={notificationCount} />
+              )}
             </TouchableOpacity>
           )}
         </View>

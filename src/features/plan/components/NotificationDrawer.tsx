@@ -17,11 +17,13 @@ import { BottomDrawer } from '../../../components/common/BottomDrawer';
 
 interface Notification {
   id: string;
-  type: 'reminder' | 'achievement' | 'social' | 'system';
+  type: 'reminder' | 'achievement' | 'social' | 'system' | 'like' | 'comment' | 'reply';
   title: string;
   message: string;
   time: string;
   read: boolean;
+  targetType?: string;
+  targetId?: string;
 }
 
 interface NotificationDrawerProps {
@@ -29,6 +31,7 @@ interface NotificationDrawerProps {
   onClose: () => void;
   notifications: Notification[];
   onNotificationPress?: (id: string) => void;
+  navigation?: any;
 }
 
 export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
@@ -36,6 +39,7 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
   onClose,
   notifications,
   onNotificationPress,
+  navigation,
 }) => {
   const getNotificationIcon = (type: Notification['type']) => {
     switch (type) {
@@ -47,6 +51,11 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
         return 'people';
       case 'system':
         return 'info';
+      case 'like':
+        return 'favorite';
+      case 'comment':
+      case 'reply':
+        return 'chat-bubble';
       default:
         return 'notifications';
     }
@@ -62,6 +71,11 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
         return Colors.tertiary;
       case 'system':
         return Colors.onSurfaceVariant;
+      case 'like':
+        return Colors.error;
+      case 'comment':
+      case 'reply':
+        return Colors.primary;
       default:
         return Colors.primary;
     }
@@ -97,7 +111,17 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                 styles.notificationItem,
                 !notification.read && styles.notificationUnread,
               ]}
-              onPress={() => onNotificationPress?.(notification.id)}
+              onPress={() => {
+                // 标记为已读
+                onNotificationPress?.(notification.id);
+                
+                // 导航到相关动态
+                if (navigation && notification.targetType === 'moment' && notification.targetId) {
+                  onClose();
+                  navigation.navigate('Circles' as never);
+                  // 这里可以添加逻辑，导航到具体的动态详情并滚动到评论区
+                }
+              }}
               activeOpacity={0.7}
             >
               <View

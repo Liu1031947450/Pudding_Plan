@@ -7,6 +7,7 @@ import React, {
 } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import { setAuthToken } from '../api';
+import { websocketService } from '../services/websocketService';
 
 export interface User {
   id: string;
@@ -61,6 +62,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
           setUser(parsedUser);
           setToken(storedToken);
           setAuthToken(storedToken);
+          
+          // 连接WebSocket
+          await websocketService.connect();
         } else {
           await clearAuth();
         }
@@ -89,6 +93,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       setUser(userData);
       setToken(tokenValue);
       setAuthToken(tokenValue);
+      
+      // 连接WebSocket
+      await websocketService.connect();
     } catch (error) {
       console.error('保存登录信息失败:', error);
       throw error;
@@ -110,6 +117,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
   const logout = async () => {
     try {
+      // 断开WebSocket连接
+      websocketService.disconnect();
+      
       await clearAuth();
       setUser(null);
       setToken(null);

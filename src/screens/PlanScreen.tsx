@@ -42,7 +42,7 @@ const PlanScreen: React.FC = () => {
     refreshPlans,
   } = usePlanManagement();
 
-  const { notifications, markAsRead, refreshNotifications, unreadCount } =
+  const { notifications, markAsRead, refreshNotifications, unreadCount, showNewMessageAnimation } =
     useNotificationState();
   const [notificationVisible, setNotificationVisible] = useState(false);
   const [achievementVisible, setAchievementVisible] = useState(false);
@@ -61,7 +61,7 @@ const PlanScreen: React.FC = () => {
     React.useCallback(() => {
       if (!currentUserId) return;
       refreshPlans(currentUserId, true);
-      refreshNotifications(currentUserId);
+      refreshNotifications();
     }, [currentUserId, refreshPlans, refreshNotifications]),
   );
 
@@ -105,7 +105,7 @@ const PlanScreen: React.FC = () => {
     try {
       await Promise.all([
         refreshPlans(currentUserId, true),
-        refreshNotifications(currentUserId),
+        refreshNotifications(),
         fetchRhythmData(rhythmPeriod),
       ]);
     } finally {
@@ -180,6 +180,8 @@ const PlanScreen: React.FC = () => {
         leftIcon="emoji-events"
         rightIcon="notifications"
         rightIconShake={unreadCount > 0}
+        notificationCount={unreadCount}
+        showNewMessageAnimation={showNewMessageAnimation}
         onLeftPress={handleOpenAchievements}
         onRightPress={handleOpenNotifications}
       />
@@ -233,9 +235,8 @@ const PlanScreen: React.FC = () => {
         visible={notificationVisible}
         onClose={() => setNotificationVisible(false)}
         notifications={notifications}
-        onNotificationPress={id =>
-          currentUserId && markAsRead(id, currentUserId)
-        }
+        onNotificationPress={id => markAsRead(id)}
+        navigation={navigation}
       />
 
       <AchievementDrawer

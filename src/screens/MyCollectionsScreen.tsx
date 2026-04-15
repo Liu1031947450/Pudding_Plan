@@ -67,7 +67,7 @@ const MyCollectionsScreen: React.FC = () => {
 
   const handleRemoveCollection = async (circleId: string) => {
     try {
-      const success = await circleService.toggleCollectCircle({ id: circleId, isCollected: true });
+      const success = await circleService.toggleCollectCircle({ id: circleId, isCollected: false });
       if (success) {
         setCollections(prev => prev.filter(item => item.id !== circleId));
         setToastMessage('已取消收藏');

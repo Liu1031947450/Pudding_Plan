@@ -53,6 +53,41 @@ async function ensureUsersTableMigration() {
   }
 }
 
+async function ensureNotificationsTableMigration() {
+  const tableExists = await sequelize
+    .getQueryInterface()
+    .showAllTables()
+    .then(tables => tables.includes('notifications'));
+
+  if (!tableExists) return;
+
+  const columns = await sequelize.getQueryInterface().describeTable('notifications');
+
+  // 添加 senderId 列
+  if (!columns.senderId) {
+    console.log('[Migration] Adding senderId to notifications table');
+    await sequelize.query('ALTER TABLE notifications ADD COLUMN "senderId" INTEGER REFERENCES users(id);');
+  }
+
+  // 添加 targetType 列
+  if (!columns.targetType) {
+    console.log('[Migration] Adding targetType to notifications table');
+    await sequelize.query('ALTER TABLE notifications ADD COLUMN "targetType" VARCHAR(20);');
+  }
+
+  // 添加 targetId 列
+  if (!columns.targetId) {
+    console.log('[Migration] Adding targetId to notifications table');
+    await sequelize.query('ALTER TABLE notifications ADD COLUMN "targetId" INTEGER;');
+  }
+
+  // 添加 time 列 (如果之前缺失)
+  if (!columns.time) {
+    console.log('[Migration] Adding time to notifications table');
+    await sequelize.query('ALTER TABLE notifications ADD COLUMN "time" VARCHAR(50) DEFAULT \'刚刚\';');
+  }
+}
+
 async function seedTemplates() {
   const count = await Template.count();
   if (count > 0) return;
@@ -167,6 +202,7 @@ async function initDatabase() {
     console.log('数据库表同步成功！');
 
     await ensureUsersTableMigration();
+    await ensureNotificationsTableMigration();
     await seedTemplates();
     await seedCircleMomentsAndBuddies();
 
