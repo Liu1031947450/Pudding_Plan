@@ -17,6 +17,7 @@ import {
   AllBadgesScreen,
   MyCollectionsScreen,
   NotificationsScreen,
+  CircleDetailScreen,
 } from '../screens';
 import { useAuth } from '../contexts';
 import { Colors } from '../constants/theme';
@@ -32,6 +33,7 @@ export type RootStackParamList = {
   CheckInRecords: undefined;
   MyCollections: undefined;
   Notifications: undefined;
+  CircleDetail: { circleId: string };
 };
 
 export type MainTabParamList = {
@@ -141,6 +143,13 @@ const AppNavigator: React.FC = () => {
         <Stack.Screen
           name="Notifications"
           component={NotificationsScreen}
+          options={{
+            presentation: 'card',
+          }}
+        />
+        <Stack.Screen
+          name="CircleDetail"
+          component={CircleDetailScreen}
           options={{
             presentation: 'card',
           }}

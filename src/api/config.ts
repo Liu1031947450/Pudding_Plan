@@ -4,6 +4,9 @@ export const API_CONFIG = {
   BASE_URL: __DEV__
     ? 'http://192.168.0.101:3000/api'
     : 'https://api.puddingplan.com',
+  SERVER_URL: __DEV__
+    ? 'http://192.168.0.101:3000'
+    : 'https://api.puddingplan.com',
   TIMEOUT: 10000,
   RETRY_ATTEMPTS: 3,
 };

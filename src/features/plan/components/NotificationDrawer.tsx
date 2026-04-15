@@ -115,11 +115,10 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                 // 标记为已读
                 onNotificationPress?.(notification.id);
                 
-                // 导航到相关动态
+                // 导航到相关详情
                 if (navigation && notification.targetType === 'moment' && notification.targetId) {
                   onClose();
-                  navigation.navigate('Circles' as never);
-                  // 这里可以添加逻辑，导航到具体的动态详情并滚动到评论区
+                  navigation.navigate('CircleDetail', { circleId: notification.targetId });
                 }
               }}
               activeOpacity={0.7}

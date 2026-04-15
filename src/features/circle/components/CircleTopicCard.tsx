@@ -15,12 +15,14 @@ import { DEFAULT_TOPIC_BG_COLOR } from '../constants';
 interface CircleTopicCardProps {
   circle: CircleTopic;
   onPress?: () => void;
+  onLongPress?: () => void;
   style?: StyleProp<ViewStyle>;
 }
 
 export const CircleTopicCard: React.FC<CircleTopicCardProps> = ({
   circle,
   onPress,
+  onLongPress,
   style,
 }) => {
   return (
@@ -31,6 +33,7 @@ export const CircleTopicCard: React.FC<CircleTopicCardProps> = ({
         style,
       ]}
       onPress={onPress}
+      onLongPress={onLongPress}
     >
       <View style={styles.topicHeader}>
         <View style={styles.topicTagContainer}>

@@ -14,6 +14,7 @@ interface CardProps {
   children: React.ReactNode;
   style?: StyleProp<ViewStyle>;
   onPress?: () => void;
+  onLongPress?: () => void;
   variant?: 'default' | 'elevated' | 'outlined' | 'ghost';
   gradient?: boolean;
   gradientColors?: [string, string, ...string[]];
@@ -23,6 +24,7 @@ export const Card: React.FC<CardProps> = ({
   children,
   style,
   onPress,
+  onLongPress,
   variant = 'default',
   gradient = false,
   gradientColors = [Colors.primary, Colors.primaryContainer],
@@ -78,6 +80,7 @@ export const Card: React.FC<CardProps> = ({
         <TouchableOpacity
           style={cardStyle}
           onPress={onPress}
+          onLongPress={onLongPress}
           onPressIn={handlePressIn}
           onPressOut={handlePressOut}
           activeOpacity={1}

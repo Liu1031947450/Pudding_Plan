@@ -4,17 +4,18 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Colors, Spacing, FontSize, BorderRadius } from '../constants/theme';
-import { TopAppBar, Card, Toast } from '../components';
+import { Colors, Spacing, FontSize } from '../constants/theme';
+import { TopAppBar, Toast } from '../components';
 import { useAuth } from '../contexts';
 import { circleService } from '../services/circleService';
+import { CircleWaterfall } from '../features/circle';
 import type { CircleListItem } from '../features/circle/types';
 
 const MyCollectionsScreen: React.FC = () => {
@@ -67,7 +68,11 @@ const MyCollectionsScreen: React.FC = () => {
 
   const handleRemoveCollection = async (circleId: string) => {
     try {
-      const success = await circleService.toggleCollectCircle({ id: circleId, isCollected: false });
+      const success = await circleService.toggleCollectCircle({ 
+        id: circleId, 
+        isCollected: false 
+      } as any);
+      
       if (success) {
         setCollections(prev => prev.filter(item => item.id !== circleId));
         setToastMessage('已取消收藏');
@@ -83,6 +88,21 @@ const MyCollectionsScreen: React.FC = () => {
     } finally {
       setToastVisible(true);
     }
+  };
+
+  const handleLongPress = (circleId: string) => {
+    Alert.alert(
+      '取消收藏',
+      '确定要将此动态从收藏中移除吗？',
+      [
+        { text: '取消', style: 'cancel' },
+        { 
+          text: '确认删除', 
+          style: 'destructive',
+          onPress: () => handleRemoveCollection(circleId)
+        },
+      ]
+    );
   };
 
   return (
@@ -125,86 +145,12 @@ const MyCollectionsScreen: React.FC = () => {
             </Text>
           </View>
         ) : (
-          <View style={styles.collectionsList}>
-            {collections.map((item) => (
-              <Card key={item.id} style={styles.collectionCard}>
-                <View style={styles.cardHeader}>
-                  <View style={styles.authorInfo}>
-                    <View style={styles.avatarContainer}>
-                      <MaterialIcons
-                        name="person"
-                        size={24}
-                        color={Colors.onSurfaceVariant}
-                      />
-                    </View>
-                    <View>
-                      <Text style={styles.authorName}>
-                        {item.authorName || '匿名用户'}
-                      </Text>
-                      <Text style={styles.postTime}>收藏于 刚刚</Text>
-                    </View>
-                  </View>
-                  <TouchableOpacity
-                    style={styles.deleteButton}
-                    onPress={() => handleRemoveCollection(item.id)}
-                  >
-                    <MaterialIcons
-                      name="delete"
-                      size={20}
-                      color={Colors.error}
-                    />
-                  </TouchableOpacity>
-                </View>
-
-                <Text style={styles.postTitle}>{item.title}</Text>
-                {item.content && (
-                  <Text style={styles.postContent} numberOfLines={2}>
-                    {item.content}
-                  </Text>
-                )}
-
-                {item.images && item.images.length > 0 && (
-                  <View style={styles.imagesContainer}>
-                    {item.images.slice(0, 3).map((image, index) => (
-                      <View key={index} style={styles.imageWrapper}>
-                        <MaterialIcons
-                          name="image"
-                          size={40}
-                          color={Colors.outlineVariant}
-                        />
-                      </View>
-                    ))}
-                  </View>
-                )}
-
-                <View style={styles.cardFooter}>
-                  <View style={styles.stats}>
-                    <View style={styles.statItem}>
-                      <MaterialIcons
-                        name="favorite"
-                        size={16}
-                        color={Colors.error}
-                      />
-                      <Text style={styles.statText}>{item.likes || 0}</Text>
-                    </View>
-                    <View style={styles.statItem}>
-                      <MaterialIcons
-                        name="chat-bubble"
-                        size={16}
-                        color={Colors.primary}
-                      />
-                      <Text style={styles.statText}>{item.comments || 0}</Text>
-                    </View>
-                  </View>
-                  <TouchableOpacity
-                    style={styles.viewButton}
-                    onPress={() => handleCirclePress(item.id)}
-                  >
-                    <Text style={styles.viewButtonText}>查看详情</Text>
-                  </TouchableOpacity>
-                </View>
-              </Card>
-            ))}
+          <View style={styles.waterfallContainer}>
+            <CircleWaterfall
+              circles={collections}
+              onCirclePress={handleCirclePress}
+              onCircleLongPress={handleLongPress}
+            />
           </View>
         )}
       </ScrollView>
@@ -228,7 +174,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: Spacing.md,
     paddingTop: 32,
     paddingBottom: 100,
     flexGrow: 1,
@@ -262,100 +207,8 @@ const styles = StyleSheet.create({
     color: Colors.onSurfaceVariant,
     textAlign: 'center',
   },
-  collectionsList: {
-    gap: Spacing.md,
-  },
-  collectionCard: {
-    padding: Spacing.md,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: Spacing.md,
-  },
-  authorInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  avatarContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: Colors.surfaceContainerLow,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: Spacing.sm,
-  },
-  authorName: {
-    fontSize: FontSize.md,
-    fontWeight: '600',
-    color: Colors.onSurface,
-  },
-  postTime: {
-    fontSize: FontSize.xs,
-    color: Colors.onSurfaceVariant,
-    marginTop: 2,
-  },
-  deleteButton: {
-    padding: Spacing.xs,
-  },
-  postTitle: {
-    fontSize: FontSize.lg,
-    fontWeight: '700',
-    color: Colors.onSurface,
-    marginBottom: Spacing.xs,
-  },
-  postContent: {
-    fontSize: FontSize.md,
-    color: Colors.onSurfaceVariant,
-    lineHeight: 22,
-    marginBottom: Spacing.md,
-  },
-  imagesContainer: {
-    flexDirection: 'row',
-    gap: Spacing.xs,
-    marginBottom: Spacing.md,
-  },
-  imageWrapper: {
-    width: 80,
-    height: 80,
-    backgroundColor: Colors.surfaceContainerLow,
-    borderRadius: BorderRadius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cardFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingTop: Spacing.sm,
-    borderTopWidth: 1,
-    borderTopColor: Colors.outlineVariant,
-  },
-  stats: {
-    flexDirection: 'row',
-    gap: Spacing.md,
-  },
-  statItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  statText: {
-    fontSize: FontSize.sm,
-    color: Colors.onSurfaceVariant,
-  },
-  viewButton: {
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
-    backgroundColor: Colors.primaryContainer,
-    borderRadius: BorderRadius.full,
-  },
-  viewButtonText: {
-    fontSize: FontSize.sm,
-    fontWeight: '600',
-    color: Colors.onPrimaryContainer,
+  waterfallContainer: {
+    paddingVertical: Spacing.sm,
   },
 });
 

@@ -322,6 +322,51 @@ router.post('/:id/comments', authMiddleware, async (req, res) => {
   }
 });
 
+// 获取用户收藏列表
+router.get('/collections', authMiddleware, async (req, res) => {
+  try {
+    console.log(`[Collections] 开始获取收藏: UserUUID=${req.userId}`);
+    const collects = await Collect.findAll({
+      where: { userId: req.userId },
+      include: [{
+        model: CircleMoment,
+        as: 'moment',
+        required: true, // 确保动态确实存在
+        include: [{
+          model: User,
+          as: 'author',
+          attributes: ['userId', 'username', 'avatar'],
+        }],
+      }],
+      order: [['createdAt', 'DESC']],
+    });
+
+    console.log(`[Collections] 找到 ${collects.length} 条原始记录`);
+    
+    if (collects.length > 0) {
+      // 记录第一条数据的结构，辅助排查别名问题
+      const firstRow = collects[0].toJSON();
+      console.log(`[Collections] 数据结构示例键名: ${Object.keys(firstRow).join(', ')}`);
+    }
+
+    const data = collects.map(c => {
+      // 兼容多种可能的别名，确保获取到动态内容
+      const m = c.moment || c.CircleMoment || c.get?.('moment') || c.get?.('CircleMoment');
+      if (!m) {
+        console.warn(`[Collections] 记录 ${c.id} 无法获取到关联动态对象`);
+        return null;
+      }
+      return serializeMoment(m, req.userId, new Set(), new Set([m.id]));
+    }).filter(Boolean);
+
+    console.log(`[Collections] 最终返回给前端的动态数: ${data.length}`);
+    sendResponse(res, true, data, '获取收藏列表成功');
+  } catch (error) {
+    console.error('获取收藏列表失败:', error);
+    sendResponse(res, false, null, '', '服务器内部错误');
+  }
+});
+
 // 根据 ID 获取单个动态
 router.get('/:id', authMiddleware, async (req, res) => {
   try {
@@ -477,34 +522,6 @@ router.delete('/:id/collect', authMiddleware, async (req, res) => {
     });
     sendResponse(res, true, true, '取消收藏成功');
   } catch (error) {
-    sendResponse(res, false, null, '', '服务器内部错误');
-  }
-});
-
-// 获取用户收藏列表
-router.get('/collections', authMiddleware, async (req, res) => {
-  try {
-    const collects = await Collect.findAll({
-      where: { userId: req.userId },
-      include: [{
-        model: CircleMoment,
-        include: [{
-          model: User,
-          as: 'author',
-          attributes: ['userId', 'username', 'avatar'],
-        }],
-      }],
-      order: [['createdAt', 'DESC']],
-    });
-
-    const collectedMoments = collects.map(c => c.CircleMoment).filter(Boolean);
-    const data = collectedMoments.map(m => {
-      return serializeMoment(m, req.userId, new Set(), new Set([m.id]));
-    });
-
-    sendResponse(res, true, data, '获取收藏列表成功');
-  } catch (error) {
-    console.error('获取收藏列表失败:', error);
     sendResponse(res, false, null, '', '服务器内部错误');
   }
 });

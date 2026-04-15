@@ -8,11 +8,13 @@ import type { CircleListItem } from '../types';
 interface CircleWaterfallProps {
   circles: CircleListItem[];
   onCirclePress?: (circleId: string) => void;
+  onCircleLongPress?: (circleId: string) => void;
 }
 
 export const CircleWaterfall: React.FC<CircleWaterfallProps> = ({
   circles,
   onCirclePress,
+  onCircleLongPress,
 }) => {
   const leftColumn: CircleListItem[] = [];
   const rightColumn: CircleListItem[] = [];
@@ -32,6 +34,7 @@ export const CircleWaterfall: React.FC<CircleWaterfallProps> = ({
           key={circle.id}
           circle={circle}
           onPress={() => onCirclePress?.(circle.id)}
+          onLongPress={() => onCircleLongPress?.(circle.id)}
         />
       );
     }
@@ -41,6 +44,7 @@ export const CircleWaterfall: React.FC<CircleWaterfallProps> = ({
         key={circle.id}
         circle={circle}
         onPress={() => onCirclePress?.(circle.id)}
+        onLongPress={() => onCircleLongPress?.(circle.id)}
       />
     );
   };

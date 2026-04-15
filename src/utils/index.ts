@@ -1,3 +1,12 @@
+import { API_CONFIG } from '../api/config';
+
+export const getImageUrl = (path?: string) => {
+  if (!path) return undefined;
+  if (path.startsWith('http')) return path;
+  const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+  return `${API_CONFIG.SERVER_URL}/${cleanPath}`;
+};
+
 export const delay = (ms: number): Promise<void> =>
   new Promise(resolve => setTimeout(resolve, ms));
 

@@ -14,24 +14,27 @@ import {
   BorderRadius,
 } from '../../../constants/theme';
 import { Card } from '../../../components/common/Card';
+import { getImageUrl } from '../../../utils';
 import type { CircleMoment } from '../types';
 
 interface CircleWaterfallItemProps {
   circle: CircleMoment;
   onPress?: () => void;
+  onLongPress?: () => void;
   style?: StyleProp<ViewStyle>;
 }
 
 export const CircleWaterfallItem: React.FC<CircleWaterfallItemProps> = ({
   circle,
   onPress,
+  onLongPress,
   style,
 }) => {
   return (
-    <Card style={[styles.card, style]} onPress={onPress}>
+    <Card style={[styles.card, style]} onPress={onPress} onLongPress={onLongPress}>
       {circle.imageUri && (
         <Image
-          source={{ uri: circle.imageUri }}
+          source={{ uri: getImageUrl(circle.imageUri) }}
           style={styles.image}
           resizeMode="cover"
         />
@@ -47,7 +50,7 @@ export const CircleWaterfallItem: React.FC<CircleWaterfallItemProps> = ({
           <View style={styles.author}>
             {circle.authorAvatarUri && (
               <Image
-                source={{ uri: circle.authorAvatarUri }}
+                source={{ uri: getImageUrl(circle.authorAvatarUri) }}
                 style={styles.authorAvatar}
               />
             )}

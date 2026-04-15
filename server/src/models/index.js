@@ -40,10 +40,10 @@ User.hasMany(Collect, {
 Collect.belongsTo(User, { foreignKey: 'userId', targetKey: 'userId', as: 'user' });
 
 CircleMoment.hasMany(Like, { foreignKey: 'momentId', as: 'likes' });
-Like.belongsTo(CircleMoment, { foreignKey: 'momentId' });
+Like.belongsTo(CircleMoment, { foreignKey: 'momentId', as: 'moment' });
 
 CircleMoment.hasMany(Collect, { foreignKey: 'momentId', as: 'collects' });
-Collect.belongsTo(CircleMoment, { foreignKey: 'momentId' });
+Collect.belongsTo(CircleMoment, { foreignKey: 'momentId', as: 'moment' });
 
 // 评论关联
 CircleMoment.hasMany(Comment, { foreignKey: 'momentId', as: 'comments' });
