@@ -6,7 +6,6 @@ import {
   Modal,
   TouchableOpacity,
   Pressable,
-  Dimensions,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize, BorderRadius } from '../../constants/theme';

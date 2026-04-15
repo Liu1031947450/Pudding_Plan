@@ -11,7 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Colors, Spacing } from '../constants/theme';
 import type { Plan, Badge, RhythmData } from '../types/domain';
-import { BottomNavBar, TopAppBar } from '../components';
+import { BottomNavBar, TopAppBar, Toast } from '../components';
 import {
   PlanList,
   PlanEmptyState,
@@ -35,7 +35,7 @@ const PlanScreen: React.FC = () => {
     loading,
     isManaging,
     selectedPlans,
-    handleDeleteSelected,
+    handleDeleteSelected: deleteSelectedPlans,
     handleReorderPlans,
     toggleManageMode,
     togglePlanSelection,
@@ -53,6 +53,9 @@ const PlanScreen: React.FC = () => {
   const [rhythmData, setRhythmData] = useState<RhythmData[]>([]);
   const [rhythmLoading, setRhythmLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState<'success' | 'error' | 'info'>('success');
 
   useFocusEffect(
     React.useCallback(() => {
@@ -143,6 +146,26 @@ const PlanScreen: React.FC = () => {
     (navigation as any).navigate('CreatePlan', { planId: plan.id });
   };
 
+  const handleDeletePlans = async () => {
+    if (!currentUserId) return;
+    
+    try {
+      const deletedCount = await deleteSelectedPlans(currentUserId);
+      if (deletedCount > 0) {
+        setToastMessage(`成功删除 ${deletedCount} 个计划`);
+        setToastType('success');
+      } else {
+        setToastMessage('删除失败，请重试');
+        setToastType('error');
+      }
+    } catch (error) {
+      setToastMessage('删除失败，请重试');
+      setToastType('error');
+    } finally {
+      setToastVisible(true);
+    }
+  };
+
   const movePlan = (fromIndex: number, toIndex: number) => {
     const newPlans = [...plans];
     const [movedPlan] = newPlans.splice(fromIndex, 1);
@@ -190,7 +213,7 @@ const PlanScreen: React.FC = () => {
               selectedPlans={selectedPlans}
               onToggleManage={toggleManageMode}
               onToggleSelect={togglePlanSelection}
-              onDeleteSelected={() => handleDeleteSelected(currentUserId)}
+              onDeleteSelected={handleDeletePlans}
               onMovePlan={movePlan}
               onCreatePlan={handleCreatePlan}
               onPlanPress={handlePlanPress}
@@ -220,6 +243,13 @@ const PlanScreen: React.FC = () => {
         onClose={() => setAchievementVisible(false)}
         badges={badges}
         loading={badgesLoading}
+      />
+
+      <Toast
+        visible={toastVisible}
+        message={toastMessage}
+        type={toastType}
+        onHide={() => setToastVisible(false)}
       />
 
       <BottomNavBar />

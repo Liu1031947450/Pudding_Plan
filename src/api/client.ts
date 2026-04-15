@@ -66,7 +66,7 @@ class ApiClient {
       }
 
       if (!skipAuth && authToken) {
-        requestHeaders['Authorization'] = `Bearer ${authToken}`;
+        requestHeaders.Authorization = `Bearer ${authToken}`;
       }
 
       const response = await fetch(url, {
@@ -81,7 +81,7 @@ class ApiClient {
       let data;
       try {
         data = await response.json();
-      } catch (parseError) {
+      } catch {
         return {
           success: false,
           error: response.ok ? '数据格式错误' : '服务器错误',

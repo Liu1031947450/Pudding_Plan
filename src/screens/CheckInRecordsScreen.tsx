@@ -9,7 +9,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Colors, Spacing, FontSize, BorderRadius } from '../constants/theme';
+import { Colors, Spacing, FontSize } from '../constants/theme';
 import { TopAppBar, Card } from '../components';
 import { authApi } from '../api';
 import { useAuth } from '../contexts';
@@ -22,7 +22,7 @@ interface CheckInRecord {
 
 const CheckInRecordsScreen: React.FC = () => {
   const navigation = useNavigation();
-  const { user } = useAuth();
+  const { } = useAuth();
   const [records, setRecords] = useState<CheckInRecord[]>([]);
   const [loading, setLoading] = useState(true);
 

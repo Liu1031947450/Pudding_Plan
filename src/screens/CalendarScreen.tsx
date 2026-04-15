@@ -11,7 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { Colors, Spacing } from '../constants/theme';
-import { BottomNavBar, TopAppBar } from '../components';
+import { BottomNavBar, TopAppBar, Toast } from '../components';
 import {
   CalendarHeader,
   CalendarGrid,
@@ -37,6 +37,9 @@ const CalendarScreen: React.FC = () => {
   });
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState<'success' | 'error' | 'info'>('success');
   const { plans, refreshPlans, handleCheckIn } = usePlanManagement();
 
   // 盖章动画状态
@@ -145,16 +148,31 @@ const CalendarScreen: React.FC = () => {
 
   const onCheckIn = async (planId: string) => {
     if (!currentUserId) {
+      setToastMessage('请先登录后再打卡');
+      setToastType('error');
+      setToastVisible(true);
       return;
     }
 
-    const selectedDateStr = `${year}-${String(month).padStart(2, '0')}-${String(
-      selectedDay,
-    ).padStart(2, '0')}`;
-    const result = await handleCheckIn(planId, selectedDateStr, currentUserId);
-    if (result.success) {
-      playStampAnimation();
-      fetchCalendarData(true);
+    try {
+      const selectedDateStr = `${year}-${String(month).padStart(2, '0')}-${String(
+        selectedDay,
+      ).padStart(2, '0')}`;
+      const result = await handleCheckIn(planId, selectedDateStr, currentUserId);
+      if (result.success) {
+        playStampAnimation();
+        fetchCalendarData(true);
+        setToastMessage('打卡成功');
+        setToastType('success');
+      } else {
+        setToastMessage(result.error || '打卡失败，请重试');
+        setToastType('error');
+      }
+    } catch (error) {
+      setToastMessage('打卡失败，请重试');
+      setToastType('error');
+    } finally {
+      setToastVisible(true);
     }
   };
 
@@ -261,6 +279,13 @@ const CalendarScreen: React.FC = () => {
         onNotificationPress={id =>
           currentUserId && markAsRead(id, currentUserId)
         }
+      />
+
+      <Toast
+        visible={toastVisible}
+        message={toastMessage}
+        type={toastType}
+        onHide={() => setToastVisible(false)}
       />
 
       <BottomNavBar />

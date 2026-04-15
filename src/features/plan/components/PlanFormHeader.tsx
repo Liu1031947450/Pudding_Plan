@@ -1,13 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import {
-  Colors,
-  Spacing,
-  FontSize,
-  BorderRadius,
-} from '../../../constants/theme';
-import type { TemplateDetail } from '../../../types/domain';
+import { Colors, Spacing, FontSize, BorderRadius } from '../../../constants/theme';
 
 interface PlanFormHeaderProps {
   planName: string;

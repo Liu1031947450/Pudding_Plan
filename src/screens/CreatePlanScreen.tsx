@@ -39,7 +39,6 @@ const CreatePlanScreen: React.FC = () => {
   const [templateData, setTemplateData] = useState<TemplateDetail | undefined>(
     undefined,
   );
-  const [loading, setLoading] = useState(false);
   const isEditMode = !!planId;
 
   useEffect(() => {
@@ -58,13 +57,10 @@ const CreatePlanScreen: React.FC = () => {
     if (templateId) {
       const fetchTemplateDetail = async () => {
         try {
-          setLoading(true);
           const data = await templateService.getTemplateById(templateId);
           setTemplateData(data);
         } catch (error) {
           console.error('Failed to fetch template:', error);
-        } finally {
-          setLoading(false);
         }
       };
       fetchTemplateDetail();

@@ -2,7 +2,7 @@ import React, {
   createContext,
   useContext,
   useState,
-  useEffect,
+  useCallback,
   ReactNode,
 } from 'react';
 import * as SecureStore from 'expo-secure-store';
@@ -39,11 +39,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    checkAuth();
+  const clearAuth = useCallback(async () => {
+    await SecureStore.deleteItemAsync(AUTH_STORAGE_KEY);
+    await SecureStore.deleteItemAsync(AUTH_EXPIRY_KEY);
+    await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
+    setAuthToken(null);
   }, []);
 
-  const checkAuth = async () => {
+  const checkAuth = useCallback(async () => {
     try {
       const storedUser = await SecureStore.getItemAsync(AUTH_STORAGE_KEY);
       const storedExpiry = await SecureStore.getItemAsync(AUTH_EXPIRY_KEY);
@@ -68,7 +71,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [clearAuth]);
+
+  React.useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
 
   const login = async (tokenValue: string, userData: User) => {
     try {
@@ -111,13 +118,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       console.error('退出登录失败:', error);
       throw error;
     }
-  };
-
-  const clearAuth = async () => {
-    await SecureStore.deleteItemAsync(AUTH_STORAGE_KEY);
-    await SecureStore.deleteItemAsync(AUTH_EXPIRY_KEY);
-    await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
-    setAuthToken(null);
   };
 
   return (

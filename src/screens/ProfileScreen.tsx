@@ -93,10 +93,7 @@ const ProfileScreen: React.FC = () => {
       <TopAppBar
         leftIcon="settings"
         onLeftPress={() => navigation.navigate('Settings' as never)}
-        rightIcon="notifications-none"
-        onRightPress={() => navigation.navigate('Notifications' as never)}
       />
-      {unreadNotifications > 0 && <View style={styles.topBadge} />}
 
       <ScrollView
         style={styles.scrollView}
@@ -641,18 +638,7 @@ const styles = StyleSheet.create({
   lockedText: {
     color: Colors.outlineVariant,
   },
-  topBadge: {
-    position: 'absolute',
-    top: 50,
-    right: 28,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: Colors.error,
-    borderWidth: 1.5,
-    borderColor: Colors.white,
-    zIndex: 99,
-  },
+
 });
 
 export default ProfileScreen;

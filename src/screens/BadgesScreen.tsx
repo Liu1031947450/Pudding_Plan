@@ -18,7 +18,7 @@ import type { Badge } from '../types/domain';
 
 const BadgesScreen: React.FC = () => {
   const navigation = useNavigation();
-  const { user } = useAuth();
+  const { } = useAuth();
   const [badges, setBadges] = useState<Badge[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'all' | 'unlocked' | 'locked'>(

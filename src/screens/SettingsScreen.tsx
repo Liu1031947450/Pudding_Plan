@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  View,
   Text,
   StyleSheet,
   ScrollView,
@@ -46,7 +45,6 @@ const SettingsScreen: React.FC = () => {
   const [activeDrawer, setActiveDrawer] = React.useState<string | null>(null);
   const [toastVisible, setToastVisible] = React.useState(false);
   const [toastMessage, setToastMessage] = React.useState('');
-  const [loading, setLoading] = React.useState(false);
 
   // 本地状态
   const [profile, setProfile] = React.useState({
@@ -86,7 +84,6 @@ const SettingsScreen: React.FC = () => {
   };
 
   const handleProfileSave = async (data: { nickname: string; bio: string }) => {
-    setLoading(true);
     try {
       const response = await authApi.updateProfile({
         username: data.nickname,
@@ -104,10 +101,8 @@ const SettingsScreen: React.FC = () => {
       } else {
         showToast(response.error || '更新失败');
       }
-    } catch (error) {
+    } catch {
       showToast('更新失败，请稍后重试');
-    } finally {
-      setLoading(false);
     }
   };
 

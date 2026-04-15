@@ -20,6 +20,7 @@ import {
   FontSize,
   BorderRadius,
 } from '../../../constants/theme';
+import { Toast } from '../../../components';
 import type { CircleListItem, CircleMoment } from '../types';
 import { DEFAULT_AVATAR } from '../constants';
 import { circleService } from '../../../services/circleService';
@@ -52,6 +53,9 @@ export const CircleDetailModal: React.FC<CircleDetailModalProps> = ({
     null,
   );
   const [submitting, setSubmitting] = useState(false);
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState<'success' | 'error' | 'info'>('success');
   const inputRef = React.useRef<TextInput>(null);
 
   const loadExtraData = async () => {
@@ -112,44 +116,87 @@ export const CircleDetailModal: React.FC<CircleDetailModalProps> = ({
 
   const handleToggleLike = async () => {
     if (circle.type === 'topic') return;
-    const nextCircle: CircleMoment = {
-      ...circle,
-      isLiked: !circle.isLiked,
-      likes: Math.max(0, (circle.likes || 0) + (circle.isLiked ? -1 : 1)),
-    };
-    setCircle(nextCircle);
-    await circleService.toggleLikeCircle(nextCircle);
-    await onDataChange?.();
+    try {
+      const nextCircle: CircleMoment = {
+        ...circle,
+        isLiked: !circle.isLiked,
+        likes: Math.max(0, (circle.likes || 0) + (circle.isLiked ? -1 : 1)),
+      };
+      setCircle(nextCircle);
+      await circleService.toggleLikeCircle(nextCircle);
+      await onDataChange?.();
+      setToastMessage(circle.isLiked ? '取消点赞成功' : '点赞成功');
+      setToastType('success');
+    } catch (error) {
+      setToastMessage('操作失败，请重试');
+      setToastType('error');
+      // Revert on failure
+      setCircle({
+        ...circle,
+        isLiked: !circle.isLiked,
+        likes: Math.max(0, (circle.likes || 0) + (circle.isLiked ? -1 : 1)),
+      });
+    } finally {
+      setToastVisible(true);
+    }
   };
 
   const handleToggleCollect = async () => {
-    const nextCircle = {
-      ...circle,
-      isCollected: !circle.isCollected,
-    };
-    setCircle(nextCircle);
-    await circleService.toggleCollectCircle(nextCircle);
-    await onDataChange?.();
+    try {
+      const nextCircle = {
+        ...circle,
+        isCollected: !circle.isCollected,
+      };
+      setCircle(nextCircle);
+      await circleService.toggleCollectCircle(nextCircle);
+      await onDataChange?.();
+      setToastMessage(circle.isCollected ? '取消收藏成功' : '收藏成功');
+      setToastType('success');
+    } catch (error) {
+      setToastMessage('操作失败，请重试');
+      setToastType('error');
+      // Revert on failure
+      setCircle({
+        ...circle,
+        isCollected: !circle.isCollected,
+      });
+    } finally {
+      setToastVisible(true);
+    }
   };
 
   const handleToggleFollow = async () => {
     if (!circle || circle.type !== 'waterfall' || !circle.authorUserId) return;
-    const authorId = String(circle.authorUserId);
-    const nextFollowing = !circle.isFollowing;
-    const nextCircle = {
-      ...circle,
-      isFollowing: nextFollowing,
-    };
-    setCircle(nextCircle);
-    const success = await circleService.toggleFollowBuddy(
-      authorId,
-      !nextFollowing,
-    );
-    if (!success) {
+    try {
+      const authorId = String(circle.authorUserId);
+      const nextFollowing = !circle.isFollowing;
+      const nextCircle = {
+        ...circle,
+        isFollowing: nextFollowing,
+      };
+      setCircle(nextCircle);
+      const success = await circleService.toggleFollowBuddy(
+        authorId,
+        !nextFollowing,
+      );
+      if (!success) {
+        // Revert on failure
+        setCircle({ ...circle, isFollowing: !nextFollowing });
+        setToastMessage('操作失败，请重试');
+        setToastType('error');
+      } else {
+        setToastMessage(nextFollowing ? '关注成功' : '取消关注成功');
+        setToastType('success');
+      }
+      await onDataChange?.();
+    } catch (error) {
+      setToastMessage('操作失败，请重试');
+      setToastType('error');
       // Revert on failure
-      setCircle({ ...circle, isFollowing: !nextFollowing });
+      setCircle({ ...circle, isFollowing: !circle.isFollowing });
+    } finally {
+      setToastVisible(true);
     }
-    await onDataChange?.();
   };
 
   const handleSubmitComment = async () => {
@@ -169,9 +216,18 @@ export const CircleDetailModal: React.FC<CircleDetailModalProps> = ({
         if (!replyTo) {
           await onDataChange?.();
         }
+        setToastMessage('发布成功');
+        setToastType('success');
+      } else {
+        setToastMessage('发布失败，请重试');
+        setToastType('error');
       }
+    } catch (error) {
+      setToastMessage('发布失败，请重试');
+      setToastType('error');
     } finally {
       setSubmitting(false);
+      setToastVisible(true);
     }
   };
 
@@ -423,6 +479,13 @@ export const CircleDetailModal: React.FC<CircleDetailModalProps> = ({
             )}
           </View>
         </KeyboardAvoidingView>
+
+        <Toast
+          visible={toastVisible}
+          message={toastMessage}
+          type={toastType}
+          onHide={() => setToastVisible(false)}
+        />
       </SafeAreaView>
     </Modal>
   );

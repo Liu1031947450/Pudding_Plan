@@ -32,7 +32,7 @@ export const PlanCard: React.FC<PlanCardProps> = ({
   canMoveDown = true,
 }) => {
   // 从 completedDate 派生所有展示数据（completedDate 是唯一事实源）
-  const { days, progress, streakBroken, subtitle } = getPlanDisplayData(plan);
+  const { progress, streakBroken, subtitle } = getPlanDisplayData(plan);
   const color = plan.color ?? Colors.primaryContainer;
   const icon = plan.icon || 'stars';
 
