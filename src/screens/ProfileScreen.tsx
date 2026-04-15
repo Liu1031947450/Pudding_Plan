@@ -18,7 +18,7 @@ import {
   Card,
   BottomDrawer,
 } from '../components';
-import { authApi, badgesApi } from '../api';
+import { authApi, badgesApi, notificationsApi } from '../api';
 import { useAuth } from '../contexts';
 import { FeedbackSheet } from '../features/settings';
 import type { Badge } from '../types/domain';
@@ -29,6 +29,7 @@ const ProfileScreen: React.FC = () => {
   const [badges, setBadges] = useState<Badge[]>([]);
   const [loading, setLoading] = useState(true);
   const [feedbackVisible, setFeedbackVisible] = useState(false);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
   const [stats, setStats] = useState({
     streakDays: 0,
     totalCheckIns: 0,
@@ -68,6 +69,12 @@ const ProfileScreen: React.FC = () => {
           socialStats: d.socialStats || prev.socialStats,
         }));
       }
+
+      // 获取未读通知数
+      const notifyRes = await notificationsApi.getAll(true);
+      if (notifyRes.success) {
+        setUnreadNotifications(notifyRes.data?.length || 0);
+      }
     } catch (error) {
       console.error('获取个人中心数据失败:', error);
     } finally {
@@ -86,8 +93,10 @@ const ProfileScreen: React.FC = () => {
       <TopAppBar
         leftIcon="settings"
         onLeftPress={() => navigation.navigate('Settings' as never)}
-        rightIcon="more-vert"
+        rightIcon="notifications-none"
+        onRightPress={() => navigation.navigate('Notifications' as never)}
       />
+      {unreadNotifications > 0 && <View style={styles.topBadge} />}
 
       <ScrollView
         style={styles.scrollView}
@@ -125,12 +134,15 @@ const ProfileScreen: React.FC = () => {
               <Text style={styles.socialStatLabel}>关注</Text>
             </View>
             <View style={styles.socialStatDivider} />
-            <View style={styles.socialStatItem}>
+            <TouchableOpacity
+              style={styles.socialStatItem}
+              onPress={() => navigation.navigate('MyCollections' as never)}
+            >
               <Text style={styles.socialStatNumber}>
                 {stats.socialStats.collects}
               </Text>
-              <Text style={styles.socialStatLabel}>粉丝</Text>
-            </View>
+              <Text style={styles.socialStatLabel}>收藏</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -628,6 +640,18 @@ const styles = StyleSheet.create({
   },
   lockedText: {
     color: Colors.outlineVariant,
+  },
+  topBadge: {
+    position: 'absolute',
+    top: 50,
+    right: 28,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: Colors.error,
+    borderWidth: 1.5,
+    borderColor: Colors.white,
+    zIndex: 99,
   },
 });
 

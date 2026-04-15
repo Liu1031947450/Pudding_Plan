@@ -22,13 +22,24 @@ export const circlesApi = {
   // 上传图片
   uploadImage: async (uri: string): Promise<ApiResponse<string>> => {
     try {
+      if (!uri || typeof uri !== 'string') {
+        return { success: false, error: '无效的图片路径' };
+      }
+
+      const normalizedUri = uri.trim();
+      if (!normalizedUri) {
+        return { success: false, error: '无效的图片路径' };
+      }
+
       const formData = new FormData();
-      const filename = uri.split('/').pop() || 'photo.jpg';
+      const filename = normalizedUri.split('/').pop() || 'photo.jpg';
       const match = /\.(\w+)$/.exec(filename);
-      const type = match ? `image/${match[1]}` : 'image/jpeg';
+      const extension = (match?.[1] || 'jpeg').toLowerCase();
+      const normalizedExtension = extension === 'jpg' ? 'jpeg' : extension;
+      const type = `image/${normalizedExtension}`;
 
       formData.append('image', {
-        uri,
+        uri: normalizedUri,
         name: filename,
         type,
       } as any);
@@ -91,6 +102,28 @@ export const circlesApi = {
   // 取消关注
   unfollowUser: async (userId: string): Promise<ApiResponse<boolean>> => {
     return apiClient.delete<boolean>(`/auth/follow/${userId}`);
+  },
+
+  // 获取点赞列表
+  getLikers: async (id: string): Promise<ApiResponse<any[]>> => {
+    return apiClient.get<any[]>(API_ENDPOINTS.CIRCLE_DETAIL(id) + '/likers');
+  },
+
+  // 获取评论列表
+  getComments: async (id: string): Promise<ApiResponse<any[]>> => {
+    return apiClient.get<any[]>(API_ENDPOINTS.CIRCLE_DETAIL(id) + '/comments');
+  },
+
+  // 发表评论
+  postComment: async (
+    id: string,
+    content: string,
+    parentId?: string,
+  ): Promise<ApiResponse<{ id: number }>> => {
+    return apiClient.post<{ id: number }>(
+      API_ENDPOINTS.CIRCLE_DETAIL(id) + '/comments',
+      { content, parentId },
+    );
   },
 };
 

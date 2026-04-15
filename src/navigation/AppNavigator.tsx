@@ -15,6 +15,8 @@ import {
   AuthScreen,
   CheckInHistoryScreen,
   AllBadgesScreen,
+  MyCollectionsScreen,
+  NotificationsScreen,
 } from '../screens';
 import { useAuth } from '../contexts';
 import { Colors } from '../constants/theme';
@@ -28,6 +30,8 @@ export type RootStackParamList = {
   PostMoment: undefined;
   Badges: undefined;
   CheckInRecords: undefined;
+  MyCollections: undefined;
+  Notifications: undefined;
 };
 
 export type MainTabParamList = {
@@ -123,6 +127,20 @@ const AppNavigator: React.FC = () => {
         <Stack.Screen
           name="CheckInRecords"
           component={CheckInHistoryScreen}
+          options={{
+            presentation: 'card',
+          }}
+        />
+        <Stack.Screen
+          name="MyCollections"
+          component={MyCollectionsScreen}
+          options={{
+            presentation: 'card',
+          }}
+        />
+        <Stack.Screen
+          name="Notifications"
+          component={NotificationsScreen}
           options={{
             presentation: 'card',
           }}

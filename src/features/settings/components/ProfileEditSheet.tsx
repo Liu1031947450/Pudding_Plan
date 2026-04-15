@@ -21,6 +21,7 @@ interface ProfileEditSheetProps {
   initialData: {
     nickname: string;
     bio: string;
+    /** 用户头像 URL，最大长度 1000 字符 */
     avatar?: string;
   };
 }

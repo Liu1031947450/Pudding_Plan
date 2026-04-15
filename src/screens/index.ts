@@ -10,3 +10,5 @@ export { default as PostMomentScreen } from './PostMomentScreen';
 export { default as TemplateSelectionScreen } from './TemplateSelectionScreen';
 export { default as CheckInHistoryScreen } from './CheckInHistoryScreen';
 export { default as AllBadgesScreen } from './AllBadgesScreen';
+export { default as MyCollectionsScreen } from './MyCollectionsScreen';
+export { default as NotificationsScreen } from './NotificationsScreen';

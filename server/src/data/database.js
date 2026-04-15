@@ -151,28 +151,42 @@ class Database {
 
     let notifications = await Notification.findAll({
       where: { userId: user.id },
+      include: [{
+        model: User,
+        as: 'sender',
+        attributes: ['userId', 'username', 'avatar']
+      }],
       order: [['createdAt', 'DESC']],
     });
 
     if (notifications.length === 0) {
       const stats = await this.getUserStatsByUserId(userId);
-      const seededNotifications = await Notification.bulkCreate(
+      // 为演示目的提供初始消息
+      await Notification.bulkCreate(
         mockNotifications.map(notification => ({
           userId: user.id,
           type: notification.type,
           title: notification.title,
-          message:
-            notification.type === 'achievement'
-              ? `你已累计打卡 ${stats.streakDays} 天，继续加油！`
-              : notification.message,
+          message: notification.type === 'achievement' 
+            ? `你已累计打卡 ${stats.streakDays} 天，继续加油！` 
+            : notification.message,
           time: notification.time,
           read: notification.read,
-        })),
+          senderId: null
+        }))
       );
-      notifications = seededNotifications;
+      notifications = await Notification.findAll({
+        where: { userId: user.id },
+        include: [{
+          model: User,
+          as: 'sender',
+          attributes: ['userId', 'username', 'avatar']
+        }],
+        order: [['createdAt', 'DESC']],
+      });
     }
 
-    return notifications.map(notification => notification.toJSON());
+    return notifications.map(n => n.toJSON());
   }
 
   async markNotificationAsRead(userId, notificationId) {

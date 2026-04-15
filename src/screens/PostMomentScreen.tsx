@@ -107,9 +107,16 @@ const PostMomentScreen: React.FC = () => {
       // 1. 上传所有图片
       const uploadedImageUrls: string[] = [];
       for (const uri of images) {
+        if (!uri || !uri.trim()) {
+          continue;
+        }
+
         const uploadRes = await circlesApi.uploadImage(uri);
-        if (uploadRes.success) {
-          uploadedImageUrls.push(uploadRes.data!);
+        if (uploadRes.success && uploadRes.data) {
+          uploadedImageUrls.push(uploadRes.data);
+        } else {
+          showToast(uploadRes.error || '图片上传失败', 'error');
+          return;
         }
       }
 
@@ -249,9 +256,17 @@ const PostMomentScreen: React.FC = () => {
       });
 
       if (!result.canceled) {
-        const newUris = result.assets.map(asset => asset.uri);
+        const newUris = result.assets
+          .map(asset => asset?.uri)
+          .filter((uri): uri is string => typeof uri === 'string' && !!uri.trim());
+
+        if (newUris.length === 0) {
+          showToast('未读取到有效图片，请重试', 'error');
+          return;
+        }
+
         // 这里可以结合 api 上传，目前我们将本地 uri 加入列表进行预览
-        setImages([...images, ...newUris]);
+        setImages(prev => [...prev, ...newUris]);
       }
     } catch (error) {
       console.error('选择图片失败:', error);

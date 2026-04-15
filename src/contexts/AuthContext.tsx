@@ -12,6 +12,7 @@ export interface User {
   id: string;
   username: string;
   phone: string;
+  /** 用户头像 URL，最大长度 1000 字符 */
   avatar?: string | null;
   bio?: string | null;
 }

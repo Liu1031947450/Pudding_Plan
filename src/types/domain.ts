@@ -45,11 +45,20 @@ export interface Badge {
 // Notification types
 export interface Notification {
   id: string;
-  type: 'reminder' | 'achievement' | 'social' | 'system';
+  type: 'reminder' | 'achievement' | 'social' | 'system' | 'like' | 'comment' | 'reply';
   title: string;
   message: string;
   time: string;
   read: boolean;
+  senderId?: string;
+  sender?: {
+    userId: string;
+    username: string;
+    /** 用户头像 URL，最大长度 1000 字符 */
+    avatar?: string;
+  };
+  targetType?: 'moment' | 'comment';
+  targetId?: string;
 }
 
 // Rhythm data for charts
@@ -64,15 +73,19 @@ export interface Buddy {
   id: string;
   name: string;
   goal: string;
+  /** 用户头像 URL，最大长度 1000 字符 */
   avatarUri?: string;
 }
 
 export interface Comment {
   id: string;
+  userId: string;
   userName: string;
+  /** 用户头像 URL，最大长度 1000 字符 */
   userAvatarUri?: string;
   text: string;
   time: string;
+  replies?: Comment[];
 }
 
 // Calendar types

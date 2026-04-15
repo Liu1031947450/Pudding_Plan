@@ -39,6 +39,22 @@ const Notification = sequelize.define(
       allowNull: false,
       defaultValue: false,
     },
+    senderId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: 'users',
+        key: 'id',
+      },
+    },
+    targetType: {
+      type: DataTypes.STRING(20),
+      allowNull: true, // 'moment', 'comment'
+    },
+    targetId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
     createdAt: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,

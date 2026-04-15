@@ -30,17 +30,19 @@ class CircleService {
 
   // Toggle like status
   async toggleLikeCircle(circle: CircleListItem): Promise<boolean> {
+    // circle.isLiked is the NEW state from the UI
     const response = circle.isLiked
-      ? await circlesApi.unlikeCircle(circle.id)
-      : await circlesApi.likeCircle(circle.id);
+      ? await circlesApi.likeCircle(circle.id)
+      : await circlesApi.unlikeCircle(circle.id);
     return response.success;
   }
 
   // Toggle collect status
   async toggleCollectCircle(circle: CircleListItem): Promise<boolean> {
+    // circle.isCollected is the NEW state from the UI
     const response = circle.isCollected
-      ? await circlesApi.uncollectCircle(circle.id)
-      : await circlesApi.collectCircle(circle.id);
+      ? await circlesApi.collectCircle(circle.id)
+      : await circlesApi.uncollectCircle(circle.id);
     return response.success;
   }
 
@@ -53,6 +55,24 @@ class CircleService {
       ? await circlesApi.unfollowUser(userId)
       : await circlesApi.followUser(userId);
     return response.success;
+  }
+
+  // Get likers for a moment
+  async getLikers(id: string) {
+    const response = await circlesApi.getLikers(id);
+    return response.data || [];
+  }
+
+  // Get comments for a moment
+  async getComments(id: string) {
+    const response = await circlesApi.getComments(id);
+    return response.data || [];
+  }
+
+  // Post a comment
+  async postComment(id: string, content: string, parentId?: string) {
+    const response = await circlesApi.postComment(id, content, parentId);
+    return response;
   }
 }
 

@@ -10,6 +10,8 @@ import {
   Dimensions,
   SafeAreaView,
   Platform,
+  TextInput,
+  KeyboardAvoidingView,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import {
@@ -43,6 +45,28 @@ export const CircleDetailModal: React.FC<CircleDetailModalProps> = ({
   const [circle, setCircle] = useState<CircleListItem | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [comments, setComments] = useState<any[]>([]);
+  const [likers, setLikers] = useState<any[]>([]);
+  const [commentText, setCommentText] = useState('');
+  const [replyTo, setReplyTo] = useState<{ id: string; name: string } | null>(
+    null,
+  );
+  const [submitting, setSubmitting] = useState(false);
+  const inputRef = React.useRef<TextInput>(null);
+
+  const loadExtraData = async () => {
+    if (!circleId) return;
+    try {
+      const [comments, likers] = await Promise.all([
+        circleService.getComments(circleId),
+        circleService.getLikers(circleId),
+      ]);
+      setComments(comments);
+      setLikers(likers);
+    } catch (error) {
+      console.error('加载详情辅助数据失败:', error);
+    }
+  };
 
   useEffect(() => {
     if (!visible || !circleId) {
@@ -55,6 +79,7 @@ export const CircleDetailModal: React.FC<CircleDetailModalProps> = ({
       try {
         const detail = await circleService.getCircleById(circleId);
         setCircle(detail || null);
+        await loadExtraData();
       } finally {
         setLoading(false);
       }
@@ -125,6 +150,34 @@ export const CircleDetailModal: React.FC<CircleDetailModalProps> = ({
       setCircle({ ...circle, isFollowing: !nextFollowing });
     }
     await onDataChange?.();
+  };
+
+  const handleSubmitComment = async () => {
+    if (!circleId || !commentText.trim() || submitting) return;
+    setSubmitting(true);
+    try {
+      const res = await circleService.postComment(
+        circleId,
+        commentText,
+        replyTo?.id,
+      );
+      if (res.success) {
+        setCommentText('');
+        setReplyTo(null);
+        await loadExtraData();
+        // 如果是评论而非回复，更新外层的评论数
+        if (!replyTo) {
+          await onDataChange?.();
+        }
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleReply = (commentId: string, userName: string) => {
+    setReplyTo({ id: commentId, name: userName });
+    inputRef.current?.focus();
   };
 
   return (
@@ -221,29 +274,78 @@ export const CircleDetailModal: React.FC<CircleDetailModalProps> = ({
             <Text style={styles.time}>
               {loading ? '加载中...' : '编辑于 刚刚'}
             </Text>
+
+            {likers.length > 0 && (
+              <View style={styles.likersContainer}>
+                <View style={styles.likerAvatars}>
+                  {likers.slice(0, 5).map((liker, index) => (
+                    <Image
+                      key={liker.id}
+                      source={{ uri: liker.avatar || DEFAULT_AVATAR }}
+                      style={[
+                        styles.likerAvatar,
+                        { marginLeft: index === 0 ? 0 : -8 },
+                      ]}
+                    />
+                  ))}
+                </View>
+                <Text style={styles.likersText}>
+                  {likers.length} 人觉得很赞
+                </Text>
+              </View>
+            )}
           </View>
 
           {circle.type === 'waterfall' && (
             <View style={styles.commentsSection}>
               <View style={styles.commentsHeader}>
                 <Text style={styles.commentsTitle}>
-                  共 {circle.commentsCount || 0} 条评论
+                  共 {comments.length || 0} 条评论
                 </Text>
               </View>
-              {circle.comments?.map(comment => (
-                <View key={comment.id} style={styles.commentItem}>
-                  <Image
-                    source={{ uri: comment.userAvatarUri || DEFAULT_AVATAR }}
-                    style={styles.commentAvatar}
-                  />
-                  <View style={styles.commentContent}>
-                    <Text style={styles.commentUser}>{comment.userName}</Text>
-                    <Text style={styles.commentText}>{comment.text}</Text>
-                    <Text style={styles.commentTime}>{comment.time}</Text>
+
+              {comments.map(comment => (
+                <View key={comment.id} style={styles.commentContainer}>
+                  <View style={styles.commentItem}>
+                    <Image
+                      source={{ uri: comment.userAvatarUri || DEFAULT_AVATAR }}
+                      style={styles.commentAvatar}
+                    />
+                    <View style={styles.commentContent}>
+                      <View style={styles.commentHeaderRow}>
+                        <Text style={styles.commentUser}>{comment.userName}</Text>
+                        <TouchableOpacity
+                          onPress={() =>
+                            handleReply(comment.id, comment.userName)
+                          }
+                        >
+                          <Text style={styles.replyActionText}>回复</Text>
+                        </TouchableOpacity>
+                      </View>
+                      <Text style={styles.commentText}>{comment.text}</Text>
+                      <Text style={styles.commentTime}>{comment.time}</Text>
+
+                      {/* 回复列表 */}
+                      {comment.replies && comment.replies.length > 0 && (
+                        <View style={styles.repliesList}>
+                          {comment.replies.map((reply: any) => (
+                            <View key={reply.id} style={styles.replyItem}>
+                              <Text style={styles.replyContent}>
+                                <Text style={styles.replyUser}>
+                                  {reply.userName}:{' '}
+                                </Text>
+                                {reply.text}
+                              </Text>
+                            </View>
+                          ))}
+                        </View>
+                      )}
+                    </View>
                   </View>
                 </View>
               ))}
-              {(!circle.comments || circle.comments.length === 0) && (
+
+              {comments.length === 0 && (
                 <Text style={styles.emptyComments}>
                   快来发表你的第一个评论吧 ~
                 </Text>
@@ -252,52 +354,75 @@ export const CircleDetailModal: React.FC<CircleDetailModalProps> = ({
           )}
         </ScrollView>
 
-        <View style={styles.footer}>
-          <View style={styles.inputPlaceholder}>
-            <MaterialIcons
-              name="edit"
-              size={18}
-              color={Colors.onSurfaceVariant}
-            />
-            <Text style={styles.inputPlaceholderText}>说点什么...</Text>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+        >
+          <View style={styles.footer}>
+            <View style={styles.inputContainer}>
+              <View style={styles.inputWrapper}>
+                <MaterialIcons
+                  name="edit"
+                  size={18}
+                  color={Colors.onSurfaceVariant}
+                />
+                <TextInput
+                  ref={inputRef}
+                  style={styles.textInput}
+                  placeholder={
+                    replyTo ? `回复 @${replyTo.name}...` : '说点什么...'
+                  }
+                  value={commentText}
+                  onChangeText={setCommentText}
+                  placeholderTextColor={Colors.onSurfaceVariant}
+                  onBlur={() => !commentText && setReplyTo(null)}
+                />
+              </View>
+              {commentText.length > 0 && (
+                <TouchableOpacity
+                  onPress={handleSubmitComment}
+                  disabled={submitting}
+                  style={styles.sendButton}
+                >
+                  <Text style={styles.sendButtonText}>
+                    {submitting ? '...' : '发布'}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
+
+            {!commentText && (
+              <View style={styles.interactionIcons}>
+                <TouchableOpacity
+                  onPress={handleToggleLike}
+                  style={styles.iconButton}
+                >
+                  <MaterialIcons
+                    name={circle.isLiked ? 'favorite' : 'favorite-border'}
+                    size={24}
+                    color={circle.isLiked ? Colors.error : Colors.onSurface}
+                  />
+                  <Text style={styles.iconCount}>
+                    {circle.type === 'waterfall' ? circle.likes || 0 : ''}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={handleToggleCollect}
+                  style={styles.iconButton}
+                >
+                  <MaterialIcons
+                    name={circle.isCollected ? 'star' : 'star-border'}
+                    size={26}
+                    color={
+                      circle.isCollected ? Colors.primary : Colors.onSurface
+                    }
+                  />
+                  <Text style={styles.iconCount}>收藏</Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
-          <View style={styles.interactionIcons}>
-            <TouchableOpacity
-              onPress={handleToggleLike}
-              style={styles.iconButton}
-            >
-              <MaterialIcons
-                name={circle.isLiked ? 'favorite' : 'favorite-border'}
-                size={24}
-                color={circle.isLiked ? Colors.error : Colors.onSurface}
-              />
-              <Text style={styles.iconCount}>
-                {circle.type === 'waterfall' ? circle.likes || 0 : ''}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={handleToggleCollect}
-              style={styles.iconButton}
-            >
-              <MaterialIcons
-                name={circle.isCollected ? 'star' : 'star-border'}
-                size={26}
-                color={circle.isCollected ? Colors.primary : Colors.onSurface}
-              />
-              <Text style={styles.iconCount}>收藏</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.iconButton}>
-              <MaterialIcons
-                name="chat-bubble-outline"
-                size={22}
-                color={Colors.onSurface}
-              />
-              <Text style={styles.iconCount}>
-                {circle.type === 'waterfall' ? circle.commentsCount || 0 : ''}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+        </KeyboardAvoidingView>
       </SafeAreaView>
     </Modal>
   );
@@ -457,21 +582,81 @@ const styles = StyleSheet.create({
     marginTop: Spacing.xl,
     opacity: 0.6,
   },
+  likersContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: Spacing.md,
+    backgroundColor: `${Colors.primary}05`,
+    padding: Spacing.sm,
+    borderRadius: BorderRadius.md,
+  },
+  likerAvatars: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: Spacing.sm,
+  },
+  likerAvatar: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: Colors.white,
+    backgroundColor: Colors.surfaceVariant,
+  },
+  likersText: {
+    fontSize: FontSize.xs,
+    color: Colors.onSurfaceVariant,
+    fontWeight: '500',
+  },
+  commentContainer: {
+    marginBottom: Spacing.lg,
+  },
+  commentHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  replyActionText: {
+    fontSize: FontSize.xs,
+    color: Colors.primary,
+    fontWeight: '600',
+  },
+  repliesList: {
+    backgroundColor: Colors.surfaceContainerLow,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.sm,
+    marginTop: Spacing.sm,
+  },
+  replyItem: {
+    marginBottom: 4,
+  },
+  replyContent: {
+    fontSize: FontSize.sm,
+    color: Colors.onSurface,
+    lineHeight: 18,
+  },
+  replyUser: {
+    fontWeight: '700',
+    color: Colors.onSurface,
+  },
   footer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
     backgroundColor: Colors.white,
     borderTopWidth: 1,
     borderTopColor: `${Colors.outlineVariant}15`,
     paddingHorizontal: Spacing.md,
-    paddingTop: Spacing.sm,
+    paddingVertical: Spacing.sm,
     paddingBottom: Platform.OS === 'ios' ? 34 : Spacing.md,
     flexDirection: 'row',
     alignItems: 'center',
   },
-  inputPlaceholder: {
+  inputContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  inputWrapper: {
     flex: 1,
     height: 40,
     backgroundColor: Colors.surfaceContainerLow,
@@ -481,9 +666,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
-  inputPlaceholderText: {
+  textInput: {
+    flex: 1,
+    height: '100%',
     fontSize: FontSize.md,
-    color: Colors.onSurfaceVariant,
+    color: Colors.onSurface,
+    padding: 0,
+  },
+  sendButton: {
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 8,
+    backgroundColor: Colors.primary,
+    borderRadius: BorderRadius.full,
+    justifyContent: 'center',
+  },
+  sendButtonText: {
+    color: Colors.white,
+    fontSize: FontSize.sm,
+    fontWeight: '700',
   },
   interactionIcons: {
     flexDirection: 'row',

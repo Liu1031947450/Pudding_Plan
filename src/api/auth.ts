@@ -4,6 +4,7 @@ export interface User {
   id: string;
   username: string;
   phone: string;
+  /** 用户头像 URL，最大长度 1000 字符 */
   avatar?: string;
   bio?: string;
 }
@@ -77,6 +78,7 @@ export const authApi = {
   // 更新用户资料
   updateProfile: async (data: {
     username: string;
+    /** 用户头像 URL，最大长度 1000 字符 */
     avatar?: string;
     bio?: string;
   }): Promise<ApiResponse<User>> => {

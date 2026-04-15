@@ -42,7 +42,7 @@ const CircleMoment = sequelize.define(
       allowNull: true,
       defaultValue: [],
     },
-    likes: {
+    likesCount: {
       type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 0,

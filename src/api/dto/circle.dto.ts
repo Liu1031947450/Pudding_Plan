@@ -3,6 +3,7 @@
 export interface CommentDTO {
   id: string;
   user_name: string;
+  /** 用户头像 URL，最大长度 1000 字符 */
   user_avatar?: string;
   content: string;
   created_at: string;
@@ -19,12 +20,14 @@ export interface CircleListItemDTO {
   category?: string;
   // Waterfall 类型字段
   author_name?: string;
+  /** 作者头像 URL，最大长度 1000 字符 */
   author_avatar?: string;
   like_count?: number;
   comment_count?: number;
   // Topic 类型字段
   is_topic?: boolean;
   topic_tag?: string;
+  /** 参与者头像 URL 列表，每个 URL 最大长度 1000 字符 */
   participant_avatars?: string[];
   background_color?: string;
   // 用户交互状态
@@ -45,6 +48,7 @@ export interface CircleDetailDTO {
   category?: string;
   // Waterfall 类型字段
   author_name?: string;
+  /** 作者头像 URL，最大长度 1000 字符 */
   author_avatar?: string;
   like_count?: number;
   comment_count?: number;
@@ -52,6 +56,7 @@ export interface CircleDetailDTO {
   // Topic 类型字段
   is_topic?: boolean;
   topic_tag?: string;
+  /** 参与者头像 URL 列表，每个 URL 最大长度 1000 字符 */
   participant_avatars?: string[];
   background_color?: string;
   // 用户交互状态

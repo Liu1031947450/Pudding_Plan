@@ -8,6 +8,7 @@ const {
   CircleMoment,
   Template,
   Friendship,
+  Comment,
 } = require('../models');
 const { v4: uuidv4 } = require('uuid');
 const { mockCircles, mockBuddies } = require('../data/mockData/communityData');
@@ -53,7 +54,9 @@ async function ensureUsersTableMigration() {
   }
 
   if (!columns.avatar) {
-    await sequelize.query('ALTER TABLE users ADD COLUMN avatar VARCHAR(255);');
+    await sequelize.query('ALTER TABLE users ADD COLUMN avatar VARCHAR(1000);');
+  } else if (columns.avatar.type === 'character varying(255)') {
+    await sequelize.query('ALTER TABLE users ALTER COLUMN avatar TYPE VARCHAR(1000);');
   }
   if (!columns.bio) {
     await sequelize.query('ALTER TABLE users ADD COLUMN bio VARCHAR(200);');
@@ -121,7 +124,7 @@ async function seedCircleMomentsAndBuddies() {
       category: item.category || '',
       imageUri: item.imageUri || null,
       images: item.images || [],
-      likes: item.likes || 0,
+      likesCount: item.likes || 0,
       commentsCount: item.commentsCount || 0,
     }));
 
