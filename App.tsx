@@ -6,6 +6,23 @@ import AppNavigator from './src/navigation/AppNavigator';
 import { SplashScreen } from './src/screens';
 import { AuthProvider, NotificationProvider } from './src/contexts';
 
+// 全局通知行为配置：前台收到通知时也弹出提示
+// 在 Expo Go 中可能不可用，用 try-catch 保护
+try {
+  const Notifications = require('expo-notifications');
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+      shouldShowBanner: true,
+      shouldShowList: true,
+    }),
+  });
+} catch (e) {
+  console.warn('[App] expo-notifications 初始化跳过（可能在 Expo Go 中）:', e);
+}
+
 function App() {
   const [showSplash, setShowSplash] = useState(true);
 

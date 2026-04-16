@@ -3,6 +3,7 @@ import type { Plan } from '../types/domain';
 import { planService } from '../services/planService';
 import type { ApiResponse } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
+import { cancelPlanReminders } from '../services/notificationScheduler';
 
 export const usePlanManagement = () => {
   const { user } = useAuth();
@@ -83,6 +84,8 @@ export const usePlanManagement = () => {
 
       const response = await planService.deletePlan(id);
       if (response.success) {
+        // 取消该计划关联的所有系统通知
+        await cancelPlanReminders(id);
         await loadPlans(currentUserId);
       }
       return response;
@@ -99,7 +102,10 @@ export const usePlanManagement = () => {
       let deletedCount = 0;
       for (const id of selectedPlans) {
         const response = await planService.deletePlan(id);
-        if (response.success) deletedCount++;
+        if (response.success) {
+          await cancelPlanReminders(id);
+          deletedCount++;
+        }
       }
       if (deletedCount > 0) {
         await loadPlans(currentUserId);

@@ -20,6 +20,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { planService } from '../services/planService';
 import { templateService } from '../services/templateService';
 import { formatTime } from '../utils';
+import { syncPlanReminders } from '../services/notificationScheduler';
 import type { TemplateDetail, Reminder, Plan } from '../types/domain';
 
 type CreatePlanRouteProp = RouteProp<
@@ -230,6 +231,12 @@ const CreatePlanScreen: React.FC = () => {
         : await handleCreatePlan(newPlanData, user.id);
 
       if (result.success) {
+        // 同步提醒到系统通知
+        const savedPlanId = isEditMode ? planId! : result.data?.id;
+        if (savedPlanId) {
+          await syncPlanReminders(savedPlanId, planName, reminders);
+        }
+
         // 显示成功提示
         setToastMessage(isEditMode ? '计划更新成功！' : '计划创建成功！');
         setToastType('success');
