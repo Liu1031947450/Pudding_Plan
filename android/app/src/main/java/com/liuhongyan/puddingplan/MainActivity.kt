@@ -1,4 +1,4 @@
-package com.puddingplan
+package com.liuhongyan.puddingplan
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

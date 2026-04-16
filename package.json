@@ -5,8 +5,8 @@
   "scripts": {
     "backend": "cd server && npm run dev",
     "frontend": "npm start",
-    "android": "react-native run-android",
-    "ios": "react-native run-ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "lint": "eslint .",
     "format": "prettier --write . --ignore-unknown",
     "format:check": "prettier --check . --ignore-unknown",

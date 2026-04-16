@@ -1,4 +1,4 @@
-package com.puddingplan
+package com.liuhongyan.puddingplan
 
 import android.app.Application
 import com.facebook.react.PackageList
