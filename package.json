@@ -16,7 +16,10 @@
     "test": "jest",
     "web": "webpack serve --mode development",
     "web:build": "webpack --mode production",
-    "server": "cd server && npm start"
+    "server": "cd server && npm start",
+    "db:start": "npm run --prefix server db:start",
+    "db:stop": "npm run --prefix server db:stop",
+    "db:status": "npm run --prefix server db:status"
   },
   "dependencies": {
     "@babel/preset-react": "^7.28.5",
