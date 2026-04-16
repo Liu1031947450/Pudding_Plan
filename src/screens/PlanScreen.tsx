@@ -20,7 +20,7 @@ import {
   AchievementDrawer,
 } from '../features/plan';
 import { usePlanManagement } from '../hooks';
-import { useNotificationState } from '../hooks/useNotificationState';
+import { useNotifications } from '../contexts';
 import { useAuth } from '../contexts/AuthContext';
 import { badgesApi, rhythmApi } from '../api';
 
@@ -48,7 +48,7 @@ const PlanScreen: React.FC = () => {
     refreshNotifications,
     unreadCount,
     showNewMessageAnimation,
-  } = useNotificationState();
+  } = useNotifications();
   const [notificationVisible, setNotificationVisible] = useState(false);
   const [achievementVisible, setAchievementVisible] = useState(false);
   const [badges, setBadges] = useState<Badge[]>([]);

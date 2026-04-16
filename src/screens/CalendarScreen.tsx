@@ -19,7 +19,7 @@ import {
   DailyQuoteCard,
   NotificationDrawer,
 } from '../features/calendar';
-import { useNotificationState } from '../hooks/useNotificationState';
+import { useNotifications } from '../contexts';
 import type { DayData } from '../types/domain';
 import { usePlanManagement } from '../hooks';
 import { useAuth } from '../contexts/AuthContext';
@@ -82,7 +82,7 @@ const CalendarScreen: React.FC = () => {
   const [notificationDrawerVisible, setNotificationDrawerVisible] =
     useState(false);
   const { notifications, markAsRead, refreshNotifications, unreadCount } =
-    useNotificationState();
+    useNotifications();
 
   const handleOpenNotifications = () => {
     setNotificationDrawerVisible(true);
@@ -204,6 +204,7 @@ const CalendarScreen: React.FC = () => {
         title="日历"
         rightIcon="notifications"
         rightIconShake={unreadCount > 0}
+        notificationCount={unreadCount}
         onRightPress={handleOpenNotifications}
       />
 

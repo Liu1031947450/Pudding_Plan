@@ -7,8 +7,7 @@ import { BottomNavBar, TopAppBar, FloatingActionButton } from '../components';
 import { CircleWaterfall, CircleDetailModal } from '../features/circle';
 import { NotificationDrawer } from '../features/plan';
 import { useCircleData } from '../hooks';
-import { useNotificationState } from '../hooks/useNotificationState';
-import { useNotificationPolling } from '../hooks/useNotificationPolling';
+import { useNotifications } from '../contexts';
 import { useAuth } from '../contexts/AuthContext';
 
 const CirclesScreen: React.FC = () => {
@@ -20,17 +19,10 @@ const CirclesScreen: React.FC = () => {
     useState(false);
   const [selectedCircleId, setSelectedCircleId] = useState<string | null>(null);
   const [detailVisible, setDetailVisible] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
 
-  const { notifications, markAsRead, refreshNotifications } =
-    useNotificationState();
+  const { notifications, markAsRead, refreshNotifications, unreadCount } =
+    useNotifications();
 
-  // 使用轮询 hook 获取未读消息数量
-  useNotificationPolling({
-    interval: 10000,
-    onCountChange: (count: number) => setUnreadCount(count),
-    enabled: true,
-  });
 
   const displayCircles = useMemo(
     () =>
