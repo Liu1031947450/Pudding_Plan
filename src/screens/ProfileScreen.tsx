@@ -21,7 +21,6 @@ import {
 import { authApi, badgesApi } from '../api';
 import { useAuth } from '../contexts';
 import { FeedbackSheet } from '../features/settings';
-import { useNotificationPolling } from '../hooks/useNotificationPolling';
 import type { Badge } from '../types/domain';
 
 const ProfileScreen: React.FC = () => {
@@ -30,7 +29,6 @@ const ProfileScreen: React.FC = () => {
   const [badges, setBadges] = useState<Badge[]>([]);
   const [loading, setLoading] = useState(true);
   const [feedbackVisible, setFeedbackVisible] = useState(false);
-  const [unreadNotifications, setUnreadNotifications] = useState(0);
   const [stats, setStats] = useState({
     streakDays: 0,
     totalCheckIns: 0,
@@ -44,27 +42,25 @@ const ProfileScreen: React.FC = () => {
     },
   });
 
-  // 使用轮询 hook 获取未读消息数量
-  useNotificationPolling({
-    interval: 10000,
-    onCountChange: (count) => setUnreadNotifications(count),
-    enabled: true,
-  });
-
-  // 使用轮询 hook 获取未读消息数量
-  useNotificationPolling({
-    interval: 10000,
-    onCountChange: (count) => setUnreadNotifications(count),
-    enabled: true,
-  });
-
   const fetchProfileData = useCallback(async () => {
-    if (!user?.id) return;
+    console.log('[Profile] fetchProfileData called, user:', user?.id, user?.username);
+    if (!user?.id) {
+      console.warn('[Profile] user.id 不存在，跳过数据加载');
+      setLoading(false);
+      return;
+    }
     try {
+      console.log('[Profile] 开始请求 badges 和 stats...');
       const [badgesResponse, statsResponse] = await Promise.all([
         badgesApi.getAll(),
         authApi.getCurrentUserStats(),
       ]);
+
+      console.log('[Profile] badgesResponse:', JSON.stringify({
+        success: badgesResponse.success,
+        dataLength: badgesResponse.data?.length,
+        error: badgesResponse.error
+      }));
 
       if (badgesResponse.success && badgesResponse.data) {
         setBadges(badgesResponse.data);
@@ -102,10 +98,6 @@ const ProfileScreen: React.FC = () => {
       <TopAppBar
         leftIcon="settings"
         onLeftPress={() => navigation.navigate('Settings' as never)}
-        rightIcon="notifications"
-        onRightPress={() => navigation.navigate('Notifications' as never)}
-        notificationCount={unreadNotifications}
-        rightIconShake={unreadNotifications > 0}
       />
 
       <ScrollView
@@ -235,55 +227,57 @@ const ProfileScreen: React.FC = () => {
               </View>
             ) : badges.length > 0 ? (
               <>
-                {badges.filter(b => b.unlocked).map(badge => (
-                  <View key={badge.id} style={styles.badgeItem}>
-                    <View
-                      style={[
-                        styles.badgeIcon,
-                        {
-                          backgroundColor: badge.color,
-                        },
-                      ]}
-                    >
-                      <MaterialIcons
-                        name={badge.icon}
-                        size={28}
-                        color={Colors.white}
-                      />
-                    </View>
-                    <Text style={styles.badgeTitle}>
-                      {badge.title}
-                    </Text>
-                  </View>
-                ))}
-                {badges.filter(b => !b.unlocked).map(badge => (
-                  <View key={badge.id} style={styles.badgeItem}>
-                    <View
-                      style={[
-                        styles.badgeIcon,
-                        {
-                          backgroundColor: Colors.surfaceVariant,
-                        },
-                      ]}
-                    >
-                      <MaterialIcons
-                        name={badge.icon}
-                        size={28}
-                        color={Colors.outlineVariant}
-                      />
-                      <View style={styles.lockOverlay}>
+                {badges
+                  .filter(b => b.unlocked)
+                  .map(badge => (
+                    <View key={badge.id} style={styles.badgeItem}>
+                      <View
+                        style={[
+                          styles.badgeIcon,
+                          {
+                            backgroundColor: badge.color,
+                          },
+                        ]}
+                      >
                         <MaterialIcons
-                          name="lock"
-                          size={10}
-                          color={Colors.outlineVariant}
+                          name={badge.icon}
+                          size={28}
+                          color={Colors.white}
                         />
                       </View>
+                      <Text style={styles.badgeTitle}>{badge.title}</Text>
                     </View>
-                    <Text style={[styles.badgeTitle, styles.lockedText]}>
-                      {badge.title}
-                    </Text>
-                  </View>
-                ))}
+                  ))}
+                {badges
+                  .filter(b => !b.unlocked)
+                  .map(badge => (
+                    <View key={badge.id} style={styles.badgeItem}>
+                      <View
+                        style={[
+                          styles.badgeIcon,
+                          {
+                            backgroundColor: Colors.surfaceVariant,
+                          },
+                        ]}
+                      >
+                        <MaterialIcons
+                          name={badge.icon}
+                          size={28}
+                          color={Colors.outlineVariant}
+                        />
+                        <View style={styles.lockOverlay}>
+                          <MaterialIcons
+                            name="lock"
+                            size={10}
+                            color={Colors.outlineVariant}
+                          />
+                        </View>
+                      </View>
+                      <Text style={[styles.badgeTitle, styles.lockedText]}>
+                        {badge.title}
+                      </Text>
+                    </View>
+                  ))}
               </>
             ) : (
               <View style={styles.emptyContainer}>
@@ -321,7 +315,7 @@ const ProfileScreen: React.FC = () => {
               />
             </TouchableOpacity>
 
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.menuItem}
               onPress={() => navigation.navigate('MyCollections' as never)}
             >
@@ -666,7 +660,6 @@ const styles = StyleSheet.create({
   lockedText: {
     color: Colors.outlineVariant,
   },
-
 });
 
 export default ProfileScreen;

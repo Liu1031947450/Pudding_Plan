@@ -241,65 +241,9 @@ class Database {
   }
 
   async getBadgesByUserId(userId) {
-    const user = await User.findOne({ where: { userId } });
-    if (!user) return [];
-
+    const achievementService = require('../services/achievementService');
     const stats = await this.getUserStatsByUserId(userId);
-    const circlesCount = await this.getUserCircleMomentsCountByUserId(userId);
-
-    let badges = await Badge.findAll({
-      where: { userId: user.id },
-      order: [['id', 'ASC']],
-    });
-
-    if (badges.length === 0) {
-      const seededBadges = await Badge.bulkCreate(
-        mockBadges.map(badge => ({
-          userId: user.id,
-          badgeKey: badge.id,
-          title: badge.title,
-          description: badge.description,
-          icon: badge.icon,
-          color: badge.color,
-          unlocked: false,
-        })),
-      );
-      badges = seededBadges;
-    }
-
-    const unlockRules = {
-      first_check_in: () => stats.totalCheckIns >= 1,
-      streak_3: () => stats.streakDays >= 3,
-      streak_7: () => stats.streakDays >= 7,
-      streak_14: () => stats.streakDays >= 14,
-      streak_30: () => stats.streakDays >= 30,
-      checkin_10: () => stats.totalCheckIns >= 10,
-      checkin_50: () => stats.totalCheckIns >= 50,
-      plan_1: () => stats.healingPlans >= 1,
-      plan_3: () => stats.healingPlans >= 3,
-      plan_5: () => stats.healingPlans >= 5,
-      social_post_1: () => circlesCount >= 1,
-      all_rounder: () =>
-        stats.streakDays >= 7 &&
-        stats.totalCheckIns >= 10 &&
-        stats.healingPlans >= 3,
-    };
-
-    for (const badge of badges) {
-      const unlocked = unlockRules[badge.badgeKey]
-        ? unlockRules[badge.badgeKey]()
-        : false;
-
-      if (badge.unlocked !== unlocked) {
-        await badge.update({ unlocked });
-      }
-    }
-
-    const refreshedBadges = await Badge.findAll({
-      where: { userId: user.id },
-      order: [['id', 'ASC']],
-    });
-    return refreshedBadges.map(badge => badge.toJSON());
+    return await achievementService.getUserAchievements(userId, stats);
   }
 
   async getUserCircleMomentsCountByUserId(userId) {

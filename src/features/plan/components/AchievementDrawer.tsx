@@ -228,6 +228,21 @@ export const AchievementDrawer: React.FC<AchievementDrawerProps> = ({
                             <Text style={[styles.badgeDesc, styles.lockedText]}>
                               {badge.description}
                             </Text>
+                            {badge.target !== undefined && badge.progress !== undefined && (
+                              <View style={styles.progressContainer}>
+                                <View style={styles.progressBarBg}>
+                                  <View 
+                                    style={[
+                                      styles.progressBarFill, 
+                                      { width: `${badge.percentage || 0}%` }
+                                    ]} 
+                                  />
+                                </View>
+                                <Text style={styles.progressText}>
+                                  {badge.progress}/{badge.target}
+                                </Text>
+                              </View>
+                            )}
                           </Card>
                         ))}
                     </View>
@@ -380,5 +395,28 @@ const styles = StyleSheet.create({
     marginTop: Spacing.xs,
     fontSize: FontSize.sm,
     color: Colors.onSurfaceVariant,
+  },
+  progressContainer: {
+    width: '100%',
+    marginTop: Spacing.sm,
+    alignItems: 'center',
+  },
+  progressBarBg: {
+    width: '100%',
+    height: 4,
+    backgroundColor: Colors.surfaceVariant,
+    borderRadius: 2,
+    overflow: 'hidden',
+    marginBottom: 4,
+  },
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: Colors.primary,
+    borderRadius: 2,
+  },
+  progressText: {
+    fontSize: 10,
+    color: Colors.onSurfaceVariant,
+    fontWeight: '600',
   },
 });

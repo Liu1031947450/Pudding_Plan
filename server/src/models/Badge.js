@@ -21,26 +21,14 @@ const Badge = sequelize.define(
       type: DataTypes.STRING(50),
       allowNull: false,
     },
-    title: {
-      type: DataTypes.STRING(100),
-      allowNull: false,
-    },
-    description: {
-      type: DataTypes.STRING(255),
-      allowNull: false,
-    },
-    icon: {
-      type: DataTypes.STRING(50),
-      allowNull: false,
-    },
-    color: {
-      type: DataTypes.STRING(20),
-      allowNull: false,
-    },
     unlocked: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false,
+    },
+    unlockedAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
     },
     createdAt: {
       type: DataTypes.DATE,

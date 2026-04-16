@@ -40,6 +40,10 @@ export interface Badge {
   icon: keyof typeof MaterialIcons.glyphMap;
   color: string;
   unlocked: boolean;
+  unlockedAt?: string;
+  progress?: number;
+  target?: number;
+  percentage?: number;
 }
 
 // Notification types

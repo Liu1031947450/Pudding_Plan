@@ -192,6 +192,40 @@ async function seedCircleMomentsAndBuddies() {
   console.log('圈子动态与好友数据初始化成功');
 }
 
+async function ensureBadgesTableMigration() {
+  const tableExists = await sequelize
+    .getQueryInterface()
+    .showAllTables()
+    .then(tables => tables.includes('badges'));
+
+  if (!tableExists) return;
+
+  const columns = await sequelize.getQueryInterface().describeTable('badges');
+
+  // 添加 unlockedAt 列（新增）
+  if (!columns.unlockedAt) {
+    console.log('[Migration] Adding unlockedAt to badges table');
+    await sequelize.query('ALTER TABLE badges ADD COLUMN "unlockedAt" TIMESTAMP;');
+  }
+
+  // 将旧的冗余列改为 nullable（如果存在的话），以免阻塞查询
+  const oldColumns = ['title', 'description', 'icon', 'color'];
+  for (const col of oldColumns) {
+    if (columns[col]) {
+      try {
+        console.log(`[Migration] Making badges.${col} nullable`);
+        await sequelize.query(`ALTER TABLE badges ALTER COLUMN "${col}" DROP NOT NULL;`);
+      } catch (e) {
+        // 可能已经是 nullable 了，忽略
+      }
+    }
+  }
+
+  // 清空旧的不一致记录，让系统基于标准库重新计算
+  console.log('[Migration] Clearing old badge records for re-calculation');
+  await sequelize.query('DELETE FROM badges;');
+}
+
 async function initDatabase() {
   try {
     await sequelize.authenticate();
@@ -203,6 +237,7 @@ async function initDatabase() {
 
     await ensureUsersTableMigration();
     await ensureNotificationsTableMigration();
+    await ensureBadgesTableMigration();
     await seedTemplates();
     await seedCircleMomentsAndBuddies();
 
