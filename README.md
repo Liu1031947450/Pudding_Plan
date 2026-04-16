@@ -54,13 +54,17 @@ Pudding_Plan/
 ### 第一步：安装依赖
 
 #### 前端依赖
+
 在项目根目录运行：
+
 ```sh
 npm install
 ```
 
 #### 后端依赖
+
 在 `server` 目录运行：
+
 ```sh
 cd server && npm install && cd ..
 ```
@@ -68,25 +72,32 @@ cd server && npm install && cd ..
 ### 第二步：启动服务
 
 #### 启动后端 API 服务
+
 在 `server` 目录运行：
+
 ```sh
 cd server && npm run dev
 ```
+
 后端服务默认运行在 `http://0.0.0.0:3000` (API 路径为 `/api`)。
 
 #### 启动前端 Expo 服务
+
 在项目根目录运行：
+
 ```sh
 npm start
 ```
 
 ### 第三步：在设备上运行
+
 1. **Expo Go**: 在手机上安装 Expo Go App，扫描终端二维码。
 2. **模拟器**: 在终端按 `a` (Android) 或 `i` (iOS) 启动。
 
 ## 🔧 技术栈
 
 ### 前端
+
 - **框架**: React Native + Expo
 - **状态管理**: React Hooks + Context API
 - **路由**: React Navigation (Stack & Tabs)
@@ -94,6 +105,7 @@ npm start
 - **UI 组件**: Material Design 3 风格，Lucide Icons, Expo Linear Gradient
 
 ### 后端
+
 - **引擎**: Node.js + Express
 - **数据库**: Sequelize ORM (PostgreSQL / SQLite)
 - **实时性**: Socket.io (WebSocket)
@@ -103,10 +115,12 @@ npm start
 ## 📊 重大更新记录
 
 ### 2026-04-15 全面社交化与持久化升级
+
 - **数据库迁移**: 从内存数据库全量迁移至 Sequelize ORM 架构。
 - **动态详情页**: 实现了完整的动态阅读、点赞、收藏及瀑布流展示 logic。
 - **实时系统**: 引入 Socket.io 共享管理器，实现评论与点赞的即时通知推送。
 - **收藏管理**: 升级“我的收藏”为瀑布流布局，并支持长按取消收藏。
 
 ---
+
 © 2026 PuddingPlan (布丁计划)

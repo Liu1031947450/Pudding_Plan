@@ -37,7 +37,11 @@ User.hasMany(Collect, {
   sourceKey: 'userId',
   as: 'collects',
 });
-Collect.belongsTo(User, { foreignKey: 'userId', targetKey: 'userId', as: 'user' });
+Collect.belongsTo(User, {
+  foreignKey: 'userId',
+  targetKey: 'userId',
+  as: 'user',
+});
 
 CircleMoment.hasMany(Like, { foreignKey: 'momentId', as: 'likes' });
 Like.belongsTo(CircleMoment, { foreignKey: 'momentId', as: 'moment' });

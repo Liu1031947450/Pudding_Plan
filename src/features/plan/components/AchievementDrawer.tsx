@@ -153,7 +153,9 @@ export const AchievementDrawer: React.FC<AchievementDrawerProps> = ({
                             key={badge.id}
                             style={styles.badgeCard}
                             onPress={
-                              onBadgePress ? () => onBadgePress(badge) : undefined
+                              onBadgePress
+                                ? () => onBadgePress(badge)
+                                : undefined
                             }
                           >
                             <View
@@ -169,7 +171,9 @@ export const AchievementDrawer: React.FC<AchievementDrawerProps> = ({
                               />
                             </View>
                             <Text style={styles.badgeTitle}>{badge.title}</Text>
-                            <Text style={styles.badgeDesc}>{badge.description}</Text>
+                            <Text style={styles.badgeDesc}>
+                              {badge.description}
+                            </Text>
                           </Card>
                         ))}
                     </View>
@@ -200,7 +204,9 @@ export const AchievementDrawer: React.FC<AchievementDrawerProps> = ({
                             key={badge.id}
                             style={[styles.badgeCard, styles.badgeCardLocked]}
                             onPress={
-                              onBadgePress ? () => onBadgePress(badge) : undefined
+                              onBadgePress
+                                ? () => onBadgePress(badge)
+                                : undefined
                             }
                           >
                             <View
@@ -222,27 +228,30 @@ export const AchievementDrawer: React.FC<AchievementDrawerProps> = ({
                                 />
                               </View>
                             </View>
-                            <Text style={[styles.badgeTitle, styles.lockedText]}>
+                            <Text
+                              style={[styles.badgeTitle, styles.lockedText]}
+                            >
                               {badge.title}
                             </Text>
                             <Text style={[styles.badgeDesc, styles.lockedText]}>
                               {badge.description}
                             </Text>
-                            {badge.target !== undefined && badge.progress !== undefined && (
-                              <View style={styles.progressContainer}>
-                                <View style={styles.progressBarBg}>
-                                  <View 
-                                    style={[
-                                      styles.progressBarFill, 
-                                      { width: `${badge.percentage || 0}%` }
-                                    ]} 
-                                  />
+                            {badge.target !== undefined &&
+                              badge.progress !== undefined && (
+                                <View style={styles.progressContainer}>
+                                  <View style={styles.progressBarBg}>
+                                    <View
+                                      style={[
+                                        styles.progressBarFill,
+                                        { width: `${badge.percentage || 0}%` },
+                                      ]}
+                                    />
+                                  </View>
+                                  <Text style={styles.progressText}>
+                                    {badge.progress}/{badge.target}
+                                  </Text>
                                 </View>
-                                <Text style={styles.progressText}>
-                                  {badge.progress}/{badge.target}
-                                </Text>
-                              </View>
-                            )}
+                              )}
                           </Card>
                         ))}
                     </View>

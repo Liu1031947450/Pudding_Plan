@@ -22,7 +22,7 @@ interface CheckInRecord {
 
 const CheckInRecordsScreen: React.FC = () => {
   const navigation = useNavigation();
-  const { } = useAuth();
+  const {} = useAuth();
   const [records, setRecords] = useState<CheckInRecord[]>([]);
   const [loading, setLoading] = useState(true);
 

@@ -157,15 +157,19 @@ class Database {
 
     let notifications = await Notification.findAll({
       where: { userId: user.id },
-      include: [{
-        model: User,
-        as: 'sender',
-        attributes: ['userId', 'username', 'avatar']
-      }],
+      include: [
+        {
+          model: User,
+          as: 'sender',
+          attributes: ['userId', 'username', 'avatar'],
+        },
+      ],
       order: [['createdAt', 'DESC']],
     });
 
-    console.log(`[Database] 用户 ${user.id} 共有 ${notifications.length} 条通知数据`);
+    console.log(
+      `[Database] 用户 ${user.id} 共有 ${notifications.length} 条通知数据`,
+    );
 
     if (notifications.length === 0) {
       const stats = await this.getUserStatsByUserId(userId);
@@ -175,21 +179,24 @@ class Database {
           userId: user.id,
           type: notification.type,
           title: notification.title,
-          message: notification.type === 'achievement' 
-            ? `你已累计打卡 ${stats.streakDays} 天，继续加油！` 
-            : notification.message,
+          message:
+            notification.type === 'achievement'
+              ? `你已累计打卡 ${stats.streakDays} 天，继续加油！`
+              : notification.message,
           time: notification.time,
           read: notification.read,
-          senderId: null
-        }))
+          senderId: null,
+        })),
       );
       notifications = await Notification.findAll({
         where: { userId: user.id },
-        include: [{
-          model: User,
-          as: 'sender',
-          attributes: ['userId', 'username', 'avatar']
-        }],
+        include: [
+          {
+            model: User,
+            as: 'sender',
+            attributes: ['userId', 'username', 'avatar'],
+          },
+        ],
         order: [['createdAt', 'DESC']],
       });
     }

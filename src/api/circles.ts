@@ -128,7 +128,9 @@ export const circlesApi = {
 
   // 获取用户收藏列表
   getCollections: async (): Promise<ApiResponse<CircleListItem[]>> => {
-    return apiClient.get<CircleListItem[]>(API_ENDPOINTS.CIRCLES + '/collections');
+    return apiClient.get<CircleListItem[]>(
+      API_ENDPOINTS.CIRCLES + '/collections',
+    );
   },
 };
 

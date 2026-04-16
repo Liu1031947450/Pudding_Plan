@@ -43,7 +43,11 @@ const ProfileScreen: React.FC = () => {
   });
 
   const fetchProfileData = useCallback(async () => {
-    console.log('[Profile] fetchProfileData called, user:', user?.id, user?.username);
+    console.log(
+      '[Profile] fetchProfileData called, user:',
+      user?.id,
+      user?.username,
+    );
     if (!user?.id) {
       console.warn('[Profile] user.id 不存在，跳过数据加载');
       setLoading(false);
@@ -56,11 +60,14 @@ const ProfileScreen: React.FC = () => {
         authApi.getCurrentUserStats(),
       ]);
 
-      console.log('[Profile] badgesResponse:', JSON.stringify({
-        success: badgesResponse.success,
-        dataLength: badgesResponse.data?.length,
-        error: badgesResponse.error
-      }));
+      console.log(
+        '[Profile] badgesResponse:',
+        JSON.stringify({
+          success: badgesResponse.success,
+          dataLength: badgesResponse.data?.length,
+          error: badgesResponse.error,
+        }),
+      );
 
       if (badgesResponse.success && badgesResponse.data) {
         setBadges(badgesResponse.data);
@@ -85,7 +92,7 @@ const ProfileScreen: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [user?.id]);
+  }, [user?.id, user?.username]);
 
   useFocusEffect(
     useCallback(() => {

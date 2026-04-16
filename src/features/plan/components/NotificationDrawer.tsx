@@ -17,7 +17,14 @@ import { BottomDrawer } from '../../../components/common/BottomDrawer';
 
 interface Notification {
   id: string;
-  type: 'reminder' | 'achievement' | 'social' | 'system' | 'like' | 'comment' | 'reply';
+  type:
+    | 'reminder'
+    | 'achievement'
+    | 'social'
+    | 'system'
+    | 'like'
+    | 'comment'
+    | 'reply';
   title: string;
   message: string;
   time: string;
@@ -114,11 +121,17 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
               onPress={() => {
                 // 标记为已读
                 onNotificationPress?.(notification.id);
-                
+
                 // 导航到相关详情
-                if (navigation && notification.targetType === 'moment' && notification.targetId) {
+                if (
+                  navigation &&
+                  notification.targetType === 'moment' &&
+                  notification.targetId
+                ) {
                   onClose();
-                  navigation.navigate('CircleDetail', { circleId: notification.targetId });
+                  navigation.navigate('CircleDetail', {
+                    circleId: notification.targetId,
+                  });
                 }
               }}
               activeOpacity={0.7}

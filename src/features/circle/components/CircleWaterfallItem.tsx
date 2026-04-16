@@ -31,7 +31,11 @@ export const CircleWaterfallItem: React.FC<CircleWaterfallItemProps> = ({
   style,
 }) => {
   return (
-    <Card style={[styles.card, style]} onPress={onPress} onLongPress={onLongPress}>
+    <Card
+      style={[styles.card, style]}
+      onPress={onPress}
+      onLongPress={onLongPress}
+    >
       {circle.imageUri && (
         <Image
           source={{ uri: getImageUrl(circle.imageUri) }}

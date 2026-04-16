@@ -214,14 +214,21 @@ router.post('/:id/check-in', authMiddleware, async (req, res) => {
     if (!completedDate.includes(date)) {
       completedDate.push(date);
       const updatedPlan = await db.updatePlan(id, { completedDate });
-      
+
       // 实时触发成就检查
       const achievementService = require('../services/achievementService');
       const stats = await db.getUserStatsByUserId(req.userId);
-      const newlyUnlocked = await achievementService.checkAndUnlockAchievements(req.userId, stats);
-      
+      const newlyUnlocked = await achievementService.checkAndUnlockAchievements(
+        req.userId,
+        stats,
+      );
+
       if (newlyUnlocked.length > 0) {
-        console.log(`[Achievement] 用户 ${req.userId} 新解锁成就: ${newlyUnlocked.join(', ')}`);
+        console.log(
+          `[Achievement] 用户 ${req.userId} 新解锁成就: ${newlyUnlocked.join(
+            ', ',
+          )}`,
+        );
         // 这里后续可以集成 Socket.io 推送提醒
       }
 

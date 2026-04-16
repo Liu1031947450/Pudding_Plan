@@ -1,12 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const {
-  mockLocations,
-  mockTopics,
-} = require('../data/mockData/communityData');
+const { mockLocations, mockTopics } = require('../data/mockData/communityData');
 const { authMiddleware } = require('../middleware/auth');
 const { upload, getFileUrl } = require('../middleware/upload');
-const { User, CircleMoment, Like, Collect, Comment, Notification } = require('../models');
+const {
+  User,
+  CircleMoment,
+  Like,
+  Collect,
+  Comment,
+  Notification,
+} = require('../models');
 const { getIO, connectedUsers } = require('../utils/socketManager');
 
 const sendResponse = (res, success, data, message = '', error = null) => {
@@ -14,10 +18,20 @@ const sendResponse = (res, success, data, message = '', error = null) => {
 };
 
 // 辅助函数：创建通知
-async function createNotification({ userId, senderId, type, title, message, targetType, targetId }) {
+async function createNotification({
+  userId,
+  senderId,
+  type,
+  title,
+  message,
+  targetType,
+  targetId,
+}) {
   try {
-    console.log(`[Notification] 尝试创建通知: Target(intID): ${userId}, Sender(intID): ${senderId}, Type: ${type}`);
-    
+    console.log(
+      `[Notification] 尝试创建通知: Target(intID): ${userId}, Sender(intID): ${senderId}, Type: ${type}`,
+    );
+
     if (userId === senderId) {
       console.log('[Notification] 自己对自己的作品操作，跳道推送');
       return;
@@ -31,27 +45,35 @@ async function createNotification({ userId, senderId, type, title, message, targ
       message,
       targetType,
       targetId,
-      read: false
+      read: false,
     });
-    
+
     console.log(`[Notification] 数据库记录已创建: ID ${notification.id}`);
 
     // 获取接收通知用户的UUID
     const recipient = await User.findByPk(userId);
     if (recipient) {
-      console.log(`[Notification] 目标用户匹配: ${recipient.username} (UUID: ${recipient.userId})`);
-      
+      console.log(
+        `[Notification] 目标用户匹配: ${recipient.username} (UUID: ${recipient.userId})`,
+      );
+
       // 通过WebSocket推送通知
       const socketId = connectedUsers.get(recipient.userId);
-      console.log(`[Notification] Socket 状态: ${socketId ? '在线' : '离线'} (SocketID: ${socketId || 'N/A'})`);
+      console.log(
+        `[Notification] Socket 状态: ${socketId ? '在线' : '离线'} (SocketID: ${
+          socketId || 'N/A'
+        })`,
+      );
 
       if (socketId) {
         const currentIO = getIO();
         if (!currentIO) {
-          console.warn('[Notification] WebSocket io 实例未初始化，无法实时推送');
+          console.warn(
+            '[Notification] WebSocket io 实例未初始化，无法实时推送',
+          );
           return;
         }
-        
+
         // 计算相对时间
         const now = new Date();
         const notificationTime = notification.createdAt;
@@ -59,7 +81,7 @@ async function createNotification({ userId, senderId, type, title, message, targ
         const diffMinutes = Math.floor(diffMs / 60000);
         const diffHours = Math.floor(diffMs / 3600000);
         const diffDays = Math.floor(diffMs / 86400000);
-        
+
         let timeString = '刚刚';
         if (diffDays > 0) {
           timeString = `${diffDays}天前`;
@@ -68,7 +90,7 @@ async function createNotification({ userId, senderId, type, title, message, targ
         } else if (diffMinutes > 0) {
           timeString = `${diffMinutes}分钟前`;
         }
-        
+
         const payload = {
           id: String(notification.id),
           type: notification.type,
@@ -77,14 +99,20 @@ async function createNotification({ userId, senderId, type, title, message, targ
           time: timeString,
           read: notification.read,
           targetType: notification.targetType || null,
-          targetId: notification.targetId ? String(notification.targetId) : null,
+          targetId: notification.targetId
+            ? String(notification.targetId)
+            : null,
         };
 
         currentIO.to(socketId).emit('new_notification', payload);
-        console.log(`[Notification] 实时消息已由 WebSocket 成功推送到用户 ${recipient.userId}`);
+        console.log(
+          `[Notification] 实时消息已由 WebSocket 成功推送到用户 ${recipient.userId}`,
+        );
       }
     } else {
-      console.error(`[Notification] 严重错误: 找不到 ID 为 ${userId} 的接收用户`);
+      console.error(
+        `[Notification] 严重错误: 找不到 ID 为 ${userId} 的接收用户`,
+      );
     }
   } catch (error) {
     console.error('[Notification] 创建并推送通知失败:', error);
@@ -175,19 +203,21 @@ router.get('/:id/likers', authMiddleware, async (req, res) => {
     const { id } = req.params;
     const likes = await Like.findAll({
       where: { momentId: parseInt(id) },
-      include: [{
-        model: User,
-        as: 'user',
-        attributes: ['userId', 'username', 'avatar']
-      }],
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: ['userId', 'username', 'avatar'],
+        },
+      ],
       limit: 20,
-      order: [['createdAt', 'DESC']]
+      order: [['createdAt', 'DESC']],
     });
 
     const likers = likes.map(l => ({
       id: l.user.userId,
       username: l.user.username,
-      avatar: l.user.avatar
+      avatar: l.user.avatar,
     }));
 
     sendResponse(res, true, likers, '获取点赞列表成功');
@@ -207,19 +237,21 @@ router.get('/:id/comments', authMiddleware, async (req, res) => {
         {
           model: User,
           as: 'user',
-          attributes: ['userId', 'username', 'avatar']
+          attributes: ['userId', 'username', 'avatar'],
         },
         {
           model: Comment,
           as: 'replies',
-          include: [{
-            model: User,
-            as: 'user',
-            attributes: ['userId', 'username', 'avatar']
-          }]
-        }
+          include: [
+            {
+              model: User,
+              as: 'user',
+              attributes: ['userId', 'username', 'avatar'],
+            },
+          ],
+        },
       ],
-      order: [['createdAt', 'DESC']]
+      order: [['createdAt', 'DESC']],
     });
 
     // 计算相对时间的函数
@@ -229,7 +261,7 @@ router.get('/:id/comments', authMiddleware, async (req, res) => {
       const diffMinutes = Math.floor(diffMs / 60000);
       const diffHours = Math.floor(diffMs / 3600000);
       const diffDays = Math.floor(diffMs / 86400000);
-      
+
       if (diffDays > 0) {
         return `${diffDays}天前`;
       } else if (diffHours > 0) {
@@ -254,8 +286,8 @@ router.get('/:id/comments', authMiddleware, async (req, res) => {
         userName: r.user.username,
         userAvatarUri: r.user.avatar,
         text: r.content,
-        time: getRelativeTime(r.createdAt)
-      }))
+        time: getRelativeTime(r.createdAt),
+      })),
     }));
 
     sendResponse(res, true, formattedComments, '获取评论列表成功');
@@ -267,7 +299,9 @@ router.get('/:id/comments', authMiddleware, async (req, res) => {
 
 // 发布评论
 router.post('/:id/comments', authMiddleware, async (req, res) => {
-  console.log(`[Circles] 收到评论请求: MomentID=${req.params.id}, UserID=${req.userId}`);
+  console.log(
+    `[Circles] 收到评论请求: MomentID=${req.params.id}, UserID=${req.userId}`,
+  );
   try {
     const { id } = req.params;
     const { content, parentId } = req.body;
@@ -281,7 +315,7 @@ router.post('/:id/comments', authMiddleware, async (req, res) => {
       momentId: parseInt(id),
       userId: currentUser.id,
       content,
-      parentId: parentId ? parseInt(parentId) : null
+      parentId: parentId ? parseInt(parentId) : null,
     });
 
     await moment.increment('commentsCount');
@@ -295,9 +329,11 @@ router.post('/:id/comments', authMiddleware, async (req, res) => {
           senderId: currentUser.id,
           type: 'reply',
           title: '收到新的回复',
-          message: `${currentUser.username} 回复了你的评论: "${content.substring(0, 20)}..."`,
+          message: `${
+            currentUser.username
+          } 回复了你的评论: "${content.substring(0, 20)}..."`,
           targetType: 'moment',
-          targetId: id
+          targetId: id,
         });
       }
     } else {
@@ -308,9 +344,11 @@ router.post('/:id/comments', authMiddleware, async (req, res) => {
           senderId: currentUser.id,
           type: 'comment',
           title: '收到新的评论',
-          message: `${currentUser.username} 评论了你的动态: "${content.substring(0, 20)}..."`,
+          message: `${
+            currentUser.username
+          } 评论了你的动态: "${content.substring(0, 20)}..."`,
           targetType: 'moment',
-          targetId: id
+          targetId: id,
         });
       }
     }
@@ -328,36 +366,48 @@ router.get('/collections', authMiddleware, async (req, res) => {
     console.log(`[Collections] 开始获取收藏: UserUUID=${req.userId}`);
     const collects = await Collect.findAll({
       where: { userId: req.userId },
-      include: [{
-        model: CircleMoment,
-        as: 'moment',
-        required: true, // 确保动态确实存在
-        include: [{
-          model: User,
-          as: 'author',
-          attributes: ['userId', 'username', 'avatar'],
-        }],
-      }],
+      include: [
+        {
+          model: CircleMoment,
+          as: 'moment',
+          required: true, // 确保动态确实存在
+          include: [
+            {
+              model: User,
+              as: 'author',
+              attributes: ['userId', 'username', 'avatar'],
+            },
+          ],
+        },
+      ],
       order: [['createdAt', 'DESC']],
     });
 
     console.log(`[Collections] 找到 ${collects.length} 条原始记录`);
-    
+
     if (collects.length > 0) {
       // 记录第一条数据的结构，辅助排查别名问题
       const firstRow = collects[0].toJSON();
-      console.log(`[Collections] 数据结构示例键名: ${Object.keys(firstRow).join(', ')}`);
+      console.log(
+        `[Collections] 数据结构示例键名: ${Object.keys(firstRow).join(', ')}`,
+      );
     }
 
-    const data = collects.map(c => {
-      // 兼容多种可能的别名，确保获取到动态内容
-      const m = c.moment || c.CircleMoment || c.get?.('moment') || c.get?.('CircleMoment');
-      if (!m) {
-        console.warn(`[Collections] 记录 ${c.id} 无法获取到关联动态对象`);
-        return null;
-      }
-      return serializeMoment(m, req.userId, new Set(), new Set([m.id]));
-    }).filter(Boolean);
+    const data = collects
+      .map(c => {
+        // 兼容多种可能的别名，确保获取到动态内容
+        const m =
+          c.moment ||
+          c.CircleMoment ||
+          c.get?.('moment') ||
+          c.get?.('CircleMoment');
+        if (!m) {
+          console.warn(`[Collections] 记录 ${c.id} 无法获取到关联动态对象`);
+          return null;
+        }
+        return serializeMoment(m, req.userId, new Set(), new Set([m.id]));
+      })
+      .filter(Boolean);
 
     console.log(`[Collections] 最终返回给前端的动态数: ${data.length}`);
     sendResponse(res, true, data, '获取收藏列表成功');
@@ -437,7 +487,12 @@ router.post('/', authMiddleware, async (req, res) => {
       commentsCount: 0,
     });
 
-    sendResponse(res, true, serializeMoment(moment, req.userId), '发布动态成功');
+    sendResponse(
+      res,
+      true,
+      serializeMoment(moment, req.userId),
+      '发布动态成功',
+    );
   } catch (error) {
     console.error('发布动态失败:', error);
     sendResponse(res, false, null, '', `发布动态失败: ${error.message}`);
@@ -446,7 +501,9 @@ router.post('/', authMiddleware, async (req, res) => {
 
 // 点赞
 router.post('/:id/like', authMiddleware, async (req, res) => {
-  console.log(`[Circles] 收到点赞请求: MomentID=${req.params.id}, UserID=${req.userId}`);
+  console.log(
+    `[Circles] 收到点赞请求: MomentID=${req.params.id}, UserID=${req.userId}`,
+  );
   try {
     const { id } = req.params;
     const moment = await CircleMoment.findByPk(id);
@@ -467,9 +524,11 @@ router.post('/:id/like', authMiddleware, async (req, res) => {
           senderId: currentUser.id,
           type: 'like',
           title: '动态获得点赞',
-          message: `${currentUser.username} 点赞了你的动态: "${moment.title || '无标题'}"`,
+          message: `${currentUser.username} 点赞了你的动态: "${
+            moment.title || '无标题'
+          }"`,
           targetType: 'moment',
-          targetId: id
+          targetId: id,
         });
       }
     }

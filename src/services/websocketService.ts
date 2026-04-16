@@ -24,8 +24,11 @@ class WebSocketService {
       }
 
       // 从API配置中获取WebSocket地址
-      const wsUrl = API_CONFIG.BASE_URL.replace('http', 'ws').replace('/api', '');
-      
+      const wsUrl = API_CONFIG.BASE_URL.replace('http', 'ws').replace(
+        '/api',
+        '',
+      );
+
       this.socket = io(wsUrl, {
         auth: {
           token,
@@ -54,11 +57,11 @@ class WebSocketService {
       this.reconnectAttempts = 0;
     });
 
-    this.socket.on('disconnect', (reason) => {
+    this.socket.on('disconnect', reason => {
       console.log('WebSocket断开连接:', reason);
     });
 
-    this.socket.on('connect_error', (error) => {
+    this.socket.on('connect_error', error => {
       console.error('WebSocket连接错误:', error);
       this.reconnectAttempts++;
       if (this.reconnectAttempts >= this.maxReconnectAttempts) {
@@ -66,7 +69,7 @@ class WebSocketService {
       }
     });
 
-    this.socket.on('new_notification', (data) => {
+    this.socket.on('new_notification', data => {
       console.log('收到新通知:', data);
       this.triggerMessageHandler('new_notification', data);
     });

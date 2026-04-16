@@ -258,7 +258,9 @@ const PostMomentScreen: React.FC = () => {
       if (!result.canceled) {
         const newUris = result.assets
           .map(asset => asset?.uri)
-          .filter((uri): uri is string => typeof uri === 'string' && !!uri.trim());
+          .filter(
+            (uri): uri is string => typeof uri === 'string' && !!uri.trim(),
+          );
 
         if (newUris.length === 0) {
           showToast('未读取到有效图片，请重试', 'error');

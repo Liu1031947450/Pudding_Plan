@@ -40,7 +40,9 @@ const CalendarScreen: React.FC = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
-  const [toastType, setToastType] = useState<'success' | 'error' | 'info'>('success');
+  const [toastType, setToastType] = useState<'success' | 'error' | 'info'>(
+    'success',
+  );
   const { plans, refreshPlans, handleCheckIn } = usePlanManagement();
 
   // 盖章动画状态
@@ -156,10 +158,15 @@ const CalendarScreen: React.FC = () => {
     }
 
     try {
-      const selectedDateStr = `${year}-${String(month).padStart(2, '0')}-${String(
-        selectedDay,
-      ).padStart(2, '0')}`;
-      const result = await handleCheckIn(planId, selectedDateStr, currentUserId);
+      const selectedDateStr = `${year}-${String(month).padStart(
+        2,
+        '0',
+      )}-${String(selectedDay).padStart(2, '0')}`;
+      const result = await handleCheckIn(
+        planId,
+        selectedDateStr,
+        currentUserId,
+      );
       if (result.success) {
         playStampAnimation();
         fetchCalendarData(true);

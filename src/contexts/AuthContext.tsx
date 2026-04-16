@@ -62,7 +62,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
           setUser(parsedUser);
           setToken(storedToken);
           setAuthToken(storedToken);
-          
+
           // 连接WebSocket
           await websocketService.connect();
         } else {
@@ -93,7 +93,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       setUser(userData);
       setToken(tokenValue);
       setAuthToken(tokenValue);
-      
+
       // 连接WebSocket
       await websocketService.connect();
     } catch (error) {
@@ -119,7 +119,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     try {
       // 断开WebSocket连接
       websocketService.disconnect();
-      
+
       await clearAuth();
       setUser(null);
       setToken(null);

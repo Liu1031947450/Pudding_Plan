@@ -49,7 +49,14 @@ export interface Badge {
 // Notification types
 export interface Notification {
   id: string;
-  type: 'reminder' | 'achievement' | 'social' | 'system' | 'like' | 'comment' | 'reply';
+  type:
+    | 'reminder'
+    | 'achievement'
+    | 'social'
+    | 'system'
+    | 'like'
+    | 'comment'
+    | 'reply';
   title: string;
   message: string;
   time: string;

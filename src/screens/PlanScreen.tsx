@@ -42,8 +42,13 @@ const PlanScreen: React.FC = () => {
     refreshPlans,
   } = usePlanManagement();
 
-  const { notifications, markAsRead, refreshNotifications, unreadCount, showNewMessageAnimation } =
-    useNotificationState();
+  const {
+    notifications,
+    markAsRead,
+    refreshNotifications,
+    unreadCount,
+    showNewMessageAnimation,
+  } = useNotificationState();
   const [notificationVisible, setNotificationVisible] = useState(false);
   const [achievementVisible, setAchievementVisible] = useState(false);
   const [badges, setBadges] = useState<Badge[]>([]);
@@ -55,7 +60,9 @@ const PlanScreen: React.FC = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
-  const [toastType, setToastType] = useState<'success' | 'error' | 'info'>('success');
+  const [toastType, setToastType] = useState<'success' | 'error' | 'info'>(
+    'success',
+  );
 
   useFocusEffect(
     React.useCallback(() => {
@@ -148,7 +155,7 @@ const PlanScreen: React.FC = () => {
 
   const handleDeletePlans = async () => {
     if (!currentUserId) return;
-    
+
     try {
       const deletedCount = await deleteSelectedPlans(currentUserId);
       if (deletedCount > 0) {

@@ -6,14 +6,14 @@ interface NotificationBadgeProps {
   count: number;
 }
 
-export const NotificationBadge: React.FC<NotificationBadgeProps> = ({ count }) => {
+export const NotificationBadge: React.FC<NotificationBadgeProps> = ({
+  count,
+}) => {
   if (count <= 0) return null;
 
   return (
     <View style={styles.badge}>
-      <Text style={styles.badgeText}>
-        {count > 99 ? '99+' : count}
-      </Text>
+      <Text style={styles.badgeText}>{count > 99 ? '99+' : count}</Text>
     </View>
   );
 };

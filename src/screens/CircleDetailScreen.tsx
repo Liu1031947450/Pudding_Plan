@@ -15,12 +15,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
-import {
-  Colors,
-  Spacing,
-  FontSize,
-  BorderRadius,
-} from '../constants/theme';
+import { Colors, Spacing, FontSize, BorderRadius } from '../constants/theme';
 import { TopAppBar, Toast } from '../components';
 import { circleService } from '../services/circleService';
 import { useAuth } from '../contexts/AuthContext';
@@ -48,11 +43,15 @@ const CircleDetailScreen: React.FC = () => {
   const [comments, setComments] = useState<any[]>([]);
   const [likers, setLikers] = useState<any[]>([]);
   const [commentText, setCommentText] = useState('');
-  const [replyTo, setReplyTo] = useState<{ id: string; name: string } | null>(null);
+  const [replyTo, setReplyTo] = useState<{ id: string; name: string } | null>(
+    null,
+  );
   const [submitting, setSubmitting] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
-  const [toastType, setToastType] = useState<'success' | 'error' | 'info'>('success');
+  const [toastType, setToastType] = useState<'success' | 'error' | 'info'>(
+    'success',
+  );
   const inputRef = React.useRef<TextInput>(null);
 
   const loadExtraData = async () => {
@@ -159,7 +158,10 @@ const CircleDetailScreen: React.FC = () => {
         isFollowing: nextFollowing,
       };
       setCircle(nextCircle);
-      const success = await circleService.toggleFollowBuddy(authorId, !nextFollowing);
+      const success = await circleService.toggleFollowBuddy(
+        authorId,
+        !nextFollowing,
+      );
       if (!success) {
         setCircle(circle); // Revert
         setToastMessage('操作失败，请重试');
@@ -181,7 +183,11 @@ const CircleDetailScreen: React.FC = () => {
     if (!circleId || !commentText.trim() || submitting) return;
     setSubmitting(true);
     try {
-      const res = await circleService.postComment(circleId, commentText, replyTo?.id);
+      const res = await circleService.postComment(
+        circleId,
+        commentText,
+        replyTo?.id,
+      );
       if (res.success) {
         setCommentText('');
         setReplyTo(null);
@@ -204,7 +210,11 @@ const CircleDetailScreen: React.FC = () => {
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
-        <TopAppBar title="动态详情" showBackButton onBackPress={() => navigation.goBack()} />
+        <TopAppBar
+          title="动态详情"
+          showBackButton
+          onBackPress={() => navigation.goBack()}
+        />
         <View style={styles.centerContainer}>
           <ActivityIndicator size="large" color={Colors.primary} />
         </View>
@@ -215,7 +225,11 @@ const CircleDetailScreen: React.FC = () => {
   if (!circle) {
     return (
       <SafeAreaView style={styles.container}>
-        <TopAppBar title="动态详情" showBackButton onBackPress={() => navigation.goBack()} />
+        <TopAppBar
+          title="动态详情"
+          showBackButton
+          onBackPress={() => navigation.goBack()}
+        />
         <View style={styles.centerContainer}>
           <Text style={styles.emptyText}>动态不存在或已被删除</Text>
         </View>
@@ -231,30 +245,46 @@ const CircleDetailScreen: React.FC = () => {
         onBackPress={() => navigation.goBack()}
       />
 
-      <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollView}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        style={styles.scrollView}
+      >
         {/* 作者信息栏 */}
         <View style={styles.authorHeader}>
           <View style={styles.authorInfo}>
             <Image
               source={{
-                uri: getImageUrl(circle.type === 'waterfall' && circle.authorAvatarUri
-                  ? circle.authorAvatarUri
-                  : undefined) || DEFAULT_AVATAR,
+                uri:
+                  getImageUrl(
+                    circle.type === 'waterfall' && circle.authorAvatarUri
+                      ? circle.authorAvatarUri
+                      : undefined,
+                  ) || DEFAULT_AVATAR,
               }}
               style={styles.authorAvatar}
             />
             <Text style={styles.authorName}>{displayAuthorName}</Text>
           </View>
-          {circle.type === 'waterfall' && circle.authorUserId && String(circle.authorUserId) !== String(currentUserId) && (
-            <TouchableOpacity
-              style={[styles.followButton, circle.isFollowing && styles.followedButton]}
-              onPress={handleToggleFollow}
-            >
-              <Text style={[styles.followButtonText, circle.isFollowing && styles.followedButtonText]}>
-                {circle.isFollowing ? '已关注' : '关注'}
-              </Text>
-            </TouchableOpacity>
-          )}
+          {circle.type === 'waterfall' &&
+            circle.authorUserId &&
+            String(circle.authorUserId) !== String(currentUserId) && (
+              <TouchableOpacity
+                style={[
+                  styles.followButton,
+                  circle.isFollowing && styles.followedButton,
+                ]}
+                onPress={handleToggleFollow}
+              >
+                <Text
+                  style={[
+                    styles.followButtonText,
+                    circle.isFollowing && styles.followedButtonText,
+                  ]}
+                >
+                  {circle.isFollowing ? '已关注' : '关注'}
+                </Text>
+              </TouchableOpacity>
+            )}
         </View>
 
         {/* 图片轮播 */}
@@ -268,7 +298,11 @@ const CircleDetailScreen: React.FC = () => {
               scrollEventThrottle={16}
             >
               {images.map((uri, index) => (
-                <Image key={index} source={{ uri: getImageUrl(uri) }} style={styles.sliderImage} />
+                <Image
+                  key={index}
+                  source={{ uri: getImageUrl(uri) }}
+                  style={styles.sliderImage}
+                />
               ))}
             </ScrollView>
             {images.length > 1 && (
@@ -276,7 +310,10 @@ const CircleDetailScreen: React.FC = () => {
                 {images.map((_, index) => (
                   <View
                     key={index}
-                    style={[styles.paginationDot, activeIndex === index && styles.paginationDotActive]}
+                    style={[
+                      styles.paginationDot,
+                      activeIndex === index && styles.paginationDotActive,
+                    ]}
                   />
                 ))}
               </View>
@@ -287,7 +324,9 @@ const CircleDetailScreen: React.FC = () => {
         <View style={styles.contentSection}>
           <Text style={styles.title}>{circle.title}</Text>
           <Text style={styles.content}>
-            {circle.type === 'waterfall' ? circle.content || circle.description : circle.description}
+            {circle.type === 'waterfall'
+              ? circle.content || circle.description
+              : circle.description}
           </Text>
           <Text style={styles.time}>编辑于 刚刚</Text>
 
@@ -297,8 +336,13 @@ const CircleDetailScreen: React.FC = () => {
                 {likers.slice(0, 5).map((liker, index) => (
                   <Image
                     key={liker.id}
-                    source={{ uri: getImageUrl(liker.avatar) || DEFAULT_AVATAR }}
-                    style={[styles.likerAvatar, { marginLeft: index === 0 ? 0 : -8 }]}
+                    source={{
+                      uri: getImageUrl(liker.avatar) || DEFAULT_AVATAR,
+                    }}
+                    style={[
+                      styles.likerAvatar,
+                      { marginLeft: index === 0 ? 0 : -8 },
+                    ]}
                   />
                 ))}
               </View>
@@ -310,20 +354,28 @@ const CircleDetailScreen: React.FC = () => {
         {circle.type === 'waterfall' && (
           <View style={styles.commentsSection}>
             <View style={styles.commentsHeader}>
-              <Text style={styles.commentsTitle}>共 {comments.length || 0} 条评论</Text>
+              <Text style={styles.commentsTitle}>
+                共 {comments.length || 0} 条评论
+              </Text>
             </View>
 
             {comments.map(comment => (
               <View key={comment.id} style={styles.commentContainer}>
                 <View style={styles.commentItem}>
                   <Image
-                    source={{ uri: getImageUrl(comment.userAvatarUri) || DEFAULT_AVATAR }}
+                    source={{
+                      uri: getImageUrl(comment.userAvatarUri) || DEFAULT_AVATAR,
+                    }}
                     style={styles.commentAvatar}
                   />
                   <View style={styles.commentContent}>
                     <View style={styles.commentHeaderRow}>
                       <Text style={styles.commentUser}>{comment.userName}</Text>
-                      <TouchableOpacity onPress={() => setReplyTo({ id: comment.id, name: comment.userName })}>
+                      <TouchableOpacity
+                        onPress={() =>
+                          setReplyTo({ id: comment.id, name: comment.userName })
+                        }
+                      >
                         <Text style={styles.replyActionText}>回复</Text>
                       </TouchableOpacity>
                     </View>
@@ -335,7 +387,9 @@ const CircleDetailScreen: React.FC = () => {
                         {comment.replies.map((reply: any) => (
                           <View key={reply.id} style={styles.replyItem}>
                             <Text style={styles.replyContent}>
-                              <Text style={styles.replyUser}>{reply.userName}: </Text>
+                              <Text style={styles.replyUser}>
+                                {reply.userName}:{' '}
+                              </Text>
                               {reply.text}
                             </Text>
                           </View>
@@ -348,21 +402,31 @@ const CircleDetailScreen: React.FC = () => {
             ))}
 
             {comments.length === 0 && (
-              <Text style={styles.emptyComments}>快来发表你的第一个评论吧 ~</Text>
+              <Text style={styles.emptyComments}>
+                快来发表你的第一个评论吧 ~
+              </Text>
             )}
           </View>
         )}
       </ScrollView>
 
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
         <View style={styles.footer}>
           <View style={styles.inputContainer}>
             <View style={styles.inputWrapper}>
-              <MaterialIcons name="edit" size={18} color={Colors.onSurfaceVariant} />
+              <MaterialIcons
+                name="edit"
+                size={18}
+                color={Colors.onSurfaceVariant}
+              />
               <TextInput
                 ref={inputRef}
                 style={styles.textInput}
-                placeholder={replyTo ? `回复 @${replyTo.name}...` : '说点什么...'}
+                placeholder={
+                  replyTo ? `回复 @${replyTo.name}...` : '说点什么...'
+                }
                 value={commentText}
                 onChangeText={setCommentText}
                 placeholderTextColor={Colors.onSurfaceVariant}
@@ -370,15 +434,24 @@ const CircleDetailScreen: React.FC = () => {
               />
             </View>
             {commentText.length > 0 && (
-              <TouchableOpacity onPress={handleSubmitComment} disabled={submitting} style={styles.sendButton}>
-                <Text style={styles.sendButtonText}>{submitting ? '...' : '发布'}</Text>
+              <TouchableOpacity
+                onPress={handleSubmitComment}
+                disabled={submitting}
+                style={styles.sendButton}
+              >
+                <Text style={styles.sendButtonText}>
+                  {submitting ? '...' : '发布'}
+                </Text>
               </TouchableOpacity>
             )}
           </View>
 
           {!commentText && (
             <View style={styles.interactionIcons}>
-              <TouchableOpacity onPress={handleToggleLike} style={styles.iconButton}>
+              <TouchableOpacity
+                onPress={handleToggleLike}
+                style={styles.iconButton}
+              >
                 <MaterialIcons
                   name={circle.isLiked ? 'favorite' : 'favorite-border'}
                   size={24}
@@ -388,7 +461,10 @@ const CircleDetailScreen: React.FC = () => {
                   {circle.type === 'waterfall' ? circle.likes || 0 : ''}
                 </Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={handleToggleCollect} style={styles.iconButton}>
+              <TouchableOpacity
+                onPress={handleToggleCollect}
+                style={styles.iconButton}
+              >
                 <MaterialIcons
                   name={circle.isCollected ? 'star' : 'star-border'}
                   size={26}

@@ -55,7 +55,9 @@ export const CircleDetailModal: React.FC<CircleDetailModalProps> = ({
   const [submitting, setSubmitting] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
-  const [toastType, setToastType] = useState<'success' | 'error' | 'info'>('success');
+  const [toastType, setToastType] = useState<'success' | 'error' | 'info'>(
+    'success',
+  );
   const inputRef = React.useRef<TextInput>(null);
 
   const loadExtraData = async () => {
@@ -369,7 +371,9 @@ export const CircleDetailModal: React.FC<CircleDetailModalProps> = ({
                     />
                     <View style={styles.commentContent}>
                       <View style={styles.commentHeaderRow}>
-                        <Text style={styles.commentUser}>{comment.userName}</Text>
+                        <Text style={styles.commentUser}>
+                          {comment.userName}
+                        </Text>
                         <TouchableOpacity
                           onPress={() =>
                             handleReply(comment.id, comment.userName)

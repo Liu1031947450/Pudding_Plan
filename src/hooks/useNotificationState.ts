@@ -29,24 +29,27 @@ export const useNotificationState = () => {
     }
   }, [user]);
 
-  const markAsRead = useCallback(async (id: string) => {
-    if (!user) {
-      return;
-    }
-
-    try {
-      const response = await notificationsApi.markAsRead(id);
-      if (response.success) {
-        setNotifications(prev =>
-          prev.map(notif =>
-            notif.id === id ? { ...notif, read: true } : notif,
-          ),
-        );
+  const markAsRead = useCallback(
+    async (id: string) => {
+      if (!user) {
+        return;
       }
-    } catch (error) {
-      console.error('Failed to mark notification as read:', error);
-    }
-  }, [user]);
+
+      try {
+        const response = await notificationsApi.markAsRead(id);
+        if (response.success) {
+          setNotifications(prev =>
+            prev.map(notif =>
+              notif.id === id ? { ...notif, read: true } : notif,
+            ),
+          );
+        }
+      } catch (error) {
+        console.error('Failed to mark notification as read:', error);
+      }
+    },
+    [user],
+  );
 
   const markAllAsRead = useCallback(async () => {
     if (!user) {

@@ -26,7 +26,9 @@ const MyCollectionsScreen: React.FC = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
-  const [toastType, setToastType] = useState<'success' | 'error' | 'info'>('error');
+  const [toastType, setToastType] = useState<'success' | 'error' | 'info'>(
+    'error',
+  );
 
   const fetchCollections = useCallback(async () => {
     if (!user?.id) {
@@ -68,11 +70,11 @@ const MyCollectionsScreen: React.FC = () => {
 
   const handleRemoveCollection = async (circleId: string) => {
     try {
-      const success = await circleService.toggleCollectCircle({ 
-        id: circleId, 
-        isCollected: false 
+      const success = await circleService.toggleCollectCircle({
+        id: circleId,
+        isCollected: false,
       } as any);
-      
+
       if (success) {
         setCollections(prev => prev.filter(item => item.id !== circleId));
         setToastMessage('已取消收藏');
@@ -91,18 +93,14 @@ const MyCollectionsScreen: React.FC = () => {
   };
 
   const handleLongPress = (circleId: string) => {
-    Alert.alert(
-      '取消收藏',
-      '确定要将此动态从收藏中移除吗？',
-      [
-        { text: '取消', style: 'cancel' },
-        { 
-          text: '确认删除', 
-          style: 'destructive',
-          onPress: () => handleRemoveCollection(circleId)
-        },
-      ]
-    );
+    Alert.alert('取消收藏', '确定要将此动态从收藏中移除吗？', [
+      { text: '取消', style: 'cancel' },
+      {
+        text: '确认删除',
+        style: 'destructive',
+        onPress: () => handleRemoveCollection(circleId),
+      },
+    ]);
   };
 
   return (
@@ -140,9 +138,7 @@ const MyCollectionsScreen: React.FC = () => {
               color={Colors.outlineVariant}
             />
             <Text style={styles.emptyText}>暂无收藏内容</Text>
-            <Text style={styles.emptySubtext}>
-              浏览圈子，收藏感兴趣的动态
-            </Text>
+            <Text style={styles.emptySubtext}>浏览圈子，收藏感兴趣的动态</Text>
           </View>
         ) : (
           <View style={styles.waterfallContainer}>

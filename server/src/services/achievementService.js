@@ -15,7 +15,7 @@ class AchievementService {
       totalCheckIns: 0,
       healingPlans: 0,
       socialStats: { moments: 0, likes: 0, collects: 0, friends: 0 },
-      ...stats
+      ...stats,
     };
 
     // 尝试查找用户
@@ -33,11 +33,21 @@ class AchievementService {
       try {
         const userBadges = await Badge.findAll({
           where: { userId: user.id },
-          attributes: ['id', 'userId', 'badgeKey', 'unlocked', 'createdAt', 'updatedAt'],
+          attributes: [
+            'id',
+            'userId',
+            'badgeKey',
+            'unlocked',
+            'createdAt',
+            'updatedAt',
+          ],
         });
         userBadges.forEach(b => badgeMap.set(b.badgeKey, b));
       } catch (dbErr) {
-        console.error('[Achievement] 查询用户徽章记录失败（可能是表结构不匹配）:', dbErr.message);
+        console.error(
+          '[Achievement] 查询用户徽章记录失败（可能是表结构不匹配）:',
+          dbErr.message,
+        );
       }
     }
 
@@ -45,13 +55,15 @@ class AchievementService {
     const results = ACHIEVEMENTS.map(standard => {
       const userRecord = badgeMap.get(standard.key);
       const isUnlockedInDb = userRecord ? userRecord.unlocked : false;
-      
+
       let progress = 0;
       let meetsRequirement = false;
 
       try {
         progress = standard.getProgress ? standard.getProgress(safeStats) : 0;
-        meetsRequirement = standard.requirement ? standard.requirement(safeStats) : false;
+        meetsRequirement = standard.requirement
+          ? standard.requirement(safeStats)
+          : false;
       } catch (err) {
         console.error(`[Achievement] 计算成就 ${standard.key} 进度失败:`, err);
       }
@@ -67,9 +79,10 @@ class AchievementService {
         unlockedAt: userRecord ? userRecord.unlockedAt : null,
         progress: typeof progress === 'number' ? progress : 0,
         target: standard.target || 0,
-        percentage: (standard.target && standard.target > 0) 
-          ? Math.min(100, (Number(progress || 0) / standard.target) * 100) 
-          : 0
+        percentage:
+          standard.target && standard.target > 0
+            ? Math.min(100, (Number(progress || 0) / standard.target) * 100)
+            : 0,
       };
     });
 
@@ -86,7 +99,7 @@ class AchievementService {
     if (!user) return [];
 
     const newlyUnlocked = []; // { key, title, description, icon, color }
-    
+
     for (const standard of ACHIEVEMENTS) {
       try {
         if (standard.requirement(stats)) {
@@ -94,8 +107,8 @@ class AchievementService {
             where: { userId: user.id, badgeKey: standard.key },
             defaults: {
               unlocked: true,
-              unlockedAt: new Date()
-            }
+              unlockedAt: new Date(),
+            },
           });
 
           if (created) {
@@ -103,13 +116,16 @@ class AchievementService {
           } else if (!badge.unlocked) {
             await badge.update({
               unlocked: true,
-              unlockedAt: new Date()
+              unlockedAt: new Date(),
             });
             newlyUnlocked.push(standard);
           }
         }
       } catch (err) {
-        console.error(`[Achievement] 检查成就 ${standard.key} 时出错:`, err.message);
+        console.error(
+          `[Achievement] 检查成就 ${standard.key} 时出错:`,
+          err.message,
+        );
       }
     }
 
@@ -134,7 +150,9 @@ class AchievementService {
         read: false,
       });
 
-      console.log(`[Achievement] 通知已创建: 用户 ${user.username} 解锁「${achievement.title}」`);
+      console.log(
+        `[Achievement] 通知已创建: 用户 ${user.username} 解锁「${achievement.title}」`,
+      );
 
       // 通过 WebSocket 实时推送
       const socketId = connectedUsers.get(user.userId);
@@ -160,4 +178,3 @@ class AchievementService {
 }
 
 module.exports = new AchievementService();
-

@@ -1,5 +1,17 @@
 const sequelize = require('../config/database');
-const {  User,  Plan,  Habit,  Notification,  Badge,  CircleMoment,  Template,  Like,  Collect,  Friendship,  Comment,} = require('../models');
+const {
+  User,
+  Plan,
+  Habit,
+  Notification,
+  Badge,
+  CircleMoment,
+  Template,
+  Like,
+  Collect,
+  Friendship,
+  Comment,
+} = require('../models');
 const { v4: uuidv4 } = require('uuid');
 const { mockCircles, mockBuddies } = require('../data/mockData/communityData');
 const { templateDetails } = require('../data/mockData/templates');
@@ -46,7 +58,9 @@ async function ensureUsersTableMigration() {
   if (!columns.avatar) {
     await sequelize.query('ALTER TABLE users ADD COLUMN avatar VARCHAR(1000);');
   } else if (columns.avatar.type === 'character varying(255)') {
-    await sequelize.query('ALTER TABLE users ALTER COLUMN avatar TYPE VARCHAR(1000);');
+    await sequelize.query(
+      'ALTER TABLE users ALTER COLUMN avatar TYPE VARCHAR(1000);',
+    );
   }
   if (!columns.bio) {
     await sequelize.query('ALTER TABLE users ADD COLUMN bio VARCHAR(200);');
@@ -61,30 +75,40 @@ async function ensureNotificationsTableMigration() {
 
   if (!tableExists) return;
 
-  const columns = await sequelize.getQueryInterface().describeTable('notifications');
+  const columns = await sequelize
+    .getQueryInterface()
+    .describeTable('notifications');
 
   // 添加 senderId 列
   if (!columns.senderId) {
     console.log('[Migration] Adding senderId to notifications table');
-    await sequelize.query('ALTER TABLE notifications ADD COLUMN "senderId" INTEGER REFERENCES users(id);');
+    await sequelize.query(
+      'ALTER TABLE notifications ADD COLUMN "senderId" INTEGER REFERENCES users(id);',
+    );
   }
 
   // 添加 targetType 列
   if (!columns.targetType) {
     console.log('[Migration] Adding targetType to notifications table');
-    await sequelize.query('ALTER TABLE notifications ADD COLUMN "targetType" VARCHAR(20);');
+    await sequelize.query(
+      'ALTER TABLE notifications ADD COLUMN "targetType" VARCHAR(20);',
+    );
   }
 
   // 添加 targetId 列
   if (!columns.targetId) {
     console.log('[Migration] Adding targetId to notifications table');
-    await sequelize.query('ALTER TABLE notifications ADD COLUMN "targetId" INTEGER;');
+    await sequelize.query(
+      'ALTER TABLE notifications ADD COLUMN "targetId" INTEGER;',
+    );
   }
 
   // 添加 time 列 (如果之前缺失)
   if (!columns.time) {
     console.log('[Migration] Adding time to notifications table');
-    await sequelize.query('ALTER TABLE notifications ADD COLUMN "time" VARCHAR(50) DEFAULT \'刚刚\';');
+    await sequelize.query(
+      'ALTER TABLE notifications ADD COLUMN "time" VARCHAR(50) DEFAULT \'刚刚\';',
+    );
   }
 }
 
@@ -205,7 +229,9 @@ async function ensureBadgesTableMigration() {
   // 添加 unlockedAt 列（新增）
   if (!columns.unlockedAt) {
     console.log('[Migration] Adding unlockedAt to badges table');
-    await sequelize.query('ALTER TABLE badges ADD COLUMN "unlockedAt" TIMESTAMP;');
+    await sequelize.query(
+      'ALTER TABLE badges ADD COLUMN "unlockedAt" TIMESTAMP;',
+    );
   }
 
   // 将旧的冗余列改为 nullable（如果存在的话），以免阻塞查询
@@ -214,7 +240,9 @@ async function ensureBadgesTableMigration() {
     if (columns[col]) {
       try {
         console.log(`[Migration] Making badges.${col} nullable`);
-        await sequelize.query(`ALTER TABLE badges ALTER COLUMN "${col}" DROP NOT NULL;`);
+        await sequelize.query(
+          `ALTER TABLE badges ALTER COLUMN "${col}" DROP NOT NULL;`,
+        );
       } catch (e) {
         // 可能已经是 nullable 了，忽略
       }

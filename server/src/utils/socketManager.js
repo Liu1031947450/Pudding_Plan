@@ -7,7 +7,7 @@ let io = null;
 const connectedUsers = new Map();
 
 module.exports = {
-  setIO: (ioInstance) => {
+  setIO: ioInstance => {
     io = ioInstance;
   },
   getIO: () => io,

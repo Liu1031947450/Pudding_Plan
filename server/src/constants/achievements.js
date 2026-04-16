@@ -16,9 +16,9 @@ const ACHIEVEMENTS = [
     description: '完成第一次打卡，开启你的坚持旅程。',
     icon: 'flare',
     color: Colors.coral,
-    requirement: (stats) => stats.totalCheckIns >= 1,
+    requirement: stats => stats.totalCheckIns >= 1,
     target: 1,
-    getProgress: (stats) => stats.totalCheckIns,
+    getProgress: stats => stats.totalCheckIns,
   },
   {
     key: 'streak_3',
@@ -26,9 +26,9 @@ const ACHIEVEMENTS = [
     description: '连续打卡 3 天。',
     icon: 'wb-twilight',
     color: Colors.sky,
-    requirement: (stats) => stats.streakDays >= 3,
+    requirement: stats => stats.streakDays >= 3,
     target: 3,
-    getProgress: (stats) => stats.streakDays,
+    getProgress: stats => stats.streakDays,
   },
   {
     key: 'streak_7',
@@ -36,9 +36,9 @@ const ACHIEVEMENTS = [
     description: '连续打卡 7 天。',
     icon: 'local-fire-department',
     color: Colors.gold,
-    requirement: (stats) => stats.streakDays >= 7,
+    requirement: stats => stats.streakDays >= 7,
     target: 7,
-    getProgress: (stats) => stats.streakDays,
+    getProgress: stats => stats.streakDays,
   },
   {
     key: 'streak_14',
@@ -46,9 +46,9 @@ const ACHIEVEMENTS = [
     description: '连续打卡 14 天。',
     icon: 'workspace-premium',
     color: Colors.violet,
-    requirement: (stats) => stats.streakDays >= 14,
+    requirement: stats => stats.streakDays >= 14,
     target: 14,
-    getProgress: (stats) => stats.streakDays,
+    getProgress: stats => stats.streakDays,
   },
   {
     key: 'streak_30',
@@ -56,9 +56,9 @@ const ACHIEVEMENTS = [
     description: '连续打卡 30 天。',
     icon: 'shield-moon',
     color: Colors.silver,
-    requirement: (stats) => stats.streakDays >= 30,
+    requirement: stats => stats.streakDays >= 30,
     target: 30,
-    getProgress: (stats) => stats.streakDays,
+    getProgress: stats => stats.streakDays,
   },
   {
     key: 'checkin_10',
@@ -66,9 +66,9 @@ const ACHIEVEMENTS = [
     description: '累计完成 10 次打卡。',
     icon: 'looks-10',
     color: Colors.emerald,
-    requirement: (stats) => stats.totalCheckIns >= 10,
+    requirement: stats => stats.totalCheckIns >= 10,
     target: 10,
-    getProgress: (stats) => stats.totalCheckIns,
+    getProgress: stats => stats.totalCheckIns,
   },
   {
     key: 'checkin_50',
@@ -76,9 +76,9 @@ const ACHIEVEMENTS = [
     description: '累计完成 50 次打卡。',
     icon: 'military-tech',
     color: Colors.gold,
-    requirement: (stats) => stats.totalCheckIns >= 50,
+    requirement: stats => stats.totalCheckIns >= 50,
     target: 50,
-    getProgress: (stats) => stats.totalCheckIns,
+    getProgress: stats => stats.totalCheckIns,
   },
   {
     key: 'plan_1',
@@ -86,9 +86,9 @@ const ACHIEVEMENTS = [
     description: '创建并坚持至少 1 个计划。',
     icon: 'flag',
     color: Colors.coral,
-    requirement: (stats) => stats.healingPlans >= 1,
+    requirement: stats => stats.healingPlans >= 1,
     target: 1,
-    getProgress: (stats) => stats.healingPlans,
+    getProgress: stats => stats.healingPlans,
   },
   {
     key: 'plan_3',
@@ -96,9 +96,9 @@ const ACHIEVEMENTS = [
     description: '拥有 3 个治愈计划。',
     icon: 'favorite',
     color: Colors.violet,
-    requirement: (stats) => stats.healingPlans >= 3,
+    requirement: stats => stats.healingPlans >= 3,
     target: 3,
-    getProgress: (stats) => stats.healingPlans,
+    getProgress: stats => stats.healingPlans,
   },
   {
     key: 'plan_5',
@@ -106,9 +106,9 @@ const ACHIEVEMENTS = [
     description: '拥有 5 个计划并持续推进。',
     icon: 'auto-awesome',
     color: Colors.bronze,
-    requirement: (stats) => stats.healingPlans >= 5,
+    requirement: stats => stats.healingPlans >= 5,
     target: 5,
-    getProgress: (stats) => stats.healingPlans,
+    getProgress: stats => stats.healingPlans,
   },
   {
     key: 'social_post_1',
@@ -116,9 +116,9 @@ const ACHIEVEMENTS = [
     description: '发布第一条动态，分享你的今日时刻。',
     icon: 'forum',
     color: Colors.sky,
-    requirement: (stats) => stats.socialStats.moments >= 1,
+    requirement: stats => stats.socialStats.moments >= 1,
     target: 1,
-    getProgress: (stats) => stats.socialStats.moments,
+    getProgress: stats => stats.socialStats.moments,
   },
   {
     key: 'all_rounder',
@@ -126,16 +126,16 @@ const ACHIEVEMENTS = [
     description: '同时达成 7 天连续打卡、10 次累计打卡和 3 个计划。',
     icon: 'diamond',
     color: Colors.gold,
-    requirement: (stats) =>
+    requirement: stats =>
       stats.streakDays >= 7 &&
       stats.totalCheckIns >= 10 &&
       stats.healingPlans >= 3,
     target: 1,
-    getProgress: (stats) => {
+    getProgress: stats => {
       const p1 = Math.min(1, stats.streakDays / 7);
       const p2 = Math.min(1, stats.totalCheckIns / 10);
       const p3 = Math.min(1, stats.healingPlans / 3);
-      return (p1 + p2 + p3) === 3 ? 1 : 0; // Simplified for basic display
+      return p1 + p2 + p3 === 3 ? 1 : 0; // Simplified for basic display
     },
   },
 ];
