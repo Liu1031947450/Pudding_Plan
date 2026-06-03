@@ -1,5 +1,5 @@
 import { io, Socket } from 'socket.io-client';
-import { API_CONFIG, API_ENDPOINTS } from '../api/config';
+import { API_CONFIG } from '../api/config';
 import * as SecureStore from 'expo-secure-store';
 
 class WebSocketService {

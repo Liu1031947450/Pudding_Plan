@@ -23,7 +23,6 @@ const CirclesScreen: React.FC = () => {
   const { notifications, markAsRead, refreshNotifications, unreadCount } =
     useNotifications();
 
-
   const displayCircles = useMemo(
     () =>
       circles.map(circle => {

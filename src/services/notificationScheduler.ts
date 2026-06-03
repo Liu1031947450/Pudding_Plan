@@ -3,7 +3,7 @@ import { Platform } from 'react-native';
 /**
  * 通知调度服务
  * 负责将计划提醒同步为系统本地定时通知
- * 
+ *
  * 注意：在 Expo Go 中 expo-notifications 不可用，
  * 所有方法会静默降级（打印警告但不报错）
  */
@@ -12,7 +12,7 @@ let Notifications: typeof import('expo-notifications') | null = null;
 
 try {
   Notifications = require('expo-notifications');
-} catch (e) {
+} catch {
   console.warn('[Notification] expo-notifications 不可用，提醒功能将被禁用');
 }
 
@@ -108,7 +108,9 @@ export async function syncPlanReminders(
     const { hour, minute } = parseTime(reminder.time);
     const identifier = makeNotificationId(
       planId,
-      `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`,
+      `${hour.toString().padStart(2, '0')}:${minute
+        .toString()
+        .padStart(2, '0')}`,
     );
 
     try {
@@ -129,7 +131,9 @@ export async function syncPlanReminders(
       });
 
       console.log(
-        `[Notification] 已注册提醒: ${planTitle} → ${hour}:${minute.toString().padStart(2, '0')} (id: ${identifier})`,
+        `[Notification] 已注册提醒: ${planTitle} → ${hour}:${minute
+          .toString()
+          .padStart(2, '0')} (id: ${identifier})`,
       );
     } catch (err) {
       console.error(`[Notification] 注册提醒失败:`, err);
@@ -145,8 +149,8 @@ export async function cancelPlanReminders(planId: string): Promise<void> {
 
   try {
     const scheduled = await Notifications.getAllScheduledNotificationsAsync();
-    const toCancel = scheduled.filter(
-      n => n.identifier.startsWith(`plan_${planId}_reminder_`),
+    const toCancel = scheduled.filter(n =>
+      n.identifier.startsWith(`plan_${planId}_reminder_`),
     );
 
     for (const notification of toCancel) {

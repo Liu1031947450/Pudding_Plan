@@ -165,7 +165,7 @@ const PlanScreen: React.FC = () => {
         setToastMessage('删除失败，请重试');
         setToastType('error');
       }
-    } catch (error) {
+    } catch {
       setToastMessage('删除失败，请重试');
       setToastType('error');
     } finally {

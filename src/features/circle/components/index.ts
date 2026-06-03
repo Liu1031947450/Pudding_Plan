@@ -7,3 +7,4 @@ export * from './CircleTopicCard';
 export * from './CircleDetailModal';
 export * from './BuddyCard';
 export * from './BuddyList';
+export * from './CircleDetailContent';

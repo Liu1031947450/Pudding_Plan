@@ -1,12 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import {
-  Colors,
-  Spacing,
-  FontSize,
-  BorderRadius,
-} from '../../../constants/theme';
+import { Colors, Spacing, FontSize } from '../../../constants/theme';
 import { Button } from '../../../components/common';
 
 interface ConfirmSheetProps {

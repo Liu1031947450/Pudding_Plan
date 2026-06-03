@@ -18,7 +18,12 @@ import { Colors, Spacing, FontSize, BorderRadius } from '../constants/theme';
 import { TopAppBar, BottomDrawer, Toast } from '../components';
 import { circlesApi } from '../api/circles';
 import * as ImagePicker from 'expo-image-picker';
-import * as Location from 'expo-location';
+import { useGeolocation } from '../hooks/useGeolocation';
+import {
+  LocationDrawerContent,
+  TopicDrawerContent,
+  VisibilityDrawerContent,
+} from '../features/circle/components/PostMomentDrawers';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -34,12 +39,8 @@ const PostMomentScreen: React.FC = () => {
   const [topic, setTopic] = useState('');
   const [visibility, setVisibility] = useState('公开');
 
-  // Location specific states
+  // Drawer Search states
   const [locationSearch, setLocationSearch] = useState('');
-  const [isLocating, setIsLocating] = useState(false);
-  const [nearbyLocations, setNearbyLocations] = useState<any[]>([]);
-
-  // Topic specific states
   const [topicSearch, setTopicSearch] = useState('');
   const [allTopics, setAllTopics] = useState<string[]>([]);
 
@@ -52,6 +53,9 @@ const PostMomentScreen: React.FC = () => {
   const [drawerType, setDrawerType] = useState<
     'location' | 'topic' | 'visibility' | null
   >(null);
+
+  // Geolocation integration
+  const { isLocating, nearbyLocations, fetchRealLocation } = useGeolocation();
 
   // Toast state
   const [toastConfig, setToastConfig] = useState<{
@@ -148,93 +152,10 @@ const PostMomentScreen: React.FC = () => {
     }
   };
 
-  const requestLocationPermission = async () => {
-    const { status } = await Location.requestForegroundPermissionsAsync();
-    return status === 'granted';
-  };
-
-  const fetchRealLocation = async () => {
-    setIsLocating(true);
-    try {
-      // 1. 检查定位服务是否开启
-      const servicesEnabled = await Location.hasServicesEnabledAsync();
-      if (!servicesEnabled) {
-        showToast('定位服务未开启，请在系统设置中打开', 'error');
-        setIsLocating(false);
-        return;
-      }
-
-      // 2. 检查并请求权限
-      const hasPermission = await requestLocationPermission();
-      if (!hasPermission) {
-        showToast('请授予位置权限以查看附近地点', 'error');
-        setIsLocating(false);
-        return;
-      }
-
-      // 3. 优先尝试快速获取上一次的已知位置（瞬间响应）
-      let locResult = await Location.getLastKnownPositionAsync({});
-
-      if (!locResult) {
-        // 4. 如果没有缓存位置，再发起真实的 GPS 搜索，并增加超时控制
-        const locationPromise = Location.getCurrentPositionAsync({
-          accuracy: Location.Accuracy.Balanced,
-        });
-
-        const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('TIMEOUT')), 8000),
-        );
-
-        locResult = (await Promise.race([
-          locationPromise,
-          timeoutPromise,
-        ])) as Location.LocationObject;
-      }
-
-      if (locResult) {
-        const [address] = await Location.reverseGeocodeAsync({
-          latitude: locResult.coords.latitude,
-          longitude: locResult.coords.longitude,
-        });
-
-        if (address) {
-          const city = address.city || address.region || '';
-          const district = address.district || '';
-
-          // 根据真实城市动态生成“附近”地点推荐
-          const spots = [
-            {
-              name: `${city} · ${district} (当前位置)`,
-              sub: `${address.street || ''}${address.name || ''}`,
-              id: 'current',
-            },
-            {
-              name: `${district}中心广场`,
-              sub: `${address.street || ''}108号`,
-              id: 'p1',
-            },
-            { name: `${city}市民公园`, sub: '近绿化路', id: 'p2' },
-            { name: `${district}创意园区`, sub: '文化路22号', id: 'p3' },
-            { name: `星巴克 (${district}店)`, sub: '近地铁站', id: 'p4' },
-            { name: `${city}图书馆`, sub: '文渊北路', id: 'p5' },
-          ];
-
-          setNearbyLocations(spots);
-
-          // 如果逆地理编码非常完整，直接更新当前位置（可选，这里保持不自动关闭）
-          const addrText = `${city}${district}${address.street || ''}`;
-          if (addrText) setLocation(addrText);
-        }
-      }
-    } catch (error: any) {
-      console.error('获取定位出错:', error);
-      if (error.message === 'TIMEOUT') {
-        showToast('获取位置超时，请重试', 'error');
-      } else {
-        showToast('获取位置失败，请检查设置', 'error');
-      }
-    } finally {
-      setIsLocating(false);
+  const handleFetchRealLocation = async () => {
+    const addrText = await fetchRealLocation(showToast);
+    if (addrText) {
+      setLocation(addrText);
     }
   };
 
@@ -267,7 +188,6 @@ const PostMomentScreen: React.FC = () => {
           return;
         }
 
-        // 这里可以结合 api 上传，目前我们将本地 uri 加入列表进行预览
         setImages(prev => [...prev, ...newUris]);
       }
     } catch (error) {
@@ -284,308 +204,39 @@ const PostMomentScreen: React.FC = () => {
 
   const renderDrawerContent = () => {
     if (drawerType === 'location') {
-      const filteredLocations = allLocations.filter(
-        item =>
-          item.name.includes(locationSearch) ||
-          item.sub.includes(locationSearch),
-      );
-
       return (
-        <View style={styles.drawerList}>
-          {/* Search Bar */}
-          <View style={styles.searchBar}>
-            <MaterialIcons
-              name="search"
-              size={20}
-              color={Colors.onSurfaceVariant}
-            />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="搜索地点..."
-              placeholderTextColor={Colors.outlineVariant}
-              value={locationSearch}
-              onChangeText={setLocationSearch}
-            />
-          </View>
-
-          {/* Special Actions */}
-          <TouchableOpacity
-            style={styles.drawerItem}
-            onPress={() => {
-              setLocation('');
-              setDrawerVisible(false);
-            }}
-          >
-            <View style={styles.drawerItemLeft}>
-              <MaterialIcons
-                name="location-off"
-                size={20}
-                color={Colors.error}
-                style={styles.drawerItemIcon}
-              />
-              <Text style={[styles.drawerItemText, { color: Colors.error }]}>
-                不显示地点
-              </Text>
-            </View>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.drawerItem}
-            onPress={fetchRealLocation}
-            disabled={isLocating}
-          >
-            <View style={styles.drawerItemLeft}>
-              <MaterialIcons
-                name="my-location"
-                size={20}
-                color={Colors.primary}
-                style={styles.drawerItemIcon}
-              />
-              <Text style={[styles.drawerItemText, { color: Colors.primary }]}>
-                {isLocating ? '正在精准定位中...' : '定位当前所在位置'}
-              </Text>
-            </View>
-            {isLocating && (
-              <ActivityIndicator size="small" color={Colors.primary} />
-            )}
-          </TouchableOpacity>
-
-          {/* Locations List */}
-          <ScrollView
-            style={styles.locationListScroll}
-            contentContainerStyle={styles.locationListContent}
-            showsVerticalScrollIndicator={false}
-          >
-            {/* Nearby Spots Section */}
-            {nearbyLocations.length > 0 && (
-              <View style={styles.sectionContainer}>
-                <Text style={styles.sectionHeader}>附近地点推荐</Text>
-                {nearbyLocations.map(loc => (
-                  <TouchableOpacity
-                    key={loc.id}
-                    style={styles.drawerItem}
-                    onPress={() => {
-                      setLocation(loc.name);
-                      setDrawerVisible(false);
-                    }}
-                  >
-                    <View style={styles.drawerItemLeft}>
-                      <MaterialIcons
-                        name="place"
-                        size={20}
-                        color={Colors.primary}
-                        style={styles.drawerItemIcon}
-                      />
-                      <View>
-                        <Text
-                          style={[
-                            styles.drawerItemText,
-                            location === loc.name && {
-                              color: Colors.primary,
-                              fontWeight: '600',
-                            },
-                          ]}
-                        >
-                          {loc.name}
-                        </Text>
-                        <Text style={styles.drawerItemSubText}>{loc.sub}</Text>
-                      </View>
-                    </View>
-                    {location === loc.name && (
-                      <MaterialIcons
-                        name="check"
-                        size={20}
-                        color={Colors.primary}
-                      />
-                    )}
-                  </TouchableOpacity>
-                ))}
-              </View>
-            )}
-
-            {/* 地点列表 */}
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionHeader}>
-                {nearbyLocations.length > 0 ? '更多地点' : '推荐地点'}
-              </Text>
-              {filteredLocations.map(loc => (
-                <TouchableOpacity
-                  key={loc.id}
-                  style={styles.drawerItem}
-                  onPress={() => {
-                    setLocation(loc.name);
-                    setDrawerVisible(false);
-                  }}
-                >
-                  <View style={styles.drawerItemLeft}>
-                    <MaterialIcons
-                      name="place"
-                      size={20}
-                      color={Colors.onSurfaceVariant}
-                      style={styles.drawerItemIcon}
-                    />
-                    <View>
-                      <Text style={styles.drawerItemText}>{loc.name}</Text>
-                      <Text style={styles.drawerItemSubText}>{loc.sub}</Text>
-                    </View>
-                  </View>
-                  {location === loc.name && (
-                    <MaterialIcons
-                      name="check"
-                      size={20}
-                      color={Colors.primary}
-                    />
-                  )}
-                </TouchableOpacity>
-              ))}
-            </View>
-            {filteredLocations.length === 0 && (
-              <Text style={styles.emptySearch}>未找到相关地点</Text>
-            )}
-          </ScrollView>
-        </View>
+        <LocationDrawerContent
+          location={location}
+          onSelectLocation={setLocation}
+          allLocations={allLocations}
+          locationSearch={locationSearch}
+          onLocationSearchChange={setLocationSearch}
+          nearbyLocations={nearbyLocations}
+          isLocating={isLocating}
+          onFetchRealLocation={handleFetchRealLocation}
+          onCloseDrawer={() => setDrawerVisible(false)}
+        />
       );
     }
     if (drawerType === 'topic') {
-      const filteredTopics = allTopics.filter(t => t.includes(topicSearch));
-      const hasExactMatch = allTopics.some(t => t === topicSearch);
-
       return (
-        <View style={styles.drawerList}>
-          {/* Search/Custom Input Bar */}
-          <View style={styles.searchBar}>
-            <MaterialIcons name="tag" size={20} color={Colors.primary} />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="搜索或输入新话题..."
-              placeholderTextColor={Colors.outlineVariant}
-              value={topicSearch}
-              onChangeText={setTopicSearch}
-              autoFocus
-            />
-          </View>
-
-          <ScrollView
-            style={styles.topicListScroll}
-            contentContainerStyle={styles.locationListContent}
-            showsVerticalScrollIndicator={false}
-          >
-            {/* Create New Topic Option */}
-            {topicSearch.length > 0 && !hasExactMatch && (
-              <TouchableOpacity
-                style={styles.drawerItem}
-                onPress={() => {
-                  setTopic(`#${topicSearch}`);
-                  setTopicSearch('');
-                  setDrawerVisible(false);
-                }}
-              >
-                <View style={styles.drawerItemLeft}>
-                  <MaterialIcons
-                    name="add-circle-outline"
-                    size={20}
-                    color={Colors.primary}
-                    style={styles.drawerItemIcon}
-                  />
-                  <Text
-                    style={[
-                      styles.drawerItemText,
-                      { color: Colors.primary, fontWeight: '600' },
-                    ]}
-                  >
-                    创建新话题: #{topicSearch}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            )}
-
-            {/* "No Topic" Option */}
-            <TouchableOpacity
-              style={styles.drawerItem}
-              onPress={() => {
-                setTopic('');
-                setTopicSearch('');
-                setDrawerVisible(false);
-              }}
-            >
-              <View style={styles.drawerItemLeft}>
-                <MaterialIcons
-                  name="label-off"
-                  size={20}
-                  color={Colors.onSurfaceVariant}
-                  style={styles.drawerItemIcon}
-                />
-                <Text style={styles.drawerItemText}>无话题</Text>
-              </View>
-            </TouchableOpacity>
-
-            {/* List existing topics */}
-            {filteredTopics.map(t => (
-              <TouchableOpacity
-                key={t}
-                style={styles.drawerItem}
-                onPress={() => {
-                  setTopic(`#${t}`);
-                  setTopicSearch('');
-                  setDrawerVisible(false);
-                }}
-              >
-                <View style={styles.drawerItemLeft}>
-                  <MaterialIcons
-                    name="label"
-                    size={20}
-                    color={
-                      topic === `#${t}`
-                        ? Colors.primary
-                        : Colors.onSurfaceVariant
-                    }
-                    style={styles.drawerItemIcon}
-                  />
-                  <Text
-                    style={[
-                      styles.drawerItemText,
-                      topic === `#${t}` && {
-                        color: Colors.primary,
-                        fontWeight: '600',
-                      },
-                    ]}
-                  >
-                    #{t}
-                  </Text>
-                </View>
-                {topic === `#${t}` && (
-                  <MaterialIcons
-                    name="check"
-                    size={20}
-                    color={Colors.primary}
-                  />
-                )}
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
+        <TopicDrawerContent
+          topic={topic}
+          onSelectTopic={setTopic}
+          allTopics={allTopics}
+          topicSearch={topicSearch}
+          onTopicSearchChange={setTopicSearch}
+          onCloseDrawer={() => setDrawerVisible(false)}
+        />
       );
     }
     if (drawerType === 'visibility') {
-      const options = ['公开', '仅好友', '私密'];
       return (
-        <View style={styles.drawerList}>
-          {options.map(opt => (
-            <TouchableOpacity
-              key={opt}
-              style={styles.drawerItem}
-              onPress={() => {
-                setVisibility(opt);
-                setDrawerVisible(false);
-              }}
-            >
-              <Text style={styles.drawerItemText}>{opt}</Text>
-              {visibility === opt && (
-                <MaterialIcons name="check" size={20} color={Colors.primary} />
-              )}
-            </TouchableOpacity>
-          ))}
-        </View>
+        <VisibilityDrawerContent
+          visibility={visibility}
+          onSelectVisibility={setVisibility}
+          onCloseDrawer={() => setDrawerVisible(false)}
+        />
       );
     }
     return null;

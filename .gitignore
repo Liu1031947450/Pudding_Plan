@@ -80,3 +80,10 @@ dist/
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# Environment variables
+.env
+.env.*
+!.env.example
+server/.env
+

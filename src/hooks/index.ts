@@ -6,3 +6,4 @@ export * from './useCircleData';
 export * from './useCalendarData';
 export * from './useNotificationState';
 export * from './useNotificationPolling';
+export * from './useGeolocation';

@@ -11,7 +11,6 @@ import {
   Colors,
   Spacing,
   FontSize as GlobalFontSize,
-  BorderRadius,
 } from '../../../constants/theme';
 import { Card, Button } from '../../../components/common';
 

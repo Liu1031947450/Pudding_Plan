@@ -1,12 +1,13 @@
 // API Configuration
+const devApiUrl =
+  process.env.EXPO_PUBLIC_API_URL || 'http://192.168.0.101:3000/api';
+const devServerUrl = devApiUrl.endsWith('/api')
+  ? devApiUrl.slice(0, -4)
+  : devApiUrl;
+
 export const API_CONFIG = {
-  // 本地ip地址
-  BASE_URL: __DEV__
-    ? 'http://192.168.0.101:3000/api'
-    : 'https://api.puddingplan.com',
-  SERVER_URL: __DEV__
-    ? 'http://192.168.0.101:3000'
-    : 'https://api.puddingplan.com',
+  BASE_URL: __DEV__ ? devApiUrl : 'https://api.puddingplan.com',
+  SERVER_URL: __DEV__ ? devServerUrl : 'https://api.puddingplan.com',
   TIMEOUT: 10000,
   RETRY_ATTEMPTS: 3,
 };

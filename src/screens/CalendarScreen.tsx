@@ -176,7 +176,7 @@ const CalendarScreen: React.FC = () => {
         setToastMessage(result.error || '打卡失败，请重试');
         setToastType('error');
       }
-    } catch (error) {
+    } catch {
       setToastMessage('打卡失败，请重试');
       setToastType('error');
     } finally {

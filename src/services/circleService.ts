@@ -1,5 +1,5 @@
 import type { Buddy } from '../types/domain';
-import type { CircleListItem, CircleMoment } from '../features/circle/types';
+import type { CircleListItem } from '../features/circle/types';
 import { circlesApi, buddiesApi } from '../api';
 
 // Circle Service - handles circle and buddy operations
