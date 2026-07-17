@@ -17,6 +17,7 @@ export class CircleMapper {
   static mapCommentFromDTO(dto: CommentDTO): Comment {
     return {
       id: dto.id,
+      userId: dto.user_id || '',
       userName: dto.user_name,
       userAvatarUri: dto.user_avatar,
       text: dto.content,

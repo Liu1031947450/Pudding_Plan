@@ -4,9 +4,9 @@ import {
   ScrollView,
   View,
   ActivityIndicator,
-  Text,
   RefreshControl,
 } from 'react-native';
+import { AppText as Text } from '../components/common/AppText';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Colors, Spacing } from '../constants/theme';

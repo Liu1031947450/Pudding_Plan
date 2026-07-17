@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ViewStyle, Animated } from 'react-native';
+import { View, StyleSheet, ViewStyle, Animated } from 'react-native';
+import { AppText as Text } from '../common/AppText';
 import { Colors, Spacing, FontSize, BorderRadius } from '../../constants/theme';
 
 interface ProgressBarProps {

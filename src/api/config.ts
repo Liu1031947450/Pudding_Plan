@@ -18,6 +18,7 @@ export const API_ENDPOINTS = {
   PLANS: '/plans',
   PLAN_DETAIL: (id: string) => `/plans/${id}`,
   PLAN_CHECK_IN: (id: string) => `/plans/${id}/check-in`,
+  PLAN_REORDER: '/plans/reorder',
 
   // Templates
   TEMPLATES: '/templates',
@@ -40,6 +41,10 @@ export const API_ENDPOINTS = {
   // Notifications & Badges
   NOTIFICATIONS: '/notifications',
   BADGES: '/badges',
+
+  // User settings
+  SETTINGS: '/settings',
+  FEEDBACK: '/feedback',
 
   // Rhythm Data
   RHYTHM_WEEK: '/rhythm/week',

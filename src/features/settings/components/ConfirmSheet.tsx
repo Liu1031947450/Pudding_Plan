@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { AppText as Text } from '../../../components/common/AppText';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize } from '../../../constants/theme';
 import { Button } from '../../../components/common';
@@ -11,6 +12,7 @@ interface ConfirmSheetProps {
   onConfirm: () => void;
   onCancel: () => void;
   isDestructive?: boolean;
+  loading?: boolean;
 }
 
 export const ConfirmSheet: React.FC<ConfirmSheetProps> = ({
@@ -20,6 +22,7 @@ export const ConfirmSheet: React.FC<ConfirmSheetProps> = ({
   onConfirm,
   onCancel,
   isDestructive = false,
+  loading = false,
 }) => {
   return (
     <View style={styles.container}>
@@ -48,12 +51,15 @@ export const ConfirmSheet: React.FC<ConfirmSheetProps> = ({
           <Button
             title={confirmLabel}
             onPress={onConfirm}
+            loading={loading}
+            disabled={loading}
             style={[styles.button, isDestructive && styles.destructiveButton]}
             variant={isDestructive ? 'primary' : 'primary'}
           />
           <Button
             title="取消"
             onPress={onCancel}
+            disabled={loading}
             style={styles.button}
             variant="outline"
           />

@@ -41,6 +41,7 @@ const Comment = sequelize.define(
   {
     tableName: 'comments',
     timestamps: true,
+    indexes: [{ fields: ['momentId', 'createdAt'] }, { fields: ['parentId'] }],
   },
 );
 

@@ -5,7 +5,7 @@ export interface Plan {
   id: string;
   title: string; // 计划名称
   totalDays: number; // 打卡周期（总天数）
-  completedDate: string[]; // 已打卡日期列表（'YYYY-MM-DD'），唯一事实源头
+  completedDate: string[]; // 已打卡日期兼容投影；服务端事实源为 plan_check_ins
   type: 0 | 1 | 2; // 打卡方式：0-盖章打卡, 1-数值记录, 2-文字日记
   remindSetting: {
     time: string; // 提醒时间（HH:mm）
@@ -23,6 +23,19 @@ export interface Plan {
   progress?: number; // 进度百分比
   days?: number; // 已打卡天数（兼容旧字段）
   color?: string; // 卡片颜色
+  sortOrder?: number; // 用户自定义排序位置
+  checkInRecords?: PlanCheckInRecord[]; // 规范化打卡事实，由后端按日期返回
+}
+
+export interface PlanCheckInRecord {
+  date: string;
+  numericValue: number | null;
+  note: string | null;
+}
+
+export interface PlanCheckInDetails {
+  numericValue?: number;
+  note?: string;
 }
 
 export interface Reminder {
@@ -116,6 +129,15 @@ export interface Habit {
   icon: keyof typeof MaterialIcons.glyphMap;
   completed: boolean;
   category: string;
+}
+
+export interface UserSettings {
+  notificationsEnabled: boolean;
+  notificationTime: string;
+  dndStart: string;
+  dndEnd: string;
+  theme: 'light' | 'dark' | 'system';
+  fontSize: 'small' | 'medium' | 'large';
 }
 
 // Template types

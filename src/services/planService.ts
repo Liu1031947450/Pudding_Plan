@@ -1,4 +1,4 @@
-import type { Plan } from '../types/domain';
+import type { Plan, PlanCheckInDetails } from '../types/domain';
 import { plansApi } from '../api';
 import type { ApiResponse } from '../api/client';
 
@@ -32,9 +32,17 @@ class PlanService {
     return await plansApi.delete(id);
   }
 
+  async reorderPlans(planIds: string[]): Promise<ApiResponse<boolean>> {
+    return await plansApi.reorder(planIds);
+  }
+
   // Check in plan（依赖 token 鉴权）
-  async checkInPlan(id: string, date: string): Promise<ApiResponse<Plan>> {
-    return await plansApi.checkIn(id, date);
+  async checkInPlan(
+    id: string,
+    date: string,
+    details?: PlanCheckInDetails,
+  ): Promise<ApiResponse<Plan>> {
+    return await plansApi.checkIn(id, date, details);
   }
 }
 

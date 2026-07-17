@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, StyleSheet, ScrollView } from 'react-native';
+import { AppText as Text } from '../../../components/common/AppText';
 import { Colors, Spacing, FontSize } from '../../../constants/theme';
 
 interface LegalDocSheetProps {

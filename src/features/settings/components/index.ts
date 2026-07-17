@@ -6,5 +6,4 @@ export * from './DNDSheet';
 export * from './FeedbackSheet';
 export * from './LegalDocSheet';
 export * from './NotificationSheet';
-export * from './PhoneBindSheet';
 export * from './ProfileEditSheet';

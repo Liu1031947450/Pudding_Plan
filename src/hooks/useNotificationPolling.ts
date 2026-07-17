@@ -13,7 +13,7 @@ export const useNotificationPolling = ({
   onCountChange,
   enabled = true,
 }: UseNotificationPollingOptions = {}) => {
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const appState = useRef(AppState.currentState);
 
   const fetchUnreadCount = useCallback(async () => {

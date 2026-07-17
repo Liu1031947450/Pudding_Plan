@@ -27,10 +27,12 @@ const Habit = sequelize.define(
     },
     icon: {
       type: DataTypes.STRING(50),
+      allowNull: true,
       defaultValue: 'check-circle',
     },
     completed: {
       type: DataTypes.BOOLEAN,
+      allowNull: false,
       defaultValue: false,
     },
     category: {
@@ -49,6 +51,7 @@ const Habit = sequelize.define(
   {
     tableName: 'habits',
     timestamps: true,
+    indexes: [{ fields: ['userId'] }],
   },
 );
 

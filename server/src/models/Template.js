@@ -18,7 +18,9 @@ const Template = sequelize.define(
     },
     duration: {
       type: DataTypes.INTEGER,
+      allowNull: false,
       defaultValue: 21,
+      validate: { min: 1 },
     },
     icon: {
       type: DataTypes.STRING(50),
@@ -53,6 +55,7 @@ const Template = sequelize.define(
     },
     difficulty: {
       type: DataTypes.ENUM('easy', 'medium', 'hard'),
+      allowNull: false,
       defaultValue: 'easy',
     },
     frequency: {
@@ -63,6 +66,7 @@ const Template = sequelize.define(
   {
     tableName: 'templates',
     timestamps: true,
+    indexes: [{ fields: ['category'] }, { fields: ['difficulty'] }],
   },
 );
 

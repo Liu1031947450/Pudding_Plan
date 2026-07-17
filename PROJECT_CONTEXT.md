@@ -1,8 +1,11 @@
 # PuddingPlan 项目上下文与开发指南
 
-> 最后核对：2026-07-16  
-> 当前分支：`dev`  
-> 分析基线：`2d3b1abb7e871439eecd2e24c2e29e0788414551`  
+> 最后核对：2026-07-17
+>
+> 当前分支：`dev`
+>
+> 分析基线：`2d3b1abb7e871439eecd2e24c2e29e0788414551`
+>
 > 适用范围：React Native / Expo 前端、Express 后端、PostgreSQL 数据库、Socket.io 实时通知、Android/iOS 原生工程及 Web 构建尝试
 
 ## 1. 文档用途
@@ -32,18 +35,18 @@ PuddingPlan（布丁计划）是一款面向习惯养成、自律打卡和轻社
 
 ## 3. 核心业务模块
 
-| 模块           | 主要能力                                   | 前端入口                                           | 后端入口                                      | 核心数据                              |
-| -------------- | ------------------------------------------ | -------------------------------------------------- | --------------------------------------------- | ------------------------------------- |
-| 认证与账号     | 注册、登录、会话恢复、资料编辑、退出       | `AuthScreen.tsx`、`AuthContext.tsx`                | `routes/auth.js`                              | `User`、JWT、SecureStore              |
-| 计划管理       | 新建、编辑、删除、批量管理、模板创建       | `PlanScreen.tsx`、`CreatePlanScreen.tsx`           | `routes/plans.js`                             | `Plan`                                |
-| 打卡与提醒     | 三种打卡方式、日期打卡、本地定时提醒       | `usePlanManagement.ts`、`notificationScheduler.ts` | `routes/plans.js`                             | `Plan.completedDate`、`remindSetting` |
-| 日历与习惯     | 月历、每日计划完成情况、习惯切换、每日金句 | `CalendarScreen.tsx`、`useCalendarData.ts`         | `routes/calendar.js`、`routes/habits.js`      | `Plan`、`Habit`                       |
-| 节奏与成就     | 周/月打卡图表、徽章进度、解锁通知          | `RhythmChart.tsx`、`AchievementDrawer.tsx`         | `routes/rhythm.js`、`routes/badges.js`        | `Badge`、实时统计                     |
-| 模板           | 系统模板、分类、难度、计划预填充           | `TemplateSelectionScreen.tsx`                      | `routes/templates.js`                         | `Template`、本地模板兜底              |
-| 圈子与伙伴     | 动态发布、图片上传、瀑布流、详情、关注     | `CirclesScreen.tsx`、`PostMomentScreen.tsx`        | `routes/circles.js`、`circleController.js`    | `CircleMoment`、`Friendship`          |
-| 社交互动       | 点赞、收藏、评论、回复、我的收藏           | 圈子组件、`MyCollectionsScreen.tsx`                | `circleController.js`                         | `Like`、`Collect`、`Comment`          |
-| 实时通知       | 通知列表、未读数、已读、实时推送           | `NotificationContext.tsx`、`websocketService.ts`   | `routes/notifications.js`、`socketManager.js` | `Notification`、Socket.io             |
-| 设置与个人中心 | 外观、通知、免打扰、反馈、资料和统计展示   | `ProfileScreen.tsx`、`SettingsScreen.tsx`          | `routes/auth.js`                              | 用户资料与聚合统计                    |
+| 模块           | 主要能力                                   | 前端入口                                         | 后端入口                                                     | 核心数据                                     |
+| -------------- | ------------------------------------------ | ------------------------------------------------ | ------------------------------------------------------------ | -------------------------------------------- |
+| 认证与账号     | 注册、登录、会话恢复、资料编辑、服务端退出 | `AuthScreen.tsx`、`AuthContext.tsx`              | `routes/auth.js`                                             | `User.tokenVersion`、JWT、SecureStore        |
+| 计划管理       | 新建、编辑、删除、批量管理、模板创建       | `PlanScreen.tsx`、`CreatePlanScreen.tsx`         | `routes/plans.js`                                            | `Plan`                                       |
+| 打卡与提醒     | 盖章、数值、日记打卡与本地定时提醒         | `CalendarScreen.tsx`、`usePlanManagement.ts`     | `routes/plans.js`                                            | `PlanCheckIn`、`Plan.completedDate` 兼容字段 |
+| 日历与习惯     | 月历、每日计划完成情况、习惯切换、每日金句 | `CalendarScreen.tsx`、`useCalendarData.ts`       | `routes/calendar.js`、`routes/habits.js`                     | `Plan`、`Habit`                              |
+| 节奏与成就     | 周/月打卡图表、徽章进度、解锁通知          | `RhythmChart.tsx`、`AchievementDrawer.tsx`       | `routes/rhythm.js`、`routes/badges.js`                       | `Badge`、实时统计                            |
+| 模板           | 系统模板、分类、难度、计划预填充           | `TemplateSelectionScreen.tsx`                    | `routes/templates.js`                                        | `Template`、本地模板兜底                     |
+| 圈子与伙伴     | 动态发布、图片上传、瀑布流、详情、关注     | `CirclesScreen.tsx`、`PostMomentScreen.tsx`      | `routes/circles.js`、`circleController.js`                   | `CircleMoment`、`Friendship`                 |
+| 社交互动       | 点赞、收藏、评论、回复、我的收藏           | 圈子组件、`MyCollectionsScreen.tsx`              | `circleController.js`                                        | `Like`、`Collect`、`Comment`                 |
+| 实时通知       | 通知列表、未读数、已读、实时推送           | `NotificationContext.tsx`、`websocketService.ts` | `routes/notifications.js`、`socketManager.js`                | `Notification`、Socket.io                    |
+| 设置与个人中心 | 外观、通知、免打扰、反馈、资料和统计       | `ProfileScreen.tsx`、`SettingsScreen.tsx`        | `routes/auth.js`、`routes/settings.js`、`routes/feedback.js` | `UserSetting`、`Feedback`、用户资料与统计    |
 
 ## 4. 技术栈
 
@@ -76,7 +79,7 @@ PuddingPlan（布丁计划）是一款面向习惯养成、自律打卡和轻社
 - Android Gradle 工程与 Kotlin Application；
 - iOS CocoaPods、Xcode 工程与 Swift AppDelegate；
 - ESLint、Prettier；
-- GitHub Actions 执行格式、lint、指定测试和后端语法门禁。
+- GitHub Actions 执行格式、lint、完整前端测试、类型检查、Web 构建、后端测试、空库 migration、数据库验证和 API 冒烟。
 
 ## 5. 总体技术架构
 
@@ -133,7 +136,7 @@ Screen / Feature Component
 | `index.web.js`           | 独立 Webpack Web 注册入口                                                  |
 | `package.json`           | 前端依赖、开发脚本、质量检查和后端快捷命令                                 |
 | `app.json`、`eas.json`   | Expo 元数据与 EAS 构建配置                                                 |
-| `webpack.config.js`      | 自维护 Web 构建配置，当前不可成功构建                                      |
+| `webpack.config.js`      | 自维护 Web 构建配置，开发端口 8080，生产构建已通过                         |
 | `README.md`              | 项目简介与基础启动说明，部分细节需结合本文件                               |
 | `API_DOCS.md`            | 早期 Mock API 文档，已明显过期                                             |
 | `stitch_puddingplan1.0/` | HTML 设计原型与产品需求参考，不属于运行时代码                              |
@@ -176,8 +179,9 @@ Screen / Feature Component
 1. `index.js` 通过 Expo 注册 `App`。
 2. `App.tsx` 安装 `AuthProvider`、`NotificationProvider` 和 `SafeAreaProvider`。
 3. `AuthContext` 从 SecureStore 读取用户、过期时间和 JWT。
-4. 本地会话有效时，恢复内存 `authToken` 并连接 Socket.io；会话期限固定为 30 天。
-5. `AppNavigator` 根据认证状态进入 Auth 或 Main；登录成功后 `AuthScreen` 主动 reset 到 Main。
+4. 本地会话有效时，恢复内存 `authToken` 并连接 Socket.io；服务端仍以 JWT 的 `exp` 和 `User.tokenVersion` 为最终有效性依据。
+5. 任一鉴权请求返回 401 时，`apiClient` 通知 `AuthProvider` 清理 SecureStore、Context 和 WebSocket 状态。
+6. `AppNavigator` 根据认证状态进入 Auth 或 Main；登录成功后 `AuthScreen` 主动 reset 到 Main。
 
 注意：`apiClient` 中的 token 仅保存在模块内存中，真正持久化由 `AuthContext` 和 SecureStore 负责。
 
@@ -186,17 +190,20 @@ Screen / Feature Component
 1. 功能代码调用 `plansApi`、`circlesApi` 等领域 API。
 2. API 模块统一委托 `apiClient`。
 3. `apiClient` 负责 Base URL、JSON/FormData、10 秒超时和 Bearer Token。
-4. 后端 `authMiddleware` 验证 JWT，将 UUID 写入 `req.userId`。
+4. 后端 `authMiddleware` 验证 JWT，并查询用户核对 `tokenVersion`，再将 UUID 和用户实例写入请求上下文。
 5. route/controller 查询数据并返回 `{ success, data, message, error }`。
 
 当前 `API_CONFIG.RETRY_ATTEMPTS` 只是配置项，尚未实现自动重试。
 
 ### 7.3 计划、打卡与提醒
 
-- `Plan.completedDate: string[]` 是打卡记录的唯一事实源；
-- `currentDays`、`days`、`progress` 是服务端或前端根据 `completedDate` 派生的兼容字段；
+- `plan_check_ins` 是打卡记录的数据库事实源，唯一键为 `(planId, checkInDate)`；
+- `Plan.completedDate: string[]` 暂时保留并双写，只用于旧客户端和回滚兼容；
+- 计划响应同时提供 `checkInRecords`，可包含 `numericValue` 和 `note`；
+- `currentDays`、`days`、`progress` 仍根据兼容日期列表派生；
 - 创建/编辑由 `CreatePlanScreen → usePlanManagement → planService → plansApi` 完成；
-- 打卡由 `POST /api/plans/:id/check-in?date=YYYY-MM-DD` 完成，重复日期不会重复插入；
+- 打卡由 `POST /api/plans/:id/check-in?date=YYYY-MM-DD` 完成，请求体可传 `numericValue` 或 `note`；
+- 重复日期不会插入新记录，但允许更新已有数值/文字明细；
 - 后端完成打卡后立即检查成就；
 - 计划提醒由前端 `notificationScheduler.ts` 注册为设备本地通知，不由后端定时任务触发；
 - 删除计划时，前端同步取消该计划对应的本地提醒。
@@ -205,7 +212,7 @@ Screen / Feature Component
 
 ### 7.4 日历、习惯与节奏图
 
-- 月历数据不是独立表，而是服务端根据当前用户所有计划的 `completedDate` 即时计算；
+- 月历数据不是独立表，而是服务端按日期范围查询 `plan_check_ins` 即时计算；
 - `completedPlanIds` 用于标记某日完成过哪些计划；
 - Habit 是独立表，完成状态通过 `/api/habits/:id/toggle` 切换；
 - 周/月节奏图统计每日完成计划数量，并映射为 0-100 的展示值；
@@ -244,7 +251,10 @@ Screen / Feature Component
 ### 8.1 主要模型
 
 - `User`：账号、手机号、密码摘要、头像、简介；
+- `UserSetting`：用户提醒时间、勿扰时段、主题与字体偏好；
+- `Feedback`：用户意见类型、内容、联系方式与处理状态；
 - `Plan`：计划周期、打卡日期、打卡方式、提醒、里程碑；
+- `PlanCheckIn`：计划每日打卡明细、数值和文字记录；
 - `Habit`：日历页习惯项目及完成状态；
 - `Template`：系统计划模板；
 - `Badge`：用户成就解锁记录；
@@ -269,18 +279,20 @@ Screen / Feature Component
 
 所有业务接口以 `/api` 为前缀。
 
-| 前缀             | 主要接口                                                          |
-| ---------------- | ----------------------------------------------------------------- |
-| `/auth`          | 登录、注册、当前用户、资料更新、统计、公开用户查询、关注/取消关注 |
-| `/plans`         | 计划 CRUD、打卡                                                   |
-| `/templates`     | 模板列表、详情、分类                                              |
-| `/calendar`      | 月历、每日金句、日历更新占位接口                                  |
-| `/habits`        | 习惯列表、创建、切换、删除                                        |
-| `/rhythm`        | 周/月节奏数据                                                     |
-| `/badges`        | 成就与进度                                                        |
-| `/circles`       | 动态列表/详情/发布、上传、点赞、收藏、评论、地点、话题、收藏列表  |
-| `/buddies`       | 推荐伙伴                                                          |
-| `/notifications` | 列表、未读筛选、单条/全部已读、删除                               |
+| 前缀             | 主要接口                                                                      |
+| ---------------- | ----------------------------------------------------------------------------- |
+| `/auth`          | 登录、注册、服务端退出、当前用户、资料更新、统计、公开用户查询、关注/取消关注 |
+| `/plans`         | 计划 CRUD、打卡                                                               |
+| `/templates`     | 模板列表、详情、分类                                                          |
+| `/calendar`      | 月历、每日金句、日历更新占位接口                                              |
+| `/habits`        | 习惯列表、创建、切换、删除                                                    |
+| `/rhythm`        | 周/月节奏数据                                                                 |
+| `/badges`        | 成就与进度                                                                    |
+| `/circles`       | 动态列表/详情/发布、上传、点赞、收藏、评论、地点、话题、收藏列表              |
+| `/buddies`       | 推荐伙伴                                                                      |
+| `/notifications` | 列表、未读筛选、单条/全部已读、删除                                           |
+| `/settings`      | 当前用户设置读取与更新                                                        |
+| `/feedback`      | 登录用户提交意见反馈                                                          |
 
 后端目前并未完全统一 HTTP 状态码：部分业务失败仍返回 HTTP 200，并通过 `success: false` 表达失败。前端必须同时检查 HTTP 结果和业务 `success`。
 
@@ -353,6 +365,17 @@ npm run db:status
 
 `db:start/db:stop/db:status` 硬编码了 macOS PostgreSQL 18 安装路径，并要求 `sudo -u postgres`。其他系统或安装方式应改用本机 PostgreSQL 服务管理命令。
 
+数据库结构由 Sequelize migration 管理。已有历史数据库首次接入时执行：
+
+```bash
+cd server
+npm run db:baseline
+npm run db:migrate
+npm run db:verify
+```
+
+全新数据库不要执行 baseline，直接运行 `npm run db:migrate`。应用启动不再自动创建或修改表；`SEED_DEMO_DATA=true` 仅用于显式初始化演示社区数据。
+
 ## 11. 开发规范
 
 ### 11.1 分层与依赖方向
@@ -384,6 +407,7 @@ npm run db:status
 - 业务错误应使用正确的 4xx/5xx 状态码，并保持统一响应结构；
 - Schema 变更使用可回滚 migration；
 - 启动初始化必须幂等，不得清空用户业务数据；
+- 禁止恢复 `sequelize.sync()` 作为正式 Schema 演进手段；
 - 新增关联时明确外键使用整数 ID 还是 UUID；
 - 生产上传应迁移到对象存储，或至少补充配额、清理、备份和多实例策略。
 
@@ -409,66 +433,48 @@ node --check server/src/index.js
 
 ## 12. 当前实际验证状态
 
-以下结果来自 2026-07-16 对当前工作树的实际执行，不是历史文档结论。
+以下结果来自 2026-07-17 对当前工作树的实际执行，不是历史文档结论。
 
-| 检查                        | 结果 | 说明                                                                 |
-| --------------------------- | ---- | -------------------------------------------------------------------- |
-| `npx tsc --noEmit`          | 失败 | 4 个类型错误                                                         |
-| `npm run lint`              | 失败 | 2 个 error、25 个 warning                                            |
-| `npm test -- --runInBand`   | 失败 | `planUtils` 6 个测试通过；`App.test.tsx` 因 Expo 模块测试环境失败    |
-| `npm run format:check`      | 失败 | 至少 4 个原有跟踪文件格式不合规；分析产物也会被当前规则扫描          |
-| 后端关键文件 `node --check` | 通过 | `index.js`、circle controller、database、initDatabase 均通过语法检查 |
-| `npm run web:build`         | 失败 | Webpack 报 34 个错误，涉及字体、Expo/RN 包转译和 ESM 解析            |
+| 检查                         | 结果 | 说明                                                           |
+| ---------------------------- | ---- | -------------------------------------------------------------- |
+| `npx tsc --noEmit`           | 通过 | 当前 TypeScript 工程无错误                                     |
+| `npm run lint`               | 通过 | 0 error、13 个非阻断 warning                                   |
+| `npm test -- --runInBand`    | 通过 | 2 suites、7 tests                                              |
+| `cd server && npm test`      | 通过 | 连续日期、日期与打卡类型校验 4 tests                           |
+| 后端全部 JS `node --check`   | 通过 | 新增 migration、脚本、Model、路由均通过                        |
+| `npm run web:build`          | 通过 | bundle 约 1.41 MiB，仅保留体积 warning                         |
+| `npm run db:migrate:status`  | 通过 | 10 条 migration 均为 `up`                                      |
+| `npm run db:verify`          | 通过 | 字段、CHECK、索引、UNIQUE、孤儿记录和行数均正常                |
+| 空 PostgreSQL 全量 migration | 通过 | 隔离库从零执行 10 条 migration，`db:verify` 通过并已删除测试库 |
+| `npm run test:api`           | 通过 | 设置、反馈、排序、打卡、统计、退出失效均通过且测试数据已清理   |
 
-当前 TypeScript 错误：
-
-1. `__tests__/planUtils.test.ts` 的 Plan 测试对象缺少必填字段；
-2. `src/api/mappers/circle.mapper.ts` 映射 Comment 时缺少 `userId`；
-3. `src/hooks/useNotificationPolling.ts` 使用了当前类型环境不存在的 `NodeJS.Timeout`；
-4. `NotificationsScreen.tsx` 使用了主题中不存在的 `Colors.warning`。
+数据库当前数据量为 users 11、plans 12、plan_check_ins 19、habits 1、notifications 35、templates 6、circle_moments 8、likes 5、collects 4、comments 18、user_settings 0、feedbacks 0。迁移前后原业务表行数未减少。
 
 ## 13. 已知问题与解决方案
 
-### P0：可能造成数据错误或数据丢失
+### 已在本轮解决
 
-#### 13.1 服务每次启动都会清空徽章记录
+- 服务启动不再清空 `badges`；
+- 服务启动不再执行 `sequelize.sync()` 或手写 ALTER；
+- `users` 表 93 个重复 UNIQUE 已精简为 2 个；
+- 19 条历史打卡已迁移到 `plan_check_ins`；
+- 连续打卡统计已改为真正的当前连续日期；
+- 数值打卡和文字日记已贯通前端输入、API 和数据库；
+- 计划编辑不再接受或重建打卡日期，数值/日记明细在编辑后保持不变；
+- 日历可展示选中日期的数值/日记摘要，并可编辑当天明细；
+- 用户设置已由 `user_settings` 跨设备持久化；提醒开关会重建/取消本地通知，勿扰时段会抑制前台通知并将定时提醒延后到勿扰结束，字号由全局 `AppText` 按设置缩放；
+- “清除所有数据”已改为后端事务删除，保留账号但清理业务数据、本地提醒并安全退出；
+- 计划拖动顺序已由 `sortOrder` 和批量事务接口跨设备持久化；
+- 意见反馈已真实写入 `feedbacks`，未接入短信前不再展示伪手机号绑定成功；
+- 退出登录会递增 `tokenVersion`，旧 JWT 和 WebSocket 握手立即失效；
+- 登录/注册已增加进程内 IP/账号限流，匿名 `/auth/user?id=` 内部 ID 枚举接口已删除；
+- 401 会统一清理 SecureStore、AuthContext 和 WebSocket 状态；
+- CI 已加入 PostgreSQL 空库 migration、结构验证和安全 API 冒烟；
+- TypeScript、测试、lint 和 Web 构建阻断项已修复。
 
-位置：`server/src/utils/initDatabase.js` 的 `ensureBadgesTableMigration()`。
+### P1：核心数据语义和上线安全
 
-当前逻辑在完成字段兼容后无条件执行：
-
-```sql
-DELETE FROM badges;
-```
-
-影响：服务重启会丢失所有用户已持久化的徽章解锁记录，之后只能依赖实时统计重新推导，`unlockedAt` 等历史信息无法可靠保留。
-
-解决方案：
-
-1. 立即移除启动时无条件删除；
-2. 把旧结构转换写成一次性、可追踪的 Sequelize migration；
-3. 对已有记录做字段映射或补齐，而不是全表清空；
-4. 增加“重启服务后徽章记录不变”的集成测试。
-
-#### 13.2 连续打卡统计实际是“不同打卡日期总数”
-
-位置：`server/src/data/database.js#getUserStatsByUserId()`。
-
-`streakDays` 当前等于 `uniqueCheckInDates.length`，没有检查日期是否连续；但成就规则将它用于“连续 3/7/14/30 天”判断。
-
-影响：非连续打卡也可能提前解锁连续成就。
-
-解决方案：提取一份服务端可复用的连续日期算法，按今天/昨天和连续日期计算当前 streak；为跨月、跨年、断档和重复日期补测试。
-
-### P1：阻塞构建、质量门禁或核心体验
-
-#### 13.3 当前 TypeScript、lint、完整测试均未通过
-
-影响：历史优化文档声称质量门禁已完成，但当前 CI 的 format/lint 阶段会失败，本地完整测试也失败。
-
-解决方案：先修复第 12 节列出的 4 个类型问题和 2 个 lint error；为 Expo 原生模块增加 Jest mock/setup，再恢复 `App.test.tsx`。
-
-#### 13.4 日历 PATCH 接口不持久化
+#### 13.1 日历 PATCH 接口不持久化
 
 位置：`PATCH /api/calendar`。
 
@@ -479,44 +485,28 @@ DELETE FROM badges;
 - 如果日历只能反映计划打卡，删除该写接口和前端 `updateDayActivity`；
 - 如果允许独立日历事件，新增 CalendarEvent 模型、migration、所有权校验和 CRUD。
 
-#### 13.5 Web 构建不可用
+#### 13.2 Habit 完成状态不是按日记录
 
-`npm run web:build` 当前出现 34 个错误，主要包括：
+`habits.completed` 是永久布尔值，无法表示“某个习惯在某天是否完成”，也不能计算连续习惯天数。
 
-- `@expo/vector-icons` 字体没有 loader；
-- 多个 Expo/RN 包被 `exclude: /node_modules/` 排除在 Babel 转译之外；
-- Flow/TypeScript/JSX 语法无法解析；
-- React Navigation ESM fully-specified 解析失败；
-- Webpack Babel loose 选项冲突。
+解决方案：新增 `habit_check_ins(habitId, checkInDate)` 和复合唯一约束；Habit 表保留定义信息，日历状态从每日记录派生。
 
-此外 `webpack-dev-server` 和后端默认都使用 3000 端口；`index.web.js` 还按顶层 `app.json.name` 读取名称，而 Expo 配置实际位于 `expo.name`。
+#### 13.3 认证与生产配置仍不安全
 
-解决方案：优先决定 Web 是否为正式目标。若是，优先使用 Expo 官方 Web 工具链并删除重复 Webpack 配置；若必须保留 Webpack，则补齐 RN Web 转译白名单、字体 loader、ESM resolve 和独立端口，并验证 app 注册名。
+- 注册流程尚未接入短信供应商，不能证明手机号归属；
+- 当前限流为单进程内存实现，多实例部署时应迁移到 Redis/API 网关。
 
-#### 13.6 数据库变更机制混合
+解决方案：上线前接入服务端验证码和共享限流存储。生产环境目前已强制数据库配置、32 位以上 JWT 密钥和 `CORS_ORIGINS` 白名单。
 
-当前同时存在：
+#### 13.4 兼容打卡数组仍需最终下线
 
-- 一个只覆盖部分核心表的显式 migration；
-- `sequelize.sync()` 自动建表；
-- 启动时手写 `ALTER TABLE`；
-- 启动时 Seed。
+`plan_check_ins` 已是数据库事实源。通用计划创建/更新接口已忽略 `completedDate`，仅专用打卡接口为兼容旧客户端投影更新该数组。
 
-影响：不同环境可能获得不同 Schema，回滚和审计困难，生产启动还可能隐式改库。
-
-解决方案：为所有模型补齐 migration，把兼容修补转为一次性 migration；生产启动只做连接和 migration 状态校验，不执行自动 Schema 修改。
+解决方案：待所有客户端升级后运行一致性检查，再用独立 migration 删除数组字段；在此之前任何打卡写入必须继续通过统一数据访问方法，不能绕过双写。
 
 ### P2：容易形成隐性缺陷或维护成本
 
-#### 13.7 401 只清空内存 token，没有同步 AuthContext
-
-`apiClient` 收到 401 时设置模块内 `authToken = null`，但不会清理 SecureStore、Context 用户状态或导航栈。
-
-影响：UI 仍显示已登录，但所有后续请求不再携带 token。
-
-解决方案：提供统一 unauthorized 回调或事件，由 `AuthProvider` 执行完整 `logout` 和导航重置。
-
-#### 13.8 导航类型和真实参数不一致
+#### 13.5 导航类型和真实参数不一致
 
 - `CreatePlanScreen` 支持 `planId`，但公共 RootStack 类型只声明 `templateId`；
 - 多处使用 `as never` 或 `any` 绕过导航检查；
@@ -524,7 +514,7 @@ DELETE FROM badges;
 
 解决方案：合并并导出唯一导航类型；补上 `planId`；嵌套导航使用 `navigate('Main', { screen: 'Circles' })` 或直接进入 `CircleDetail`。
 
-#### 13.9 通知状态存在重复实现
+#### 13.6 通知状态存在重复实现
 
 项目同时存在：
 
@@ -537,38 +527,36 @@ DELETE FROM badges;
 
 解决方案：以 `NotificationContext` 为唯一全局状态入口；确认无调用后删除旧 Hook，或只保留向 Context 转发的兼容导出。
 
-#### 13.10 圈子 DTO Mapper 未接入且类型已漂移
+#### 13.7 圈子 DTO Mapper 未接入且类型已漂移
 
-`CircleMapper` 没有实际调用者，DTO 使用 snake_case，但当前后端直接返回前端领域结构；Mapper 中还存在缺少 `userId` 的编译错误。
+`CircleMapper` 没有实际调用者，DTO 使用 snake_case，但当前后端直接返回前端领域结构。为通过类型检查补齐的 `user_id` 仍不代表真实运行合同已经统一。
 
 解决方案：二选一：
 
 - 若后端合同保持当前结构，删除未使用 DTO/Mapper；
 - 若要建立明确 API 合同，统一由 API 层使用 Mapper，并为 DTO/领域转换补测试。
 
-#### 13.11 API 与进度文档已过期
+#### 13.8 API 与部分历史文档已过期
 
-`API_DOCS.md` 仍描述 `USE_MOCK` 和不存在的 `src/api/mock-server.ts`；`server/README.md` 仍偏向早期 Mock 数据结构；优化进度文档声称 lint/test 已全部通过，与当前验证不符。
+`API_DOCS.md` 仍描述 `USE_MOCK` 和不存在的 `src/api/mock-server.ts`；`server/README.md` 仍偏向早期 Mock 数据结构。当前状态以本文和 `SYSTEM_AUDIT_AND_ROADMAP.md` 为准。
 
 解决方案：以当前 route 和 API module 自动整理接口表；历史进度文档增加日期与 commit，避免把旧结论当成持续保证。
 
-#### 13.12 环境文件已被 Git 跟踪
+#### 13.10 环境文件已被 Git 跟踪
 
 `.gitignore` 现在忽略 `.env*`，但 `.env.development` 和 `.env.production` 已经是跟踪文件。它们当前主要是公开 API 地址，不等同于服务端秘密，但容易让团队误以为所有环境文件均未入库。
 
 解决方案：明确区分“可提交的公开客户端配置”和“本机/秘密配置”。推荐提交 `.env.example`，由本地或 CI 注入实际地址；任何密钥禁止使用 `EXPO_PUBLIC_`。
 
-#### 13.13 安全与生产化缺口
+#### 13.11 安全与生产化缺口
 
-- CORS 为 `*`；
-- 注册验证码固定为客户端 `0000`，并非真实验证；
-- 公开兼容用户接口会返回手机号；
+- 注册流程尚未验证手机号归属；当前登录/注册限流为单进程内存实现；
 - 数据库开发默认密码硬编码；
 - 本地上传没有完整配额、清理和对象存储策略；
 - 多个业务失败使用 HTTP 200；
-- 后端没有自动化测试或数据库集成测试。
+- 当前 API 冒烟依赖人工启动本机服务，CI 尚未配置隔离 PostgreSQL 集成测试。
 
-解决方案：上线前按信任边界逐项治理，至少完成 CORS 白名单、服务端验证码、敏感字段收敛、强制环境变量、上传限制、标准状态码和认证/所有权集成测试。
+解决方案：上线前继续完成服务端验证码、共享限流、上传限制、标准状态码和更广的所有权集成测试。CORS 白名单、生产秘密配置检查和内部 ID 枚举接口删除已完成。
 
 ## 14. 复杂度热点
 

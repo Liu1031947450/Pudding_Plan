@@ -1,5 +1,6 @@
 import React from 'react';
-import { Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { StyleSheet, TouchableOpacity } from 'react-native';
+import { AppText as Text } from '../../../components/common/AppText';
 import { Colors, Spacing, FontSize } from '../../../constants/theme';
 import { Card } from '../../../components/common/Card';
 import { Avatar } from '../../../components/common/Avatar';

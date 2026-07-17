@@ -6,7 +6,7 @@ import React, {
   ReactNode,
 } from 'react';
 import * as SecureStore from 'expo-secure-store';
-import { setAuthToken } from '../api';
+import { authApi, setAuthToken, setUnauthorizedHandler } from '../api';
 import { websocketService } from '../services/websocketService';
 
 export interface User {
@@ -81,6 +81,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     checkAuth();
   }, [checkAuth]);
 
+  React.useEffect(() => {
+    setUnauthorizedHandler(async () => {
+      websocketService.disconnect();
+      await clearAuth();
+      setUser(null);
+      setToken(null);
+    });
+    return () => setUnauthorizedHandler(null);
+  }, [clearAuth]);
+
   const login = async (tokenValue: string, userData: User) => {
     try {
       const expiryTime = Date.now() + 30 * 24 * 60 * 60 * 1000;
@@ -119,6 +129,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     try {
       // 断开WebSocket连接
       websocketService.disconnect();
+
+      await authApi.logout();
 
       await clearAuth();
       setUser(null);

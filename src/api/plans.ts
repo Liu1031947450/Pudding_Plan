@@ -1,6 +1,6 @@
 import { apiClient, type ApiResponse } from './client';
 import { API_ENDPOINTS } from './config';
-import type { Plan } from '../types/domain';
+import type { Plan, PlanCheckInDetails } from '../types/domain';
 
 export const plansApi = {
   // 获取所有计划（依赖 token 鉴权）
@@ -29,9 +29,12 @@ export const plansApi = {
     updates: Partial<Plan>,
   ): Promise<ApiResponse<Plan>> => {
     try {
+      const safeUpdates = { ...updates };
+      delete safeUpdates.completedDate;
+      delete safeUpdates.checkInRecords;
       const response = await apiClient.put<Plan>(
         API_ENDPOINTS.PLAN_DETAIL(id),
-        updates,
+        safeUpdates,
       );
       return response;
     } catch (error: any) {
@@ -51,11 +54,20 @@ export const plansApi = {
     }
   },
 
+  reorder: async (planIds: string[]): Promise<ApiResponse<boolean>> => {
+    return apiClient.put<boolean>(API_ENDPOINTS.PLAN_REORDER, { planIds });
+  },
+
   // 计划打卡（依赖 token 鉴权）
-  checkIn: async (id: string, date: string): Promise<ApiResponse<Plan>> => {
+  checkIn: async (
+    id: string,
+    date: string,
+    details?: PlanCheckInDetails,
+  ): Promise<ApiResponse<Plan>> => {
     try {
       const response = await apiClient.post<Plan>(
-        `${API_ENDPOINTS.PLAN_CHECK_IN(id)}?date=${date}`,
+        `${API_ENDPOINTS.PLAN_CHECK_IN(id)}?date=${encodeURIComponent(date)}`,
+        details,
       );
       return response;
     } catch (error: any) {

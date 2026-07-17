@@ -1,17 +1,24 @@
 import React, { useState } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   ScrollView,
   Animated,
   ActivityIndicator,
   RefreshControl,
+  TextInput,
 } from 'react-native';
+import { AppText as Text } from '../components/common/AppText';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Colors, Spacing } from '../constants/theme';
-import { BottomNavBar, TopAppBar, Toast } from '../components';
+import {
+  BottomDrawer,
+  BottomNavBar,
+  Button,
+  TopAppBar,
+  Toast,
+} from '../components';
 import {
   CalendarHeader,
   CalendarGrid,
@@ -20,7 +27,7 @@ import {
   NotificationDrawer,
 } from '../features/calendar';
 import { useNotifications } from '../contexts';
-import type { DayData } from '../types/domain';
+import type { DayData, Plan, PlanCheckInDetails } from '../types/domain';
 import { usePlanManagement } from '../hooks';
 import { useAuth } from '../contexts/AuthContext';
 import { calendarApi } from '../api/calendar';
@@ -43,6 +50,10 @@ const CalendarScreen: React.FC = () => {
   const [toastType, setToastType] = useState<'success' | 'error' | 'info'>(
     'success',
   );
+  const [checkInPlan, setCheckInPlan] = useState<Plan | null>(null);
+  const [numericValue, setNumericValue] = useState('');
+  const [note, setNote] = useState('');
+  const [checkInSubmitting, setCheckInSubmitting] = useState(false);
   const { plans, refreshPlans, handleCheckIn } = usePlanManagement();
 
   // 盖章动画状态
@@ -149,7 +160,7 @@ const CalendarScreen: React.FC = () => {
     }
   }, [currentUserId, fetchCalendarData, refreshPlans, refreshNotifications]);
 
-  const onCheckIn = async (planId: string) => {
+  const submitCheckIn = async (plan: Plan, details?: PlanCheckInDetails) => {
     if (!currentUserId) {
       setToastMessage('请先登录后再打卡');
       setToastType('error');
@@ -162,15 +173,13 @@ const CalendarScreen: React.FC = () => {
         2,
         '0',
       )}-${String(selectedDay).padStart(2, '0')}`;
-      const result = await handleCheckIn(
-        planId,
-        selectedDateStr,
-        currentUserId,
-      );
+      setCheckInSubmitting(true);
+      const result = await handleCheckIn(plan.id, selectedDateStr, details);
       if (result.success) {
         playStampAnimation();
-        fetchCalendarData(true);
-        setToastMessage('打卡成功');
+        await fetchCalendarData(true);
+        setCheckInPlan(null);
+        setToastMessage(result.message || '打卡成功');
         setToastType('success');
       } else {
         setToastMessage(result.error || '打卡失败，请重试');
@@ -180,8 +189,63 @@ const CalendarScreen: React.FC = () => {
       setToastMessage('打卡失败，请重试');
       setToastType('error');
     } finally {
+      setCheckInSubmitting(false);
       setToastVisible(true);
     }
+  };
+
+  const onCheckIn = async (planId: string) => {
+    const plan = plans.find(item => item.id === planId);
+    if (!plan) return;
+
+    if (plan.type === 0) {
+      await submitCheckIn(plan);
+      return;
+    }
+
+    const selectedDate = `${year}-${String(month).padStart(2, '0')}-${String(
+      selectedDay,
+    ).padStart(2, '0')}`;
+    const existing = plan.checkInRecords?.find(
+      record => record.date === selectedDate,
+    );
+    setNumericValue(
+      existing?.numericValue === null || existing?.numericValue === undefined
+        ? ''
+        : String(existing.numericValue),
+    );
+    setNote(existing?.note || '');
+    setCheckInPlan(plan);
+  };
+
+  const handleDetailedCheckIn = async () => {
+    if (!checkInPlan) return;
+
+    if (checkInPlan.type === 1) {
+      const value = Number(numericValue);
+      if (
+        numericValue.trim() === '' ||
+        !Number.isFinite(value) ||
+        value < 0 ||
+        value > 9999999999.99
+      ) {
+        setToastMessage('请输入有效的非负数值');
+        setToastType('error');
+        setToastVisible(true);
+        return;
+      }
+      await submitCheckIn(checkInPlan, { numericValue: value });
+      return;
+    }
+
+    const trimmedNote = note.trim();
+    if (!trimmedNote) {
+      setToastMessage('请写下本次打卡内容');
+      setToastType('error');
+      setToastVisible(true);
+      return;
+    }
+    await submitCheckIn(checkInPlan, { note: trimmedNote });
   };
 
   const getActivityColor = (type?: string) => {
@@ -289,6 +353,46 @@ const CalendarScreen: React.FC = () => {
         navigation={navigation}
       />
 
+      <BottomDrawer
+        visible={checkInPlan !== null}
+        onClose={() => setCheckInPlan(null)}
+        title={checkInPlan?.type === 1 ? '记录本次数值' : '写下打卡日记'}
+        height="auto"
+      >
+        <View style={styles.checkInDrawerContent}>
+          <Text style={styles.checkInPlanTitle}>{checkInPlan?.title}</Text>
+          {checkInPlan?.type === 1 ? (
+            <TextInput
+              value={numericValue}
+              onChangeText={setNumericValue}
+              placeholder="例如：30"
+              placeholderTextColor={Colors.outline}
+              keyboardType="decimal-pad"
+              style={styles.checkInInput}
+              autoFocus
+            />
+          ) : (
+            <TextInput
+              value={note}
+              onChangeText={setNote}
+              placeholder="记录今天的感受或收获..."
+              placeholderTextColor={Colors.outline}
+              multiline
+              maxLength={5000}
+              style={[styles.checkInInput, styles.checkInNoteInput]}
+              textAlignVertical="top"
+              autoFocus
+            />
+          )}
+          <Button
+            title="完成打卡"
+            onPress={handleDetailedCheckIn}
+            loading={checkInSubmitting}
+            disabled={checkInSubmitting}
+          />
+        </View>
+      </BottomDrawer>
+
       <Toast
         visible={toastVisible}
         message={toastMessage}
@@ -352,6 +456,28 @@ const styles = StyleSheet.create({
     color: '#4CAF50',
     letterSpacing: 4,
     fontStyle: 'italic',
+  },
+  checkInDrawerContent: {
+    padding: Spacing.lg,
+    gap: Spacing.md,
+  },
+  checkInPlanTitle: {
+    color: Colors.onSurface,
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  checkInInput: {
+    minHeight: 52,
+    borderWidth: 1,
+    borderColor: Colors.outlineVariant,
+    borderRadius: 12,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    color: Colors.onSurface,
+    backgroundColor: Colors.surfaceContainerLowest,
+  },
+  checkInNoteInput: {
+    minHeight: 140,
   },
 });
 

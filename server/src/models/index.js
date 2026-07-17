@@ -9,10 +9,20 @@ const Like = require('./Like');
 const Collect = require('./Collect');
 const Friendship = require('./Friendship');
 const Comment = require('./Comment');
+const PlanCheckIn = require('./PlanCheckIn');
+const UserSetting = require('./UserSetting');
+const Feedback = require('./Feedback');
 
 // 定义关联关系
 User.hasMany(Plan, { foreignKey: 'userId', as: 'plans' });
 Plan.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
+Plan.hasMany(PlanCheckIn, {
+  foreignKey: 'planId',
+  as: 'checkIns',
+  onDelete: 'CASCADE',
+});
+PlanCheckIn.belongsTo(Plan, { foreignKey: 'planId', as: 'plan' });
 
 User.hasMany(Habit, { foreignKey: 'userId', as: 'habits' });
 Habit.belongsTo(User, { foreignKey: 'userId', as: 'user' });
@@ -24,6 +34,12 @@ Notification.belongsTo(User, { foreignKey: 'senderId', as: 'sender' });
 
 User.hasMany(Badge, { foreignKey: 'userId', as: 'badges' });
 Badge.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
+User.hasOne(UserSetting, { foreignKey: 'userId', as: 'settings' });
+UserSetting.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
+User.hasMany(Feedback, { foreignKey: 'userId', as: 'feedbacks' });
+Feedback.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
 User.hasMany(CircleMoment, { foreignKey: 'authorId', as: 'circleMoments' });
 CircleMoment.belongsTo(User, { foreignKey: 'authorId', as: 'author' });
@@ -79,4 +95,7 @@ module.exports = {
   Collect,
   Friendship,
   Comment,
+  PlanCheckIn,
+  UserSetting,
+  Feedback,
 };

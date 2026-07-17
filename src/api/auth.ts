@@ -66,6 +66,14 @@ export const authApi = {
     }
   },
 
+  logout: async (): Promise<ApiResponse<void>> => {
+    return apiClient.post<void>('/auth/logout');
+  },
+
+  clearData: async (): Promise<ApiResponse<void>> => {
+    return apiClient.delete<void>('/auth/data');
+  },
+
   // 获取当前用户信息
   getCurrentUser: async (): Promise<ApiResponse<User>> => {
     try {
@@ -95,17 +103,6 @@ export const authApi = {
       return await apiClient.get<UserStats>('/auth/stats');
     } catch (error: any) {
       return { success: false, error: error.message || '获取用户统计失败' };
-    }
-  },
-
-  // 兼容旧接口：根据ID获取用户信息
-  getUserInfo: async (id: string): Promise<ApiResponse<User>> => {
-    try {
-      return await apiClient.get<User>(`/auth/user?id=${id}`, {
-        skipAuth: true,
-      });
-    } catch (error: any) {
-      return { success: false, error: error.message || '获取用户信息失败' };
     }
   },
 };

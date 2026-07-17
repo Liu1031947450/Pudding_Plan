@@ -2,9 +2,9 @@ name: Pudding Plan CI/CD Quality Gate
 
 on:
   push:
-    branches: [ main, dev ]
+    branches: [main, dev]
   pull_request:
-    branches: [ main, dev ]
+    branches: [main, dev]
 
 jobs:
   frontend-validation:
@@ -29,12 +29,44 @@ jobs:
       - name: ESLint Code Quality Check
         run: npm run lint
 
+      - name: TypeScript Type Check
+        run: npx tsc --noEmit
+
       - name: Run Jest Unit Tests
-        run: npm run test -- __tests__/planUtils.test.ts
+        run: npm test -- --runInBand
+
+      - name: Build Web App
+        run: npm run web:build
 
   backend-validation:
     name: Backend Quality Gate
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: pudding_plan_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      NODE_ENV: test
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_NAME: pudding_plan_test
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      JWT_SECRET: ci-only-jwt-secret
+      PORT: 3001
+      API_BASE_URL: http://127.0.0.1:3001/api
+      ALLOW_DESTRUCTIVE_SMOKE: 'true'
+      SEED_DEMO_DATA: 'false'
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -47,11 +79,37 @@ jobs:
           cache-dependency-path: server/package-lock.json
 
       - name: Install Backend Dependencies
-        run: |
-          cd server
-          npm ci
+        working-directory: server
+        run: npm ci
 
-      - name: Verify Backend Builds / Syntax
+      - name: Run Backend Unit Tests
+        working-directory: server
+        run: npm test
+
+      - name: Verify Backend Syntax
+        working-directory: server
         run: |
-          cd server
-          node --check src/index.js
+          find src migrations scripts -name '*.js' -print0 | xargs -0 -n1 node --check
+
+      - name: Migrate Empty Database
+        working-directory: server
+        run: npm run db:migrate
+
+      - name: Verify Database Schema
+        working-directory: server
+        run: npm run db:verify
+
+      - name: Start Backend
+        working-directory: server
+        run: |
+          npm start > /tmp/pudding-plan-server.log 2>&1 &
+          for attempt in {1..20}; do
+            curl --fail --silent http://127.0.0.1:3001/ && exit 0
+            sleep 1
+          done
+          cat /tmp/pudding-plan-server.log
+          exit 1
+
+      - name: Run API Smoke Test
+        working-directory: server
+        run: npm run test:api

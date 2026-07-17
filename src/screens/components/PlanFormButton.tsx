@@ -1,12 +1,12 @@
 import React, { useRef } from 'react';
 import {
   TouchableOpacity,
-  Text,
   StyleSheet,
   ActivityIndicator,
   Animated,
   ViewStyle,
 } from 'react-native';
+import { AppText as Text } from '../../components/common/AppText';
 import { Colors, Spacing, FontSize, BorderRadius } from '../../constants/theme';
 
 interface PlanFormButtonProps {

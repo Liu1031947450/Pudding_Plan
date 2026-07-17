@@ -6,12 +6,13 @@ const http = require('http');
 const { Server } = require('socket.io');
 const { setIO, connectedUsers } = require('./utils/socketManager');
 const initDatabase = require('./utils/initDatabase');
+const { expressOrigin, socketOrigin } = require('./config/cors');
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: '*',
+    origin: socketOrigin,
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   },
@@ -35,7 +36,10 @@ const notificationsRoutes = require('./routes/notifications');
 const badgesRoutes = require('./routes/badges');
 const rhythmRoutes = require('./routes/rhythm');
 const authRoutes = require('./routes/auth');
+const settingsRoutes = require('./routes/settings');
+const feedbackRoutes = require('./routes/feedback');
 const { verifyToken } = require('./middleware/auth');
+const { User } = require('./models');
 
 const PORT = process.env.PORT || 3000;
 
@@ -43,7 +47,7 @@ const path = require('path');
 
 app.use(
   cors({
-    origin: '*',
+    origin: expressOrigin,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   }),
@@ -73,10 +77,12 @@ app.use('/api/habits', habitsRoutes);
 app.use('/api/notifications', notificationsRoutes);
 app.use('/api/badges', badgesRoutes);
 app.use('/api/rhythm', rhythmRoutes);
+app.use('/api/settings', settingsRoutes);
+app.use('/api/feedback', feedbackRoutes);
 
 // WebSocket连接管理（connectedUsers 来自 socketManager）
 
-io.use((socket, next) => {
+io.use(async (socket, next) => {
   const token = socket.handshake.auth.token;
   if (!token) {
     return next(new Error('未提供认证token'));
@@ -84,6 +90,10 @@ io.use((socket, next) => {
 
   try {
     const decoded = verifyToken(token);
+    const user = await User.findOne({ where: { userId: decoded.userId } });
+    if (!user || user.tokenVersion !== Number(decoded.tokenVersion || 0)) {
+      return next(new Error('token已失效'));
+    }
     socket.userId = decoded.userId;
     next();
   } catch (error) {

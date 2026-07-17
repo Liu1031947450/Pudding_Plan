@@ -37,6 +37,12 @@ const User = sequelize.define(
       type: DataTypes.STRING(200),
       allowNull: true,
     },
+    tokenVersion: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+      validate: { min: 0 },
+    },
     createdAt: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,

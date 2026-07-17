@@ -1,7 +1,6 @@
 import React, { useRef } from 'react';
 import {
   TouchableOpacity,
-  Text,
   StyleSheet,
   ViewStyle,
   TextStyle,
@@ -9,6 +8,7 @@ import {
   Animated,
   StyleProp,
 } from 'react-native';
+import { AppText as Text } from './AppText';
 import { Colors, Spacing, FontSize, BorderRadius } from '../../constants/theme';
 
 interface ButtonProps {

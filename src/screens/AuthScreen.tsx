@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   TextInput,
   TouchableOpacity,
@@ -10,6 +9,7 @@ import {
   Platform,
   ActivityIndicator,
 } from 'react-native';
+import { AppText as Text } from '../components/common/AppText';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -26,8 +26,6 @@ const AuthScreen: React.FC = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [name, setName] = useState('');
-  const [verificationCode, setVerificationCode] = useState('');
-  const [countdown, setCountdown] = useState(0);
   const [loading, setLoading] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
@@ -44,33 +42,7 @@ const AuthScreen: React.FC = () => {
     setToastVisible(true);
   };
 
-  const startCountdown = () => {
-    setCountdown(60);
-    const timer = setInterval(() => {
-      setCountdown(prev => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  };
-
-  const handleGetVerificationCode = () => {
-    if (!phone || phone.length !== 11) {
-      return;
-    }
-    console.log('发送验证码到手机号:', phone);
-    startCountdown();
-  };
-
   const handleSubmit = async () => {
-    if (!isLogin && verificationCode !== '0000') {
-      showToast('验证码错误，请输入0000', 'error');
-      return;
-    }
-
     if (!phone || phone.length !== 11) {
       showToast('请输入正确的手机号', 'error');
       return;
@@ -84,6 +56,14 @@ const AuthScreen: React.FC = () => {
     if (!isLogin) {
       if (!name) {
         showToast('请输入用户名', 'error');
+        return;
+      }
+      if (
+        password.length < 8 ||
+        !/[A-Za-z]/.test(password) ||
+        !/\d/.test(password)
+      ) {
+        showToast('密码至少8位，且必须同时包含字母和数字', 'error');
         return;
       }
       if (password !== confirmPassword) {
@@ -121,7 +101,6 @@ const AuthScreen: React.FC = () => {
           setIsLogin(true);
           setPassword('');
           setConfirmPassword('');
-          setVerificationCode('');
         } else {
           // 检查是否是手机号已注册的错误
           if (
@@ -132,7 +111,6 @@ const AuthScreen: React.FC = () => {
             setIsLogin(true);
             setPassword('');
             setConfirmPassword('');
-            setVerificationCode('');
           } else {
             showToast(response.error || '注册失败，请重试', 'error');
           }
@@ -210,47 +188,6 @@ const AuthScreen: React.FC = () => {
                 />
               </View>
             </View>
-
-            {!isLogin && (
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>验证码</Text>
-                <View style={styles.verificationCodeContainer}>
-                  <View
-                    style={[styles.inputWrapper, styles.verificationCodeInput]}
-                  >
-                    <TextInput
-                      style={styles.input}
-                      placeholder="请输入验证码"
-                      placeholderTextColor={Colors.outlineVariant}
-                      keyboardType="number-pad"
-                      maxLength={4}
-                      value={verificationCode}
-                      onChangeText={setVerificationCode}
-                    />
-                  </View>
-                  <TouchableOpacity
-                    style={[
-                      styles.getCodeButton,
-                      countdown > 0 && styles.getCodeButtonDisabled,
-                    ]}
-                    onPress={handleGetVerificationCode}
-                    disabled={countdown > 0}
-                  >
-                    <Text
-                      style={[
-                        styles.getCodeButtonText,
-                        countdown > 0 && styles.getCodeButtonTextDisabled,
-                      ]}
-                    >
-                      {countdown > 0 ? `${countdown}s` : '获取验证码'}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-                <Text style={styles.verificationCodeHint}>
-                  提示：请输入验证码 0000
-                </Text>
-              </View>
-            )}
 
             <View style={styles.inputGroup}>
               <Text style={styles.label}>密码</Text>
@@ -415,38 +352,6 @@ const styles = StyleSheet.create({
     fontSize: FontSize.sm,
     color: Colors.primary,
     fontWeight: '500',
-  },
-  verificationCodeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-  },
-  verificationCodeInput: {
-    flex: 1,
-  },
-  getCodeButton: {
-    backgroundColor: Colors.primaryContainer,
-    borderRadius: BorderRadius.md,
-    paddingHorizontal: Spacing.md,
-    height: 56,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  getCodeButtonDisabled: {
-    backgroundColor: Colors.surfaceContainerHigh,
-  },
-  getCodeButtonText: {
-    fontSize: FontSize.sm,
-    fontWeight: '600',
-    color: Colors.onPrimaryContainer,
-  },
-  getCodeButtonTextDisabled: {
-    color: Colors.onSurfaceVariant,
-  },
-  verificationCodeHint: {
-    fontSize: FontSize.xs,
-    color: Colors.onSurfaceVariant,
-    marginTop: Spacing.xs,
   },
 });
 

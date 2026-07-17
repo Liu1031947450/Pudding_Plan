@@ -1,6 +1,15 @@
 require('dotenv').config();
 const { Sequelize } = require('sequelize');
 
+if (
+  process.env.NODE_ENV === 'production' &&
+  ['DB_HOST', 'DB_NAME', 'DB_USER', 'DB_PASSWORD'].some(
+    key => !process.env[key],
+  )
+) {
+  throw new Error('生产环境数据库配置不完整');
+}
+
 // 数据库配置
 const sequelize = new Sequelize({
   dialect: 'postgres',

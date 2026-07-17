@@ -19,6 +19,7 @@ interface RequestOptions {
 
 // Token storage
 let authToken: string | null = null;
+let unauthorizedHandler: (() => void | Promise<void>) | null = null;
 
 export function setAuthToken(token: string | null) {
   authToken = token;
@@ -26,6 +27,12 @@ export function setAuthToken(token: string | null) {
 
 export function getAuthToken(): string | null {
   return authToken;
+}
+
+export function setUnauthorizedHandler(
+  handler: (() => void | Promise<void>) | null,
+) {
+  unauthorizedHandler = handler;
 }
 
 // API Client
@@ -89,8 +96,9 @@ class ApiClient {
       }
 
       if (!response.ok) {
-        if (response.status === 401) {
+        if (response.status === 401 && !skipAuth) {
           authToken = null;
+          await unauthorizedHandler?.();
         }
         return {
           success: false,

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   SafeAreaView,
   FlatList,
@@ -9,6 +8,7 @@ import {
   Image,
   RefreshControl,
 } from 'react-native';
+import { AppText as Text } from '../components/common/AppText';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize } from '../constants/theme';
 import { TopAppBar } from '../components/layout/TopAppBar';
@@ -77,7 +77,7 @@ const NotificationsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       case 'reply':
         return { name: 'chat-bubble', color: Colors.primary };
       case 'achievement':
-        return { name: 'stars', color: Colors.warning };
+        return { name: 'stars', color: Colors.primary };
       case 'system':
       default:
         return { name: 'notifications', color: Colors.onSurfaceVariant };

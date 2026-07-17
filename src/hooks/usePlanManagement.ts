@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import type { Plan } from '../types/domain';
+import type { Plan, PlanCheckInDetails } from '../types/domain';
 import { planService } from '../services/planService';
 import type { ApiResponse } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
@@ -121,13 +121,13 @@ export const usePlanManagement = () => {
     async (
       id: string,
       date: string,
-      userId?: string,
+      details?: PlanCheckInDetails,
     ): Promise<ApiResponse<Plan>> => {
-      if (!userId && !currentUserId) {
+      if (!currentUserId) {
         return { success: false, error: '当前用户未登录' };
       }
 
-      const response = await planService.checkInPlan(id, date);
+      const response = await planService.checkInPlan(id, date, details);
       if (response.success) {
         await loadPlans(currentUserId);
       }
@@ -136,9 +136,19 @@ export const usePlanManagement = () => {
     [currentUserId, loadPlans],
   );
 
-  const handleReorderPlans = useCallback((newOrder: Plan[]) => {
-    setPlans(newOrder);
-  }, []);
+  const handleReorderPlans = useCallback(
+    async (newOrder: Plan[]) => {
+      setPlans(newOrder);
+      const response = await planService.reorderPlans(
+        newOrder.map(plan => plan.id),
+      );
+      if (!response.success) {
+        await loadPlans(currentUserId, true);
+      }
+      return response;
+    },
+    [currentUserId, loadPlans],
+  );
 
   const toggleManageMode = useCallback(() => {
     setIsManaging(prev => !prev);

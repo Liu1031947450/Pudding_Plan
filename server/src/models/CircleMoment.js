@@ -46,11 +46,13 @@ const CircleMoment = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 0,
+      validate: { min: 0 },
     },
     commentsCount: {
       type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 0,
+      validate: { min: 0 },
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -64,6 +66,11 @@ const CircleMoment = sequelize.define(
   {
     tableName: 'circle_moments',
     timestamps: true,
+    indexes: [
+      { fields: ['authorId', 'createdAt'] },
+      { fields: ['createdAt'] },
+      { fields: ['category'] },
+    ],
   },
 );
 

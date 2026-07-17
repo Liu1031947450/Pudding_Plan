@@ -10,6 +10,7 @@ module.exports = {
   resolve: {
     alias: {
       'react-native$': 'react-native-web',
+      'expo-notifications$': false,
     },
     extensions: [
       '.web.js',
@@ -26,21 +27,25 @@ module.exports = {
   module: {
     rules: [
       {
+        test: /\.m?js$/,
+        resolve: {
+          fullySpecified: false,
+        },
+      },
+      {
         test: /\.(js|jsx|ts|tsx)$/,
-        exclude: /node_modules/,
+        exclude:
+          /node_modules\/(?!(?:@expo|expo[^/]*|@react-native|react-native|@react-navigation|react-navigation|@react-native-community|react-native-svg|react-native-chart-kit)\/)/,
         use: {
           loader: 'babel-loader',
-          options: {
-            presets: [
-              '@babel/preset-env',
-              '@babel/preset-react',
-              '@babel/preset-typescript',
-            ],
-          },
         },
       },
       {
         test: /\.(png|jpe?g|gif|svg)$/i,
+        type: 'asset/resource',
+      },
+      {
+        test: /\.(ttf|woff2?)$/i,
         type: 'asset/resource',
       },
     ],
@@ -55,7 +60,7 @@ module.exports = {
       directory: path.join(__dirname, 'public'),
     },
     compress: true,
-    port: 3000,
+    port: 8080,
     hot: true,
     historyApiFallback: true,
   },

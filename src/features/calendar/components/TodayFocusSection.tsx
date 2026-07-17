@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { AppText as Text } from '../../../components/common/AppText';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize } from '../../../constants/theme';
 import { Card } from '../../../components/common/Card';
@@ -50,10 +51,33 @@ export const TodayFocusSection: React.FC<TodayFocusSectionProps> = ({
           const isCompleted = selectedDayObj?.completedPlanIds
             ? selectedDayObj.completedPlanIds.includes(plan.id)
             : false;
+          const selectedDate = `${year}-${String(month).padStart(
+            2,
+            '0',
+          )}-${String(selectedDay).padStart(2, '0')}`;
+          const record = plan.checkInRecords?.find(
+            item => item.date === selectedDate,
+          );
+          const recordSummary =
+            record?.numericValue !== null && record?.numericValue !== undefined
+              ? `已记录：${record.numericValue}`
+              : record?.note
+              ? `记录：${record.note}`
+              : null;
 
-          let buttonTitle = '点击盖章';
+          let buttonTitle =
+            plan.type === 1
+              ? '记录数值'
+              : plan.type === 2
+              ? '写下日记'
+              : '点击盖章';
           if (isCompleted) {
-            buttonTitle = '已盖章';
+            buttonTitle =
+              isTodaySelected && plan.type === 1
+                ? '编辑数值'
+                : isTodaySelected && plan.type === 2
+                ? '编辑日记'
+                : '已完成';
           } else if (!isTodaySelected) {
             buttonTitle = '非今日';
           }
@@ -83,8 +107,11 @@ export const TodayFocusSection: React.FC<TodayFocusSectionProps> = ({
                 </View>
                 <View style={styles.habitInfo}>
                   <Text style={styles.habitTitle}>{plan.title}</Text>
-                  <Text style={styles.habitSubtitle}>
-                    {plan.totalDays ? `目标: ${plan.totalDays}天` : '通用计划'}
+                  <Text style={styles.habitSubtitle} numberOfLines={1}>
+                    {recordSummary ||
+                      (plan.totalDays
+                        ? `目标: ${plan.totalDays}天`
+                        : '通用计划')}
                   </Text>
                 </View>
               </View>
@@ -99,7 +126,7 @@ export const TodayFocusSection: React.FC<TodayFocusSectionProps> = ({
                     : 'outline'
                 }
                 size="small"
-                disabled={isCompleted || !isTodaySelected}
+                disabled={!isTodaySelected || (isCompleted && plan.type === 0)}
               />
             </Card>
           );

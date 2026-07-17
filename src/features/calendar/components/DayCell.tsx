@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { AppText as Text } from '../../../components/common/AppText';
 import { Colors, FontSize } from '../../../constants/theme';
 import type { DayData } from '../../../types/domain';
 

@@ -27,6 +27,7 @@ const Plan = sequelize.define(
     },
     completedDate: {
       type: DataTypes.ARRAY(DataTypes.DATEONLY),
+      allowNull: false,
       defaultValue: [],
     },
     type: {
@@ -39,10 +40,12 @@ const Plan = sequelize.define(
     },
     remindSetting: {
       type: DataTypes.JSONB,
+      allowNull: false,
       defaultValue: [],
     },
     rewords: {
       type: DataTypes.JSONB,
+      allowNull: false,
       defaultValue: [],
     },
     icon: {
@@ -52,6 +55,12 @@ const Plan = sequelize.define(
     color: {
       type: DataTypes.STRING(20),
       allowNull: true,
+    },
+    sortOrder: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+      validate: { min: 0 },
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -65,6 +74,7 @@ const Plan = sequelize.define(
   {
     tableName: 'plans',
     timestamps: true,
+    indexes: [{ fields: ['userId'] }, { fields: ['userId', 'sortOrder'] }],
   },
 );
 

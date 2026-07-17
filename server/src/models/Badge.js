@@ -42,6 +42,7 @@ const Badge = sequelize.define(
   {
     tableName: 'badges',
     timestamps: true,
+    indexes: [{ unique: true, fields: ['userId', 'badgeKey'] }],
   },
 );
 

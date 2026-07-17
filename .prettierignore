@@ -4,6 +4,7 @@ vendor
 dist
 build
 coverage
+.understand-anything
 android
 ios
 *.log

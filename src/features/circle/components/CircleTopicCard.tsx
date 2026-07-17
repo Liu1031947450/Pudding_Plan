@@ -1,12 +1,6 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  ViewStyle,
-  StyleProp,
-} from 'react-native';
+import { View, StyleSheet, Image, ViewStyle, StyleProp } from 'react-native';
+import { AppText as Text } from '../../../components/common/AppText';
 import { Spacing, FontSize, BorderRadius } from '../../../constants/theme';
 import { Card } from '../../../components/common/Card';
 import type { CircleTopic } from '../types';

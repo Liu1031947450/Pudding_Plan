@@ -1,279 +1,126 @@
+const bcrypt = require('bcrypt');
 const sequelize = require('../config/database');
-const {
-  User,
-  Plan,
-  Habit,
-  Notification,
-  Badge,
-  CircleMoment,
-  Template,
-  Like,
-  Collect,
-  Friendship,
-  Comment,
-} = require('../models');
-const { v4: uuidv4 } = require('uuid');
+const { User, CircleMoment, Template } = require('../models');
 const { mockCircles, mockBuddies } = require('../data/mockData/communityData');
 const { templateDetails } = require('../data/mockData/templates');
-const bcrypt = require('bcrypt');
 
-async function ensureUsersTableMigration() {
-  const userTableExists = await sequelize
-    .getQueryInterface()
-    .showAllTables()
-    .then(tables => tables.includes('users'));
+const REQUIRED_TABLES = [
+  'users',
+  'plans',
+  'plan_check_ins',
+  'habits',
+  'notifications',
+  'badges',
+  'templates',
+  'circle_moments',
+  'likes',
+  'collects',
+  'friendships',
+  'comments',
+  'user_settings',
+  'feedbacks',
+];
 
-  if (!userTableExists) return;
-
-  const columns = await sequelize.getQueryInterface().describeTable('users');
-
-  if (!columns.userId) {
-    await sequelize.query('ALTER TABLE users ADD COLUMN "userId" VARCHAR(36);');
-
-    const users = await sequelize.query(
-      'SELECT id FROM users WHERE "userId" IS NULL',
-      {
-        type: sequelize.QueryTypes.SELECT,
-      },
-    );
-
-    for (const user of users) {
-      const userId = uuidv4();
-      await sequelize.query(
-        'UPDATE users SET "userId" = :userId WHERE id = :id',
-        {
-          replacements: { userId, id: user.id },
-        },
-      );
-    }
-
-    await sequelize.query(
-      'ALTER TABLE users ALTER COLUMN "userId" SET NOT NULL;',
-    );
-    await sequelize.query(
-      'ALTER TABLE users ADD CONSTRAINT users_userId_unique UNIQUE ("userId");',
-    );
-  }
-
-  if (!columns.avatar) {
-    await sequelize.query('ALTER TABLE users ADD COLUMN avatar VARCHAR(1000);');
-  } else if (columns.avatar.type === 'character varying(255)') {
-    await sequelize.query(
-      'ALTER TABLE users ALTER COLUMN avatar TYPE VARCHAR(1000);',
-    );
-  }
-  if (!columns.bio) {
-    await sequelize.query('ALTER TABLE users ADD COLUMN bio VARCHAR(200);');
-  }
-}
-
-async function ensureNotificationsTableMigration() {
-  const tableExists = await sequelize
-    .getQueryInterface()
-    .showAllTables()
-    .then(tables => tables.includes('notifications'));
-
-  if (!tableExists) return;
-
-  const columns = await sequelize
-    .getQueryInterface()
-    .describeTable('notifications');
-
-  // 添加 senderId 列
-  if (!columns.senderId) {
-    console.log('[Migration] Adding senderId to notifications table');
-    await sequelize.query(
-      'ALTER TABLE notifications ADD COLUMN "senderId" INTEGER REFERENCES users(id);',
-    );
-  }
-
-  // 添加 targetType 列
-  if (!columns.targetType) {
-    console.log('[Migration] Adding targetType to notifications table');
-    await sequelize.query(
-      'ALTER TABLE notifications ADD COLUMN "targetType" VARCHAR(20);',
-    );
-  }
-
-  // 添加 targetId 列
-  if (!columns.targetId) {
-    console.log('[Migration] Adding targetId to notifications table');
-    await sequelize.query(
-      'ALTER TABLE notifications ADD COLUMN "targetId" INTEGER;',
-    );
-  }
-
-  // 添加 time 列 (如果之前缺失)
-  if (!columns.time) {
-    console.log('[Migration] Adding time to notifications table');
-    await sequelize.query(
-      'ALTER TABLE notifications ADD COLUMN "time" VARCHAR(50) DEFAULT \'刚刚\';',
+async function verifySchema() {
+  const tables = new Set(
+    (await sequelize.getQueryInterface().showAllTables()).map(String),
+  );
+  const missing = REQUIRED_TABLES.filter(table => !tables.has(table));
+  if (missing.length > 0) {
+    throw new Error(
+      `数据库结构未迁移完成，缺少表: ${missing.join(
+        ', ',
+      )}。请先执行 npm run db:migrate`,
     );
   }
 }
 
 async function seedTemplates() {
-  const count = await Template.count();
-  if (count > 0) return;
+  if ((await Template.count()) > 0) return;
 
-  const templatesToCreate = Object.values(templateDetails).map(item => ({
-    id: String(item.id),
-    title: item.title,
-    subtitle: item.subtitle,
-    duration: item.duration,
-    icon: item.icon,
-    color: item.color,
-    category: item.category,
-    description: item.description,
-    goals: item.goals || [],
-    checkpoints: item.checkpoints || [],
-    tips: item.tips || [],
-    difficulty: item.difficulty,
-    frequency: item.frequency,
-  }));
-
-  await Template.bulkCreate(templatesToCreate);
+  await Template.bulkCreate(
+    Object.values(templateDetails).map(item => ({
+      id: String(item.id),
+      title: item.title,
+      subtitle: item.subtitle,
+      duration: item.duration,
+      icon: item.icon,
+      color: item.color,
+      category: item.category,
+      description: item.description,
+      goals: item.goals || [],
+      checkpoints: item.checkpoints || [],
+      tips: item.tips || [],
+      difficulty: item.difficulty,
+      frequency: item.frequency,
+    })),
+  );
   console.log('计划模板数据初始化成功');
 }
 
-async function seedCircleMomentsAndBuddies() {
-  // 1. 初始化用户和动态
-  const momentCount = await CircleMoment.count();
-  if (momentCount > 0) return;
+async function seedDemoCommunityData() {
+  if (process.env.SEED_DEMO_DATA !== 'true') return;
 
-  const authorMap = new Map();
+  const hashedPassword = await bcrypt.hash('123456', 10);
+  const authors = new Map();
+  const demoPeople = [
+    ...mockCircles
+      .filter(item => item.type === 'waterfall' && item.authorName)
+      .map(item => ({
+        name: item.authorName,
+        avatar: item.authorAvatarUri,
+        bio: '热爱生活的布丁计划成员',
+      })),
+    ...mockBuddies.map(item => ({
+      name: item.name,
+      avatar: item.avatarUri,
+      bio: item.goal,
+    })),
+  ];
 
-  for (const item of mockCircles) {
-    if (item.type !== 'waterfall' || !item.authorName) continue;
-
-    if (!authorMap.has(item.authorName)) {
-      let author = await User.findOne({ where: { username: item.authorName } });
-
-      if (!author) {
-        const hashedPassword = await bcrypt.hash('123456', 10);
-        author = await User.create({
-          username: item.authorName,
-          phone: `00${String(Math.random()).slice(2, 11)}`,
-          password: hashedPassword,
-          avatar: item.authorAvatarUri || null,
-          bio: '热爱生活的布丁计划成员',
-        });
-      }
-      authorMap.set(item.authorName, author);
-    }
-  }
-
-  const momentsToCreate = mockCircles
-    .filter(item => item.type === 'waterfall' && item.authorName)
-    .map(item => ({
-      authorId: authorMap.get(item.authorName).id,
-      title: item.title || '',
-      description: item.description || '',
-      content: item.content || '',
-      category: item.category || '',
-      imageUri: item.imageUri || null,
-      images: item.images || [],
-      likesCount: item.likes || 0,
-      commentsCount: item.commentsCount || 0,
-    }));
-
-  if (momentsToCreate.length > 0) {
-    await CircleMoment.bulkCreate(momentsToCreate);
-  }
-
-  // 2. 初始化好友关系 (Buddies)
-  const friendshipCount = await Friendship.count();
-  if (friendshipCount > 0) return;
-
-  // 创建一个测试机器人用户作为公共好友
-  let robot = await User.findOne({ where: { username: '布丁助手' } });
-  if (!robot) {
-    const hashedPassword = await bcrypt.hash('123456', 10);
-    robot = await User.create({
-      username: '布丁助手',
-      phone: '13800000000',
-      password: hashedPassword,
-      avatar: 'https://i.pravatar.cc/150?u=robot',
-      bio: '我是你的布丁助手，有问题随时问我。',
-    });
-  }
-
-  // 将 mockBuddies 转化为真实用户并建立关系
-  for (const buddy of mockBuddies) {
-    let user = await User.findOne({ where: { username: buddy.name } });
-    if (!user) {
-      const hashedPassword = await bcrypt.hash('123456', 10);
-      user = await User.create({
-        username: buddy.name,
-        phone: `13${String(Math.random()).slice(2, 11)}`,
+  for (const [index, person] of demoPeople.entries()) {
+    if (authors.has(person.name)) continue;
+    const [user] = await User.findOrCreate({
+      where: { username: person.name },
+      defaults: {
+        phone: `199${String(index).padStart(8, '0')}`,
         password: hashedPassword,
-        avatar: buddy.avatarUri,
-        bio: buddy.goal,
-      });
-    }
+        avatar: person.avatar || null,
+        bio: person.bio || null,
+      },
+    });
+    authors.set(person.name, user);
   }
 
-  console.log('圈子动态与好友数据初始化成功');
-}
-
-async function ensureBadgesTableMigration() {
-  const tableExists = await sequelize
-    .getQueryInterface()
-    .showAllTables()
-    .then(tables => tables.includes('badges'));
-
-  if (!tableExists) return;
-
-  const columns = await sequelize.getQueryInterface().describeTable('badges');
-
-  // 添加 unlockedAt 列（新增）
-  if (!columns.unlockedAt) {
-    console.log('[Migration] Adding unlockedAt to badges table');
-    await sequelize.query(
-      'ALTER TABLE badges ADD COLUMN "unlockedAt" TIMESTAMP;',
+  if ((await CircleMoment.count()) === 0) {
+    await CircleMoment.bulkCreate(
+      mockCircles
+        .filter(item => item.type === 'waterfall' && item.authorName)
+        .map(item => ({
+          authorId: authors.get(item.authorName).id,
+          title: item.title || '',
+          description: item.description || '',
+          content: item.content || '',
+          category: item.category || '',
+          imageUri: item.imageUri || null,
+          images: item.images || [],
+          likesCount: item.likes || 0,
+          commentsCount: item.commentsCount || 0,
+        })),
     );
   }
 
-  // 将旧的冗余列改为 nullable（如果存在的话），以免阻塞查询
-  const oldColumns = ['title', 'description', 'icon', 'color'];
-  for (const col of oldColumns) {
-    if (columns[col]) {
-      try {
-        console.log(`[Migration] Making badges.${col} nullable`);
-        await sequelize.query(
-          `ALTER TABLE badges ALTER COLUMN "${col}" DROP NOT NULL;`,
-        );
-      } catch (e) {
-        // 可能已经是 nullable 了，忽略
-      }
-    }
-  }
-
-  // 清空旧的不一致记录，让系统基于标准库重新计算
-  console.log('[Migration] Clearing old badge records for re-calculation');
-  await sequelize.query('DELETE FROM badges;');
+  console.log('演示圈子数据初始化成功');
 }
 
 async function initDatabase() {
-  try {
-    await sequelize.authenticate();
-    console.log('数据库连接成功！');
+  await sequelize.authenticate();
+  console.log('数据库连接成功！');
 
-    // 强制同步以确保新表（Template, Like, Collect, Friendship）被创建
-    await sequelize.sync();
-    console.log('数据库表同步成功！');
-
-    await ensureUsersTableMigration();
-    await ensureNotificationsTableMigration();
-    await ensureBadgesTableMigration();
-    await seedTemplates();
-    await seedCircleMomentsAndBuddies();
-
-    return true;
-  } catch (error) {
-    console.error('数据库初始化失败:', error);
-    throw error;
-  }
+  await verifySchema();
+  await seedTemplates();
+  await seedDemoCommunityData();
+  return true;
 }
 
 module.exports = initDatabase;

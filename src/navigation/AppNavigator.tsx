@@ -1,6 +1,10 @@
 import React from 'react';
 import { View, ActivityIndicator } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import {
+  DarkTheme,
+  DefaultTheme,
+  NavigationContainer,
+} from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import {
@@ -19,7 +23,7 @@ import {
   NotificationsScreen,
   CircleDetailScreen,
 } from '../screens';
-import { useAuth } from '../contexts';
+import { useAppSettings, useAuth } from '../contexts';
 import { Colors } from '../constants/theme';
 
 export type RootStackParamList = {
@@ -65,6 +69,7 @@ const MainNavigator: React.FC = () => {
 
 const AppNavigator: React.FC = () => {
   const { user, isLoading } = useAuth();
+  const { isDark } = useAppSettings();
 
   if (isLoading) {
     return (
@@ -82,7 +87,7 @@ const AppNavigator: React.FC = () => {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer theme={isDark ? DarkTheme : DefaultTheme}>
       <Stack.Navigator
         screenOptions={{
           headerShown: false,

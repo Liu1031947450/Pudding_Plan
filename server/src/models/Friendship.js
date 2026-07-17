@@ -12,13 +12,22 @@ const Friendship = sequelize.define(
     userId: {
       type: DataTypes.STRING(36),
       allowNull: false,
+      references: {
+        model: 'users',
+        key: 'userId',
+      },
     },
     friendId: {
       type: DataTypes.STRING(36),
       allowNull: false,
+      references: {
+        model: 'users',
+        key: 'userId',
+      },
     },
     status: {
       type: DataTypes.ENUM('pending', 'accepted', 'blocked'),
+      allowNull: false,
       defaultValue: 'accepted', // 简化起见，当前默认直接接受
     },
   },
@@ -30,6 +39,7 @@ const Friendship = sequelize.define(
         unique: true,
         fields: ['userId', 'friendId'],
       },
+      { fields: ['friendId', 'status'] },
     ],
   },
 );

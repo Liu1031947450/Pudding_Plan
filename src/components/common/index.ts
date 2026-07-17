@@ -8,4 +8,4 @@ export * from './Toast';
 export * from './FloatingActionButton';
 export * from './BottomDrawer';
 export * from './NotificationBadge';
-export * from './NotificationBadge';
+export * from './AppText';

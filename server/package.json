@@ -10,6 +10,10 @@
     "db:migrate": "sequelize-cli db:migrate",
     "db:migrate:undo": "sequelize-cli db:migrate:undo",
     "db:migrate:status": "sequelize-cli db:migrate:status",
+    "db:baseline": "node scripts/baselineMigrations.js",
+    "db:verify": "node scripts/verifyDatabase.js",
+    "test": "node --test test/*.test.js",
+    "test:api": "node scripts/smokeApi.js",
     "db:start": "sudo -u postgres /Library/PostgreSQL/18/bin/pg_ctl -D /Library/PostgreSQL/18/data start",
     "db:stop": "sudo -u postgres /Library/PostgreSQL/18/bin/pg_ctl -D /Library/PostgreSQL/18/data stop",
     "db:status": "sudo -u postgres /Library/PostgreSQL/18/bin/pg_ctl -D /Library/PostgreSQL/18/data status"

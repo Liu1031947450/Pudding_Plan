@@ -1,16 +1,17 @@
 import React from 'react';
-import { Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { AppText as Text } from '../components/common/AppText';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize, BorderRadius } from '../constants/theme';
 import { TopAppBar, Toast, BottomDrawer } from '../components';
-import { useAuth } from '../contexts';
-import { authApi } from '../api';
+import { useAppSettings, useAuth } from '../contexts';
+import { authApi, feedbackApi } from '../api';
+import type { UserSettings } from '../types/domain';
 import {
   SettingSection,
   ProfileEditSheet,
-  PhoneBindSheet,
   NotificationSheet,
   DNDSheet,
   AppearanceSheet,
@@ -37,31 +38,25 @@ interface SettingSectionData {
 const SettingsScreen: React.FC = () => {
   const navigation = useNavigation();
   const { user, logout, updateUser } = useAuth();
+  const { settings, updateSettings, resetSettings } = useAppSettings();
   const [activeDrawer, setActiveDrawer] = React.useState<string | null>(null);
   const [toastVisible, setToastVisible] = React.useState(false);
   const [toastMessage, setToastMessage] = React.useState('');
+  const [clearingData, setClearingData] = React.useState(false);
 
   // 本地状态
   const [profile, setProfile] = React.useState({
     nickname: user?.username || '',
     bio: '',
   });
-  const [phone, setPhone] = React.useState(user?.phone || '');
-  const [notifEnabled, setNotifEnabled] = React.useState(false);
-  const [notifTime, setNotifTime] = React.useState('08:00');
-  const [dndRange, setDndRange] = React.useState({
-    start: '22:00',
-    end: '07:00',
-  });
-  const [appearance, setAppearance] = React.useState<{
-    theme: 'light' | 'dark' | 'system';
-    fontSize: 'small' | 'medium' | 'large';
-  }>({ theme: 'system', fontSize: 'medium' });
+  const notifEnabled = settings.notificationsEnabled;
+  const notifTime = settings.notificationTime;
+  const dndRange = { start: settings.dndStart, end: settings.dndEnd };
+  const appearance = { theme: settings.theme, fontSize: settings.fontSize };
 
   React.useEffect(() => {
     if (user) {
       setProfile({ nickname: user.username, bio: user.bio || '' });
-      setPhone(user.phone);
     }
   }, [user]);
 
@@ -101,22 +96,33 @@ const SettingsScreen: React.FC = () => {
     }
   };
 
+  const saveSettings = async (updates: Partial<UserSettings>) => {
+    const response = await updateSettings(updates);
+    if (response.success && response.data) {
+      setActiveDrawer(null);
+      showToast('设置已保存');
+      return;
+    }
+    showToast(response.error || '保存设置失败');
+  };
+
+  const handleClearData = async () => {
+    setClearingData(true);
+    const response = await authApi.clearData();
+    if (!response.success) {
+      setClearingData(false);
+      showToast(response.error || '清除数据失败');
+      return;
+    }
+    await resetSettings();
+    await logout();
+  };
+
   const renderDrawerContent = () => {
     switch (activeDrawer) {
       case '1':
         return (
           <ProfileEditSheet initialData={profile} onSave={handleProfileSave} />
-        );
-      case '2':
-        return (
-          <PhoneBindSheet
-            currentPhone={phone}
-            onBind={newPhone => {
-              setPhone(newPhone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2'));
-              setActiveDrawer(null);
-              showToast('手机号绑定成功');
-            }}
-          />
         );
       case '3':
         return (
@@ -124,10 +130,10 @@ const SettingsScreen: React.FC = () => {
             initialEnabled={notifEnabled}
             initialTime={notifTime}
             onSave={(enabled, time) => {
-              setNotifEnabled(enabled);
-              setNotifTime(time);
-              setActiveDrawer(null);
-              showToast('通知设置已保存');
+              saveSettings({
+                notificationsEnabled: enabled,
+                notificationTime: time,
+              });
             }}
           />
         );
@@ -137,9 +143,7 @@ const SettingsScreen: React.FC = () => {
             initialStartTime={dndRange.start}
             initialEndTime={dndRange.end}
             onSave={(start, end) => {
-              setDndRange({ start, end });
-              setActiveDrawer(null);
-              showToast('勿扰时间已更新');
+              saveSettings({ dndStart: start, dndEnd: end });
             }}
           />
         );
@@ -150,9 +154,7 @@ const SettingsScreen: React.FC = () => {
             currentTheme={appearance.theme}
             currentFontSize={appearance.fontSize}
             onSave={(theme, fontSize) => {
-              setAppearance({ theme, fontSize });
-              setActiveDrawer(null);
-              showToast('外观设置已应用');
+              saveSettings({ theme, fontSize });
             }}
           />
         );
@@ -167,19 +169,26 @@ const SettingsScreen: React.FC = () => {
             message="此操作将永久删除你的所有计划、打卡记录和个人设置，且无法撤销。"
             confirmLabel="确认清除"
             isDestructive
-            onConfirm={() => {
-              setActiveDrawer(null);
-              showToast('所有数据已清除');
-            }}
+            loading={clearingData}
+            onConfirm={handleClearData}
             onCancel={() => setActiveDrawer(null)}
           />
         );
       case '11':
         return (
           <FeedbackSheet
-            onSubmit={() => {
-              setActiveDrawer(null);
-              showToast('反馈已提交，感谢你的支持');
+            onSubmit={async (category, content, contact) => {
+              const response = await feedbackApi.submit(
+                category,
+                content,
+                contact,
+              );
+              if (response.success) {
+                setActiveDrawer(null);
+                showToast('反馈已提交，感谢你的支持');
+              } else {
+                showToast(response.error || '反馈提交失败');
+              }
             }}
           />
         );
@@ -211,7 +220,6 @@ const SettingsScreen: React.FC = () => {
     if (activeDrawer === 'logout') return '安全退出';
     const drawerTitles: Record<string, string> = {
       '1': '个人资料修改',
-      '2': '手机号绑定',
       '3': '每日提醒',
       '4': '勿扰模式',
       '5': '深色模式',
@@ -239,14 +247,6 @@ const SettingsScreen: React.FC = () => {
           id: '1',
           title: '个人资料修改',
           icon: 'person',
-          iconColor: Colors.primary,
-          showArrow: true,
-        },
-        {
-          id: '2',
-          title: '手机号绑定',
-          value: phone || '未绑定',
-          icon: 'phone',
           iconColor: Colors.primary,
           showArrow: true,
         },

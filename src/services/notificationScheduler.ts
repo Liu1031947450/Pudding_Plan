@@ -1,4 +1,6 @@
 import { Platform } from 'react-native';
+import { plansApi } from '../api/plans';
+import type { Plan, UserSettings } from '../types/domain';
 
 /**
  * 通知调度服务
@@ -9,6 +11,7 @@ import { Platform } from 'react-native';
  */
 
 let Notifications: typeof import('expo-notifications') | null = null;
+let activeSettings: UserSettings | null = null;
 
 try {
   Notifications = require('expo-notifications');
@@ -79,6 +82,100 @@ function parseTime(time: Date | string): { hour: number; minute: number } {
   return { hour: time.getHours(), minute: time.getMinutes() };
 }
 
+const toMinutes = (time: string) => {
+  const { hour, minute } = parseTime(time);
+  return hour * 60 + minute;
+};
+
+export const isTimeInDndRange = (time: string, start: string, end: string) => {
+  const value = toMinutes(time);
+  const startValue = toMinutes(start);
+  const endValue = toMinutes(end);
+  if (startValue === endValue) return false;
+  return startValue < endValue
+    ? value >= startValue && value < endValue
+    : value >= startValue || value < endValue;
+};
+
+const resolveNotificationTime = (time: string, settings: UserSettings) =>
+  isTimeInDndRange(time, settings.dndStart, settings.dndEnd)
+    ? settings.dndEnd
+    : time;
+
+const scheduleReminder = async (
+  identifier: string,
+  title: string,
+  body: string,
+  time: string,
+  data: Record<string, string>,
+) => {
+  if (!Notifications) return;
+  const { hour, minute } = parseTime(time);
+  await Notifications.scheduleNotificationAsync({
+    identifier,
+    content: { title, body, sound: 'default', data },
+    trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.DAILY,
+      hour,
+      minute,
+      channelId: Platform.OS === 'android' ? 'plan-reminders' : undefined,
+    },
+  });
+};
+
+const schedulePlan = async (plan: Plan, settings: UserSettings) => {
+  for (const reminder of plan.remindSetting || []) {
+    if (!reminder.status) continue;
+    const time = resolveNotificationTime(reminder.time, settings);
+    await scheduleReminder(
+      makeNotificationId(plan.id, reminder.time),
+      '🔔 布丁计划 · 打卡提醒',
+      `该完成「${plan.title}」了！坚持就是胜利💪`,
+      time,
+      { planId: plan.id, type: 'plan_reminder' },
+    );
+  }
+};
+
+export const shouldPresentNotification = (now = new Date()) => {
+  if (!activeSettings?.notificationsEnabled) return false;
+  const time = `${String(now.getHours()).padStart(2, '0')}:${String(
+    now.getMinutes(),
+  ).padStart(2, '0')}`;
+  return !isTimeInDndRange(
+    time,
+    activeSettings.dndStart,
+    activeSettings.dndEnd,
+  );
+};
+
+export async function syncNotificationSettings(
+  settings: UserSettings,
+): Promise<void> {
+  activeSettings = settings;
+  await cancelAllReminders();
+  if (!settings.notificationsEnabled || !Notifications) return;
+  if (!(await requestNotificationPermission())) return;
+
+  const dailyTime = resolveNotificationTime(
+    settings.notificationTime,
+    settings,
+  );
+  await scheduleReminder(
+    'pudding_daily_reminder',
+    '🍮 布丁计划 · 每日提醒',
+    '开启今日治愈时刻，完成你的计划吧。',
+    dailyTime,
+    { type: 'daily_reminder' },
+  );
+
+  const response = await plansApi.getAll();
+  if (!response.success || !response.data) return;
+  for (const plan of response.data) {
+    await schedulePlan(plan, settings);
+  }
+}
+
 /**
  * 为某个计划同步所有提醒到系统通知
  */
@@ -92,48 +189,34 @@ export async function syncPlanReminders(
     return;
   }
 
+  await cancelPlanReminders(planId);
+  if (!activeSettings?.notificationsEnabled) return;
+
   const hasPermission = await requestNotificationPermission();
   if (!hasPermission) {
     console.warn('[Notification] 无通知权限，跳过提醒同步');
     return;
   }
 
-  // 1. 先取消该计划的所有旧通知
-  await cancelPlanReminders(planId);
-
-  // 2. 为每个启用的提醒创建新的定时通知
+  // 为每个启用的提醒创建新的定时通知
   for (const reminder of reminders) {
     if (!reminder.enabled) continue;
 
-    const { hour, minute } = parseTime(reminder.time);
-    const identifier = makeNotificationId(
-      planId,
-      `${hour.toString().padStart(2, '0')}:${minute
-        .toString()
-        .padStart(2, '0')}`,
-    );
+    const originalTime =
+      typeof reminder.time === 'string'
+        ? reminder.time
+        : `${String(reminder.time.getHours()).padStart(2, '0')}:${String(
+            reminder.time.getMinutes(),
+          ).padStart(2, '0')}`;
+    const scheduledTime = resolveNotificationTime(originalTime, activeSettings);
 
     try {
-      await Notifications.scheduleNotificationAsync({
-        identifier,
-        content: {
-          title: '🔔 布丁计划 · 打卡提醒',
-          body: `该完成「${planTitle}」了！坚持就是胜利💪`,
-          sound: 'default',
-          data: { planId, type: 'plan_reminder' },
-        },
-        trigger: {
-          type: Notifications.SchedulableTriggerInputTypes.DAILY,
-          hour,
-          minute,
-          channelId: Platform.OS === 'android' ? 'plan-reminders' : undefined,
-        },
-      });
-
-      console.log(
-        `[Notification] 已注册提醒: ${planTitle} → ${hour}:${minute
-          .toString()
-          .padStart(2, '0')} (id: ${identifier})`,
+      await scheduleReminder(
+        makeNotificationId(planId, originalTime),
+        '🔔 布丁计划 · 打卡提醒',
+        `该完成「${planTitle}」了！坚持就是胜利💪`,
+        scheduledTime,
+        { planId, type: 'plan_reminder' },
       );
     } catch (err) {
       console.error(`[Notification] 注册提醒失败:`, err);

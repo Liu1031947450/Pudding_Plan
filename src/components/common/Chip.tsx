@@ -1,12 +1,12 @@
 import React, { useRef } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   ViewStyle,
   Animated,
 } from 'react-native';
+import { AppText as Text } from './AppText';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize, BorderRadius } from '../../constants/theme';
 

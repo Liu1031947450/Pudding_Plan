@@ -2,6 +2,7 @@
 
 export interface CommentDTO {
   id: string;
+  user_id?: string;
   user_name: string;
   /** 用户头像 URL，最大长度 1000 字符 */
   user_avatar?: string;

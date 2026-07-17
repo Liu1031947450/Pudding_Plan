@@ -3,9 +3,22 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const db = require('../data/database');
 const { generateToken, authMiddleware } = require('../middleware/auth');
+const { createRateLimit } = require('../middleware/rateLimit');
+
+const authKey = req => `${req.ip}:${String(req.body?.phone || '').trim()}`;
+const loginRateLimit = createRateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  key: authKey,
+});
+const registerRateLimit = createRateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 10,
+  key: req => req.ip,
+});
 
 // 登录接口
-router.post('/login', async (req, res) => {
+router.post('/login', loginRateLimit, async (req, res) => {
   const { phone, password } = req.body;
 
   if (!phone || !password) {
@@ -32,7 +45,7 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    const token = generateToken(user.userId);
+    const token = generateToken(user.userId, user.tokenVersion);
 
     return res.json({
       success: true,
@@ -58,7 +71,7 @@ router.post('/login', async (req, res) => {
 });
 
 // 注册接口
-router.post('/register', async (req, res) => {
+router.post('/register', registerRateLimit, async (req, res) => {
   const { username, phone, password, confirmPassword } = req.body;
 
   if (!username || !phone || !password || !confirmPassword) {
@@ -74,6 +87,33 @@ router.post('/register', async (req, res) => {
       error: '两次输入的密码不一致',
     });
   }
+  if (
+    typeof username !== 'string' ||
+    !username.trim() ||
+    username.length > 50
+  ) {
+    return res.status(400).json({
+      success: false,
+      error: '用户名应为1至50个字符',
+    });
+  }
+  if (!/^\d{11}$/.test(phone)) {
+    return res.status(400).json({
+      success: false,
+      error: '请输入有效的11位手机号',
+    });
+  }
+  if (
+    typeof password !== 'string' ||
+    password.length < 8 ||
+    !/[A-Za-z]/.test(password) ||
+    !/\d/.test(password)
+  ) {
+    return res.status(400).json({
+      success: false,
+      error: '密码至少8位，且必须同时包含字母和数字',
+    });
+  }
 
   try {
     const existingUser = await db.getUserByPhone(phone);
@@ -87,12 +127,12 @@ router.post('/register', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await db.addUser({
-      username,
+      username: username.trim(),
       phone,
       password: hashedPassword,
     });
 
-    const token = generateToken(newUser.userId);
+    const token = generateToken(newUser.userId, newUser.tokenVersion);
 
     return res.status(201).json({
       success: true,
@@ -147,22 +187,58 @@ router.get('/me', authMiddleware, async (req, res) => {
   }
 });
 
+router.post('/logout', authMiddleware, async (req, res) => {
+  try {
+    await req.user.increment('tokenVersion');
+    return res.json({ success: true, message: '已安全退出' });
+  } catch (error) {
+    console.error('退出登录失败:', error);
+    return res.status(500).json({ success: false, error: '退出登录失败' });
+  }
+});
+
+router.delete('/data', authMiddleware, async (req, res) => {
+  try {
+    await db.clearUserDataByUserId(req.userId);
+    return res.json({ success: true, message: '所有个人数据已清除' });
+  } catch (error) {
+    console.error('清除用户数据失败:', error);
+    return res.status(500).json({ success: false, error: '清除数据失败' });
+  }
+});
+
 // 更新用户资料接口（需要认证）
 router.put('/me', authMiddleware, async (req, res) => {
   const { username, avatar, bio } = req.body;
 
-  if (!username) {
+  if (
+    typeof username !== 'string' ||
+    !username.trim() ||
+    username.trim().length > 50
+  ) {
     return res.status(400).json({
       success: false,
-      error: '用户名不能为空',
+      error: '用户名应为1至50个字符',
     });
+  }
+  if (bio !== undefined && (typeof bio !== 'string' || bio.length > 500)) {
+    return res
+      .status(400)
+      .json({ success: false, error: '个性签名不能超过500字' });
+  }
+  if (
+    avatar !== undefined &&
+    avatar !== null &&
+    (typeof avatar !== 'string' || avatar.length > 1000)
+  ) {
+    return res.status(400).json({ success: false, error: '头像地址格式无效' });
   }
 
   try {
     const updatedUser = await db.updateUserByUserId(req.userId, {
-      username,
+      username: username.trim(),
       avatar,
-      bio,
+      bio: typeof bio === 'string' ? bio.trim() : bio,
     });
 
     return res.json({
@@ -199,43 +275,6 @@ router.get('/stats', authMiddleware, async (req, res) => {
     return res.status(500).json({
       success: false,
       error: '获取用户统计失败，请稍后重试',
-    });
-  }
-});
-
-// 兼容旧接口：根据ID获取用户信息
-router.get('/user', async (req, res) => {
-  const { id } = req.query;
-
-  if (!id) {
-    return res.status(400).json({
-      success: false,
-      error: '用户ID不能为空',
-    });
-  }
-
-  try {
-    const user = await db.getUserById(id);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        error: '用户不存在',
-      });
-    }
-
-    return res.json({
-      success: true,
-      data: {
-        id: user.id,
-        username: user.username,
-        phone: user.phone,
-      },
-    });
-  } catch (error) {
-    console.error('获取用户信息失败:', error);
-    return res.status(500).json({
-      success: false,
-      error: '获取用户信息失败，请稍后重试',
     });
   }
 });

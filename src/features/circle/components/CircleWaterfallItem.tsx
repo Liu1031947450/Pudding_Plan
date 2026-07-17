@@ -1,12 +1,6 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  ViewStyle,
-  StyleProp,
-} from 'react-native';
+import { View, StyleSheet, Image, ViewStyle, StyleProp } from 'react-native';
+import { AppText as Text } from '../../../components/common/AppText';
 import {
   Colors,
   Spacing,

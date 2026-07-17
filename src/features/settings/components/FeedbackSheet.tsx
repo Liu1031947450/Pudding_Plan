@@ -1,18 +1,22 @@
 import React, { useState } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   TextInput,
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
+import { AppText as Text } from '../../../components/common/AppText';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize } from '../../../constants/theme';
 import { Button } from '../../../components/common';
 
 interface FeedbackSheetProps {
-  onSubmit: (feedback: string, email: string) => void;
+  onSubmit: (
+    category: 'suggestion' | 'issue' | 'experience' | 'other',
+    feedback: string,
+    contact: string,
+  ) => void;
 }
 
 export const FeedbackSheet: React.FC<FeedbackSheetProps> = ({ onSubmit }) => {
@@ -20,11 +24,11 @@ export const FeedbackSheet: React.FC<FeedbackSheetProps> = ({ onSubmit }) => {
   const [email, setEmail] = useState('');
 
   const feedbackTypes = [
-    { label: '功能建议', icon: 'lightbulb' },
-    { label: '遇到问题', icon: 'report-problem' },
-    { label: '体验优化', icon: 'mood' },
-    { label: '其他', icon: 'more-horiz' },
-  ];
+    { label: '功能建议', value: 'suggestion', icon: 'lightbulb' },
+    { label: '遇到问题', value: 'issue', icon: 'report-problem' },
+    { label: '体验优化', value: 'experience', icon: 'mood' },
+    { label: '其他', value: 'other', icon: 'more-horiz' },
+  ] as const;
   const [selectedType, setSelectedType] = useState(0);
 
   return (
@@ -79,6 +83,7 @@ export const FeedbackSheet: React.FC<FeedbackSheetProps> = ({ onSubmit }) => {
               placeholderTextColor={Colors.outline}
               multiline
               numberOfLines={6}
+              maxLength={500}
             />
             <Text style={styles.charCount}>{feedback.length}/500</Text>
           </View>
@@ -101,7 +106,9 @@ export const FeedbackSheet: React.FC<FeedbackSheetProps> = ({ onSubmit }) => {
       <Button
         title="提交反馈"
         disabled={feedback.length < 5}
-        onPress={() => onSubmit(feedback, email)}
+        onPress={() =>
+          onSubmit(feedbackTypes[selectedType].value, feedback, email)
+        }
         style={styles.submitButton}
       />
     </ScrollView>

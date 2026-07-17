@@ -1,23 +1,22 @@
 import {
   getCompletedDays,
   getProgress,
-  getCurrentStreak,
   getLongestStreak,
-  isStreakBroken,
 } from '../src/utils/planUtils';
 import type { Plan } from '../src/types/domain';
 
-// Helper to create a partial Plan object mock
+// Helper to create a complete Plan object mock
 const createMockPlan = (completedDate: string[], totalDays = 30): Plan => {
   return {
     id: '1',
-    userId: '1',
     title: 'Test Plan',
     totalDays,
     completedDate,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  } as Plan;
+    type: 0,
+    remindSetting: [],
+    rewords: [],
+    icon: 'flag',
+  };
 };
 
 describe('planUtils', () => {
@@ -42,7 +41,7 @@ describe('planUtils', () => {
     it('should cap progress percentage at 100', () => {
       const plan = createMockPlan(
         ['2026-06-01', '2026-06-02', '2026-06-03'],
-        2
+        2,
       );
       expect(getProgress(plan)).toBe(100);
     });

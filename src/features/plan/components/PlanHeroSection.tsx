@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { AppText as Text } from '../../../components/common/AppText';
 import { Colors, Spacing, FontSize } from '../../../constants/theme';
 import { MaterialIcons } from '@expo/vector-icons';
 

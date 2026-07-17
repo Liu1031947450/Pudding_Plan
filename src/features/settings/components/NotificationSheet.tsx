@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   Switch,
   FlatList,
 } from 'react-native';
+import { AppText as Text } from '../../../components/common/AppText';
 import { MaterialIcons } from '@expo/vector-icons';
 import {
   Colors,
@@ -28,8 +28,8 @@ export const NotificationSheet: React.FC<NotificationSheetProps> = ({
   onSave,
 }) => {
   const [enabled, setEnabled] = useState(initialEnabled);
-  const [hour, setHour] = useState(parseInt(initialTime.split(':')[0]));
-  const [minute, setMinute] = useState(parseInt(initialTime.split(':')[1]));
+  const [hour, setHour] = useState(parseInt(initialTime.split(':')[0], 10));
+  const [minute, setMinute] = useState(parseInt(initialTime.split(':')[1], 10));
 
   const hours = Array.from({ length: 24 }, (_, i) => i);
   const minutes = Array.from({ length: 60 }, (_, i) => i);
