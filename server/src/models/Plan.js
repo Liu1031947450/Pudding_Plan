@@ -25,10 +25,11 @@ const Plan = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    completedDate: {
-      type: DataTypes.ARRAY(DataTypes.DATEONLY),
+    status: {
+      type: DataTypes.STRING(16),
       allowNull: false,
-      defaultValue: [],
+      defaultValue: 'active',
+      validate: { isIn: [['active', 'paused', 'archived']] },
     },
     type: {
       type: DataTypes.INTEGER,

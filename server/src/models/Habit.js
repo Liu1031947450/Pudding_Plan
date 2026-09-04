@@ -30,10 +30,30 @@ const Habit = sequelize.define(
       allowNull: true,
       defaultValue: 'check-circle',
     },
-    completed: {
+    weekdays: {
+      type: DataTypes.JSONB,
+      allowNull: false,
+      defaultValue: [0, 1, 2, 3, 4, 5, 6],
+    },
+    reminderTime: {
+      type: DataTypes.STRING(5),
+      allowNull: true,
+    },
+    startDate: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    isActive: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
-      defaultValue: false,
+      defaultValue: true,
+    },
+    sortOrder: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+      validate: { min: 0 },
     },
     category: {
       type: DataTypes.STRING(50),
@@ -51,7 +71,7 @@ const Habit = sequelize.define(
   {
     tableName: 'habits',
     timestamps: true,
-    indexes: [{ fields: ['userId'] }],
+    indexes: [{ fields: ['userId', 'sortOrder'] }],
   },
 );
 

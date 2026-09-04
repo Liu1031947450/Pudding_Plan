@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { AppText as Text } from '../../../components/common/AppText';
-import { MaterialIcons } from '@expo/vector-icons';
 import {
   Colors,
   Spacing,
@@ -10,30 +9,23 @@ import {
 import { Card, Button } from '../../../components/common';
 
 interface AppearanceSheetProps {
-  currentTheme: 'light' | 'dark' | 'system';
   currentFontSize: 'small' | 'medium' | 'large';
-  onSave: (theme: any, fontSize: any) => void;
+  onSave: (fontSize: 'small' | 'medium' | 'large') => void;
 }
 
+type FontSizeOption = AppearanceSheetProps['currentFontSize'];
+
+const fontSizeOptions: Array<{ label: string; value: FontSizeOption }> = [
+  { label: '特小', value: 'small' },
+  { label: '标准', value: 'medium' },
+  { label: '特大', value: 'large' },
+];
+
 export const AppearanceSheet: React.FC<AppearanceSheetProps> = ({
-  currentTheme,
   currentFontSize,
   onSave,
 }) => {
-  const [theme, setTheme] = useState(currentTheme);
   const [fontSize, setFontSize] = useState(currentFontSize);
-
-  const themeOptions = [
-    { label: '浅色', value: 'light', icon: 'wb-sunny' },
-    { label: '深色', value: 'dark', icon: 'nights-stay' },
-    { label: '跟随系统', value: 'system', icon: 'settings-brightness' },
-  ];
-
-  const fontSizeOptions = [
-    { label: '特小', value: 'small', size: 14 },
-    { label: '标准', value: 'medium', size: 16 },
-    { label: '特大', value: 'large', size: 18 },
-  ];
 
   return (
     <View style={styles.container}>
@@ -42,56 +34,16 @@ export const AppearanceSheet: React.FC<AppearanceSheetProps> = ({
         contentContainerStyle={styles.content}
       >
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>外观主题</Text>
-          <View style={styles.themeGrid}>
-            {themeOptions.map(opt => (
-              <TouchableOpacity
-                key={opt.value}
-                style={[
-                  styles.themeItem,
-                  theme === opt.value && styles.themeItemActive,
-                ]}
-                onPress={() => setTheme(opt.value as any)}
-              >
-                <View
-                  style={[
-                    styles.themeIconCircle,
-                    theme === opt.value && styles.themeIconCircleActive,
-                  ]}
-                >
-                  <MaterialIcons
-                    name={opt.icon as any}
-                    size={24}
-                    color={
-                      theme === opt.value
-                        ? Colors.onPrimary
-                        : Colors.onSurfaceVariant
-                    }
-                  />
-                </View>
-                <Text
-                  style={[
-                    styles.themeLabel,
-                    theme === opt.value && styles.themeLabelActive,
-                  ]}
-                >
-                  {opt.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-
-        <View style={styles.section}>
           <Text style={styles.sectionTitle}>字体大小</Text>
           <Card style={styles.previewCard}>
             <Text
               style={[
                 styles.previewLabel,
-                {
-                  fontSize:
-                    fontSize === 'small' ? 12 : fontSize === 'medium' ? 14 : 16,
-                },
+                fontSize === 'small'
+                  ? styles.previewLabelSmall
+                  : fontSize === 'medium'
+                  ? styles.previewLabelMedium
+                  : styles.previewLabelLarge,
               ]}
             >
               预览效果
@@ -99,12 +51,11 @@ export const AppearanceSheet: React.FC<AppearanceSheetProps> = ({
             <Text
               style={[
                 styles.previewText,
-                {
-                  fontSize:
-                    fontSize === 'small' ? 14 : fontSize === 'medium' ? 16 : 20,
-                  lineHeight:
-                    fontSize === 'small' ? 20 : fontSize === 'medium' ? 24 : 28,
-                },
+                fontSize === 'small'
+                  ? styles.previewTextSmall
+                  : fontSize === 'medium'
+                  ? styles.previewTextMedium
+                  : styles.previewTextLarge,
               ]}
             >
               治愈计划，让每一份坚持都充满温度。在这里，你可以感受时间的流淌，记录成长的点滴。
@@ -119,12 +70,16 @@ export const AppearanceSheet: React.FC<AppearanceSheetProps> = ({
                   styles.fontSizeItem,
                   fontSize === opt.value && styles.fontSizeItemActive,
                 ]}
-                onPress={() => setFontSize(opt.value as any)}
+                onPress={() => setFontSize(opt.value)}
               >
                 <Text
                   style={[
                     styles.fontSizeText,
-                    { fontSize: opt.size / 1.1 },
+                    opt.value === 'small'
+                      ? styles.fontSizeTextSmall
+                      : opt.value === 'medium'
+                      ? styles.fontSizeTextMedium
+                      : styles.fontSizeTextLarge,
                     fontSize === opt.value && styles.fontSizeTextActive,
                   ]}
                 >
@@ -145,7 +100,7 @@ export const AppearanceSheet: React.FC<AppearanceSheetProps> = ({
 
         <Button
           title="应用设置"
-          onPress={() => onSave(theme, fontSize)}
+          onPress={() => onSave(fontSize)}
           style={styles.saveButton}
         />
       </ScrollView>
@@ -173,42 +128,6 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
     marginLeft: 4,
   },
-  themeGrid: {
-    flexDirection: 'row',
-    gap: Spacing.sm,
-  },
-  themeItem: {
-    flex: 1,
-    backgroundColor: Colors.surfaceContainerHigh,
-    borderRadius: 20,
-    padding: Spacing.md,
-    alignItems: 'center',
-    gap: Spacing.xs,
-  },
-  themeItemActive: {
-    backgroundColor: Colors.primaryContainer,
-    borderWidth: 1,
-    borderColor: Colors.primary,
-  },
-  themeIconCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: Colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  themeIconCircleActive: {
-    backgroundColor: Colors.primary,
-  },
-  themeLabel: {
-    fontSize: GlobalFontSize.sm,
-    fontWeight: '600',
-    color: Colors.onSurfaceVariant,
-  },
-  themeLabelActive: {
-    color: Colors.primary,
-  },
   previewCard: {
     backgroundColor: Colors.surfaceVariant,
     padding: Spacing.lg,
@@ -219,8 +138,29 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 8,
   },
+  previewLabelSmall: {
+    fontSize: 12,
+  },
+  previewLabelMedium: {
+    fontSize: 14,
+  },
+  previewLabelLarge: {
+    fontSize: 16,
+  },
   previewText: {
     color: Colors.onSurface,
+  },
+  previewTextSmall: {
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  previewTextMedium: {
+    fontSize: 16,
+    lineHeight: 24,
+  },
+  previewTextLarge: {
+    fontSize: 20,
+    lineHeight: 28,
   },
   fontSizeSelector: {
     flexDirection: 'row',
@@ -247,6 +187,15 @@ const styles = StyleSheet.create({
     color: Colors.onSurfaceVariant,
     fontWeight: '600',
     marginBottom: 2,
+  },
+  fontSizeTextSmall: {
+    fontSize: 13,
+  },
+  fontSizeTextMedium: {
+    fontSize: 15,
+  },
+  fontSizeTextLarge: {
+    fontSize: 16,
   },
   fontSizeTextActive: {
     color: Colors.primary,

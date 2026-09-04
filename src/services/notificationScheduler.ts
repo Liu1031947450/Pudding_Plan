@@ -1,6 +1,7 @@
 import { Platform } from 'react-native';
 import { plansApi } from '../api/plans';
-import type { Plan, UserSettings } from '../types/domain';
+import { habitsApi } from '../api/calendar';
+import type { Habit, Plan, UserSettings } from '../types/domain';
 
 /**
  * 通知调度服务
@@ -13,10 +14,12 @@ import type { Plan, UserSettings } from '../types/domain';
 let Notifications: typeof import('expo-notifications') | null = null;
 let activeSettings: UserSettings | null = null;
 
-try {
-  Notifications = require('expo-notifications');
-} catch {
-  console.warn('[Notification] expo-notifications 不可用，提醒功能将被禁用');
+if (Platform.OS !== 'web') {
+  try {
+    Notifications = require('expo-notifications');
+  } catch {
+    console.warn('[Notification] expo-notifications 不可用，提醒功能将被禁用');
+  }
 }
 
 // ─── 权限管理 ───
@@ -65,6 +68,9 @@ export async function requestNotificationPermission(): Promise<boolean> {
 function makeNotificationId(planId: string, time: string): string {
   return `plan_${planId}_reminder_${time.replace(':', '')}`;
 }
+
+const makeHabitNotificationId = (habitId: string, weekday: number) =>
+  `habit_${habitId}_weekday_${weekday}`;
 
 // ─── 核心调度 ───
 
@@ -124,6 +130,7 @@ const scheduleReminder = async (
 };
 
 const schedulePlan = async (plan: Plan, settings: UserSettings) => {
+  if ((plan.status || 'active') !== 'active') return;
   for (const reminder of plan.remindSetting || []) {
     if (!reminder.status) continue;
     const time = resolveNotificationTime(reminder.time, settings);
@@ -134,6 +141,30 @@ const schedulePlan = async (plan: Plan, settings: UserSettings) => {
       time,
       { planId: plan.id, type: 'plan_reminder' },
     );
+  }
+};
+
+const scheduleHabit = async (habit: Habit, settings: UserSettings) => {
+  if (!Notifications || !habit.isActive || !habit.reminderTime) return;
+  const time = resolveNotificationTime(habit.reminderTime, settings);
+  const { hour, minute } = parseTime(time);
+  for (const weekday of habit.weekdays) {
+    await Notifications.scheduleNotificationAsync({
+      identifier: makeHabitNotificationId(habit.id, weekday),
+      content: {
+        title: '🍮 布丁计划 · 习惯提醒',
+        body: `别忘了「${habit.title}」，完成今天的小目标。`,
+        sound: 'default',
+        data: { habitId: habit.id, type: 'habit_reminder' },
+      },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.WEEKLY,
+        weekday: weekday + 1,
+        hour,
+        minute,
+        channelId: Platform.OS === 'android' ? 'plan-reminders' : undefined,
+      },
+    });
   }
 };
 
@@ -169,10 +200,15 @@ export async function syncNotificationSettings(
     { type: 'daily_reminder' },
   );
 
-  const response = await plansApi.getAll();
-  if (!response.success || !response.data) return;
-  for (const plan of response.data) {
+  const [plansResponse, habitsResponse] = await Promise.all([
+    plansApi.getAll(),
+    habitsApi.getAll(),
+  ]);
+  for (const plan of plansResponse.data || []) {
     await schedulePlan(plan, settings);
+  }
+  for (const habit of habitsResponse.data || []) {
+    await scheduleHabit(habit, settings);
   }
 }
 

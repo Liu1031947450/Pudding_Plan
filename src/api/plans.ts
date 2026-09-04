@@ -74,4 +74,7 @@ export const plansApi = {
       return { success: false, error: error.message || '打卡失败' };
     }
   },
+
+  removeCheckIn: async (id: string, date: string): Promise<ApiResponse<Plan>> =>
+    apiClient.delete<Plan>(API_ENDPOINTS.PLAN_CHECK_IN_DATE(id, date)),
 };

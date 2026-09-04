@@ -2,6 +2,9 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const {
   calculateCurrentStreak,
+  calculateHabitStreak,
+  getCheckInDateError,
+  isHabitScheduledForDate,
   isValidDateString,
   validateCheckInDetails,
 } = require('../src/utils/checkInUtils');
@@ -28,6 +31,40 @@ test('calculateCurrentStreak accepts a streak ending yesterday', () => {
 test('date validation rejects impossible calendar dates', () => {
   assert.equal(isValidDateString('2026-02-29'), false);
   assert.equal(isValidDateString('2026-07-16'), true);
+});
+
+test('check-in window includes today and the previous six local dates', () => {
+  const today = new Date('2026-09-04T12:00:00');
+  assert.equal(getCheckInDateError('2026-09-04', today), null);
+  assert.equal(getCheckInDateError('2026-08-29', today), null);
+  assert.match(getCheckInDateError('2026-08-28', today), /过去6个自然日/);
+  assert.match(getCheckInDateError('2026-09-05', today), /未来/);
+});
+
+test('habit schedule and streak follow configured weekdays', () => {
+  const habit = {
+    isActive: true,
+    startDate: '2026-08-01',
+    weekdays: [1, 3, 5],
+  };
+  assert.equal(isHabitScheduledForDate(habit, '2026-09-04'), true);
+  assert.equal(isHabitScheduledForDate(habit, '2026-09-03'), false);
+  assert.equal(
+    calculateHabitStreak(
+      habit,
+      ['2026-08-28', '2026-08-31', '2026-09-02'],
+      new Date('2026-09-04T08:00:00'),
+    ),
+    3,
+  );
+  assert.equal(
+    calculateHabitStreak(
+      habit,
+      ['2026-08-28', '2026-08-31'],
+      new Date('2026-09-04T08:00:00'),
+    ),
+    0,
+  );
 });
 
 test('check-in details must match the plan type', () => {

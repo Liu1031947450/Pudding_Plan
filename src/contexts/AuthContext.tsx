@@ -5,9 +5,9 @@ import React, {
   useCallback,
   ReactNode,
 } from 'react';
-import * as SecureStore from 'expo-secure-store';
 import { authApi, setAuthToken, setUnauthorizedHandler } from '../api';
 import { websocketService } from '../services/websocketService';
+import { storage } from '../services/storage';
 
 export interface User {
   id: string;
@@ -16,6 +16,7 @@ export interface User {
   /** 用户头像 URL，最大长度 1000 字符 */
   avatar?: string | null;
   bio?: string | null;
+  goalTags: string[];
 }
 
 interface AuthContextType {
@@ -23,8 +24,9 @@ interface AuthContextType {
   token: string | null;
   isLoading: boolean;
   login: (token: string, user: User) => Promise<void>;
-  logout: () => Promise<void>;
+  logout: (options?: { skipRemote?: boolean }) => Promise<void>;
   updateUser: (user: User) => Promise<void>;
+  updateToken: (token: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -41,17 +43,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const [isLoading, setIsLoading] = useState(true);
 
   const clearAuth = useCallback(async () => {
-    await SecureStore.deleteItemAsync(AUTH_STORAGE_KEY);
-    await SecureStore.deleteItemAsync(AUTH_EXPIRY_KEY);
-    await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
+    await storage.removeItem(AUTH_STORAGE_KEY);
+    await storage.removeItem(AUTH_EXPIRY_KEY);
+    await storage.removeItem(AUTH_TOKEN_KEY);
     setAuthToken(null);
   }, []);
 
   const checkAuth = useCallback(async () => {
     try {
-      const storedUser = await SecureStore.getItemAsync(AUTH_STORAGE_KEY);
-      const storedExpiry = await SecureStore.getItemAsync(AUTH_EXPIRY_KEY);
-      const storedToken = await SecureStore.getItemAsync(AUTH_TOKEN_KEY);
+      const storedUser = await storage.getItem(AUTH_STORAGE_KEY);
+      const storedExpiry = await storage.getItem(AUTH_EXPIRY_KEY);
+      const storedToken = await storage.getItem(AUTH_TOKEN_KEY);
 
       if (storedUser && storedExpiry && storedToken) {
         const expiryTime = parseInt(storedExpiry, 10);
@@ -94,12 +96,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const login = async (tokenValue: string, userData: User) => {
     try {
       const expiryTime = Date.now() + 30 * 24 * 60 * 60 * 1000;
-      await SecureStore.setItemAsync(
-        AUTH_STORAGE_KEY,
-        JSON.stringify(userData),
-      );
-      await SecureStore.setItemAsync(AUTH_EXPIRY_KEY, expiryTime.toString());
-      await SecureStore.setItemAsync(AUTH_TOKEN_KEY, tokenValue);
+      await storage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userData));
+      await storage.setItem(AUTH_EXPIRY_KEY, expiryTime.toString());
+      await storage.setItem(AUTH_TOKEN_KEY, tokenValue);
       setUser(userData);
       setToken(tokenValue);
       setAuthToken(tokenValue);
@@ -114,10 +113,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
   const updateUser = async (userData: User) => {
     try {
-      await SecureStore.setItemAsync(
-        AUTH_STORAGE_KEY,
-        JSON.stringify(userData),
-      );
+      await storage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userData));
       setUser(userData);
     } catch (error) {
       console.error('更新用户信息失败:', error);
@@ -125,12 +121,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     }
   };
 
-  const logout = async () => {
+  const updateToken = async (tokenValue: string) => {
+    await storage.setItem(AUTH_TOKEN_KEY, tokenValue);
+    setToken(tokenValue);
+    setAuthToken(tokenValue);
+    await websocketService.reconnect();
+  };
+
+  const logout = async (options?: { skipRemote?: boolean }) => {
     try {
       // 断开WebSocket连接
       websocketService.disconnect();
 
-      await authApi.logout();
+      if (!options?.skipRemote) {
+        await authApi.logout();
+      }
 
       await clearAuth();
       setUser(null);
@@ -144,7 +149,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
   return (
     <AuthContext.Provider
-      value={{ user, token, isLoading, login, logout, updateUser }}
+      value={{ user, token, isLoading, login, logout, updateUser, updateToken }}
     >
       {children}
     </AuthContext.Provider>

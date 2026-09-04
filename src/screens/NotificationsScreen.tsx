@@ -16,17 +16,22 @@ import { notificationsApi } from '../api/notifications';
 import { websocketService } from '../services/websocketService';
 import { DEFAULT_AVATAR } from '../features/circle/constants';
 import type { Notification } from '../types/domain';
+import { getImageUrl } from '../utils';
 
 const NotificationsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const loadNotifications = async () => {
     setLoading(true);
+    setError('');
     try {
       const res = await notificationsApi.getAll();
       if (res.success) {
         setNotifications(res.data || []);
+      } else {
+        setError(res.error || '消息加载失败');
       }
     } finally {
       setLoading(false);
@@ -40,12 +45,18 @@ const NotificationsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     );
   };
 
-  const handleNotificationPress = (notification: Notification) => {
-    handleMarkAsRead(notification.id);
-
-    // 如果是动态相关通知，跳转到圈子页面
+  const handleNotificationPress = async (notification: Notification) => {
+    await handleMarkAsRead(notification.id);
     if (notification.targetType === 'moment' && notification.targetId) {
-      navigation.navigate('Circles' as never);
+      navigation.navigate('CircleDetail', { circleId: notification.targetId });
+    } else if (notification.targetType === 'buddy') {
+      navigation.navigate('BuddyCenter');
+    } else if (notification.targetType === 'user') {
+      navigation.navigate('Main', { screen: 'Circles' });
+    } else if (notification.targetType === 'plan' && notification.targetId) {
+      navigation.navigate('CreatePlan', { planId: notification.targetId });
+    } else if (notification.targetType === 'habit') {
+      navigation.navigate('Main', { screen: 'Calendar' });
     }
   };
 
@@ -78,6 +89,16 @@ const NotificationsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         return { name: 'chat-bubble', color: Colors.primary };
       case 'achievement':
         return { name: 'stars', color: Colors.primary };
+      case 'follow':
+        return { name: 'person-add', color: Colors.tertiary };
+      case 'buddy_request':
+        return { name: 'handshake', color: Colors.secondary };
+      case 'buddy_accepted':
+        return { name: 'group', color: Colors.secondary };
+      case 'buddy_encouragement':
+        return { name: 'waving-hand', color: Colors.primary };
+      case 'reminder':
+        return { name: 'notifications-active', color: Colors.primary };
       case 'system':
       default:
         return { name: 'notifications', color: Colors.onSurfaceVariant };
@@ -86,7 +107,15 @@ const NotificationsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   const renderItem = ({ item }: { item: Notification }) => {
     const iconConfig = getIconConfig(item.type);
-    const isSocial = ['like', 'comment', 'reply'].includes(item.type);
+    const isSocial = [
+      'like',
+      'comment',
+      'reply',
+      'follow',
+      'buddy_request',
+      'buddy_accepted',
+      'buddy_encouragement',
+    ].includes(item.type);
 
     return (
       <TouchableOpacity
@@ -96,7 +125,9 @@ const NotificationsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         <View style={styles.iconContainer}>
           {isSocial && item.sender ? (
             <Image
-              source={{ uri: item.sender.avatar || DEFAULT_AVATAR }}
+              source={{
+                uri: getImageUrl(item.sender.avatar) || DEFAULT_AVATAR,
+              }}
               style={styles.senderAvatar}
             />
           ) : (
@@ -160,7 +191,12 @@ const NotificationsScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                 size={64}
                 color={Colors.outlineVariant}
               />
-              <Text style={styles.emptyText}>赞时没有新消息 ~</Text>
+              <Text style={styles.emptyText}>{error || '暂时没有新消息'}</Text>
+              {!!error && (
+                <TouchableOpacity onPress={loadNotifications}>
+                  <Text style={styles.retryText}>重新加载</Text>
+                </TouchableOpacity>
+              )}
             </View>
           ) : null
         }
@@ -251,6 +287,11 @@ const styles = StyleSheet.create({
     marginTop: Spacing.lg,
     fontSize: FontSize.md,
     color: Colors.onSurfaceVariant,
+  },
+  retryText: {
+    color: Colors.primary,
+    fontWeight: '600',
+    marginTop: Spacing.sm,
   },
 });
 

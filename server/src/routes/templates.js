@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { Template } = require('../models');
+const { ok, fail } = require('../utils/http');
 
 // 获取所有模板
 router.get('/', async (req, res) => {
@@ -8,14 +9,10 @@ router.get('/', async (req, res) => {
     const data = await Template.findAll({
       order: [['id', 'ASC']],
     });
-    res.json({
-      success: true,
-      data,
-      message: '获取模板列表成功',
-    });
+    ok(res, data, '获取模板列表成功');
   } catch (error) {
     console.error('获取模板列表失败:', error);
-    res.status(500).json({ success: false, error: '服务器内部错误' });
+    fail(res, 500, '服务器内部错误');
   }
 });
 
@@ -27,14 +24,10 @@ router.get('/category/:category', async (req, res) => {
       where: { category },
       order: [['id', 'ASC']],
     });
-    res.json({
-      success: true,
-      data,
-      message: `获取 ${category} 分类模板成功`,
-    });
+    ok(res, data, `获取 ${category} 分类模板成功`);
   } catch (error) {
     console.error('获取分类模板失败:', error);
-    res.status(500).json({ success: false, error: '服务器内部错误' });
+    fail(res, 500, '服务器内部错误');
   }
 });
 
@@ -43,14 +36,11 @@ router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const data = await Template.findByPk(id);
-    res.json({
-      success: true,
-      data,
-      message: '获取模板详情成功',
-    });
+    if (!data) return fail(res, 404, '模板不存在');
+    ok(res, data, '获取模板详情成功');
   } catch (error) {
     console.error('获取模板详情失败:', error);
-    res.status(500).json({ success: false, error: '服务器内部错误' });
+    fail(res, 500, '服务器内部错误');
   }
 });
 

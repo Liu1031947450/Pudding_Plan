@@ -38,8 +38,13 @@ const rhythmRoutes = require('./routes/rhythm');
 const authRoutes = require('./routes/auth');
 const settingsRoutes = require('./routes/settings');
 const feedbackRoutes = require('./routes/feedback');
+const activityRoutes = require('./routes/activity');
+const usersRoutes = require('./routes/users');
+const blocksRoutes = require('./routes/blocks');
+const reportsRoutes = require('./routes/reports');
 const { verifyToken } = require('./middleware/auth');
 const { User } = require('./models');
+const { ok, fail } = require('./utils/http');
 
 const PORT = process.env.PORT || 3000;
 
@@ -64,7 +69,7 @@ app.use((req, res, next) => {
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
 app.get('/', (req, res) => {
-  res.json({ message: '布丁计划API服务' });
+  ok(res, { version: '1.0.0' }, '布丁计划 API 服务');
 });
 
 app.use('/api/auth', authRoutes);
@@ -79,6 +84,23 @@ app.use('/api/badges', badgesRoutes);
 app.use('/api/rhythm', rhythmRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/feedback', feedbackRoutes);
+app.use('/api/activity', activityRoutes);
+app.use('/api/users', usersRoutes);
+app.use('/api/blocks', blocksRoutes);
+app.use('/api/reports', reportsRoutes);
+
+app.use((req, res) => fail(res, 404, '接口不存在'));
+app.use((error, req, res, next) => {
+  if (res.headersSent) return next(error);
+  console.error('未处理的服务错误:', error);
+  return fail(
+    res,
+    error?.type === 'entity.parse.failed' ? 400 : 500,
+    error?.type === 'entity.parse.failed'
+      ? '请求 JSON 格式无效'
+      : '服务器内部错误',
+  );
+});
 
 // WebSocket连接管理（connectedUsers 来自 socketManager）
 

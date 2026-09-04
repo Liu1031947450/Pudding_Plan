@@ -25,6 +25,7 @@ export interface Plan {
   color?: string; // 卡片颜色
   sortOrder?: number; // 用户自定义排序位置
   checkInRecords?: PlanCheckInRecord[]; // 规范化打卡事实，由后端按日期返回
+  status?: 'active' | 'paused' | 'archived';
 }
 
 export interface PlanCheckInRecord {
@@ -69,7 +70,11 @@ export interface Notification {
     | 'system'
     | 'like'
     | 'comment'
-    | 'reply';
+    | 'reply'
+    | 'follow'
+    | 'buddy_request'
+    | 'buddy_accepted'
+    | 'buddy_encouragement';
   title: string;
   message: string;
   time: string;
@@ -81,7 +86,7 @@ export interface Notification {
     /** 用户头像 URL，最大长度 1000 字符 */
     avatar?: string;
   };
-  targetType?: 'moment' | 'comment';
+  targetType?: 'moment' | 'comment' | 'user' | 'buddy' | 'plan' | 'habit';
   targetId?: string;
 }
 
@@ -99,6 +104,11 @@ export interface Buddy {
   goal: string;
   /** 用户头像 URL，最大长度 1000 字符 */
   avatarUri?: string;
+  goalTags?: string[];
+  matchCount?: number;
+  relationshipId?: string;
+  status?: 'pending' | 'accepted';
+  direction?: 'incoming' | 'outgoing';
 }
 
 export interface Comment {
@@ -109,6 +119,7 @@ export interface Comment {
   userAvatarUri?: string;
   text: string;
   time: string;
+  isOwn?: boolean;
   replies?: Comment[];
 }
 
@@ -120,6 +131,8 @@ export interface DayData {
   isSelected: boolean;
   activityType?: 'primary' | 'secondary' | 'tertiary';
   completedPlanIds?: string[];
+  completedHabitIds?: string[];
+  activityCount?: number;
 }
 
 export interface Habit {
@@ -127,8 +140,16 @@ export interface Habit {
   title: string;
   subtitle: string;
   icon: keyof typeof MaterialIcons.glyphMap;
-  completed: boolean;
+  isCompleted: boolean;
   category: string;
+  weekdays: number[];
+  reminderTime: string | null;
+  startDate: string;
+  isActive: boolean;
+  sortOrder: number;
+  currentStreak: number;
+  checkInDates: string[];
+  scheduledToday?: boolean;
 }
 
 export interface UserSettings {
@@ -136,8 +157,45 @@ export interface UserSettings {
   notificationTime: string;
   dndStart: string;
   dndEnd: string;
-  theme: 'light' | 'dark' | 'system';
+  theme: 'light';
   fontSize: 'small' | 'medium' | 'large';
+}
+
+export interface ActivityRecord {
+  id: string;
+  type: 'plan' | 'habit';
+  itemId: string;
+  title: string;
+  checkInType: 0 | 1 | 2 | 'habit';
+  date: string;
+  numericValue: number | null;
+  note: string | null;
+}
+
+export interface BuddyRelationship {
+  id: string;
+  status: 'pending' | 'accepted';
+  direction: 'incoming' | 'outgoing';
+  user: {
+    userId: string;
+    username: string;
+    avatar?: string | null;
+    bio?: string | null;
+    goalTags: string[];
+  };
+  createdAt: string;
+}
+
+export interface BlockedUser {
+  id: string;
+  user: {
+    userId: string;
+    username: string;
+    avatar?: string | null;
+    bio?: string | null;
+    goalTags: string[];
+  };
+  createdAt: string;
 }
 
 // Template types

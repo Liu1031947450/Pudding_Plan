@@ -7,11 +7,15 @@ import {
   ActivityIndicator,
   RefreshControl,
   TextInput,
+  TouchableOpacity,
+  Switch,
+  Alert,
+  Platform,
 } from 'react-native';
 import { AppText as Text } from '../components/common/AppText';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { Colors, Spacing } from '../constants/theme';
+import { Colors, Spacing, FontSize, BorderRadius } from '../constants/theme';
 import {
   BottomDrawer,
   BottomNavBar,
@@ -23,14 +27,20 @@ import {
   CalendarHeader,
   CalendarGrid,
   TodayFocusSection,
+  HabitSection,
   DailyQuoteCard,
   NotificationDrawer,
 } from '../features/calendar';
-import { useNotifications } from '../contexts';
-import type { DayData, Plan, PlanCheckInDetails } from '../types/domain';
+import { useAppSettings, useNotifications } from '../contexts';
+import type { DayData, Habit, Plan, PlanCheckInDetails } from '../types/domain';
 import { usePlanManagement } from '../hooks';
 import { useAuth } from '../contexts/AuthContext';
-import { calendarApi } from '../api/calendar';
+import { calendarApi, habitsApi, type HabitInput } from '../api/calendar';
+import { formatLocalDate, isDateInCheckInWindow } from '../utils/date';
+import { syncNotificationSettings } from '../services/notificationScheduler';
+
+const ALL_WEEKDAYS = [0, 1, 2, 3, 4, 5, 6];
+const WEEKDAY_LABELS = ['日', '一', '二', '三', '四', '五', '六'];
 
 const CalendarScreen: React.FC = () => {
   const navigation = useNavigation();
@@ -54,7 +64,21 @@ const CalendarScreen: React.FC = () => {
   const [numericValue, setNumericValue] = useState('');
   const [note, setNote] = useState('');
   const [checkInSubmitting, setCheckInSubmitting] = useState(false);
-  const { plans, refreshPlans, handleCheckIn } = usePlanManagement();
+  const { plans, refreshPlans, handleCheckIn, handleRemoveCheckIn } =
+    usePlanManagement();
+  const { settings } = useAppSettings();
+  const [habits, setHabits] = useState<Habit[]>([]);
+  const [habitEditorVisible, setHabitEditorVisible] = useState(false);
+  const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
+  const [habitTitle, setHabitTitle] = useState('');
+  const [habitSubtitle, setHabitSubtitle] = useState('');
+  const [habitWeekdays, setHabitWeekdays] = useState<number[]>(ALL_WEEKDAYS);
+  const [habitReminderTime, setHabitReminderTime] = useState('');
+  const [habitStartDate, setHabitStartDate] = useState(
+    formatLocalDate(new Date()),
+  );
+  const [habitActive, setHabitActive] = useState(true);
+  const [habitSaving, setHabitSaving] = useState(false);
 
   // 盖章动画状态
   const stampAnim = React.useRef(new Animated.Value(0)).current;
@@ -101,6 +125,19 @@ const CalendarScreen: React.FC = () => {
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth() + 1;
+  const selectedDate = `${year}-${String(month).padStart(2, '0')}-${String(
+    selectedDay,
+  ).padStart(2, '0')}`;
+  const canEditSelectedDate = isDateInCheckInWindow(selectedDate);
+
+  const fetchHabits = React.useCallback(async () => {
+    if (!currentUserId) {
+      setHabits([]);
+      return;
+    }
+    const response = await habitsApi.getAll(selectedDate);
+    if (response.success && response.data) setHabits(response.data);
+  }, [currentUserId, selectedDate]);
 
   const fetchCalendarData = React.useCallback(
     async (silent = false) => {
@@ -135,12 +172,23 @@ const CalendarScreen: React.FC = () => {
       refreshNotifications();
       refreshPlans(currentUserId);
       fetchCalendarData(true);
-    }, [currentUserId, refreshNotifications, refreshPlans, fetchCalendarData]),
+      fetchHabits();
+    }, [
+      currentUserId,
+      refreshNotifications,
+      refreshPlans,
+      fetchCalendarData,
+      fetchHabits,
+    ]),
   );
 
   React.useEffect(() => {
     fetchCalendarData(true); // 切换日历静默刷新
   }, [fetchCalendarData]);
+
+  React.useEffect(() => {
+    fetchHabits();
+  }, [fetchHabits]);
 
   const handleRefresh = React.useCallback(async () => {
     if (!currentUserId) {
@@ -154,11 +202,18 @@ const CalendarScreen: React.FC = () => {
         fetchCalendarData(true),
         refreshPlans(currentUserId, true),
         refreshNotifications(),
+        fetchHabits(),
       ]);
     } finally {
       setRefreshing(false);
     }
-  }, [currentUserId, fetchCalendarData, refreshPlans, refreshNotifications]);
+  }, [
+    currentUserId,
+    fetchCalendarData,
+    fetchHabits,
+    refreshPlans,
+    refreshNotifications,
+  ]);
 
   const submitCheckIn = async (plan: Plan, details?: PlanCheckInDetails) => {
     if (!currentUserId) {
@@ -169,15 +224,11 @@ const CalendarScreen: React.FC = () => {
     }
 
     try {
-      const selectedDateStr = `${year}-${String(month).padStart(
-        2,
-        '0',
-      )}-${String(selectedDay).padStart(2, '0')}`;
       setCheckInSubmitting(true);
-      const result = await handleCheckIn(plan.id, selectedDateStr, details);
+      const result = await handleCheckIn(plan.id, selectedDate, details);
       if (result.success) {
         playStampAnimation();
-        await fetchCalendarData(true);
+        await Promise.all([fetchCalendarData(true), fetchHabits()]);
         setCheckInPlan(null);
         setToastMessage(result.message || '打卡成功');
         setToastType('success');
@@ -203,9 +254,6 @@ const CalendarScreen: React.FC = () => {
       return;
     }
 
-    const selectedDate = `${year}-${String(month).padStart(2, '0')}-${String(
-      selectedDay,
-    ).padStart(2, '0')}`;
     const existing = plan.checkInRecords?.find(
       record => record.date === selectedDate,
     );
@@ -216,6 +264,171 @@ const CalendarScreen: React.FC = () => {
     );
     setNote(existing?.note || '');
     setCheckInPlan(plan);
+  };
+
+  const removePlanCheckIn = async (planId: string) => {
+    const response = await handleRemoveCheckIn(planId, selectedDate);
+    if (response.success) {
+      await fetchCalendarData(true);
+      setToastMessage('打卡已撤销');
+      setToastType('success');
+    } else {
+      setToastMessage(response.error || '撤销失败');
+      setToastType('error');
+    }
+    setToastVisible(true);
+  };
+
+  const refreshHabitViews = async () => {
+    await Promise.all([fetchHabits(), fetchCalendarData(true)]);
+    await syncNotificationSettings(settings);
+  };
+
+  const openHabitEditor = (habit?: Habit) => {
+    setEditingHabit(habit || null);
+    setHabitTitle(habit?.title || '');
+    setHabitSubtitle(habit?.subtitle || '');
+    setHabitWeekdays(habit?.weekdays || ALL_WEEKDAYS);
+    setHabitReminderTime(habit?.reminderTime || '');
+    setHabitStartDate(habit?.startDate || formatLocalDate(new Date()));
+    setHabitActive(habit?.isActive ?? true);
+    setHabitEditorVisible(true);
+  };
+
+  const saveHabit = async () => {
+    if (!habitTitle.trim()) {
+      setToastMessage('请输入习惯名称');
+      setToastType('error');
+      setToastVisible(true);
+      return;
+    }
+    if (habitWeekdays.length === 0) {
+      setToastMessage('请至少选择一个重复星期');
+      setToastType('error');
+      setToastVisible(true);
+      return;
+    }
+    if (
+      habitReminderTime &&
+      !/^([01]\d|2[0-3]):[0-5]\d$/.test(habitReminderTime)
+    ) {
+      setToastMessage('提醒时间需使用 HH:mm 格式');
+      setToastType('error');
+      setToastVisible(true);
+      return;
+    }
+
+    const payload: HabitInput = {
+      title: habitTitle.trim(),
+      subtitle: habitSubtitle.trim(),
+      icon: editingHabit?.icon || 'task-alt',
+      category: editingHabit?.category || '日常',
+      weekdays: [...habitWeekdays].sort(),
+      reminderTime: habitReminderTime || null,
+      startDate: habitStartDate,
+      isActive: habitActive,
+    };
+    setHabitSaving(true);
+    try {
+      const response = editingHabit
+        ? await habitsApi.update(editingHabit.id, payload)
+        : await habitsApi.create(payload);
+      if (!response.success) {
+        setToastMessage(response.error || '保存习惯失败');
+        setToastType('error');
+      } else {
+        setHabitEditorVisible(false);
+        await refreshHabitViews();
+        setToastMessage(editingHabit ? '习惯已更新' : '习惯已创建');
+        setToastType('success');
+      }
+    } finally {
+      setHabitSaving(false);
+      setToastVisible(true);
+    }
+  };
+
+  const toggleHabitCheckIn = async (habit: Habit) => {
+    const completed = habit.checkInDates.includes(selectedDate);
+    const response = completed
+      ? await habitsApi.removeCheckIn(habit.id, selectedDate)
+      : await habitsApi.checkIn(habit.id, selectedDate);
+    if (response.success) {
+      await Promise.all([fetchHabits(), fetchCalendarData(true)]);
+      setToastMessage(completed ? '习惯打卡已撤销' : '习惯打卡成功');
+      setToastType('success');
+    } else {
+      setToastMessage(response.error || '习惯打卡失败');
+      setToastType('error');
+    }
+    setToastVisible(true);
+  };
+
+  const toggleHabitActive = async (habit: Habit) => {
+    const response = await habitsApi.update(habit.id, {
+      isActive: !habit.isActive,
+    });
+    if (response.success) {
+      await refreshHabitViews();
+      setToastMessage(habit.isActive ? '习惯已停用' : '习惯已启用');
+      setToastType('success');
+    } else {
+      setToastMessage(response.error || '更新习惯状态失败');
+      setToastType('error');
+    }
+    setToastVisible(true);
+  };
+
+  const deleteHabit = async (habit: Habit) => {
+    const runDelete = async () => {
+      const response = await habitsApi.delete(habit.id);
+      if (response.success) {
+        await refreshHabitViews();
+        setToastMessage('习惯已删除');
+        setToastType('success');
+      } else {
+        setToastMessage(response.error || '删除习惯失败');
+        setToastType('error');
+      }
+      setToastVisible(true);
+    };
+
+    if (Platform.OS === 'web') {
+      const confirmDelete = (globalThis as any).confirm?.(
+        `确定删除「${habit.title}」吗？`,
+      );
+      if (confirmDelete) await runDelete();
+      return;
+    }
+    Alert.alert('删除习惯', `确定删除「${habit.title}」及其打卡记录吗？`, [
+      { text: '取消', style: 'cancel' },
+      {
+        text: '删除',
+        style: 'destructive',
+        onPress: () => {
+          runDelete().catch(() => {
+            setToastMessage('删除习惯失败，请重试');
+            setToastType('error');
+            setToastVisible(true);
+          });
+        },
+      },
+    ]);
+  };
+
+  const moveHabit = async (fromIndex: number, toIndex: number) => {
+    if (toIndex < 0 || toIndex >= habits.length) return;
+    const next = [...habits];
+    const [moved] = next.splice(fromIndex, 1);
+    next.splice(toIndex, 0, moved);
+    setHabits(next);
+    const response = await habitsApi.reorder(next.map(habit => habit.id));
+    if (!response.success) {
+      await fetchHabits();
+      setToastMessage(response.error || '习惯排序失败');
+      setToastType('error');
+      setToastVisible(true);
+    }
   };
 
   const handleDetailedCheckIn = async () => {
@@ -297,8 +510,14 @@ const CalendarScreen: React.FC = () => {
               <CalendarHeader
                 year={year}
                 month={month}
-                onPrevMonth={() => setCurrentDate(new Date(year, month - 2, 1))}
-                onNextMonth={() => setCurrentDate(new Date(year, month, 1))}
+                onPrevMonth={() => {
+                  setCurrentDate(new Date(year, month - 2, 1));
+                  setSelectedDay(1);
+                }}
+                onNextMonth={() => {
+                  setCurrentDate(new Date(year, month, 1));
+                  setSelectedDay(1);
+                }}
                 onGoToToday={() => {
                   const today = new Date();
                   setCurrentDate(today);
@@ -336,8 +555,21 @@ const CalendarScreen: React.FC = () => {
               selectedDay={selectedDay}
               month={month}
               year={year}
-              calendarDays={calendarDays}
+              canEditDate={canEditSelectedDate}
               onCheckIn={onCheckIn}
+              onRemoveCheckIn={removePlanCheckIn}
+            />
+
+            <HabitSection
+              habits={habits}
+              selectedDate={selectedDate}
+              canEditDate={canEditSelectedDate}
+              onAdd={() => openHabitEditor()}
+              onEdit={openHabitEditor}
+              onDelete={deleteHabit}
+              onToggleActive={toggleHabitActive}
+              onToggleCheckIn={toggleHabitCheckIn}
+              onMove={moveHabit}
             />
 
             <DailyQuoteCard quote={quote} />
@@ -391,6 +623,102 @@ const CalendarScreen: React.FC = () => {
             disabled={checkInSubmitting}
           />
         </View>
+      </BottomDrawer>
+
+      <BottomDrawer
+        visible={habitEditorVisible}
+        onClose={() => setHabitEditorVisible(false)}
+        title={editingHabit ? '编辑快捷习惯' : '新建快捷习惯'}
+        height="85%"
+      >
+        <ScrollView contentContainerStyle={styles.habitForm}>
+          <Text style={styles.formLabel}>习惯名称</Text>
+          <TextInput
+            value={habitTitle}
+            onChangeText={setHabitTitle}
+            placeholder="例如：喝水 8 杯"
+            placeholderTextColor={Colors.outline}
+            maxLength={100}
+            style={styles.checkInInput}
+          />
+          <Text style={styles.formLabel}>补充说明</Text>
+          <TextInput
+            value={habitSubtitle}
+            onChangeText={setHabitSubtitle}
+            placeholder="可选"
+            placeholderTextColor={Colors.outline}
+            maxLength={200}
+            style={styles.checkInInput}
+          />
+          <View style={styles.formHeaderRow}>
+            <Text style={styles.formLabel}>重复星期</Text>
+            <TouchableOpacity onPress={() => setHabitWeekdays(ALL_WEEKDAYS)}>
+              <Text style={styles.formLink}>每天</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.weekdayRow}>
+            {ALL_WEEKDAYS.map(day => {
+              const selected = habitWeekdays.includes(day);
+              return (
+                <TouchableOpacity
+                  key={day}
+                  style={[
+                    styles.weekdayButton,
+                    selected && styles.weekdayButtonActive,
+                  ]}
+                  onPress={() =>
+                    setHabitWeekdays(current =>
+                      current.includes(day)
+                        ? current.filter(value => value !== day)
+                        : [...current, day],
+                    )
+                  }
+                >
+                  <Text
+                    style={[
+                      styles.weekdayText,
+                      selected && styles.weekdayTextActive,
+                    ]}
+                  >
+                    {WEEKDAY_LABELS[day]}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+          <Text style={styles.formLabel}>开始日期</Text>
+          <TextInput
+            value={habitStartDate}
+            onChangeText={setHabitStartDate}
+            placeholder="YYYY-MM-DD"
+            placeholderTextColor={Colors.outline}
+            style={styles.checkInInput}
+          />
+          <Text style={styles.formLabel}>提醒时间（可选）</Text>
+          <TextInput
+            value={habitReminderTime}
+            onChangeText={setHabitReminderTime}
+            placeholder="例如 08:30，留空则不提醒"
+            placeholderTextColor={Colors.outline}
+            maxLength={5}
+            style={styles.checkInInput}
+          />
+          <View style={styles.activeRow}>
+            <View>
+              <Text style={styles.formLabel}>启用习惯</Text>
+              <Text style={styles.formHint}>
+                停用后不再提醒，也不能继续打卡
+              </Text>
+            </View>
+            <Switch value={habitActive} onValueChange={setHabitActive} />
+          </View>
+          <Button
+            title={editingHabit ? '保存修改' : '创建习惯'}
+            onPress={saveHabit}
+            loading={habitSaving}
+            disabled={habitSaving}
+          />
+        </ScrollView>
       </BottomDrawer>
 
       <Toast
@@ -478,6 +806,66 @@ const styles = StyleSheet.create({
   },
   checkInNoteInput: {
     minHeight: 140,
+  },
+  habitForm: {
+    padding: Spacing.lg,
+    gap: Spacing.sm,
+  },
+  formLabel: {
+    fontSize: FontSize.sm,
+    fontWeight: '700',
+    color: Colors.onSurface,
+  },
+  formHint: {
+    marginTop: 2,
+    fontSize: FontSize.xs,
+    color: Colors.onSurfaceVariant,
+  },
+  formHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: Spacing.sm,
+  },
+  formLink: {
+    fontSize: FontSize.sm,
+    fontWeight: '600',
+    color: Colors.primary,
+  },
+  weekdayRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: Spacing.sm,
+  },
+  weekdayButton: {
+    width: 38,
+    height: 38,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 19,
+    borderWidth: 1,
+    borderColor: Colors.outlineVariant,
+  },
+  weekdayButtonActive: {
+    backgroundColor: Colors.primaryContainer,
+    borderColor: Colors.primary,
+  },
+  weekdayText: {
+    fontSize: FontSize.sm,
+    color: Colors.onSurfaceVariant,
+  },
+  weekdayTextActive: {
+    color: Colors.onPrimaryContainer,
+    fontWeight: '700',
+  },
+  activeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: Spacing.md,
+    marginVertical: Spacing.sm,
+    borderRadius: BorderRadius.md,
+    backgroundColor: Colors.surfaceContainerLow,
   },
 });
 

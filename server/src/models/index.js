@@ -7,11 +7,15 @@ const CircleMoment = require('./CircleMoment');
 const Template = require('./Template');
 const Like = require('./Like');
 const Collect = require('./Collect');
-const Friendship = require('./Friendship');
 const Comment = require('./Comment');
 const PlanCheckIn = require('./PlanCheckIn');
+const HabitCheckIn = require('./HabitCheckIn');
 const UserSetting = require('./UserSetting');
 const Feedback = require('./Feedback');
+const Follow = require('./Follow');
+const BuddyRelationship = require('./BuddyRelationship');
+const UserBlock = require('./UserBlock');
+const ContentReport = require('./ContentReport');
 
 // 定义关联关系
 User.hasMany(Plan, { foreignKey: 'userId', as: 'plans' });
@@ -26,6 +30,12 @@ PlanCheckIn.belongsTo(Plan, { foreignKey: 'planId', as: 'plan' });
 
 User.hasMany(Habit, { foreignKey: 'userId', as: 'habits' });
 Habit.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+Habit.hasMany(HabitCheckIn, {
+  foreignKey: 'habitId',
+  as: 'checkIns',
+  onDelete: 'CASCADE',
+});
+HabitCheckIn.belongsTo(Habit, { foreignKey: 'habitId', as: 'habit' });
 
 User.hasMany(Notification, { foreignKey: 'userId', as: 'notifications' });
 Notification.belongsTo(User, { foreignKey: 'userId', as: 'user' });
@@ -75,12 +85,35 @@ Comment.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 Comment.hasMany(Comment, { foreignKey: 'parentId', as: 'replies' });
 Comment.belongsTo(Comment, { foreignKey: 'parentId', as: 'parent' });
 
-// 好友关联
-User.belongsToMany(User, {
-  through: Friendship,
-  as: 'friends',
+Follow.belongsTo(User, {
   foreignKey: 'userId',
-  otherKey: 'friendId',
+  targetKey: 'userId',
+  as: 'follower',
+});
+Follow.belongsTo(User, {
+  foreignKey: 'followingId',
+  targetKey: 'userId',
+  as: 'following',
+});
+BuddyRelationship.belongsTo(User, {
+  foreignKey: 'requesterId',
+  targetKey: 'userId',
+  as: 'requester',
+});
+BuddyRelationship.belongsTo(User, {
+  foreignKey: 'addresseeId',
+  targetKey: 'userId',
+  as: 'addressee',
+});
+UserBlock.belongsTo(User, {
+  foreignKey: 'blockedId',
+  targetKey: 'userId',
+  as: 'blockedUser',
+});
+ContentReport.belongsTo(User, {
+  foreignKey: 'reporterId',
+  targetKey: 'userId',
+  as: 'reporter',
 });
 
 module.exports = {
@@ -93,9 +126,13 @@ module.exports = {
   Template,
   Like,
   Collect,
-  Friendship,
   Comment,
   PlanCheckIn,
+  HabitCheckIn,
   UserSetting,
   Feedback,
+  Follow,
+  BuddyRelationship,
+  UserBlock,
+  ContentReport,
 };

@@ -44,6 +44,10 @@ class PlanService {
   ): Promise<ApiResponse<Plan>> {
     return await plansApi.checkIn(id, date, details);
   }
+
+  async removeCheckIn(id: string, date: string): Promise<ApiResponse<Plan>> {
+    return plansApi.removeCheckIn(id, date);
+  }
 }
 
 // Export singleton instance

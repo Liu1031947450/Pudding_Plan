@@ -7,7 +7,7 @@ module.exports = {
   development: {
     username: process.env.DB_USER || 'postgres',
     password: process.env.DB_PASSWORD || 'postgres123',
-    database: process.env.DB_NAME || 'pudding_plan',
+    database: process.env.DB_NAME || 'pudding_plan_demo',
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT || '5432', 10),
     dialect: 'postgres',
@@ -16,7 +16,7 @@ module.exports = {
   test: {
     username: process.env.DB_USER || 'postgres',
     password: process.env.DB_PASSWORD || 'postgres123',
-    database: process.env.DB_NAME || 'pudding_plan',
+    database: process.env.DB_NAME || 'pudding_plan_demo',
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT || '5432', 10),
     dialect: 'postgres',

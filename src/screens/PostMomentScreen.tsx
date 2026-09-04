@@ -26,6 +26,11 @@ import {
 } from '../features/circle/components/PostMomentDrawers';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const VISIBILITY_VALUES = {
+  公开: 'public',
+  仅搭子: 'buddies',
+  仅自己: 'private',
+} as const;
 
 const PostMomentScreen: React.FC = () => {
   const navigation = useNavigation();
@@ -105,11 +110,20 @@ const PostMomentScreen: React.FC = () => {
       showToast('写点什么或发张图吧', 'info');
       return;
     }
+    if (title.trim().length > 200 || content.trim().length > 10000) {
+      showToast('动态内容过长', 'error');
+      return;
+    }
+    if (location.trim().length > 120) {
+      showToast('地点不能超过120字', 'error');
+      return;
+    }
 
     setIsPublishing(true);
+    const uploadedImageUrls: string[] = [];
+    let createAttempted = false;
     try {
       // 1. 上传所有图片
-      const uploadedImageUrls: string[] = [];
       for (const uri of images) {
         if (!uri || !uri.trim()) {
           continue;
@@ -119,20 +133,25 @@ const PostMomentScreen: React.FC = () => {
         if (uploadRes.success && uploadRes.data) {
           uploadedImageUrls.push(uploadRes.data);
         } else {
+          await circlesApi.cleanupUploads(uploadedImageUrls);
           showToast(uploadRes.error || '图片上传失败', 'error');
           return;
         }
       }
 
       // 2. 调用接口创建动态
+      createAttempted = true;
       const postRes = await circlesApi.createMoment({
         title,
         content,
         images: uploadedImageUrls,
         imageUri: uploadedImageUrls[0],
-        category: topic.replace('#', ''),
+        category: topic.replace(/^#+/, ''),
         description: content.substring(0, 30),
         type: 'waterfall',
+        visibility:
+          VISIBILITY_VALUES[visibility as keyof typeof VISIBILITY_VALUES],
+        location,
       });
 
       if (postRes.success) {
@@ -146,6 +165,7 @@ const PostMomentScreen: React.FC = () => {
       }
     } catch (error) {
       console.error('发布流程出错:', error);
+      if (!createAttempted) await circlesApi.cleanupUploads(uploadedImageUrls);
       showToast('由于网络原因发布失败', 'error');
     } finally {
       setIsPublishing(false);
@@ -172,7 +192,7 @@ const PostMomentScreen: React.FC = () => {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ['images'],
         allowsMultipleSelection: true,
-        selectionLimit: 9 - images.length,
+        selectionLimit: 4 - images.length,
         quality: 0.8,
       });
 
@@ -188,7 +208,7 @@ const PostMomentScreen: React.FC = () => {
           return;
         }
 
-        setImages(prev => [...prev, ...newUris]);
+        setImages(prev => [...prev, ...newUris].slice(0, 4));
       }
     } catch (error) {
       console.error('选择图片失败:', error);
@@ -290,7 +310,7 @@ const PostMomentScreen: React.FC = () => {
                 </TouchableOpacity>
               </View>
             ))}
-            {images.length < 9 && (
+            {images.length < 4 && (
               <TouchableOpacity
                 style={styles.addImageButton}
                 onPress={handleChooseImage}
@@ -365,9 +385,12 @@ const PostMomentScreen: React.FC = () => {
         <TouchableOpacity
           style={[
             styles.publishButton,
-            !content && images.length === 0 && styles.publishButtonDisabled,
+            !title.trim() &&
+              !content.trim() &&
+              images.length === 0 &&
+              styles.publishButtonDisabled,
           ]}
-          disabled={!content && images.length === 0}
+          disabled={!title.trim() && !content.trim() && images.length === 0}
           onPress={handlePublish}
         >
           <Text style={styles.publishButtonText}>发布动态</Text>

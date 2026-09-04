@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { View, StyleSheet, Animated, Easing } from 'react-native';
+import { View, StyleSheet, Animated, Easing, Platform } from 'react-native';
 import { AppText as Text } from '../components/common/AppText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -10,6 +10,7 @@ interface SplashScreenProps {
 }
 
 const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
+  const useNativeDriver = Platform.OS !== 'web';
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
   const dotAnim1 = useRef(new Animated.Value(0.2)).current;
@@ -23,13 +24,13 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
         toValue: 1,
         duration: 800,
         easing: Easing.out(Easing.cubic),
-        useNativeDriver: true,
+        useNativeDriver,
       }),
       Animated.spring(scaleAnim, {
         toValue: 1,
         tension: 50,
         friction: 7,
-        useNativeDriver: true,
+        useNativeDriver,
       }),
     ]).start();
 
@@ -39,32 +40,32 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
         Animated.timing(dotAnim1, {
           toValue: 1,
           duration: 400,
-          useNativeDriver: true,
+          useNativeDriver,
         }),
         Animated.timing(dotAnim2, {
           toValue: 1,
           duration: 400,
-          useNativeDriver: true,
+          useNativeDriver,
         }),
         Animated.timing(dotAnim3, {
           toValue: 1,
           duration: 400,
-          useNativeDriver: true,
+          useNativeDriver,
         }),
         Animated.timing(dotAnim1, {
           toValue: 0.2,
           duration: 400,
-          useNativeDriver: true,
+          useNativeDriver,
         }),
         Animated.timing(dotAnim2, {
           toValue: 0.4,
           duration: 400,
-          useNativeDriver: true,
+          useNativeDriver,
         }),
         Animated.timing(dotAnim3, {
           toValue: 0.2,
           duration: 400,
-          useNativeDriver: true,
+          useNativeDriver,
         }),
       ]),
     );
@@ -75,17 +76,25 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
       Animated.timing(fadeAnim, {
         toValue: 0,
         duration: 500,
-        useNativeDriver: true,
-      }).start(() => {
-        onFinish();
-      });
+        useNativeDriver,
+      }).start();
     }, 3000);
+    const finishTimer = setTimeout(onFinish, 3500);
 
     return () => {
       clearTimeout(timer);
+      clearTimeout(finishTimer);
       dotAnimation.stop();
     };
-  }, [fadeAnim, scaleAnim, dotAnim1, dotAnim2, dotAnim3, onFinish]);
+  }, [
+    fadeAnim,
+    scaleAnim,
+    dotAnim1,
+    dotAnim2,
+    dotAnim3,
+    onFinish,
+    useNativeDriver,
+  ]);
 
   return (
     <View style={styles.container}>

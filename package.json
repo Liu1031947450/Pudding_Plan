@@ -1,6 +1,6 @@
 {
   "name": "pudding-plan",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "backend": "cd server && npm run dev",
@@ -14,12 +14,17 @@
     "start:tunnel": "expo start --tunnel",
     "start:localhost": "expo start --localhost",
     "test": "jest",
+    "typecheck": "tsc --noEmit",
     "web": "webpack serve --mode development",
     "web:build": "webpack --mode production",
     "server": "cd server && npm start",
     "db:start": "npm run --prefix server db:start",
     "db:stop": "npm run --prefix server db:stop",
-    "db:status": "npm run --prefix server db:status"
+    "db:status": "npm run --prefix server db:status",
+    "demo:reset": "npm run --prefix server demo:reset",
+    "demo:seed": "npm run --prefix server demo:seed",
+    "demo": "npm run demo:reset && npm run demo:seed && concurrently -k -n API,WEB \"npm run server\" \"npm run web\"",
+    "verify": "npm run typecheck && npm test -- --runInBand && npm run lint && npm run format:check && npm run web:build && npm run --prefix server verify"
   },
   "dependencies": {
     "@babel/preset-react": "^7.28.5",

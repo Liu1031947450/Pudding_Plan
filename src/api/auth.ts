@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import { apiClient, type ApiResponse } from './client';
 
 export interface User {
@@ -7,6 +8,7 @@ export interface User {
   /** 用户头像 URL，最大长度 1000 字符 */
   avatar?: string;
   bio?: string;
+  goalTags: string[];
 }
 
 export interface LoginRequest {
@@ -19,6 +21,8 @@ export interface RegisterRequest {
   phone: string;
   password: string;
   confirmPassword: string;
+  acceptedTerms: boolean;
+  goalTags?: string[];
 }
 
 export interface AuthResponse {
@@ -37,8 +41,9 @@ export interface UserStats {
     likes: number;
     collects: number;
     friends: number;
+    buddies?: number;
   };
-  checkInRecords?: { date: string; planTitles: string[]; count: number }[];
+  checkInRecords?: import('../types/domain').ActivityRecord[];
 }
 
 export const authApi = {
@@ -86,9 +91,8 @@ export const authApi = {
   // 更新用户资料
   updateProfile: async (data: {
     username: string;
-    /** 用户头像 URL，最大长度 1000 字符 */
-    avatar?: string;
     bio?: string;
+    goalTags: string[];
   }): Promise<ApiResponse<User>> => {
     try {
       return await apiClient.put<User>('/auth/me', data);
@@ -96,6 +100,31 @@ export const authApi = {
       return { success: false, error: error.message || '更新资料失败' };
     }
   },
+
+  uploadAvatar: async (uri: string): Promise<ApiResponse<User>> => {
+    const formData = new FormData();
+    if (Platform.OS === 'web') {
+      const blob = await fetch(uri).then(response => response.blob());
+      (formData as any).append('avatar', blob, 'avatar.jpg');
+    } else {
+      formData.append('avatar', {
+        uri,
+        name: uri.split('/').pop() || 'avatar.jpg',
+        type: 'image/jpeg',
+      } as any);
+    }
+    return apiClient.post<User>('/auth/avatar', formData);
+  },
+
+  changePassword: async (data: {
+    currentPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+  }): Promise<ApiResponse<{ token: string }>> =>
+    apiClient.put<{ token: string }>('/auth/password', data),
+
+  deleteAccount: async (password: string): Promise<ApiResponse<void>> =>
+    apiClient.delete<void>('/auth/account', { password }),
 
   // 获取当前用户统计
   getCurrentUserStats: async (): Promise<ApiResponse<UserStats>> => {

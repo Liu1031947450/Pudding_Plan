@@ -7,18 +7,32 @@ export const useCircleData = () => {
   const [buddies, setBuddies] = useState<Buddy[]>([]);
   const [circles, setCircles] = useState<CircleListItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   const loadData = useCallback(async () => {
     setLoading(true);
+    setError('');
     try {
-      const [buddiesData, circlesData] = await Promise.all([
+      const [buddiesResponse, circlesResponse] = await Promise.all([
         circleService.getBuddies(),
         circleService.getCircles(),
       ]);
-      setBuddies(buddiesData);
-      setCircles(circlesData);
-    } catch (error) {
-      console.error('Failed to load circle data:', error);
+      if (buddiesResponse.success) {
+        setBuddies(buddiesResponse.data || []);
+      }
+      if (circlesResponse.success) {
+        setCircles(circlesResponse.data || []);
+      }
+      if (!buddiesResponse.success || !circlesResponse.success) {
+        setError(
+          circlesResponse.error ||
+            buddiesResponse.error ||
+            '圈子内容加载失败，请重试',
+        );
+      }
+    } catch (caught) {
+      console.error('Failed to load circle data:', caught);
+      setError('圈子内容加载失败，请重试');
     } finally {
       setLoading(false);
     }
@@ -27,17 +41,6 @@ export const useCircleData = () => {
   useEffect(() => {
     loadData();
   }, [loadData]);
-
-  const joinCircle = useCallback(
-    async (circleId: string) => {
-      const success = await circleService.joinCircle(circleId);
-      if (success) {
-        await loadData();
-      }
-      return success;
-    },
-    [loadData],
-  );
 
   const toggleLikeCircle = useCallback(
     async (circleId: string): Promise<CircleListItem | null> => {
@@ -99,7 +102,7 @@ export const useCircleData = () => {
     buddies,
     circles,
     loading,
-    joinCircle,
+    error,
     refreshData: loadData,
     toggleLikeCircle,
     toggleCollectCircle,

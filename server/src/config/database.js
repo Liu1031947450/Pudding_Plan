@@ -17,7 +17,7 @@ const sequelize = new Sequelize({
   port: parseInt(process.env.DB_PORT || '5432', 10),
   username: process.env.DB_USER || 'postgres',
   password: process.env.DB_PASSWORD || 'postgres123',
-  database: process.env.DB_NAME || 'pudding_plan',
+  database: process.env.DB_NAME || 'pudding_plan_demo',
   logging: process.env.NODE_ENV === 'development' ? console.log : false,
   pool: {
     max: 5,

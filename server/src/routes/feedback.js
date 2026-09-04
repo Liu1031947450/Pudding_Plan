@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { Feedback } = require('../models');
 const { authMiddleware } = require('../middleware/auth');
+const { ok, fail } = require('../utils/http');
 
 router.post('/', authMiddleware, async (req, res) => {
   const { category, content, contact } = req.body || {};
@@ -9,17 +10,13 @@ router.post('/', authMiddleware, async (req, res) => {
   const trimmedContact = typeof contact === 'string' ? contact.trim() : '';
 
   if (!['suggestion', 'issue', 'experience', 'other'].includes(category)) {
-    return res.status(400).json({ success: false, error: '反馈类型无效' });
+    return fail(res, 400, '反馈类型无效');
   }
   if (trimmedContent.length < 5 || trimmedContent.length > 500) {
-    return res
-      .status(400)
-      .json({ success: false, error: '反馈内容应为5至500个字符' });
+    return fail(res, 400, '反馈内容应为5至500个字符');
   }
   if (trimmedContact.length > 100) {
-    return res
-      .status(400)
-      .json({ success: false, error: '联系方式不能超过100个字符' });
+    return fail(res, 400, '联系方式不能超过100个字符');
   }
 
   try {
@@ -29,14 +26,15 @@ router.post('/', authMiddleware, async (req, res) => {
       content: trimmedContent,
       contact: trimmedContact || null,
     });
-    res.status(201).json({
-      success: true,
-      data: { id: String(feedback.id), status: feedback.status },
-      message: '反馈已提交',
-    });
+    ok(
+      res,
+      { id: String(feedback.id), status: feedback.status },
+      '反馈已提交',
+      201,
+    );
   } catch (error) {
     console.error('提交反馈失败:', error);
-    res.status(500).json({ success: false, error: '提交反馈失败' });
+    fail(res, 500, '提交反馈失败');
   }
 });
 

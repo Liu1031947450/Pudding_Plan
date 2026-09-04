@@ -5,6 +5,7 @@ import {
   View,
   ActivityIndicator,
   RefreshControl,
+  TouchableOpacity,
 } from 'react-native';
 import { AppText as Text } from '../components/common/AppText';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -20,9 +21,10 @@ import {
   AchievementDrawer,
 } from '../features/plan';
 import { usePlanManagement } from '../hooks';
-import { useNotifications } from '../contexts';
+import { useAppSettings, useNotifications } from '../contexts';
 import { useAuth } from '../contexts/AuthContext';
 import { badgesApi, rhythmApi } from '../api';
+import { syncNotificationSettings } from '../services/notificationScheduler';
 
 type RhythmPeriod = 'week' | 'month';
 
@@ -33,14 +35,17 @@ const PlanScreen: React.FC = () => {
   const {
     plans,
     loading,
+    error,
     isManaging,
     selectedPlans,
     handleDeleteSelected: deleteSelectedPlans,
+    handleUpdatePlan,
     handleReorderPlans,
     toggleManageMode,
     togglePlanSelection,
     refreshPlans,
   } = usePlanManagement();
+  const { settings } = useAppSettings();
 
   const {
     notifications,
@@ -88,8 +93,8 @@ const PlanScreen: React.FC = () => {
         if (response.success && response.data) {
           setRhythmData(response.data);
         }
-      } catch (error) {
-        console.error('Failed to fetch rhythm data:', error);
+      } catch (caught) {
+        console.error('Failed to fetch rhythm data:', caught);
       } finally {
         setRhythmLoading(false);
       }
@@ -133,8 +138,8 @@ const PlanScreen: React.FC = () => {
       if (response.success && response.data) {
         setBadges(response.data);
       }
-    } catch (error) {
-      console.error('Failed to fetch badges:', error);
+    } catch (caught) {
+      console.error('Failed to fetch badges:', caught);
     } finally {
       setBadgesLoading(false);
       setAchievementVisible(true);
@@ -173,11 +178,43 @@ const PlanScreen: React.FC = () => {
     }
   };
 
+  const activePlans = plans.filter(
+    plan => (plan.status || 'active') === 'active',
+  );
+  const pausedPlans = plans.filter(plan => plan.status === 'paused');
+  const archivedPlans = plans.filter(plan => plan.status === 'archived');
+
   const movePlan = (fromIndex: number, toIndex: number) => {
-    const newPlans = [...plans];
-    const [movedPlan] = newPlans.splice(fromIndex, 1);
-    newPlans.splice(toIndex, 0, movedPlan);
-    handleReorderPlans(newPlans);
+    if (toIndex < 0 || toIndex >= activePlans.length) return;
+    const reorderedActive = [...activePlans];
+    const [movedPlan] = reorderedActive.splice(fromIndex, 1);
+    reorderedActive.splice(toIndex, 0, movedPlan);
+    handleReorderPlans([
+      ...reorderedActive,
+      ...plans.filter(plan => (plan.status || 'active') !== 'active'),
+    ]);
+  };
+
+  const handleStatusChange = async (
+    plan: Plan,
+    status: 'active' | 'paused' | 'archived',
+  ) => {
+    const response = await handleUpdatePlan(plan.id, { status }, currentUserId);
+    if (response.success) {
+      await syncNotificationSettings(settings);
+      setToastMessage(
+        status === 'active'
+          ? '计划已恢复'
+          : status === 'paused'
+          ? '计划已暂停'
+          : '计划已归档',
+      );
+      setToastType('success');
+    } else {
+      setToastMessage(response.error || '更新计划状态失败');
+      setToastType('error');
+    }
+    setToastVisible(true);
   };
 
   return (
@@ -212,12 +249,23 @@ const PlanScreen: React.FC = () => {
             <ActivityIndicator size="large" color={Colors.primary} />
             <Text style={styles.loadingText}>加载中...</Text>
           </View>
+        ) : error && plans.length === 0 ? (
+          <View style={styles.loadingContainer}>
+            <Text style={styles.errorText}>{error}</Text>
+            <TouchableOpacity
+              style={styles.retryButton}
+              onPress={() => refreshPlans(currentUserId)}
+            >
+              <Text style={styles.retryText}>重新加载</Text>
+            </TouchableOpacity>
+          </View>
         ) : plans.length === 0 ? (
           <PlanEmptyState onCreatePlan={handleCreatePlan} />
         ) : (
           <>
             <PlanList
-              plans={plans}
+              title="正在进行"
+              plans={activePlans}
               isManaging={isManaging}
               selectedPlans={selectedPlans}
               onToggleManage={toggleManageMode}
@@ -226,7 +274,44 @@ const PlanScreen: React.FC = () => {
               onMovePlan={movePlan}
               onCreatePlan={handleCreatePlan}
               onPlanPress={handlePlanPress}
+              onStatusChange={handleStatusChange}
             />
+
+            {pausedPlans.length > 0 && (
+              <PlanList
+                title="已暂停"
+                plans={pausedPlans}
+                isManaging={false}
+                selectedPlans={new Set()}
+                onToggleManage={() => {}}
+                onToggleSelect={() => {}}
+                onDeleteSelected={() => {}}
+                onMovePlan={() => {}}
+                onCreatePlan={handleCreatePlan}
+                onPlanPress={handlePlanPress}
+                onStatusChange={handleStatusChange}
+                showManagement={false}
+                showCreate={false}
+              />
+            )}
+
+            {archivedPlans.length > 0 && (
+              <PlanList
+                title="历史归档"
+                plans={archivedPlans}
+                isManaging={false}
+                selectedPlans={new Set()}
+                onToggleManage={() => {}}
+                onToggleSelect={() => {}}
+                onDeleteSelected={() => {}}
+                onMovePlan={() => {}}
+                onCreatePlan={handleCreatePlan}
+                onPlanPress={handlePlanPress}
+                onStatusChange={handleStatusChange}
+                showManagement={false}
+                showCreate={false}
+              />
+            )}
 
             <RhythmChart
               data={rhythmData}
@@ -289,6 +374,21 @@ const styles = StyleSheet.create({
     marginTop: Spacing.md,
     fontSize: 14,
     color: Colors.onSurfaceVariant,
+  },
+  errorText: {
+    color: Colors.onSurfaceVariant,
+    textAlign: 'center',
+  },
+  retryButton: {
+    marginTop: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    borderRadius: 20,
+    backgroundColor: Colors.primaryContainer,
+  },
+  retryText: {
+    color: Colors.onPrimaryContainer,
+    fontWeight: '600',
   },
 });
 

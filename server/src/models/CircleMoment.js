@@ -33,6 +33,16 @@ const CircleMoment = sequelize.define(
       type: DataTypes.STRING(50),
       allowNull: true,
     },
+    visibility: {
+      type: DataTypes.STRING(16),
+      allowNull: false,
+      defaultValue: 'public',
+      validate: { isIn: [['public', 'buddies', 'private']] },
+    },
+    location: {
+      type: DataTypes.STRING(120),
+      allowNull: true,
+    },
     imageUri: {
       type: DataTypes.STRING(500),
       allowNull: true,

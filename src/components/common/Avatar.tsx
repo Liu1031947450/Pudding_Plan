@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Image, StyleSheet, ViewStyle } from 'react-native';
 import { AppText as Text } from './AppText';
 import { Colors } from '../../constants/theme';
+import { getImageUrl } from '../../utils';
 
 interface AvatarProps {
   uri?: string;
@@ -56,7 +57,7 @@ export const Avatar: React.FC<AvatarProps> = ({
     >
       {uri ? (
         <Image
-          source={{ uri }}
+          source={{ uri: getImageUrl(uri) }}
           style={[
             styles.image,
             {

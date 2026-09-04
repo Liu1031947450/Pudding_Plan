@@ -1,7 +1,9 @@
 import { apiClient, type ApiResponse } from './client';
+import { Platform } from 'react-native';
 import { API_ENDPOINTS } from './config';
 import type { CircleListItem, CircleMoment } from '../features/circle/types';
 import type { Buddy } from '../types/domain';
+import type { BlockedUser, BuddyRelationship } from '../types/domain';
 
 export const circlesApi = {
   // 获取所有圈子
@@ -12,11 +14,6 @@ export const circlesApi = {
   // 根据 ID 获取单个圈子
   getById: async (id: string): Promise<ApiResponse<CircleListItem>> => {
     return apiClient.get<CircleListItem>(API_ENDPOINTS.CIRCLE_DETAIL(id));
-  },
-
-  // 加入圈子
-  join: async (id: string): Promise<ApiResponse<boolean>> => {
-    return apiClient.post<boolean>(API_ENDPOINTS.CIRCLE_JOIN(id));
   },
 
   // 上传图片
@@ -32,17 +29,22 @@ export const circlesApi = {
       }
 
       const formData = new FormData();
-      const filename = normalizedUri.split('/').pop() || 'photo.jpg';
-      const match = /\.(\w+)$/.exec(filename);
-      const extension = (match?.[1] || 'jpeg').toLowerCase();
-      const normalizedExtension = extension === 'jpg' ? 'jpeg' : extension;
-      const type = `image/${normalizedExtension}`;
-
-      formData.append('image', {
-        uri: normalizedUri,
-        name: filename,
-        type,
-      } as any);
+      if (Platform.OS === 'web') {
+        const blob = await fetch(normalizedUri).then(response =>
+          response.blob(),
+        );
+        (formData as any).append('image', blob, 'moment.jpg');
+      } else {
+        const filename = normalizedUri.split('/').pop() || 'photo.jpg';
+        const extension = (
+          /\.(\w+)$/.exec(filename)?.[1] || 'jpeg'
+        ).toLowerCase();
+        formData.append('image', {
+          uri: normalizedUri,
+          name: filename,
+          type: `image/${extension === 'jpg' ? 'jpeg' : extension}`,
+        } as any);
+      }
 
       return apiClient.post<string>(
         API_ENDPOINTS.CIRCLES + '/upload',
@@ -52,6 +54,9 @@ export const circlesApi = {
       return { success: false, error: error.message || '图片上传失败' };
     }
   },
+
+  cleanupUploads: (images: string[]): Promise<ApiResponse<boolean>> =>
+    apiClient.delete(`${API_ENDPOINTS.CIRCLES}/upload`, { images }),
 
   // 创建动态 (Moment)
   createMoment: async (
@@ -96,12 +101,12 @@ export const circlesApi = {
 
   // 关注用户
   followUser: async (userId: string): Promise<ApiResponse<boolean>> => {
-    return apiClient.post<boolean>(`/auth/follow/${userId}`);
+    return apiClient.post<boolean>(`/users/${userId}/follow`);
   },
 
   // 取消关注
   unfollowUser: async (userId: string): Promise<ApiResponse<boolean>> => {
-    return apiClient.delete<boolean>(`/auth/follow/${userId}`);
+    return apiClient.delete<boolean>(`/users/${userId}/follow`);
   },
 
   // 获取点赞列表
@@ -132,11 +137,63 @@ export const circlesApi = {
       API_ENDPOINTS.CIRCLES + '/collections',
     );
   },
+
+  deleteMoment: (id: string): Promise<ApiResponse<boolean>> =>
+    apiClient.delete(API_ENDPOINTS.CIRCLE_DETAIL(id)),
+
+  deleteComment: (
+    momentId: string,
+    commentId: string,
+  ): Promise<ApiResponse<boolean>> =>
+    apiClient.delete(
+      `${API_ENDPOINTS.CIRCLE_DETAIL(momentId)}/comments/${commentId}`,
+    ),
+
+  report: (
+    targetType: 'moment' | 'comment',
+    targetId: string,
+    reason: 'spam' | 'harassment' | 'inappropriate' | 'other',
+    detail?: string,
+  ): Promise<ApiResponse<{ id: string }>> =>
+    apiClient.post(API_ENDPOINTS.REPORTS, {
+      targetType,
+      targetId,
+      reason,
+      detail,
+    }),
 };
 
 export const buddiesApi = {
-  // 获取所有伙伴
-  getAll: async (): Promise<ApiResponse<Buddy[]>> => {
-    return apiClient.get<Buddy[]>(API_ENDPOINTS.BUDDIES);
-  },
+  getAll: (): Promise<ApiResponse<BuddyRelationship[]>> =>
+    apiClient.get(API_ENDPOINTS.BUDDIES),
+  getRecommendations: (): Promise<ApiResponse<Buddy[]>> =>
+    apiClient.get(API_ENDPOINTS.BUDDY_RECOMMENDATIONS),
+  getRequests: (): Promise<
+    ApiResponse<{
+      incoming: BuddyRelationship[];
+      outgoing: BuddyRelationship[];
+      buddies: BuddyRelationship[];
+    }>
+  > => apiClient.get(API_ENDPOINTS.BUDDY_REQUESTS),
+  request: (userId: string): Promise<ApiResponse<{ id: string }>> =>
+    apiClient.post(API_ENDPOINTS.BUDDY_REQUESTS, { userId }),
+  accept: (id: string): Promise<ApiResponse<BuddyRelationship>> =>
+    apiClient.post(`${API_ENDPOINTS.BUDDIES}/${id}/accept`),
+  reject: (id: string): Promise<ApiResponse<boolean>> =>
+    apiClient.post(`${API_ENDPOINTS.BUDDIES}/${id}/reject`),
+  cancel: (id: string): Promise<ApiResponse<boolean>> =>
+    apiClient.delete(`${API_ENDPOINTS.BUDDY_REQUESTS}/${id}`),
+  remove: (id: string): Promise<ApiResponse<boolean>> =>
+    apiClient.delete(`${API_ENDPOINTS.BUDDIES}/${id}`),
+  encourage: (id: string): Promise<ApiResponse<boolean>> =>
+    apiClient.post(`${API_ENDPOINTS.BUDDIES}/${id}/encouragement`),
+};
+
+export const blocksApi = {
+  getAll: (): Promise<ApiResponse<BlockedUser[]>> =>
+    apiClient.get(API_ENDPOINTS.BLOCKS),
+  block: (userId: string): Promise<ApiResponse<boolean>> =>
+    apiClient.post(API_ENDPOINTS.BLOCKS, { userId }),
+  unblock: (userId: string): Promise<ApiResponse<boolean>> =>
+    apiClient.delete(`${API_ENDPOINTS.BLOCKS}/${userId}`),
 };

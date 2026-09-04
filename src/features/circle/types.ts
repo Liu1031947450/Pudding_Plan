@@ -11,6 +11,10 @@ export interface CircleBase {
   isLiked?: boolean;
   isCollected?: boolean;
   isFollowing?: boolean;
+  visibility?: 'public' | 'buddies' | 'private';
+  location?: string;
+  isOwn?: boolean;
+  createdAt?: string;
 }
 
 export interface CircleTopic extends CircleBase {
@@ -31,6 +35,7 @@ export interface CircleMoment extends CircleBase {
   likes?: number;
   commentsCount?: number;
   comments?: Comment[];
+  authorGoalTags?: string[];
 }
 
 export type CircleListItem = CircleTopic | CircleMoment;

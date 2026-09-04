@@ -13,3 +13,5 @@ export { default as AllBadgesScreen } from './AllBadgesScreen';
 export { default as MyCollectionsScreen } from './MyCollectionsScreen';
 export { default as NotificationsScreen } from './NotificationsScreen';
 export { default as CircleDetailScreen } from './CircleDetailScreen';
+export { default as BuddyCenterScreen } from './BuddyCenterScreen';
+export { default as BlockedUsersScreen } from './BlockedUsersScreen';

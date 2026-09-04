@@ -1,52 +1,72 @@
-import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import {
+  View,
+  StyleSheet,
+  FlatList,
+  ActivityIndicator,
+  TouchableOpacity,
+} from 'react-native';
 import { AppText as Text } from '../components/common/AppText';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize, BorderRadius } from '../constants/theme';
 import { TopAppBar } from '../components';
-import { authApi } from '../api';
-
-interface CheckInRecord {
-  date: string;
-  planTitles: string[];
-  count: number;
-}
+import { activityApi } from '../api';
+import type { ActivityRecord } from '../types/domain';
+import { parseLocalDate } from '../utils/date';
 
 const CheckInHistoryScreen: React.FC = () => {
   const navigation = useNavigation();
-  const [records, setRecords] = useState<CheckInRecord[]>([]);
+  const [records, setRecords] = useState<ActivityRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  useEffect(() => {
-    authApi.getCurrentUserStats().then(res => {
-      if (res.success && res.data?.checkInRecords) {
-        setRecords(res.data.checkInRecords);
-      }
-      setLoading(false);
-    });
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError('');
+    const response = await activityApi.getHistory();
+    if (response.success) {
+      setRecords(response.data || []);
+    } else {
+      setError(response.error || '打卡记录加载失败，请重试');
+    }
+    setLoading(false);
   }, []);
 
-  const renderItem = ({ item }: { item: CheckInRecord }) => (
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const renderItem = ({ item }: { item: ActivityRecord }) => (
     <View style={styles.item}>
       <View style={styles.dateCol}>
         <MaterialIcons
-          name="event-available"
+          name={item.type === 'habit' ? 'task-alt' : 'event-available'}
           size={20}
           color={Colors.primary}
         />
-        <Text style={styles.date}>{item.date}</Text>
+        <Text style={styles.date}>
+          {parseLocalDate(item.date).toLocaleDateString('zh-CN', {
+            month: 'short',
+            day: 'numeric',
+            weekday: 'short',
+          })}
+        </Text>
       </View>
       <View style={styles.plansCol}>
-        {item.planTitles.map((title, i) => (
-          <Text key={i} style={styles.planTitle} numberOfLines={1}>
-            {title}
-          </Text>
-        ))}
+        <Text style={styles.planTitle} numberOfLines={1}>
+          {item.title}
+        </Text>
+        {item.numericValue !== null && (
+          <Text style={styles.detailText}>记录值：{item.numericValue}</Text>
+        )}
+        {item.note && <Text style={styles.detailText}>{item.note}</Text>}
       </View>
       <View style={styles.countBadge}>
-        <Text style={styles.countText}>{item.count}</Text>
+        <Text style={styles.countText}>
+          {item.type === 'habit' ? '习惯' : '计划'}
+        </Text>
       </View>
     </View>
   );
@@ -61,6 +81,14 @@ const CheckInHistoryScreen: React.FC = () => {
       {loading ? (
         <View style={styles.center}>
           <ActivityIndicator size="large" color={Colors.primary} />
+        </View>
+      ) : error && records.length === 0 ? (
+        <View style={styles.center}>
+          <MaterialIcons name="cloud-off" size={64} color={Colors.outline} />
+          <Text style={styles.emptyText}>{error}</Text>
+          <TouchableOpacity style={styles.retryButton} onPress={load}>
+            <Text style={styles.retryText}>重新加载</Text>
+          </TouchableOpacity>
         </View>
       ) : records.length === 0 ? (
         <View style={styles.center}>
@@ -77,9 +105,11 @@ const CheckInHistoryScreen: React.FC = () => {
       ) : (
         <FlatList
           data={records}
-          keyExtractor={item => item.date}
+          keyExtractor={item => item.id}
           renderItem={renderItem}
           contentContainerStyle={styles.list}
+          onRefresh={load}
+          refreshing={loading}
         />
       )}
     </SafeAreaView>
@@ -105,6 +135,14 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingHorizontal: Spacing.xl,
   },
+  retryButton: {
+    marginTop: Spacing.sm,
+    backgroundColor: Colors.primaryContainer,
+    borderRadius: BorderRadius.full,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+  },
+  retryText: { color: Colors.onPrimaryContainer, fontWeight: '600' },
   list: { padding: Spacing.md, gap: Spacing.sm },
   item: {
     flexDirection: 'row',
@@ -123,6 +161,7 @@ const styles = StyleSheet.create({
   date: { fontSize: FontSize.sm, color: Colors.onSurface, fontWeight: '600' },
   plansCol: { flex: 1, gap: 2 },
   planTitle: { fontSize: FontSize.xs, color: Colors.onSurfaceVariant },
+  detailText: { fontSize: FontSize.xs, color: Colors.outline },
   countBadge: {
     backgroundColor: Colors.primaryContainer,
     borderRadius: BorderRadius.sm,

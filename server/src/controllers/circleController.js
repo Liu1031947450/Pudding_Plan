@@ -4,133 +4,51 @@ const {
   Like,
   Collect,
   Comment,
+  ContentReport,
   Notification,
 } = require('../models');
-const { mockLocations, mockTopics } = require('../data/mockData/communityData');
 const { getFileUrl } = require('../middleware/upload');
-const { getIO, connectedUsers } = require('../utils/socketManager');
+const {
+  deleteUploadedFiles,
+  isOwnedUpload,
+  uploadedFilesExist,
+} = require('../utils/files');
+const { ok, fail } = require('../utils/http');
+const { createNotification } = require('../services/notificationService');
+const {
+  canViewComment,
+  canViewMoment,
+  getViewerContext,
+} = require('../services/communityAccess');
+const { Op } = require('sequelize');
 
-// 统一响应辅助函数
-const sendResponse = (res, success, data, message = '', error = null) => {
-  res.json({ success, data, message, error });
+const authorInclude = {
+  model: User,
+  as: 'author',
+  attributes: ['id', 'userId', 'username', 'avatar', 'goalTags'],
 };
 
-// 辅助函数：创建通知
-async function createNotification({
-  userId,
-  senderId,
-  type,
-  title,
-  message,
-  targetType,
-  targetId,
-}) {
-  try {
-    console.log(
-      `[Notification] 尝试创建通知: Target(intID): ${userId}, Sender(intID): ${senderId}, Type: ${type}`,
-    );
+const getRelativeTime = date => {
+  const diffMs = Date.now() - new Date(date).getTime();
+  const diffMinutes = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+  if (diffDays > 0) return `${diffDays}天前`;
+  if (diffHours > 0) return `${diffHours}小时前`;
+  if (diffMinutes > 0) return `${diffMinutes}分钟前`;
+  return '刚刚';
+};
 
-    if (userId === senderId) {
-      console.log('[Notification] 自己对自己的作品操作，跳过推送');
-      return;
-    }
-
-    const notification = await Notification.create({
-      userId,
-      senderId,
-      type,
-      title,
-      message,
-      targetType,
-      targetId,
-      read: false,
-    });
-
-    console.log(`[Notification] 数据库记录已创建: ID ${notification.id}`);
-
-    // 获取接收通知用户的UUID
-    const recipient = await User.findByPk(userId);
-    if (recipient) {
-      console.log(
-        `[Notification] 目标用户匹配: ${recipient.username} (UUID: ${recipient.userId})`,
-      );
-
-      // 通过WebSocket推送通知
-      const socketId = connectedUsers.get(recipient.userId);
-      console.log(
-        `[Notification] Socket 状态: ${socketId ? '在线' : '离线'} (SocketID: ${
-          socketId || 'N/A'
-        })`,
-      );
-
-      if (socketId) {
-        const currentIO = getIO();
-        if (!currentIO) {
-          console.warn(
-            '[Notification] WebSocket io 实例未初始化，无法实时推送',
-          );
-          return;
-        }
-
-        // 计算相对时间
-        const now = new Date();
-        const notificationTime = notification.createdAt;
-        const diffMs = now - notificationTime;
-        const diffMinutes = Math.floor(diffMs / 60000);
-        const diffHours = Math.floor(diffMs / 3600000);
-        const diffDays = Math.floor(diffMs / 86400000);
-
-        let timeString = '刚刚';
-        if (diffDays > 0) {
-          timeString = `${diffDays}天前`;
-        } else if (diffHours > 0) {
-          timeString = `${diffHours}小时前`;
-        } else if (diffMinutes > 0) {
-          timeString = `${diffMinutes}分钟前`;
-        }
-
-        const payload = {
-          id: String(notification.id),
-          type: notification.type,
-          title: notification.title,
-          message: notification.message,
-          time: timeString,
-          read: notification.read,
-          targetType: notification.targetType || null,
-          targetId: notification.targetId
-            ? String(notification.targetId)
-            : null,
-        };
-
-        currentIO.to(socketId).emit('new_notification', payload);
-        console.log(
-          `[Notification] 实时消息已由 WebSocket 成功推送到用户 ${recipient.userId}`,
-        );
-      }
-    } else {
-      console.error(
-        `[Notification] 严重错误: 找不到 ID 为 ${userId} 的接收用户`,
-      );
-    }
-  } catch (error) {
-    console.error('[Notification] 创建并推送通知失败:', error);
-  }
-}
-
-// 序列化动态为前端结构
-function serializeMoment(
+const serializeMoment = (
   moment,
-  userId,
+  viewerId,
   likedIds = new Set(),
   collectedIds = new Set(),
-  followedAuthorIds = new Set(),
-) {
+  followedIds = new Set(),
+) => {
   const author = moment.author || {};
-  const id = String(moment.id);
-  const authorUserId = author.userId || null;
-
   return {
-    id,
+    id: String(moment.id),
     title: moment.title || '',
     description: moment.description || '',
     content: moment.content || '',
@@ -139,75 +57,141 @@ function serializeMoment(
     imageUri: moment.imageUri || null,
     images: moment.images || [],
     category: moment.category || '',
-    authorUserId,
+    visibility: moment.visibility,
+    location: moment.location || '',
+    authorUserId: author.userId || null,
     authorName: author.username || '匿名用户',
     authorAvatarUri: author.avatar || null,
+    authorGoalTags: author.goalTags || [],
     likes: moment.likesCount || 0,
     commentsCount: moment.commentsCount || 0,
-    comments: [], // 在详情接口中填充
-    isLiked: likedIds.has(parseInt(id, 10)),
-    isCollected: collectedIds.has(parseInt(id, 10)),
-    isFollowing: followedAuthorIds.has(authorUserId),
+    comments: [],
+    isLiked: likedIds.has(moment.id),
+    isCollected: collectedIds.has(moment.id),
+    isFollowing: followedIds.has(author.userId),
+    isOwn: author.userId === viewerId,
+    createdAt: moment.createdAt,
   };
-}
+};
+
+const loadVisibleMoment = async (id, viewerId) => {
+  const moment = await CircleMoment.findByPk(id, { include: [authorInclude] });
+  if (!moment) return { status: 404, error: '未找到动态' };
+  const context = await getViewerContext(viewerId);
+  if (!canViewMoment(moment, context)) {
+    return { status: 403, error: '该动态不可见或已被隐藏' };
+  }
+  return { moment, context };
+};
 
 class CircleController {
-  // 获取所有动态
   async getAllMoments(req, res) {
     try {
-      const { Friendship } = require('../models');
-      const [moments, likes, collects, friendships] = await Promise.all([
+      const [moments, likes, collects, context] = await Promise.all([
         CircleMoment.findAll({
-          include: [
-            {
-              model: User,
-              as: 'author',
-              attributes: ['userId', 'username', 'avatar'],
-            },
-          ],
+          include: [authorInclude],
           order: [['createdAt', 'DESC']],
         }),
         Like.findAll({ where: { userId: req.userId } }),
         Collect.findAll({ where: { userId: req.userId } }),
-        Friendship.findAll({ where: { userId: req.userId } }),
+        getViewerContext(req.userId),
       ]);
-
-      const likedIds = new Set(likes.map(l => l.momentId));
-      const collectedIds = new Set(collects.map(c => c.momentId));
-      const followedAuthorIds = new Set(friendships.map(f => f.friendId));
-
-      const data = moments.map(m =>
-        serializeMoment(
-          m,
-          req.userId,
-          likedIds,
-          collectedIds,
-          followedAuthorIds,
-        ),
+      const likedIds = new Set(likes.map(item => item.momentId));
+      const collectedIds = new Set(collects.map(item => item.momentId));
+      ok(
+        res,
+        moments
+          .filter(moment => canViewMoment(moment, context))
+          .map(moment =>
+            serializeMoment(
+              moment,
+              req.userId,
+              likedIds,
+              collectedIds,
+              context.followedIds,
+            ),
+          ),
+        '获取圈子列表成功',
       );
-      sendResponse(res, true, data, '获取圈子列表成功');
     } catch (error) {
       console.error('获取圈子列表失败:', error);
-      sendResponse(res, false, null, '', '服务器内部错误');
+      fail(res, 500, '服务器内部错误');
     }
   }
 
-  // 获取附近地点
-  getNearbyLocations(req, res) {
-    sendResponse(res, true, [...mockLocations], '获取附近地点成功');
+  async getNearbyLocations(req, res) {
+    try {
+      const [moments, context] = await Promise.all([
+        CircleMoment.findAll({
+          where: { location: { [Op.ne]: null } },
+          attributes: ['id', 'location', 'visibility'],
+          include: [authorInclude],
+          order: [['updatedAt', 'DESC']],
+          limit: 30,
+        }),
+        getViewerContext(req.userId),
+      ]);
+      const names = [
+        ...new Set(
+          moments
+            .filter(moment => canViewMoment(moment, context))
+            .map(item => item.location)
+            .filter(Boolean),
+        ),
+      ];
+      ok(
+        res,
+        names.map((name, index) => ({
+          id: `history-${index}`,
+          name,
+          sub: '来自社区动态',
+        })),
+        '获取地点历史成功',
+      );
+    } catch (error) {
+      console.error('获取地点历史失败:', error);
+      fail(res, 500, '服务器内部错误');
+    }
   }
 
-  // 获取热门话题
-  getTrendingTopics(req, res) {
-    sendResponse(res, true, [...mockTopics], '获取热门话题成功');
+  async getTrendingTopics(req, res) {
+    try {
+      const [moments, context] = await Promise.all([
+        CircleMoment.findAll({
+          attributes: ['id', 'category', 'visibility'],
+          include: [authorInclude],
+        }),
+        getViewerContext(req.userId),
+      ]);
+      const counts = moments
+        .filter(moment => canViewMoment(moment, context))
+        .reduce((result, moment) => {
+          const topic = String(moment.category || '')
+            .trim()
+            .replace(/^#+/, '');
+          if (topic) result.set(topic, (result.get(topic) || 0) + 1);
+          return result;
+        }, new Map());
+      const topics = [...counts.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .map(([topic]) => topic);
+      ok(
+        res,
+        [...new Set([...topics, '学习', '运动', '早睡'])].slice(0, 12),
+        '获取热门话题成功',
+      );
+    } catch (error) {
+      console.error('获取热门话题失败:', error);
+      fail(res, 500, '服务器内部错误');
+    }
   }
 
-  // 获取动态点赞用户列表
   async getMomentLikers(req, res) {
     try {
-      const { id } = req.params;
+      const visible = await loadVisibleMoment(req.params.id, req.userId);
+      if (!visible.moment) return fail(res, visible.status, visible.error);
       const likes = await Like.findAll({
-        where: { momentId: parseInt(id, 10) },
+        where: { momentId: visible.moment.id },
         include: [
           {
             model: User,
@@ -215,29 +199,35 @@ class CircleController {
             attributes: ['userId', 'username', 'avatar'],
           },
         ],
-        limit: 20,
         order: [['createdAt', 'DESC']],
+        limit: 20,
       });
-
-      const likers = likes.map(l => ({
-        id: l.user.userId,
-        username: l.user.username,
-        avatar: l.user.avatar,
-      }));
-
-      sendResponse(res, true, likers, '获取点赞列表成功');
+      ok(
+        res,
+        likes
+          .filter(
+            item =>
+              item.user && !visible.context.blockedIds.has(item.user.userId),
+          )
+          .map(item => ({
+            id: item.user.userId,
+            username: item.user.username,
+            avatar: item.user.avatar,
+          })),
+        '获取点赞列表成功',
+      );
     } catch (error) {
       console.error('获取点赞列表失败:', error);
-      sendResponse(res, false, null, '', '服务器内部错误');
+      fail(res, 500, '服务器内部错误');
     }
   }
 
-  // 获取动态评论列表
   async getMomentComments(req, res) {
     try {
-      const { id } = req.params;
+      const visible = await loadVisibleMoment(req.params.id, req.userId);
+      if (!visible.moment) return fail(res, visible.status, visible.error);
       const comments = await Comment.findAll({
-        where: { momentId: parseInt(id, 10), parentId: null },
+        where: { momentId: visible.moment.id, parentId: null },
         include: [
           {
             model: User,
@@ -258,327 +248,368 @@ class CircleController {
         ],
         order: [['createdAt', 'DESC']],
       });
-
-      // 计算相对时间的函数
-      function getRelativeTime(date) {
-        const now = new Date();
-        const diffMs = now - date;
-        const diffMinutes = Math.floor(diffMs / 60000);
-        const diffHours = Math.floor(diffMs / 3600000);
-        const diffDays = Math.floor(diffMs / 86400000);
-
-        if (diffDays > 0) {
-          return `${diffDays}天前`;
-        } else if (diffHours > 0) {
-          return `${diffHours}小时前`;
-        } else if (diffMinutes > 0) {
-          return `${diffMinutes}分钟前`;
-        } else {
-          return '刚刚';
-        }
-      }
-
-      const formattedComments = comments.map(c => ({
-        id: String(c.id),
-        userId: c.user.userId,
-        userName: c.user.username,
-        userAvatarUri: c.user.avatar,
-        text: c.content,
-        time: getRelativeTime(c.createdAt),
-        replies: c.replies.map(r => ({
-          id: String(r.id),
-          userId: r.user.userId,
-          userName: r.user.username,
-          userAvatarUri: r.user.avatar,
-          text: r.content,
-          time: getRelativeTime(r.createdAt),
-        })),
-      }));
-
-      sendResponse(res, true, formattedComments, '获取评论列表成功');
+      ok(
+        res,
+        comments
+          .filter(comment => canViewComment(comment, visible.context))
+          .map(comment => ({
+            id: String(comment.id),
+            userId: comment.user.userId,
+            userName: comment.user.username,
+            userAvatarUri: comment.user.avatar,
+            text: comment.content,
+            time: getRelativeTime(comment.createdAt),
+            isOwn: comment.user.userId === req.userId,
+            replies: comment.replies
+              .filter(reply => canViewComment(reply, visible.context))
+              .map(reply => ({
+                id: String(reply.id),
+                userId: reply.user.userId,
+                userName: reply.user.username,
+                userAvatarUri: reply.user.avatar,
+                text: reply.content,
+                time: getRelativeTime(reply.createdAt),
+                isOwn: reply.user.userId === req.userId,
+              })),
+          })),
+        '获取评论列表成功',
+      );
     } catch (error) {
       console.error('获取评论失败:', error);
-      sendResponse(res, false, null, '', '服务器内部错误');
+      fail(res, 500, '服务器内部错误');
     }
   }
 
-  // 发表评论
   async postComment(req, res) {
-    console.log(
-      `[Circles] 收到评论请求: MomentID=${req.params.id}, UserID=${req.userId}`,
-    );
+    const content =
+      typeof req.body?.content === 'string' ? req.body.content.trim() : '';
+    if (!content || content.length > 1000)
+      return fail(res, 400, '评论需为1至1000个字符');
     try {
-      const { id } = req.params;
-      const { content, parentId } = req.body;
-      const moment = await CircleMoment.findByPk(id);
-      if (!moment) return sendResponse(res, false, null, '', '未找到动态');
-
-      const currentUser = await User.findOne({ where: { userId: req.userId } });
-      if (!currentUser) return sendResponse(res, false, null, '', '用户不存在');
-
+      const visible = await loadVisibleMoment(req.params.id, req.userId);
+      if (!visible.moment) return fail(res, visible.status, visible.error);
+      const currentUser = req.user;
+      let parent = null;
+      if (req.body.parentId) {
+        parent = await Comment.findOne({
+          where: { id: req.body.parentId, momentId: visible.moment.id },
+        });
+        if (!parent) return fail(res, 404, '未找到被回复的评论');
+      }
       const comment = await Comment.create({
-        momentId: parseInt(id, 10),
+        momentId: visible.moment.id,
         userId: currentUser.id,
         content,
-        parentId: parentId ? parseInt(parentId, 10) : null,
+        parentId: parent?.id || null,
       });
-
-      await moment.increment('commentsCount');
-
-      // 创建通知
-      if (parentId) {
-        const parentComment = await Comment.findByPk(parentId);
-        if (parentComment) {
-          await createNotification({
-            userId: parentComment.userId,
-            senderId: currentUser.id,
-            type: 'reply',
-            title: '收到新的回复',
-            message: `${
-              currentUser.username
-            } 回复了你的评论: "${content.substring(0, 20)}..."`,
-            targetType: 'moment',
-            targetId: id,
-          });
-        }
-      } else {
-        const author = await User.findByPk(moment.authorId);
-        if (author) {
-          await createNotification({
-            userId: author.id,
-            senderId: currentUser.id,
-            type: 'comment',
-            title: '收到新的评论',
-            message: `${
-              currentUser.username
-            } 评论了你的动态: "${content.substring(0, 20)}..."`,
-            targetType: 'moment',
-            targetId: id,
-          });
-        }
-      }
-
-      sendResponse(res, true, { id: comment.id }, '发表评论成功');
+      await visible.moment.increment('commentsCount');
+      const recipientId = parent?.userId || visible.moment.authorId;
+      await createNotification({
+        userId: recipientId,
+        senderId: currentUser.id,
+        type: parent ? 'reply' : 'comment',
+        title: parent ? '收到新的回复' : '收到新的评论',
+        message: `${currentUser.username}${
+          parent ? ' 回复了你的评论' : ' 评论了你的动态'
+        }：${content.slice(0, 30)}`,
+        targetType: 'moment',
+        targetId: visible.moment.id,
+      });
+      ok(res, { id: String(comment.id) }, '发表评论成功', 201);
     } catch (error) {
       console.error('发表评论失败:', error);
-      sendResponse(res, false, null, '', '服务器内部错误');
+      fail(res, 500, '服务器内部错误');
     }
   }
 
-  // 获取用户收藏列表
+  async deleteComment(req, res) {
+    try {
+      const comment = await Comment.findOne({
+        where: { id: req.params.commentId, momentId: req.params.id },
+      });
+      if (!comment) return fail(res, 404, '未找到评论');
+      if (comment.userId !== req.user.id)
+        return fail(res, 403, '只能删除自己的评论');
+      const momentId = comment.momentId;
+      await ContentReport.destroy({
+        where: { targetType: 'comment', targetId: comment.id },
+      });
+      await comment.destroy();
+      const moment = await CircleMoment.findByPk(momentId);
+      if (moment) {
+        const commentsCount = await Comment.count({ where: { momentId } });
+        await moment.update({ commentsCount });
+      }
+      ok(res, { removed: 1 }, '评论已删除');
+    } catch (error) {
+      console.error('删除评论失败:', error);
+      fail(res, 500, '服务器内部错误');
+    }
+  }
+
   async getUserCollections(req, res) {
     try {
-      console.log(`[Collections] 开始获取收藏: UserUUID=${req.userId}`);
-      const collects = await Collect.findAll({
-        where: { userId: req.userId },
-        include: [
-          {
-            model: CircleMoment,
-            as: 'moment',
-            required: true,
-            include: [
-              {
-                model: User,
-                as: 'author',
-                attributes: ['userId', 'username', 'avatar'],
-              },
-            ],
-          },
-        ],
-        order: [['createdAt', 'DESC']],
-      });
-
-      console.log(`[Collections] 找到 ${collects.length} 条原始记录`);
-
-      const data = collects
-        .map(c => {
-          const m =
-            c.moment ||
-            c.CircleMoment ||
-            c.get?.('moment') ||
-            c.get?.('CircleMoment');
-          if (!m) {
-            console.warn(`[Collections] 记录 ${c.id} 无法获取到关联动态对象`);
-            return null;
-          }
-          return serializeMoment(m, req.userId, new Set(), new Set([m.id]));
-        })
-        .filter(Boolean);
-
-      console.log(`[Collections] 最终返回给前端的动态数: ${data.length}`);
-      sendResponse(res, true, data, '获取收藏列表成功');
+      const [collects, context] = await Promise.all([
+        Collect.findAll({
+          where: { userId: req.userId },
+          include: [
+            {
+              model: CircleMoment,
+              as: 'moment',
+              required: true,
+              include: [authorInclude],
+            },
+          ],
+          order: [['createdAt', 'DESC']],
+        }),
+        getViewerContext(req.userId),
+      ]);
+      ok(
+        res,
+        collects
+          .filter(item => item.moment && canViewMoment(item.moment, context))
+          .map(item =>
+            serializeMoment(
+              item.moment,
+              req.userId,
+              new Set(),
+              new Set([item.moment.id]),
+              context.followedIds,
+            ),
+          ),
+        '获取收藏列表成功',
+      );
     } catch (error) {
       console.error('获取收藏列表失败:', error);
-      sendResponse(res, false, null, '', '服务器内部错误');
+      fail(res, 500, '服务器内部错误');
     }
   }
 
-  // 根据 ID 获取单个动态
   async getMomentById(req, res) {
     try {
-      const { id } = req.params;
-      const [moment, like, collect] = await Promise.all([
-        CircleMoment.findByPk(id, {
-          include: [
-            {
-              model: User,
-              as: 'author',
-              attributes: ['userId', 'username', 'avatar'],
-            },
-          ],
+      const visible = await loadVisibleMoment(req.params.id, req.userId);
+      if (!visible.moment) return fail(res, visible.status, visible.error);
+      const [like, collect] = await Promise.all([
+        Like.findOne({
+          where: { userId: req.userId, momentId: visible.moment.id },
         }),
-        Like.findOne({ where: { userId: req.userId, momentId: id } }),
-        Collect.findOne({ where: { userId: req.userId, momentId: id } }),
+        Collect.findOne({
+          where: { userId: req.userId, momentId: visible.moment.id },
+        }),
       ]);
-
-      if (!moment) {
-        return sendResponse(res, true, null, '未找到动态');
-      }
-
-      const likedIds = new Set(like ? [parseInt(id, 10)] : []);
-      const collectedIds = new Set(collect ? [parseInt(id, 10)] : []);
-
-      sendResponse(
+      ok(
         res,
-        true,
-        serializeMoment(moment, req.userId, likedIds, collectedIds),
+        serializeMoment(
+          visible.moment,
+          req.userId,
+          new Set(like ? [visible.moment.id] : []),
+          new Set(collect ? [visible.moment.id] : []),
+          visible.context.followedIds,
+        ),
         '获取圈子详情成功',
       );
     } catch (error) {
-      sendResponse(res, false, null, '', '服务器内部错误');
+      console.error('获取动态详情失败:', error);
+      fail(res, 500, '服务器内部错误');
     }
   }
 
-  // 图片上传
   uploadImage(req, res) {
+    if (!req.file) return fail(res, 400, '请选择图片上传');
+    ok(res, getFileUrl(req, req.file.filename), '图片上传成功', 201);
+  }
+
+  async deleteUploads(req, res) {
+    const images = Array.isArray(req.body?.images) ? req.body.images : [];
+    if (
+      images.length > 4 ||
+      images.some(image => !isOwnedUpload(image, req.userId))
+    ) {
+      return fail(res, 400, '待清理图片地址无效');
+    }
     try {
-      if (!req.file)
-        return sendResponse(res, false, null, '', '请选择图片上传');
-      const imageUrl = getFileUrl(req, req.file.filename);
-      sendResponse(res, true, imageUrl, '图片上传成功');
+      const moments = await CircleMoment.findAll({
+        where: { authorId: req.user.id },
+        attributes: ['imageUri', 'images'],
+      });
+      const publishedImages = new Set(
+        moments.flatMap(moment => [moment.imageUri, ...(moment.images || [])]),
+      );
+      if (images.some(image => publishedImages.has(image))) {
+        return fail(res, 409, '已发布图片不能通过清理接口删除');
+      }
+      await deleteUploadedFiles(images);
+      ok(res, true, '未发布图片已清理');
     } catch (error) {
-      sendResponse(res, false, null, '', '图片上传失败');
+      console.error('清理未发布图片失败:', error);
+      fail(res, 500, '清理图片失败');
     }
   }
 
-  // 发布动态
   async createMoment(req, res) {
+    const images = Array.isArray(req.body?.images) ? req.body.images : [];
+    const ownedImages = images.filter(image =>
+      isOwnedUpload(image, req.userId),
+    );
+    const reject = async (status, message) => {
+      await deleteUploadedFiles(ownedImages).catch(() => {});
+      return fail(res, status, message);
+    };
+    const content =
+      typeof req.body?.content === 'string' ? req.body.content.trim() : '';
+    const title =
+      typeof req.body?.title === 'string' ? req.body.title.trim() : '';
+    const visibility = req.body?.visibility || 'public';
+    if (!title && !content && images.length === 0) {
+      return reject(400, '动态内容不能为空');
+    }
+    if (images.length > 4 || new Set(images).size !== images.length) {
+      return reject(400, '动态最多上传4张不重复图片');
+    }
+    if (ownedImages.length !== images.length) {
+      return reject(403, '动态图片不属于当前用户');
+    }
+    if (!['public', 'buddies', 'private'].includes(visibility)) {
+      return reject(400, '动态可见性无效');
+    }
+    if (title.length > 200 || content.length > 10000) {
+      return reject(400, '动态内容过长');
+    }
+    const location =
+      typeof req.body?.location === 'string' ? req.body.location.trim() : '';
+    if (location.length > 120) return reject(400, '地点不能超过120字');
     try {
-      const body = req.body;
-      const author = await User.findOne({
-        where: { userId: req.userId },
-        attributes: ['id', 'userId', 'username', 'avatar'],
-      });
-
-      if (!author) return sendResponse(res, false, null, '', '当前用户不存在');
-
+      if (!(await uploadedFilesExist(images))) {
+        return reject(400, '动态图片不存在或已失效');
+      }
       const moment = await CircleMoment.create({
-        authorId: author.id,
-        title: body.title || '',
-        description: body.description || '',
-        content: body.content || '',
-        category: body.category || '',
-        imageUri: (body.images && body.images[0]) || body.imageUri || null,
-        images: body.images || [],
+        authorId: req.user.id,
+        title,
+        description: req.body?.description || content.slice(0, 60),
+        content,
+        category: String(req.body?.category || '')
+          .trim()
+          .slice(0, 50),
+        visibility,
+        location: location || null,
+        imageUri: images[0] || null,
+        images,
         likesCount: 0,
         commentsCount: 0,
       });
-
-      sendResponse(
-        res,
-        true,
-        serializeMoment(moment, req.userId),
-        '发布动态成功',
-      );
+      moment.author = req.user;
+      ok(res, serializeMoment(moment, req.userId), '发布动态成功', 201);
     } catch (error) {
       console.error('发布动态失败:', error);
-      sendResponse(res, false, null, '', `发布动态失败: ${error.message}`);
+      await deleteUploadedFiles(ownedImages).catch(() => {});
+      fail(res, 500, '发布动态失败');
     }
   }
 
-  // 点赞
-  async likeMoment(req, res) {
-    console.log(
-      `[Circles] 收到点赞请求: MomentID=${req.params.id}, UserID=${req.userId}`,
-    );
+  async deleteMoment(req, res) {
     try {
-      const { id } = req.params;
-      const moment = await CircleMoment.findByPk(id);
-      if (!moment) return sendResponse(res, false, null, '', '未找到动态');
-
-      const currentUser = await User.findOne({ where: { userId: req.userId } });
-      const [_like, created] = await Like.findOrCreate({
-        where: { userId: req.userId, momentId: parseInt(id, 10) },
+      const moment = await CircleMoment.findByPk(req.params.id);
+      if (!moment) return fail(res, 404, '未找到动态');
+      if (moment.authorId !== req.user.id)
+        return fail(res, 403, '只能删除自己的动态');
+      const images = [...(moment.images || []), moment.imageUri].filter(
+        Boolean,
+      );
+      const comments = await Comment.findAll({
+        where: { momentId: moment.id },
+        attributes: ['id'],
       });
-
-      if (created) {
-        await moment.increment('likesCount');
-        // 触发通知
-        const author = await User.findByPk(moment.authorId);
-        if (author && currentUser) {
-          await createNotification({
-            userId: author.id,
-            senderId: currentUser.id,
-            type: 'like',
-            title: '动态获得点赞',
-            message: `${currentUser.username} 点赞了你的动态: "${
-              moment.title || '无标题'
-            }"`,
-            targetType: 'moment',
-            targetId: id,
-          });
-        }
-      }
-      sendResponse(res, true, true, '点赞成功');
+      await ContentReport.destroy({
+        where: {
+          [Op.or]: [
+            { targetType: 'moment', targetId: moment.id },
+            ...(comments.length
+              ? [
+                  {
+                    targetType: 'comment',
+                    targetId: { [Op.in]: comments.map(comment => comment.id) },
+                  },
+                ]
+              : []),
+          ],
+        },
+      });
+      await Notification.destroy({
+        where: { targetType: 'moment', targetId: moment.id },
+      });
+      await moment.destroy();
+      await deleteUploadedFiles(images);
+      ok(res, true, '动态已删除');
     } catch (error) {
-      sendResponse(res, false, null, '', '服务器内部错误');
+      console.error('删除动态失败:', error);
+      fail(res, 500, '服务器内部错误');
     }
   }
 
-  // 取消点赞
+  async likeMoment(req, res) {
+    try {
+      const visible = await loadVisibleMoment(req.params.id, req.userId);
+      if (!visible.moment) return fail(res, visible.status, visible.error);
+      const [, created] = await Like.findOrCreate({
+        where: { userId: req.userId, momentId: visible.moment.id },
+      });
+      if (created) {
+        await visible.moment.increment('likesCount');
+        await createNotification({
+          userId: visible.moment.authorId,
+          senderId: req.user.id,
+          type: 'like',
+          title: '动态获得点赞',
+          message: `${req.user.username} 点赞了你的动态`,
+          targetType: 'moment',
+          targetId: visible.moment.id,
+        });
+      }
+      ok(res, true, created ? '点赞成功' : '已经点赞过了');
+    } catch (error) {
+      console.error('点赞失败:', error);
+      fail(res, 500, '服务器内部错误');
+    }
+  }
+
   async unlikeMoment(req, res) {
     try {
-      const { id } = req.params;
-      const moment = await CircleMoment.findByPk(id);
-      if (!moment) return sendResponse(res, false, null, '', '未找到动态');
-
+      const visible = await loadVisibleMoment(req.params.id, req.userId);
+      if (!visible.moment) return fail(res, visible.status, visible.error);
       const deleted = await Like.destroy({
-        where: { userId: req.userId, momentId: parseInt(id, 10) },
+        where: { userId: req.userId, momentId: visible.moment.id },
       });
-
-      if (deleted) await moment.decrement('likesCount');
-      sendResponse(res, true, true, '取消点赞成功');
+      if (deleted) await visible.moment.decrement('likesCount');
+      ok(res, true, '取消点赞成功');
     } catch (error) {
-      sendResponse(res, false, null, '', '服务器内部错误');
+      console.error('取消点赞失败:', error);
+      fail(res, 500, '服务器内部错误');
     }
   }
 
-  // 收藏
   async collectMoment(req, res) {
     try {
-      const { id } = req.params;
-      const moment = await CircleMoment.findByPk(id);
-      if (!moment) return sendResponse(res, false, null, '', '未找到动态');
-
+      const visible = await loadVisibleMoment(req.params.id, req.userId);
+      if (!visible.moment) return fail(res, visible.status, visible.error);
       await Collect.findOrCreate({
-        where: { userId: req.userId, momentId: parseInt(id, 10) },
+        where: { userId: req.userId, momentId: visible.moment.id },
       });
-      sendResponse(res, true, true, '收藏成功');
+      ok(res, true, '收藏成功');
     } catch (error) {
-      sendResponse(res, false, null, '', '服务器内部错误');
+      console.error('收藏失败:', error);
+      fail(res, 500, '服务器内部错误');
     }
   }
 
-  // 取消收藏
   async uncollectMoment(req, res) {
     try {
-      const { id } = req.params;
       await Collect.destroy({
-        where: { userId: req.userId, momentId: parseInt(id, 10) },
+        where: { userId: req.userId, momentId: req.params.id },
       });
-      sendResponse(res, true, true, '取消收藏成功');
+      ok(res, true, '取消收藏成功');
     } catch (error) {
-      sendResponse(res, false, null, '', '服务器内部错误');
+      console.error('取消收藏失败:', error);
+      fail(res, 500, '服务器内部错误');
     }
   }
 }

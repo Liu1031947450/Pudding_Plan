@@ -11,6 +11,7 @@ test('rate limiter blocks requests after the configured maximum', () => {
   const req = { ip: '127.0.0.1' };
   let nextCalls = 0;
   let statusCode;
+  let responseBody;
   const res = {
     set() {},
     status(code) {
@@ -18,6 +19,7 @@ test('rate limiter blocks requests after the configured maximum', () => {
       return this;
     },
     json(body) {
+      responseBody = body;
       return body;
     },
   };
@@ -28,4 +30,10 @@ test('rate limiter blocks requests after the configured maximum', () => {
 
   assert.equal(nextCalls, 2);
   assert.equal(statusCode, 429);
+  assert.deepEqual(responseBody, {
+    success: false,
+    data: null,
+    message: '',
+    error: '尝试次数过多，请稍后再试',
+  });
 });

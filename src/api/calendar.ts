@@ -2,47 +2,42 @@ import { apiClient, type ApiResponse } from './client';
 import { API_ENDPOINTS } from './config';
 import type { DayData, Habit } from '../types/domain';
 
-export const calendarApi = {
-  // 获取日历数据（依赖 token 鉴权）
-  getData: async (
-    year: number,
-    month: number,
-  ): Promise<ApiResponse<DayData[]>> => {
-    return apiClient.get<DayData[]>(
-      `${API_ENDPOINTS.CALENDAR}?year=${year}&month=${month}`,
-    );
-  },
-  // 获取每日金句
-  getDailyQuote: async (): Promise<
-    ApiResponse<{ text: string; author: string }>
-  > => {
-    return apiClient.get<{ text: string; author: string }>(
-      API_ENDPOINTS.CALENDAR_QUOTE,
-    );
-  },
+export type HabitInput = Pick<Habit, 'title' | 'weekdays' | 'startDate'> &
+  Partial<
+    Pick<Habit, 'subtitle' | 'icon' | 'category' | 'reminderTime' | 'isActive'>
+  >;
 
-  // 更新日历活动
-  updateDay: async (
-    day: number,
-    hasActivity: boolean,
-    activityType?: 'primary' | 'secondary' | 'tertiary',
-  ): Promise<ApiResponse<boolean>> => {
-    return apiClient.patch<boolean>(API_ENDPOINTS.CALENDAR, {
-      day,
-      hasActivity,
-      activityType,
-    });
-  },
+export const calendarApi = {
+  getData: (year: number, month: number): Promise<ApiResponse<DayData[]>> =>
+    apiClient.get<DayData[]>(
+      `${API_ENDPOINTS.CALENDAR}?year=${year}&month=${month}`,
+    ),
+  getDailyQuote: (): Promise<ApiResponse<{ text: string; author: string }>> =>
+    apiClient.get(API_ENDPOINTS.CALENDAR_QUOTE),
 };
 
 export const habitsApi = {
-  // 获取所有习惯（依赖 token 鉴权）
-  getAll: async (): Promise<ApiResponse<Habit[]>> => {
-    return apiClient.get<Habit[]>(API_ENDPOINTS.HABITS);
-  },
-
-  // 切换习惯完成状态（依赖 token 鉴权）
-  toggle: async (id: string): Promise<ApiResponse<Habit>> => {
-    return apiClient.post<Habit>(API_ENDPOINTS.HABIT_TOGGLE(id));
-  },
+  getAll: (date?: string): Promise<ApiResponse<Habit[]>> =>
+    apiClient.get(
+      `${API_ENDPOINTS.HABITS}${
+        date ? `?date=${encodeURIComponent(date)}` : ''
+      }`,
+    ),
+  create: (data: HabitInput): Promise<ApiResponse<Habit>> =>
+    apiClient.post(API_ENDPOINTS.HABITS, data),
+  update: (
+    id: string,
+    data: Partial<HabitInput>,
+  ): Promise<ApiResponse<Habit>> =>
+    apiClient.put(API_ENDPOINTS.HABIT_DETAIL(id), data),
+  delete: (id: string): Promise<ApiResponse<boolean>> =>
+    apiClient.delete(API_ENDPOINTS.HABIT_DETAIL(id)),
+  reorder: (habitIds: string[]): Promise<ApiResponse<boolean>> =>
+    apiClient.put(API_ENDPOINTS.HABIT_REORDER, { habitIds }),
+  checkIn: (id: string, date: string): Promise<ApiResponse<Habit>> =>
+    apiClient.put(API_ENDPOINTS.HABIT_CHECK_IN(id, date)),
+  removeCheckIn: (id: string, date: string): Promise<ApiResponse<Habit>> =>
+    apiClient.delete(API_ENDPOINTS.HABIT_CHECK_IN(id, date)),
+  toggle: (id: string): Promise<ApiResponse<Habit>> =>
+    apiClient.post(`${API_ENDPOINTS.HABIT_DETAIL(id)}/toggle`),
 };

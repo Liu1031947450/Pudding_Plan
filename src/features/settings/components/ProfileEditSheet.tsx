@@ -10,23 +10,90 @@ import { AppText as Text } from '../../../components/common/AppText';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize } from '../../../constants/theme';
 import { Avatar, Button } from '../../../components/common';
+import * as ImagePicker from 'expo-image-picker';
 
 interface ProfileEditSheetProps {
-  onSave: (data: { nickname: string; bio: string }) => void;
+  onSave: (data: {
+    nickname: string;
+    bio: string;
+    goalTags: string[];
+  }) => Promise<void> | void;
+  onAvatarUpload: (uri: string) => Promise<{ avatar?: string; error?: string }>;
   initialData: {
     nickname: string;
     bio: string;
     /** 用户头像 URL，最大长度 1000 字符 */
     avatar?: string;
+    goalTags: string[];
   };
 }
 
 export const ProfileEditSheet: React.FC<ProfileEditSheetProps> = ({
   onSave,
+  onAvatarUpload,
   initialData,
 }) => {
   const [nickname, setNickname] = useState(initialData.nickname);
   const [bio, setBio] = useState(initialData.bio);
+  const [avatar, setAvatar] = useState(initialData.avatar);
+  const [goalTags, setGoalTags] = useState(initialData.goalTags.join('、'));
+  const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+
+  const pickAvatar = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (permission.status !== 'granted') {
+      setError('需要相册权限才能更换头像');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+    if (result.canceled || !result.assets[0]?.uri) return;
+
+    setUploadingAvatar(true);
+    setError('');
+    try {
+      const response = await onAvatarUpload(result.assets[0].uri);
+      if (response.avatar) setAvatar(response.avatar);
+      if (response.error) setError(response.error);
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
+  const save = async () => {
+    const tags = goalTags
+      .split(/[，,、]/)
+      .map(tag => tag.trim())
+      .filter(Boolean);
+    if (!nickname.trim()) {
+      setError('昵称不能为空');
+      return;
+    }
+    if (tags.length < 1 || tags.length > 3) {
+      setError('请填写 1–3 个目标标签');
+      return;
+    }
+    if (
+      new Set(tags).size !== tags.length ||
+      tags.some(tag => tag.length > 20)
+    ) {
+      setError('标签不能重复，且每个标签不超过 20 个字');
+      return;
+    }
+    setSaving(true);
+    setError('');
+    try {
+      await onSave({ nickname: nickname.trim(), bio, goalTags: tags });
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -35,11 +102,15 @@ export const ProfileEditSheet: React.FC<ProfileEditSheetProps> = ({
           name={nickname}
           size="xlarge"
           style={styles.avatar}
-          uri={initialData.avatar}
+          uri={avatar}
         />
-        <TouchableOpacity style={styles.editAvatarButton}>
+        <TouchableOpacity
+          style={styles.editAvatarButton}
+          onPress={pickAvatar}
+          disabled={uploadingAvatar}
+        >
           <MaterialIcons
-            name="photo-camera"
+            name={uploadingAvatar ? 'hourglass-top' : 'photo-camera'}
             size={20}
             color={Colors.onPrimary}
           />
@@ -57,6 +128,7 @@ export const ProfileEditSheet: React.FC<ProfileEditSheetProps> = ({
               onChangeText={setNickname}
               placeholder="输入你的昵称"
               placeholderTextColor={Colors.outline}
+              maxLength={50}
             />
           </View>
         </View>
@@ -72,14 +144,34 @@ export const ProfileEditSheet: React.FC<ProfileEditSheetProps> = ({
               placeholderTextColor={Colors.outline}
               multiline
               numberOfLines={4}
+              maxLength={200}
             />
           </View>
         </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>目标标签（1–3 个）</Text>
+          <View style={styles.inputWrapper}>
+            <TextInput
+              style={styles.input}
+              value={goalTags}
+              onChangeText={setGoalTags}
+              placeholder="例如：阅读、运动、早睡"
+              placeholderTextColor={Colors.outline}
+              maxLength={64}
+            />
+          </View>
+          <Text style={styles.hint}>使用逗号或顿号分隔，用于搭子推荐。</Text>
+        </View>
       </View>
+
+      {!!error && <Text style={styles.error}>{error}</Text>}
 
       <Button
         title="保存修改"
-        onPress={() => onSave({ nickname, bio })}
+        onPress={save}
+        loading={saving}
+        disabled={saving || uploadingAvatar}
         style={styles.saveButton}
       />
     </ScrollView>
@@ -151,5 +243,15 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     marginTop: Spacing.md,
+  },
+  hint: {
+    fontSize: FontSize.xs,
+    color: Colors.onSurfaceVariant,
+    marginLeft: 4,
+  },
+  error: {
+    color: Colors.error,
+    marginBottom: Spacing.sm,
+    textAlign: 'center',
   },
 });

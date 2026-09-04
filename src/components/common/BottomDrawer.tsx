@@ -40,7 +40,7 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
           style={[
             styles.drawer,
             { height: drawerHeight as any },
-            height === 'auto' && { minHeight: 400 },
+            height === 'auto' && styles.autoDrawer,
           ]}
         >
           <View style={styles.handle} />
@@ -79,6 +79,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 12,
     elevation: 20,
+  },
+  autoDrawer: {
+    minHeight: 400,
   },
   handle: {
     width: 36,

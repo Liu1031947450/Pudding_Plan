@@ -1,7 +1,8 @@
 const path = require('path');
+const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
-module.exports = {
+module.exports = (_env, argv) => ({
   entry: './index.web.js',
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -51,8 +52,16 @@ module.exports = {
     ],
   },
   plugins: [
+    new webpack.DefinePlugin({
+      __DEV__: JSON.stringify(argv.mode !== 'production'),
+      'process.env.EXPO_OS': JSON.stringify('web'),
+      'process.env.EXPO_PUBLIC_API_URL': JSON.stringify(
+        process.env.EXPO_PUBLIC_API_URL || '',
+      ),
+    }),
     new HtmlWebpackPlugin({
       template: './public/index.html',
+      favicon: './assets/favicon.png',
     }),
   ],
   devServer: {
@@ -64,4 +73,4 @@ module.exports = {
     hot: true,
     historyApiFallback: true,
   },
-};
+});

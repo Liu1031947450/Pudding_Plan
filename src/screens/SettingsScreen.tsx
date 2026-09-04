@@ -18,6 +18,7 @@ import {
   LegalDocSheet,
   FeedbackSheet,
   ConfirmSheet,
+  PasswordSheet,
 } from '../features/settings';
 
 interface SettingItemData {
@@ -36,8 +37,8 @@ interface SettingSectionData {
 }
 
 const SettingsScreen: React.FC = () => {
-  const navigation = useNavigation();
-  const { user, logout, updateUser } = useAuth();
+  const navigation = useNavigation<any>();
+  const { user, logout, updateUser, updateToken } = useAuth();
   const { settings, updateSettings, resetSettings } = useAppSettings();
   const [activeDrawer, setActiveDrawer] = React.useState<string | null>(null);
   const [toastVisible, setToastVisible] = React.useState(false);
@@ -48,15 +49,22 @@ const SettingsScreen: React.FC = () => {
   const [profile, setProfile] = React.useState({
     nickname: user?.username || '',
     bio: '',
+    avatar: user?.avatar || undefined,
+    goalTags: user?.goalTags || ['自律'],
   });
   const notifEnabled = settings.notificationsEnabled;
   const notifTime = settings.notificationTime;
   const dndRange = { start: settings.dndStart, end: settings.dndEnd };
-  const appearance = { theme: settings.theme, fontSize: settings.fontSize };
+  const fontSize = settings.fontSize;
 
   React.useEffect(() => {
     if (user) {
-      setProfile({ nickname: user.username, bio: user.bio || '' });
+      setProfile({
+        nickname: user.username,
+        bio: user.bio || '',
+        avatar: user.avatar || undefined,
+        goalTags: user.goalTags || ['自律'],
+      });
     }
   }, [user]);
 
@@ -70,21 +78,31 @@ const SettingsScreen: React.FC = () => {
   };
 
   const handleItemPress = (itemId: string) => {
+    if (itemId === 'blocks') {
+      navigation.navigate('BlockedUsers');
+      return;
+    }
     setActiveDrawer(itemId);
   };
 
-  const handleProfileSave = async (data: { nickname: string; bio: string }) => {
+  const handleProfileSave = async (data: {
+    nickname: string;
+    bio: string;
+    goalTags: string[];
+  }) => {
     try {
       const response = await authApi.updateProfile({
         username: data.nickname,
         bio: data.bio,
-        avatar: user?.avatar || undefined,
+        goalTags: data.goalTags,
       });
       if (response.success && response.data) {
         await updateUser(response.data);
         setProfile({
           nickname: response.data.username,
           bio: response.data.bio || '',
+          avatar: response.data.avatar || undefined,
+          goalTags: response.data.goalTags,
         });
         setActiveDrawer(null);
         showToast('个人资料已更新');
@@ -93,6 +111,24 @@ const SettingsScreen: React.FC = () => {
       }
     } catch {
       showToast('更新失败，请稍后重试');
+    }
+  };
+
+  const handleAvatarUpload = async (uri: string) => {
+    try {
+      const response = await authApi.uploadAvatar(uri);
+      if (!response.success || !response.data) {
+        return { error: response.error || '头像上传失败' };
+      }
+      await updateUser(response.data);
+      setProfile(current => ({
+        ...current,
+        avatar: response.data?.avatar || undefined,
+      }));
+      showToast('头像已更新');
+      return { avatar: response.data.avatar || undefined };
+    } catch {
+      return { error: '头像上传失败，请稍后重试' };
     }
   };
 
@@ -115,14 +151,23 @@ const SettingsScreen: React.FC = () => {
       return;
     }
     await resetSettings();
+    setClearingData(false);
+    setActiveDrawer(null);
+    showToast('所有业务数据已清除');
+    await new Promise<void>(resolve => setTimeout(() => resolve(), 600));
     await logout();
+    navigation.reset({ index: 0, routes: [{ name: 'Auth' }] });
   };
 
   const renderDrawerContent = () => {
     switch (activeDrawer) {
       case '1':
         return (
-          <ProfileEditSheet initialData={profile} onSave={handleProfileSave} />
+          <ProfileEditSheet
+            initialData={profile}
+            onSave={handleProfileSave}
+            onAvatarUpload={handleAvatarUpload}
+          />
         );
       case '3':
         return (
@@ -147,14 +192,48 @@ const SettingsScreen: React.FC = () => {
             }}
           />
         );
-      case '5':
       case '6':
         return (
           <AppearanceSheet
-            currentTheme={appearance.theme}
-            currentFontSize={appearance.fontSize}
-            onSave={(theme, fontSize) => {
-              saveSettings({ theme, fontSize });
+            currentFontSize={fontSize}
+            onSave={nextFontSize => {
+              saveSettings({ fontSize: nextFontSize });
+            }}
+          />
+        );
+      case 'password':
+        return (
+          <PasswordSheet
+            mode="change"
+            onSubmit={async data => {
+              const response = await authApi.changePassword({
+                currentPassword: data.currentPassword,
+                newPassword: data.newPassword || '',
+                confirmPassword: data.confirmPassword || '',
+              });
+              if (!response.success || !response.data) {
+                return response.error || '修改密码失败';
+              }
+              await updateToken(response.data.token);
+              setActiveDrawer(null);
+              showToast('密码已修改');
+              return null;
+            }}
+          />
+        );
+      case 'deleteAccount':
+        return (
+          <PasswordSheet
+            mode="delete"
+            onSubmit={async data => {
+              const response = await authApi.deleteAccount(
+                data.currentPassword,
+              );
+              if (!response.success) return response.error || '注销账号失败';
+              await resetSettings();
+              await logout({ skipRemote: true });
+              navigation.reset({ index: 0, routes: [{ name: 'Auth' }] });
+              return null;
             }}
           />
         );
@@ -222,19 +301,25 @@ const SettingsScreen: React.FC = () => {
       '1': '个人资料修改',
       '3': '每日提醒',
       '4': '勿扰模式',
-      '5': '深色模式',
       '6': '字体大小',
       '7': '隐私政策',
       '8': '用户协议',
       '9': '清除所有数据',
       '11': '意见反馈',
+      password: '修改密码',
+      deleteAccount: '注销账号',
     };
     return drawerTitles[activeDrawer || ''] || '设置';
   };
 
   const getDrawerHeight = () => {
     if (['9', 'logout'].includes(activeDrawer || '')) return '65%';
-    if (['7', '8', '11', '1', '3'].includes(activeDrawer || '')) return '85%';
+    if (
+      ['7', '8', '11', '1', '3', 'password', 'deleteAccount'].includes(
+        activeDrawer || '',
+      )
+    )
+      return '85%';
     return '70%';
   };
 
@@ -247,6 +332,20 @@ const SettingsScreen: React.FC = () => {
           id: '1',
           title: '个人资料修改',
           icon: 'person',
+          iconColor: Colors.primary,
+          showArrow: true,
+        },
+        {
+          id: 'blocks',
+          title: '黑名单管理',
+          icon: 'block',
+          iconColor: Colors.error,
+          showArrow: true,
+        },
+        {
+          id: 'password',
+          title: '修改密码',
+          icon: 'lock-reset',
           iconColor: Colors.primary,
           showArrow: true,
         },
@@ -276,14 +375,6 @@ const SettingsScreen: React.FC = () => {
       title: '显示设置',
       items: [
         {
-          id: '5',
-          title: '深色模式',
-          icon: 'dark-mode',
-          iconColor: Colors.tertiary,
-          showArrow: false,
-          value: appearance.theme === 'dark' ? '开启' : '关闭',
-        },
-        {
           id: '6',
           title: '字体大小',
           icon: 'text-fields',
@@ -292,7 +383,7 @@ const SettingsScreen: React.FC = () => {
             small: '小',
             medium: '标准',
             large: '大',
-          }[appearance.fontSize],
+          }[fontSize],
         },
       ],
     },
@@ -320,6 +411,13 @@ const SettingsScreen: React.FC = () => {
           iconColor: Colors.error,
           showArrow: false,
         },
+        {
+          id: 'deleteAccount',
+          title: '彻底注销账号',
+          icon: 'person-remove',
+          iconColor: Colors.error,
+          showArrow: true,
+        },
       ],
     },
     {
@@ -330,7 +428,7 @@ const SettingsScreen: React.FC = () => {
           title: '当前版本',
           icon: 'info',
           iconColor: Colors.onSurfaceVariant,
-          value: 'v2.4.0 (Stable)',
+          value: '1.0.0',
         },
         {
           id: '11',

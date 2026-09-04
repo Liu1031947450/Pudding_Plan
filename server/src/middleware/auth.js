@@ -1,6 +1,7 @@
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const { User } = require('../models');
+const { fail } = require('../utils/http');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '30d';
@@ -26,10 +27,7 @@ async function authMiddleware(req, res, next) {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({
-      success: false,
-      error: '未提供认证令牌',
-    });
+    return fail(res, 401, '未提供认证令牌');
   }
 
   const token = authHeader.substring(7);
@@ -43,10 +41,7 @@ async function authMiddleware(req, res, next) {
     req.user = user;
     next();
   } catch (error) {
-    return res.status(401).json({
-      success: false,
-      error: '认证令牌无效或已过期',
-    });
+    return fail(res, 401, '认证令牌无效或已过期');
   }
 }
 

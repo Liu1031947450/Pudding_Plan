@@ -1,5 +1,5 @@
 import React from 'react';
-import { Appearance, Platform } from 'react-native';
+import { Platform } from 'react-native';
 import { settingsApi, type ApiResponse } from '../api';
 import { syncNotificationSettings } from '../services/notificationScheduler';
 import type { UserSettings } from '../types/domain';
@@ -10,7 +10,7 @@ export const DEFAULT_USER_SETTINGS: UserSettings = {
   notificationTime: '08:00',
   dndStart: '22:00',
   dndEnd: '07:00',
-  theme: 'system',
+  theme: 'light',
   fontSize: 'medium',
 };
 
@@ -34,33 +34,18 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const { user } = useAuth();
   const [settings, setSettings] = React.useState(DEFAULT_USER_SETTINGS);
-  const [systemScheme, setSystemScheme] = React.useState(
-    Appearance.getColorScheme(),
-  );
-
-  React.useEffect(() => {
-    const subscription = Appearance.addChangeListener(({ colorScheme }) =>
-      setSystemScheme(colorScheme),
-    );
-    return () => subscription.remove();
-  }, []);
-
   const applySettings = React.useCallback(async (next: UserSettings) => {
-    setSettings(next);
+    const lightSettings = { ...next, theme: 'light' as const };
+    setSettings(lightSettings);
     const webDocument = (
       globalThis as typeof globalThis & {
         document?: { documentElement: { style: { colorScheme: string } } };
       }
     ).document;
     if (Platform.OS === 'web' && webDocument) {
-      webDocument.documentElement.style.colorScheme =
-        next.theme === 'system' ? 'light dark' : next.theme;
-    } else if (typeof Appearance.setColorScheme === 'function') {
-      Appearance.setColorScheme(
-        next.theme === 'system' ? 'unspecified' : next.theme,
-      );
+      webDocument.documentElement.style.colorScheme = 'light';
     }
-    await syncNotificationSettings(next);
+    await syncNotificationSettings(lightSettings);
   }, []);
 
   const refreshSettings = React.useCallback(async () => {
@@ -94,9 +79,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
     [applySettings],
   );
 
-  const isDark =
-    settings.theme === 'dark' ||
-    (settings.theme === 'system' && systemScheme === 'dark');
+  const isDark = false;
   const fontScale =
     settings.fontSize === 'small'
       ? 0.9

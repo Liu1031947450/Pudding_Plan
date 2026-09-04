@@ -9,24 +9,7 @@ import {
   BorderRadius,
 } from '../../../constants/theme';
 import { BottomDrawer } from '../../../components/common/BottomDrawer';
-
-interface Notification {
-  id: string;
-  type:
-    | 'reminder'
-    | 'achievement'
-    | 'social'
-    | 'system'
-    | 'like'
-    | 'comment'
-    | 'reply';
-  title: string;
-  message: string;
-  time: string;
-  read: boolean;
-  targetType?: string;
-  targetId?: string;
-}
+import type { Notification } from '../../../types/domain';
 
 interface NotificationDrawerProps {
   visible: boolean;
@@ -58,6 +41,14 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
       case 'comment':
       case 'reply':
         return 'chat-bubble';
+      case 'follow':
+        return 'person-add';
+      case 'buddy_request':
+        return 'handshake';
+      case 'buddy_accepted':
+        return 'group';
+      case 'buddy_encouragement':
+        return 'waving-hand';
       default:
         return 'notifications';
     }
@@ -78,6 +69,11 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
       case 'comment':
       case 'reply':
         return Colors.primary;
+      case 'follow':
+      case 'buddy_request':
+      case 'buddy_accepted':
+      case 'buddy_encouragement':
+        return Colors.tertiary;
       default:
         return Colors.primary;
     }
@@ -127,6 +123,24 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                   navigation.navigate('CircleDetail', {
                     circleId: notification.targetId,
                   });
+                } else if (navigation && notification.targetType === 'buddy') {
+                  onClose();
+                  navigation.navigate('BuddyCenter');
+                } else if (navigation && notification.targetType === 'user') {
+                  onClose();
+                  navigation.navigate('Main', { screen: 'Circles' });
+                } else if (
+                  navigation &&
+                  notification.targetType === 'plan' &&
+                  notification.targetId
+                ) {
+                  onClose();
+                  navigation.navigate('CreatePlan', {
+                    planId: notification.targetId,
+                  });
+                } else if (navigation && notification.targetType === 'habit') {
+                  onClose();
+                  navigation.navigate('Main', { screen: 'Calendar' });
                 }
               }}
               activeOpacity={0.7}

@@ -111,6 +111,33 @@ export const LocationDrawerContent: React.FC<LocationDrawerContentProps> = ({
         contentContainerStyle={styles.locationListContent}
         showsVerticalScrollIndicator={false}
       >
+        {!!locationSearch.trim() &&
+          !filteredLocations.some(
+            item => item.name === locationSearch.trim(),
+          ) && (
+            <TouchableOpacity
+              style={styles.drawerItem}
+              onPress={() => {
+                onSelectLocation(locationSearch.trim());
+                onLocationSearchChange('');
+                onCloseDrawer();
+              }}
+            >
+              <View style={styles.drawerItemLeft}>
+                <MaterialIcons
+                  name="edit-location"
+                  size={20}
+                  color={Colors.primary}
+                  style={styles.drawerItemIcon}
+                />
+                <Text
+                  style={[styles.drawerItemText, { color: Colors.primary }]}
+                >
+                  使用“{locationSearch.trim()}”
+                </Text>
+              </View>
+            </TouchableOpacity>
+          )}
         {/* Nearby Spots Section */}
         {nearbyLocations.length > 0 && (
           <View style={styles.sectionContainer}>
@@ -135,10 +162,7 @@ export const LocationDrawerContent: React.FC<LocationDrawerContentProps> = ({
                     <Text
                       style={[
                         styles.drawerItemText,
-                        location === loc.name && {
-                          color: Colors.primary,
-                          fontWeight: '600',
-                        },
+                        location === loc.name && styles.selectedDrawerItemText,
                       ]}
                     >
                       {loc.name}
@@ -256,10 +280,7 @@ export const TopicDrawerContent: React.FC<TopicDrawerContentProps> = ({
                 style={styles.drawerItemIcon}
               />
               <Text
-                style={[
-                  styles.drawerItemText,
-                  { color: Colors.primary, fontWeight: '600' },
-                ]}
+                style={[styles.drawerItemText, styles.selectedDrawerItemText]}
               >
                 创建新话题: #{topicSearch}
               </Text>
@@ -310,10 +331,7 @@ export const TopicDrawerContent: React.FC<TopicDrawerContentProps> = ({
               <Text
                 style={[
                   styles.drawerItemText,
-                  topic === `#${t}` && {
-                    color: Colors.primary,
-                    fontWeight: '600',
-                  },
+                  topic === `#${t}` && styles.selectedDrawerItemText,
                 ]}
               >
                 #{t}
@@ -338,7 +356,7 @@ export interface VisibilityDrawerContentProps {
 export const VisibilityDrawerContent: React.FC<
   VisibilityDrawerContentProps
 > = ({ visibility, onSelectVisibility, onCloseDrawer }) => {
-  const options = ['公开', '仅好友', '私密'];
+  const options = ['公开', '仅搭子', '仅自己'];
   return (
     <View style={styles.drawerList}>
       {options.map(opt => (
@@ -376,6 +394,10 @@ const styles = StyleSheet.create({
   drawerItemText: {
     fontSize: FontSize.md,
     color: Colors.onSurface,
+  },
+  selectedDrawerItemText: {
+    color: Colors.primary,
+    fontWeight: '600',
   },
   drawerItemSubText: {
     fontSize: FontSize.xs,

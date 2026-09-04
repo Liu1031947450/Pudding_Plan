@@ -37,6 +37,28 @@ const User = sequelize.define(
       type: DataTypes.STRING(200),
       allowNull: true,
     },
+    goalTags: {
+      type: DataTypes.JSONB,
+      allowNull: false,
+      defaultValue: ['自律'],
+      validate: {
+        isValidGoalTags(value) {
+          if (
+            !Array.isArray(value) ||
+            value.length < 1 ||
+            value.length > 3 ||
+            value.some(
+              tag =>
+                typeof tag !== 'string' ||
+                !tag.trim() ||
+                tag.trim().length > 20,
+            )
+          ) {
+            throw new Error('目标标签需为1至3个非空标签');
+          }
+        },
+      },
+    },
     tokenVersion: {
       type: DataTypes.INTEGER,
       allowNull: false,

@@ -13,6 +13,8 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize, BorderRadius } from '../constants/theme';
 import { TopAppBar, Card } from '../components';
 import { badgesApi } from '../api';
+
+const badgeColorStyle = (backgroundColor: string) => ({ backgroundColor });
 import { useAuth } from '../contexts';
 import type { Badge } from '../types/domain';
 
@@ -118,17 +120,15 @@ const BadgesScreen: React.FC = () => {
                   <View
                     style={[
                       styles.badgeIcon,
-                      {
-                        backgroundColor: badge.color,
-                        opacity: badge.unlocked ? 1 : 0.4,
-                      },
+                      badgeColorStyle(badge.color),
+                      !badge.unlocked && styles.lockedBadge,
                     ]}
                   >
                     <MaterialIcons
                       name={badge.icon as any}
                       size={40}
                       color={Colors.onSurface}
-                      style={[{ opacity: badge.unlocked ? 1 : 0.4 }]}
+                      style={!badge.unlocked && styles.lockedBadge}
                     />
                   </View>
                   <Text style={styles.badgeTitle}>{badge.title}</Text>
@@ -228,6 +228,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: Spacing.sm,
+  },
+  lockedBadge: {
+    opacity: 0.4,
   },
   badgeTitle: {
     fontSize: FontSize.md,

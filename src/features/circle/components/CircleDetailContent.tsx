@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { AppText as Text } from '../../../components/common/AppText';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -19,12 +20,14 @@ import {
   FontSize,
   BorderRadius,
 } from '../../../constants/theme';
-import { Toast } from '../../../components';
+import { BottomDrawer, Toast } from '../../../components';
 import { circleService } from '../../../services/circleService';
 import { useAuth } from '../../../contexts/AuthContext';
 import { getImageUrl } from '../../../utils';
 import type { CircleListItem, CircleMoment } from '../types';
 import { DEFAULT_AVATAR } from '../constants';
+import { blocksApi, circlesApi } from '../../../api';
+import type { Comment } from '../../../types/domain';
 
 interface CircleDetailContentProps {
   circleId: string;
@@ -45,7 +48,7 @@ export const CircleDetailContent: React.FC<CircleDetailContentProps> = ({
   const [circle, setCircle] = useState<CircleListItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [comments, setComments] = useState<any[]>([]);
+  const [comments, setComments] = useState<Comment[]>([]);
   const [likers, setLikers] = useState<any[]>([]);
   const [commentText, setCommentText] = useState('');
   const [replyTo, setReplyTo] = useState<{ id: string; name: string } | null>(
@@ -58,6 +61,11 @@ export const CircleDetailContent: React.FC<CircleDetailContentProps> = ({
     'success',
   );
   const inputRef = React.useRef<TextInput>(null);
+  const [actionDrawerVisible, setActionDrawerVisible] = useState(false);
+  const [reportTarget, setReportTarget] = useState<{
+    type: 'moment' | 'comment';
+    id: string;
+  } | null>(null);
 
   const loadExtraData = React.useCallback(async () => {
     if (!circleId) return;
@@ -221,6 +229,149 @@ export const CircleDetailContent: React.FC<CircleDetailContentProps> = ({
     inputRef.current?.focus();
   };
 
+  const confirmAction = (
+    title: string,
+    message: string,
+    action: () => Promise<void>,
+  ) => {
+    const runAction = () => {
+      action().catch(() => {
+        setToastMessage('操作失败，请重试');
+        setToastType('error');
+        setToastVisible(true);
+      });
+    };
+    if (Platform.OS === 'web') {
+      if ((globalThis as any).confirm?.(message)) runAction();
+      return;
+    }
+    Alert.alert(title, message, [
+      { text: '取消', style: 'cancel' },
+      { text: '确认', style: 'destructive', onPress: runAction },
+    ]);
+  };
+
+  const handleDeleteMoment = () => {
+    confirmAction('删除动态', '确定永久删除这条动态吗？', async () => {
+      const response = await circlesApi.deleteMoment(circleId);
+      setToastMessage(
+        response.success ? '动态已删除' : response.error || '删除失败',
+      );
+      setToastType(response.success ? 'success' : 'error');
+      setToastVisible(true);
+      if (response.success) {
+        setCircle(null);
+        await onDataChange?.();
+        onClose?.();
+      }
+    });
+  };
+
+  const handleDeleteComment = (commentId: string) => {
+    confirmAction('删除评论', '确定删除这条评论吗？', async () => {
+      const response = await circlesApi.deleteComment(circleId, commentId);
+      setToastMessage(
+        response.success ? '评论已删除' : response.error || '删除失败',
+      );
+      setToastType(response.success ? 'success' : 'error');
+      setToastVisible(true);
+      if (response.success) await loadExtraData();
+    });
+  };
+
+  const handleBlockAuthor = () => {
+    if (!circle || circle.type !== 'waterfall' || !circle.authorUserId) return;
+    confirmAction(
+      '拉黑用户',
+      '拉黑后双方内容互不可见，关注和搭子关系也会解除。',
+      async () => {
+        const response = await blocksApi.block(String(circle.authorUserId));
+        setToastMessage(
+          response.success ? '已加入黑名单' : response.error || '拉黑失败',
+        );
+        setToastType(response.success ? 'success' : 'error');
+        setToastVisible(true);
+        if (response.success) {
+          setCircle(null);
+          await onDataChange?.();
+          onClose?.();
+        }
+      },
+    );
+  };
+
+  const submitReport = async (
+    reason: 'spam' | 'harassment' | 'inappropriate' | 'other',
+  ) => {
+    if (!reportTarget) return;
+    const target = reportTarget;
+    const response = await circlesApi.report(target.type, target.id, reason);
+    setActionDrawerVisible(false);
+    setReportTarget(null);
+    setToastMessage(
+      response.success
+        ? '举报已提交，该内容已隐藏'
+        : response.error || '举报失败',
+    );
+    setToastType(response.success ? 'success' : 'error');
+    setToastVisible(true);
+    if (!response.success) return;
+    if (target.type === 'moment') {
+      setCircle(null);
+      await onDataChange?.();
+      onClose?.();
+      return;
+    }
+    setComments(current =>
+      current
+        .filter(comment => comment.id !== target.id)
+        .map(comment => ({
+          ...comment,
+          replies: comment.replies?.filter(reply => reply.id !== target.id),
+        })),
+    );
+  };
+
+  const renderAuthorActions = () => {
+    if (circle?.type !== 'waterfall') return null;
+    const isOwn = String(circle.authorUserId) === String(currentUserId);
+    return (
+      <View style={styles.authorActions}>
+        {!isOwn && circle.authorUserId && (
+          <TouchableOpacity
+            style={[
+              styles.followButton,
+              circle.isFollowing && styles.followedButton,
+            ]}
+            onPress={handleToggleFollow}
+          >
+            <Text
+              style={[
+                styles.followButtonText,
+                circle.isFollowing && styles.followedButtonText,
+              ]}
+            >
+              {circle.isFollowing ? '已关注' : '关注'}
+            </Text>
+          </TouchableOpacity>
+        )}
+        <TouchableOpacity
+          style={styles.moreButton}
+          onPress={() => {
+            setReportTarget(null);
+            setActionDrawerVisible(true);
+          }}
+        >
+          <MaterialIcons
+            name="more-horiz"
+            size={22}
+            color={Colors.onSurfaceVariant}
+          />
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
   if (loading) {
     return (
       <View style={styles.centerContainer}>
@@ -263,26 +414,7 @@ export const CircleDetailContent: React.FC<CircleDetailContentProps> = ({
             />
             <Text style={styles.authorName}>{displayAuthorName}</Text>
           </View>
-          {circle.type === 'waterfall' &&
-            circle.authorUserId &&
-            String(circle.authorUserId) !== String(currentUserId) && (
-              <TouchableOpacity
-                style={[
-                  styles.followButton,
-                  circle.isFollowing && styles.followedButton,
-                ]}
-                onPress={handleToggleFollow}
-              >
-                <Text
-                  style={[
-                    styles.followButtonText,
-                    circle.isFollowing && styles.followedButtonText,
-                  ]}
-                >
-                  {circle.isFollowing ? '已关注' : '关注'}
-                </Text>
-              </TouchableOpacity>
-            )}
+          {renderAuthorActions()}
         </View>
       )}
 
@@ -307,26 +439,7 @@ export const CircleDetailContent: React.FC<CircleDetailContentProps> = ({
               />
               <Text style={styles.authorName}>{displayAuthorName}</Text>
             </View>
-            {circle.type === 'waterfall' &&
-              circle.authorUserId &&
-              String(circle.authorUserId) !== String(currentUserId) && (
-                <TouchableOpacity
-                  style={[
-                    styles.followButton,
-                    circle.isFollowing && styles.followedButton,
-                  ]}
-                  onPress={handleToggleFollow}
-                >
-                  <Text
-                    style={[
-                      styles.followButtonText,
-                      circle.isFollowing && styles.followedButtonText,
-                    ]}
-                  >
-                    {circle.isFollowing ? '已关注' : '关注'}
-                  </Text>
-                </TouchableOpacity>
-              )}
+            {renderAuthorActions()}
           </View>
         )}
 
@@ -371,7 +484,25 @@ export const CircleDetailContent: React.FC<CircleDetailContentProps> = ({
               ? circle.content || circle.description
               : circle.description}
           </Text>
-          <Text style={styles.time}>编辑于 刚刚</Text>
+          {circle.type === 'waterfall' && (
+            <View style={styles.metaRow}>
+              <Text style={styles.metaText}>
+                {
+                  { public: '公开', buddies: '仅搭子', private: '仅自己' }[
+                    circle.visibility || 'public'
+                  ]
+                }
+              </Text>
+              {!!circle.location && (
+                <Text style={styles.metaText}>· {circle.location}</Text>
+              )}
+              {!!circle.createdAt && (
+                <Text style={styles.metaText}>
+                  · {new Date(circle.createdAt).toLocaleString('zh-CN')}
+                </Text>
+              )}
+            </View>
+          )}
 
           {likers.length > 0 && (
             <View style={styles.likersContainer}>
@@ -384,7 +515,7 @@ export const CircleDetailContent: React.FC<CircleDetailContentProps> = ({
                     }}
                     style={[
                       styles.likerAvatar,
-                      { marginLeft: index === 0 ? 0 : -8 },
+                      index > 0 && styles.overlappingLikerAvatar,
                     ]}
                   />
                 ))}
@@ -421,13 +552,34 @@ export const CircleDetailContent: React.FC<CircleDetailContentProps> = ({
                       >
                         <Text style={styles.replyActionText}>回复</Text>
                       </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() =>
+                          comment.isOwn
+                            ? handleDeleteComment(comment.id)
+                            : (setReportTarget({
+                                type: 'comment',
+                                id: comment.id,
+                              }),
+                              setActionDrawerVisible(true))
+                        }
+                      >
+                        <Text
+                          style={
+                            comment.isOwn
+                              ? styles.deleteActionText
+                              : styles.reportActionText
+                          }
+                        >
+                          {comment.isOwn ? '删除' : '举报'}
+                        </Text>
+                      </TouchableOpacity>
                     </View>
                     <Text style={styles.commentText}>{comment.text}</Text>
                     <Text style={styles.commentTime}>{comment.time}</Text>
 
                     {comment.replies && comment.replies.length > 0 && (
                       <View style={styles.repliesList}>
-                        {comment.replies.map((reply: any) => (
+                        {comment.replies.map(reply => (
                           <View key={reply.id} style={styles.replyItem}>
                             <Text style={styles.replyContent}>
                               <Text style={styles.replyUser}>
@@ -435,6 +587,27 @@ export const CircleDetailContent: React.FC<CircleDetailContentProps> = ({
                               </Text>
                               {reply.text}
                             </Text>
+                            <TouchableOpacity
+                              onPress={() =>
+                                reply.isOwn
+                                  ? handleDeleteComment(reply.id)
+                                  : (setReportTarget({
+                                      type: 'comment',
+                                      id: reply.id,
+                                    }),
+                                    setActionDrawerVisible(true))
+                              }
+                            >
+                              <Text
+                                style={
+                                  reply.isOwn
+                                    ? styles.deleteActionText
+                                    : styles.reportActionText
+                                }
+                              >
+                                {reply.isOwn ? '删除' : '举报'}
+                              </Text>
+                            </TouchableOpacity>
                           </View>
                         ))}
                       </View>
@@ -520,6 +693,59 @@ export const CircleDetailContent: React.FC<CircleDetailContentProps> = ({
         </View>
       </KeyboardAvoidingView>
 
+      <BottomDrawer
+        visible={actionDrawerVisible}
+        onClose={() => {
+          setActionDrawerVisible(false);
+          setReportTarget(null);
+        }}
+        title={reportTarget ? '选择举报原因' : '内容操作'}
+        height="auto"
+      >
+        <View style={styles.actionSheet}>
+          {reportTarget ? (
+            [
+              ['spam', '垃圾内容'],
+              ['harassment', '骚扰'],
+              ['inappropriate', '不适宜内容'],
+              ['other', '其他'],
+            ].map(([reason, label]) => (
+              <TouchableOpacity
+                key={reason}
+                style={styles.sheetItem}
+                onPress={() => submitReport(reason as any)}
+              >
+                <Text style={styles.sheetItemText}>{label}</Text>
+              </TouchableOpacity>
+            ))
+          ) : circle.type === 'waterfall' && circle.isOwn ? (
+            <TouchableOpacity
+              style={styles.sheetItem}
+              onPress={handleDeleteMoment}
+            >
+              <Text style={styles.sheetDangerText}>删除动态</Text>
+            </TouchableOpacity>
+          ) : (
+            <>
+              <TouchableOpacity
+                style={styles.sheetItem}
+                onPress={() =>
+                  setReportTarget({ type: 'moment', id: circleId })
+                }
+              >
+                <Text style={styles.sheetItemText}>举报动态</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.sheetItem}
+                onPress={handleBlockAuthor}
+              >
+                <Text style={styles.sheetDangerText}>拉黑作者</Text>
+              </TouchableOpacity>
+            </>
+          )}
+        </View>
+      </BottomDrawer>
+
       <Toast
         visible={toastVisible}
         message={toastMessage}
@@ -590,6 +816,12 @@ const styles = StyleSheet.create({
     color: Colors.onSurface,
     marginLeft: Spacing.sm,
   },
+  authorActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+  },
+  moreButton: { padding: Spacing.xs },
   followButton: {
     paddingHorizontal: Spacing.md,
     paddingVertical: 6,
@@ -657,11 +889,8 @@ const styles = StyleSheet.create({
     lineHeight: 26,
     letterSpacing: 0.5,
   },
-  time: {
-    fontSize: FontSize.xs,
-    color: Colors.onSurfaceVariant,
-    marginTop: Spacing.lg,
-  },
+  metaRow: { flexDirection: 'row', flexWrap: 'wrap', marginTop: Spacing.lg },
+  metaText: { fontSize: FontSize.xs, color: Colors.onSurfaceVariant },
   commentsSection: {
     padding: Spacing.lg,
     paddingBottom: 100,
@@ -732,6 +961,9 @@ const styles = StyleSheet.create({
     borderColor: Colors.white,
     backgroundColor: Colors.surfaceVariant,
   },
+  overlappingLikerAvatar: {
+    marginLeft: -8,
+  },
   likersText: {
     fontSize: FontSize.xs,
     color: Colors.onSurfaceVariant,
@@ -751,6 +983,8 @@ const styles = StyleSheet.create({
     color: Colors.primary,
     fontWeight: '600',
   },
+  reportActionText: { fontSize: FontSize.xs, color: Colors.onSurfaceVariant },
+  deleteActionText: { fontSize: FontSize.xs, color: Colors.error },
   repliesList: {
     backgroundColor: Colors.surfaceContainerLow,
     borderRadius: BorderRadius.md,
@@ -759,6 +993,9 @@ const styles = StyleSheet.create({
   },
   replyItem: {
     marginBottom: 4,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: Spacing.sm,
   },
   replyContent: {
     fontSize: FontSize.sm,
@@ -819,6 +1056,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginLeft: Spacing.md,
     gap: Spacing.lg,
+  },
+  actionSheet: { padding: Spacing.lg },
+  sheetItem: {
+    paddingVertical: Spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: `${Colors.outlineVariant}20`,
+  },
+  sheetItemText: { fontSize: FontSize.md, color: Colors.onSurface },
+  sheetDangerText: {
+    fontSize: FontSize.md,
+    color: Colors.error,
+    fontWeight: '600',
   },
   iconButton: {
     alignItems: 'center',

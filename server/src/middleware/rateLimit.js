@@ -1,3 +1,5 @@
+const { fail } = require('../utils/http');
+
 const createRateLimit = ({ windowMs, max, key }) => {
   const attempts = new Map();
 
@@ -18,10 +20,7 @@ const createRateLimit = ({ windowMs, max, key }) => {
 
     if (entry.count >= max) {
       res.set('Retry-After', String(Math.ceil((entry.resetAt - now) / 1000)));
-      return res.status(429).json({
-        success: false,
-        error: '尝试次数过多，请稍后再试',
-      });
+      return fail(res, 429, '尝试次数过多，请稍后再试');
     }
 
     entry.count += 1;

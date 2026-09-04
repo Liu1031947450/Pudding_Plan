@@ -1,6 +1,6 @@
 import { io, Socket } from 'socket.io-client';
 import { API_CONFIG } from '../api/config';
-import * as SecureStore from 'expo-secure-store';
+import { storage } from './storage';
 
 class WebSocketService {
   private socket: Socket | null = null;
@@ -17,17 +17,15 @@ class WebSocketService {
         return;
       }
 
-      const token = await SecureStore.getItemAsync('pudding_plan_auth_token');
+      const token = await storage.getItem('pudding_plan_auth_token');
       if (!token) {
         console.error('WebSocket连接失败：未找到认证token');
         return;
       }
 
       // 从API配置中获取WebSocket地址
-      const wsUrl = API_CONFIG.BASE_URL.replace('http', 'ws').replace(
-        '/api',
-        '',
-      );
+      if (!API_CONFIG.SERVER_URL) return;
+      const wsUrl = API_CONFIG.SERVER_URL.replace(/^http/, 'ws');
 
       this.socket = io(wsUrl, {
         auth: {
@@ -109,6 +107,14 @@ class WebSocketService {
       this.socket = null;
     }
     this.messageHandlers.clear();
+  }
+
+  async reconnect() {
+    if (this.socket) {
+      this.socket.disconnect();
+      this.socket = null;
+    }
+    await this.connect();
   }
 
   isConnected(): boolean {

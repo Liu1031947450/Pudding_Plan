@@ -61,6 +61,12 @@ class ApiClient {
     const timeoutId = setTimeout(() => controller.abort(), timeout);
 
     try {
+      if (!this.baseURL) {
+        return {
+          success: false,
+          error: '移动端必须配置 EXPO_PUBLIC_API_URL 后才能连接服务',
+        };
+      }
       const url = `${this.baseURL}${endpoint}`;
 
       const isFormData = body instanceof FormData;
@@ -155,9 +161,10 @@ class ApiClient {
 
   async delete<T>(
     endpoint: string,
-    options?: Omit<RequestOptions, 'method' | 'body'>,
+    body?: any,
+    options?: Omit<RequestOptions, 'method'>,
   ): Promise<ApiResponse<T>> {
-    return this.request<T>(endpoint, { ...options, method: 'DELETE' });
+    return this.request<T>(endpoint, { ...options, method: 'DELETE', body });
   }
 
   async patch<T>(

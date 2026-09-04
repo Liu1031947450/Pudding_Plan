@@ -17,8 +17,9 @@ import {
   Avatar,
   Card,
   BottomDrawer,
+  Toast,
 } from '../components';
-import { authApi, badgesApi } from '../api';
+import { authApi, badgesApi, feedbackApi } from '../api';
 import { useAuth } from '../contexts';
 import { FeedbackSheet } from '../features/settings';
 import type { Badge } from '../types/domain';
@@ -29,6 +30,8 @@ const ProfileScreen: React.FC = () => {
   const [badges, setBadges] = useState<Badge[]>([]);
   const [loading, setLoading] = useState(true);
   const [feedbackVisible, setFeedbackVisible] = useState(false);
+  const [loadError, setLoadError] = useState('');
+  const [toastMessage, setToastMessage] = useState('');
   const [stats, setStats] = useState({
     streakDays: 0,
     totalCheckIns: 0,
@@ -43,31 +46,16 @@ const ProfileScreen: React.FC = () => {
   });
 
   const fetchProfileData = useCallback(async () => {
-    console.log(
-      '[Profile] fetchProfileData called, user:',
-      user?.id,
-      user?.username,
-    );
     if (!user?.id) {
-      console.warn('[Profile] user.id 不存在，跳过数据加载');
       setLoading(false);
       return;
     }
+    setLoadError('');
     try {
-      console.log('[Profile] 开始请求 badges 和 stats...');
       const [badgesResponse, statsResponse] = await Promise.all([
         badgesApi.getAll(),
         authApi.getCurrentUserStats(),
       ]);
-
-      console.log(
-        '[Profile] badgesResponse:',
-        JSON.stringify({
-          success: badgesResponse.success,
-          dataLength: badgesResponse.data?.length,
-          error: badgesResponse.error,
-        }),
-      );
 
       if (badgesResponse.success && badgesResponse.data) {
         setBadges(badgesResponse.data);
@@ -87,12 +75,17 @@ const ProfileScreen: React.FC = () => {
           socialStats: d.socialStats || prev.socialStats,
         }));
       }
-    } catch (error) {
-      console.error('获取个人中心数据失败:', error);
+      if (!badgesResponse.success || !statsResponse.success) {
+        setLoadError(
+          badgesResponse.error || statsResponse.error || '个人数据加载失败',
+        );
+      }
+    } catch {
+      setLoadError('个人数据加载失败，请稍后重试');
     } finally {
       setLoading(false);
     }
-  }, [user?.id, user?.username]);
+  }, [user?.id]);
 
   useFocusEffect(
     useCallback(() => {
@@ -115,10 +108,11 @@ const ProfileScreen: React.FC = () => {
         <View style={styles.profileSection}>
           <View style={styles.avatarWrapper}>
             <View style={styles.avatarBorder}>
-              <Avatar uri={user?.avatar || undefined} size="xlarge" />
-            </View>
-            <View style={styles.avatarBadge}>
-              <MaterialIcons name="verified" size={16} color={Colors.white} />
+              <Avatar
+                uri={user?.avatar || undefined}
+                name={user?.username}
+                size="xlarge"
+              />
             </View>
           </View>
           <View style={styles.userInfo}>
@@ -126,7 +120,20 @@ const ProfileScreen: React.FC = () => {
             <Text style={styles.userBio}>
               {user?.bio || '用布丁装点生活的每一天'}
             </Text>
+            <View style={styles.goalTags}>
+              {(user?.goalTags || []).map(tag => (
+                <Text key={tag} style={styles.goalTag}>
+                  {tag}
+                </Text>
+              ))}
+            </View>
           </View>
+
+          {!!loadError && (
+            <TouchableOpacity onPress={fetchProfileData}>
+              <Text style={styles.loadError}>{loadError}，点击重试</Text>
+            </TouchableOpacity>
+          )}
 
           <View style={styles.socialStatsRow}>
             <View style={styles.socialStatItem}>
@@ -389,11 +396,27 @@ const ProfileScreen: React.FC = () => {
         height="85%"
       >
         <FeedbackSheet
-          onSubmit={() => {
+          onSubmit={async (category, content, contact) => {
+            const response = await feedbackApi.submit(
+              category,
+              content,
+              contact,
+            );
+            if (!response.success) {
+              setToastMessage(response.error || '反馈提交失败');
+              return;
+            }
             setFeedbackVisible(false);
+            setToastMessage('反馈已提交，感谢你的支持');
           }}
         />
       </BottomDrawer>
+
+      <Toast
+        visible={!!toastMessage}
+        message={toastMessage}
+        onHide={() => setToastMessage('')}
+      />
 
       <BottomNavBar />
     </SafeAreaView>
@@ -426,20 +449,6 @@ const styles = StyleSheet.create({
     padding: 2,
     backgroundColor: Colors.primaryContainer,
   },
-  avatarBadge: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    backgroundColor: Colors.secondary,
-    padding: 4,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: Colors.surfaceContainerLowest,
-  },
-  avatarBadgeText: {
-    fontSize: 12,
-    color: Colors.onSecondary,
-  },
   userInfo: {
     alignItems: 'center',
   },
@@ -454,6 +463,26 @@ const styles = StyleSheet.create({
     color: Colors.onSurfaceVariant,
     fontStyle: 'italic',
     marginTop: 4,
+  },
+  goalTags: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: Spacing.xs,
+    marginTop: Spacing.sm,
+  },
+  goalTag: {
+    color: Colors.onPrimaryContainer,
+    backgroundColor: Colors.primaryContainer,
+    borderRadius: BorderRadius.full,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 3,
+    fontSize: FontSize.xs,
+  },
+  loadError: {
+    color: Colors.error,
+    marginTop: Spacing.sm,
+    fontSize: FontSize.sm,
   },
   socialStatsRow: {
     flexDirection: 'row',

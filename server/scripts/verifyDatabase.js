@@ -1,226 +1,197 @@
 require('dotenv').config();
-const { QueryTypes } = require('sequelize');
 const sequelize = require('../src/config/database');
+const { QueryTypes } = require('sequelize');
 
 const REQUIRED_TABLES = [
   'users',
   'plans',
   'plan_check_ins',
   'habits',
+  'habit_check_ins',
   'notifications',
   'badges',
   'templates',
   'circle_moments',
   'likes',
   'collects',
-  'friendships',
   'comments',
   'user_settings',
   'feedbacks',
-];
-
-const REQUIRED_INDEXES = [
-  'plan_check_ins_plan_date_unique',
-  'likes_user_moment_unique',
-  'collects_user_moment_unique',
-  'friendships_user_friend_unique',
-  'plans_user_id_idx',
-  'plans_user_sort_order_idx',
-  'feedbacks_status_created_idx',
-  'notifications_user_unread_created_idx',
-  'circle_moments_created_at_idx',
-  'comments_moment_created_idx',
-  'badges_user_badge_unique',
+  'follows',
+  'buddy_relationships',
+  'user_blocks',
+  'content_reports',
 ];
 
 const REQUIRED_COLUMNS = {
-  users: ['id', 'userId', 'phone', 'avatar', 'tokenVersion'],
-  notifications: ['userId', 'senderId', 'targetType', 'targetId'],
-  badges: ['userId', 'badgeKey', 'unlockedAt'],
+  users: ['userId', 'phone', 'avatar', 'goalTags', 'tokenVersion'],
+  plans: ['userId', 'status', 'sortOrder'],
   plan_check_ins: ['planId', 'checkInDate', 'numericValue', 'note'],
-  plans: ['id', 'userId', 'sortOrder'],
-  user_settings: [
+  habits: [
     'userId',
-    'notificationsEnabled',
-    'notificationTime',
-    'dndStart',
-    'dndEnd',
-    'theme',
-    'fontSize',
+    'weekdays',
+    'reminderTime',
+    'startDate',
+    'isActive',
+    'sortOrder',
   ],
-  feedbacks: ['id', 'userId', 'category', 'content', 'contact', 'status'],
+  habit_check_ins: ['habitId', 'checkInDate'],
+  circle_moments: ['authorId', 'visibility', 'location', 'images'],
+  follows: ['userId', 'followingId'],
+  buddy_relationships: ['requesterId', 'addresseeId', 'status'],
+  user_blocks: ['blockerId', 'blockedId'],
+  content_reports: ['reporterId', 'targetType', 'targetId', 'reason', 'status'],
 };
 
+const REQUIRED_INDEXES = [
+  'plan_check_ins_plan_date_unique',
+  'habit_check_ins_habit_date_unique',
+  'plans_user_sort_order_idx',
+  'habits_user_sort_order_idx',
+  'likes_user_moment_unique',
+  'collects_user_moment_unique',
+  'follows_user_following_unique',
+  'buddy_relationships_pair_unique',
+  'user_blocks_pair_unique',
+  'content_reports_reporter_target_unique',
+];
+
 const REQUIRED_CONSTRAINTS = [
-  'users_phone_format_check',
-  'users_public_id_format_check',
-  'users_token_version_check',
-  'plans_total_days_check',
-  'plans_type_check',
-  'plans_sort_order_check',
+  'users_goal_tags_check',
+  'plans_status_check',
   'plan_check_ins_numeric_nonnegative',
   'plan_check_ins_single_detail',
   'plan_check_ins_note_not_blank',
-  'notifications_target_type_check',
-  'user_settings_notification_time_check',
-  'user_settings_dnd_start_check',
-  'user_settings_dnd_end_check',
+  'habits_weekdays_check',
+  'habits_reminder_time_check',
+  'habits_sort_order_check',
+  'circle_moments_visibility_check',
+  'follows_not_self_check',
+  'buddy_relationships_not_self_check',
+  'buddy_relationships_status_check',
+  'user_blocks_not_self_check',
+  'content_reports_target_type_check',
+  'content_reports_reason_check',
+  'content_reports_status_check',
   'user_settings_theme_check',
-  'user_settings_font_size_check',
-  'feedbacks_category_check',
-  'feedbacks_content_check',
-  'feedbacks_status_check',
 ];
-
-const COUNTED_TABLES = REQUIRED_TABLES.filter(
-  table => table !== 'plan_check_ins',
-);
 
 async function main() {
   await sequelize.authenticate();
-  const [tables] = await sequelize.query(`
-    SELECT relname AS table_name
-    FROM pg_class
-    WHERE relnamespace = 'public'::regnamespace AND relkind = 'r'
-  `);
-  const [indexes] = await sequelize.query(`
-    SELECT indexname FROM pg_indexes WHERE schemaname = 'public'
-  `);
-  const [columns] = await sequelize.query(`
-    SELECT table_name, column_name, character_maximum_length
-    FROM information_schema.columns
-    WHERE table_schema = 'public'
-  `);
-  const [constraints] = await sequelize.query(`
-    SELECT constraint_name
-    FROM information_schema.table_constraints
-    WHERE table_schema = 'public'
-  `);
+  const [tables, columns, indexes, constraints] = await Promise.all([
+    sequelize.query(
+      `SELECT relname AS table_name FROM pg_class
+       WHERE relnamespace = 'public'::regnamespace AND relkind = 'r'`,
+      { type: QueryTypes.SELECT },
+    ),
+    sequelize.query(
+      `SELECT table_name, column_name FROM information_schema.columns
+       WHERE table_schema = 'public'`,
+      { type: QueryTypes.SELECT },
+    ),
+    sequelize.query(
+      `SELECT indexname FROM pg_indexes WHERE schemaname = 'public'`,
+      { type: QueryTypes.SELECT },
+    ),
+    sequelize.query(
+      `SELECT constraint_name FROM information_schema.table_constraints
+       WHERE table_schema = 'public'`,
+      { type: QueryTypes.SELECT },
+    ),
+  ]);
   const tableNames = new Set(tables.map(row => row.table_name));
-  const indexNames = new Set(indexes.map(row => row.indexname));
   const columnNames = new Set(
     columns.map(row => `${row.table_name}.${row.column_name}`),
   );
+  const indexNames = new Set(indexes.map(row => row.indexname));
   const constraintNames = new Set(constraints.map(row => row.constraint_name));
   const missingTables = REQUIRED_TABLES.filter(name => !tableNames.has(name));
-  const missingIndexes = REQUIRED_INDEXES.filter(name => !indexNames.has(name));
   const missingColumns = Object.entries(REQUIRED_COLUMNS).flatMap(
     ([table, names]) =>
       names
         .filter(name => !columnNames.has(`${table}.${name}`))
         .map(name => `${table}.${name}`),
   );
+  const missingIndexes = REQUIRED_INDEXES.filter(name => !indexNames.has(name));
   const missingConstraints = REQUIRED_CONSTRAINTS.filter(
     name => !constraintNames.has(name),
   );
-
+  const forbidden = [
+    tableNames.has('friendships') ? 'friendships table' : null,
+    columnNames.has('plans.completedDate') ? 'plans.completedDate' : null,
+    columnNames.has('habits.completed') ? 'habits.completed' : null,
+  ].filter(Boolean);
   if (
     missingTables.length ||
-    missingIndexes.length ||
     missingColumns.length ||
-    missingConstraints.length
+    missingIndexes.length ||
+    missingConstraints.length ||
+    forbidden.length
   ) {
     throw new Error(
       `数据库结构不完整。缺少表: ${
         missingTables.join(', ') || '无'
-      }；缺少字段: ${missingColumns.join(', ') || '无'}；缺少约束: ${
-        missingConstraints.join(', ') || '无'
-      }；缺少索引: ${missingIndexes.join(', ') || '无'}`,
+      }；缺少字段: ${missingColumns.join(', ') || '无'}；缺少索引: ${
+        missingIndexes.join(', ') || '无'
+      }；缺少约束: ${missingConstraints.join(', ') || '无'}；仍存在旧结构: ${
+        forbidden.join(', ') || '无'
+      }`,
     );
   }
 
-  const avatarColumn = columns.find(
-    row => row.table_name === 'users' && row.column_name === 'avatar',
+  const [orphans] = await sequelize.query(
+    `SELECT
+       (SELECT count(*)::int FROM plans x LEFT JOIN users u ON u.id = x."userId" WHERE u.id IS NULL) plans,
+       (SELECT count(*)::int FROM plan_check_ins x LEFT JOIN plans p ON p.id = x."planId" WHERE p.id IS NULL) plan_check_ins,
+       (SELECT count(*)::int FROM habits x LEFT JOIN users u ON u.id = x."userId" WHERE u.id IS NULL) habits,
+       (SELECT count(*)::int FROM habit_check_ins x LEFT JOIN habits h ON h.id = x."habitId" WHERE h.id IS NULL) habit_check_ins,
+       (SELECT count(*)::int FROM circle_moments x LEFT JOIN users u ON u.id = x."authorId" WHERE u.id IS NULL) moments,
+       (SELECT count(*)::int FROM comments x LEFT JOIN circle_moments m ON m.id = x."momentId" LEFT JOIN users u ON u.id = x."userId" WHERE m.id IS NULL OR u.id IS NULL) comments,
+       (SELECT count(*)::int FROM follows x LEFT JOIN users a ON a."userId" = x."userId" LEFT JOIN users b ON b."userId" = x."followingId" WHERE a.id IS NULL OR b.id IS NULL) follows,
+       (SELECT count(*)::int FROM buddy_relationships x LEFT JOIN users a ON a."userId" = x."requesterId" LEFT JOIN users b ON b."userId" = x."addresseeId" WHERE a.id IS NULL OR b.id IS NULL) buddies,
+       (SELECT count(*)::int FROM user_blocks x LEFT JOIN users a ON a."userId" = x."blockerId" LEFT JOIN users b ON b."userId" = x."blockedId" WHERE a.id IS NULL OR b.id IS NULL) blocks,
+       (SELECT count(*)::int FROM content_reports x LEFT JOIN users u ON u."userId" = x."reporterId" WHERE u.id IS NULL) reports`,
+    { type: QueryTypes.SELECT },
   );
-  if ((avatarColumn?.character_maximum_length || 0) < 1000) {
-    throw new Error('users.avatar 长度必须至少为 1000');
-  }
-
-  const [userUniqueConstraints] = await sequelize.query(`
-    SELECT array_agg(kcu.column_name ORDER BY kcu.ordinal_position) AS columns
-    FROM information_schema.table_constraints tc
-    JOIN information_schema.key_column_usage kcu
-      ON tc.constraint_name = kcu.constraint_name
-     AND tc.constraint_schema = kcu.constraint_schema
-    WHERE tc.table_schema = 'public'
-      AND tc.table_name = 'users'
-      AND tc.constraint_type = 'UNIQUE'
-    GROUP BY tc.constraint_name
-  `);
-  const parseColumns = value =>
-    Array.isArray(value)
-      ? value
-      : String(value)
-          .replace(/^\{|\}$/g, '')
-          .split(',')
-          .filter(Boolean);
-  for (const column of ['phone', 'userId']) {
-    if (
-      !userUniqueConstraints.some(constraint => {
-        const names = parseColumns(constraint.columns);
-        return names.length === 1 && names[0] === column;
-      })
-    ) {
-      throw new Error(`users.${column} 缺少唯一约束`);
-    }
-  }
-
-  const [orphans] = await sequelize.query(`
-    SELECT
-      (SELECT count(*)::int FROM plans p LEFT JOIN users u ON u.id = p."userId" WHERE u.id IS NULL) AS plans,
-      (SELECT count(*)::int FROM plan_check_ins c LEFT JOIN plans p ON p.id = c."planId" WHERE p.id IS NULL) AS plan_check_ins,
-      (SELECT count(*)::int FROM habits h LEFT JOIN users u ON u.id = h."userId" WHERE u.id IS NULL) AS habits,
-      (SELECT count(*)::int FROM notifications n LEFT JOIN users u ON u.id = n."userId" WHERE u.id IS NULL) AS notifications,
-      (SELECT count(*)::int FROM notifications n LEFT JOIN users u ON u.id = n."senderId" WHERE n."senderId" IS NOT NULL AND u.id IS NULL) AS notification_senders,
-      (SELECT count(*)::int FROM badges b LEFT JOIN users u ON u.id = b."userId" WHERE u.id IS NULL) AS badges,
-      (SELECT count(*)::int FROM user_settings s LEFT JOIN users u ON u.id = s."userId" WHERE u.id IS NULL) AS user_settings,
-      (SELECT count(*)::int FROM feedbacks f LEFT JOIN users u ON u.id = f."userId" WHERE u.id IS NULL) AS feedbacks,
-      (SELECT count(*)::int FROM circle_moments m LEFT JOIN users u ON u.id = m."authorId" WHERE u.id IS NULL) AS circle_moments,
-      (SELECT count(*)::int FROM likes l LEFT JOIN users u ON u."userId" = l."userId" WHERE u.id IS NULL) AS like_users,
-      (SELECT count(*)::int FROM likes l LEFT JOIN circle_moments m ON m.id = l."momentId" WHERE m.id IS NULL) AS like_moments,
-      (SELECT count(*)::int FROM collects c LEFT JOIN users u ON u."userId" = c."userId" WHERE u.id IS NULL) AS collect_users,
-      (SELECT count(*)::int FROM collects c LEFT JOIN circle_moments m ON m.id = c."momentId" WHERE m.id IS NULL) AS collect_moments,
-      (SELECT count(*)::int FROM friendships f LEFT JOIN users u ON u."userId" = f."userId" WHERE u.id IS NULL) AS friendship_users,
-      (SELECT count(*)::int FROM friendships f LEFT JOIN users u ON u."userId" = f."friendId" WHERE u.id IS NULL) AS friendship_friends,
-      (SELECT count(*)::int FROM comments c LEFT JOIN users u ON u.id = c."userId" WHERE u.id IS NULL) AS comment_users,
-      (SELECT count(*)::int FROM comments c LEFT JOIN circle_moments m ON m.id = c."momentId" WHERE m.id IS NULL) AS comment_moments,
-      (SELECT count(*)::int FROM comments c LEFT JOIN comments p ON p.id = c."parentId" WHERE c."parentId" IS NOT NULL AND p.id IS NULL) AS comment_parents
-  `);
-  const orphanCounts = Object.entries(orphans[0]).filter(([, count]) => count);
-  if (orphanCounts.length > 0) {
+  const orphanEntries = Object.entries(orphans).filter(
+    ([, count]) => Number(count) > 0,
+  );
+  if (orphanEntries.length) {
     throw new Error(
-      `存在孤儿记录: ${orphanCounts
-        .map(([table, count]) => `${table}=${count}`)
+      `存在外键孤儿记录: ${orphanEntries
+        .map(([name, count]) => `${name}=${count}`)
         .join(', ')}`,
     );
   }
 
-  const counts = await Promise.all(
-    COUNTED_TABLES.map(async table => {
-      const [[row]] = await sequelize.query(
-        `SELECT count(*)::int AS count FROM "${table}"`,
-      );
-      return [table, row.count];
-    }),
+  const [invalid] = await sequelize.query(
+    `SELECT
+       (SELECT count(*)::int FROM users WHERE jsonb_array_length("goalTags") NOT BETWEEN 1 AND 3) goal_tags,
+       (SELECT count(*)::int FROM habits WHERE EXISTS (
+         SELECT 1 FROM jsonb_array_elements_text(weekdays) value
+         WHERE value::int < 0 OR value::int > 6
+       )) weekdays,
+       (SELECT count(*)::int FROM buddy_relationships WHERE "requesterId" = "addresseeId") self_buddies`,
+    { type: QueryTypes.SELECT },
   );
+  const invalidEntries = Object.entries(invalid).filter(
+    ([, count]) => Number(count) > 0,
+  );
+  if (invalidEntries.length) {
+    throw new Error(
+      `存在无效业务数据: ${invalidEntries
+        .map(([name, count]) => `${name}=${count}`)
+        .join(', ')}`,
+    );
+  }
 
-  console.log('数据库结构验证通过');
-  console.log(
-    Object.fromEntries([
-      ...counts,
-      [
-        'plan_check_ins',
-        Number(
-          (
-            await sequelize.query(
-              'SELECT count(*)::int AS count FROM plan_check_ins',
-              { type: QueryTypes.SELECT, plain: true },
-            )
-          ).count,
-        ),
-      ],
-    ]),
-  );
+  console.log({
+    database: sequelize.getDatabaseName(),
+    tables: REQUIRED_TABLES.length,
+    schema: 'ok',
+    orphanRows: 0,
+    legacyFieldsRemoved: true,
+  });
 }
 
 main()

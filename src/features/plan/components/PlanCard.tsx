@@ -19,6 +19,7 @@ interface PlanCardProps {
   onMoveDown?: () => void;
   canMoveUp?: boolean;
   canMoveDown?: boolean;
+  onStatusChange?: (status: 'active' | 'paused' | 'archived') => void;
 }
 
 export const PlanCard: React.FC<PlanCardProps> = ({
@@ -31,11 +32,13 @@ export const PlanCard: React.FC<PlanCardProps> = ({
   onMoveDown,
   canMoveUp = true,
   canMoveDown = true,
+  onStatusChange,
 }) => {
-  // 从 completedDate 派生所有展示数据（completedDate 是唯一事实源）
+  // 从服务端打卡记录的 completedDate 投影派生展示数据
   const { progress, streakBroken, subtitle } = getPlanDisplayData(plan);
   const color = plan.color ?? Colors.primaryContainer;
   const icon = plan.icon || 'stars';
+  const status = plan.status || 'active';
 
   return (
     <Card
@@ -111,6 +114,51 @@ export const PlanCard: React.FC<PlanCardProps> = ({
         }
         height={8}
       />
+      {!isManaging && onStatusChange && (
+        <View style={styles.statusActions}>
+          {status === 'active' && (
+            <TouchableOpacity
+              style={styles.statusButton}
+              onPress={() => onStatusChange('paused')}
+            >
+              <MaterialIcons
+                name="pause"
+                size={16}
+                color={Colors.onSurfaceVariant}
+              />
+              <Text style={styles.statusButtonText}>暂停</Text>
+            </TouchableOpacity>
+          )}
+          {status !== 'active' && (
+            <TouchableOpacity
+              style={styles.statusButton}
+              onPress={() => onStatusChange('active')}
+            >
+              <MaterialIcons
+                name="play-arrow"
+                size={16}
+                color={Colors.primary}
+              />
+              <Text style={[styles.statusButtonText, styles.resumeText]}>
+                恢复
+              </Text>
+            </TouchableOpacity>
+          )}
+          {status !== 'archived' && (
+            <TouchableOpacity
+              style={styles.statusButton}
+              onPress={() => onStatusChange('archived')}
+            >
+              <MaterialIcons
+                name="archive"
+                size={16}
+                color={Colors.onSurfaceVariant}
+              />
+              <Text style={styles.statusButtonText}>归档</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      )}
     </Card>
   );
 };
@@ -180,5 +228,28 @@ const styles = StyleSheet.create({
   dragHandle: {
     flexDirection: 'column',
     marginRight: Spacing.xs,
+  },
+  statusActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: Spacing.sm,
+    marginTop: Spacing.sm,
+  },
+  statusButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: Colors.surfaceContainerLowest,
+  },
+  statusButtonText: {
+    fontSize: FontSize.xs,
+    color: Colors.onSurfaceVariant,
+    fontWeight: '600',
+  },
+  resumeText: {
+    color: Colors.primary,
   },
 });

@@ -1,7 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const { authMiddleware } = require('../middleware/auth');
-const { upload } = require('../middleware/upload');
+const {
+  uploadMoment,
+  validateImage,
+  handleUploadError,
+} = require('../middleware/upload');
 const circleController = require('../controllers/circleController');
 
 // 获取所有动态
@@ -14,12 +18,14 @@ router.get(
 // 获取附近地点
 router.get(
   '/locations/nearby',
+  authMiddleware,
   circleController.getNearbyLocations.bind(circleController),
 );
 
 // 获取热门话题
 router.get(
   '/topics/trending',
+  authMiddleware,
   circleController.getTrendingTopics.bind(circleController),
 );
 
@@ -62,8 +68,15 @@ router.get(
 router.post(
   '/upload',
   authMiddleware,
-  upload.single('image'),
+  uploadMoment.single('image'),
+  handleUploadError,
+  validateImage,
   circleController.uploadImage.bind(circleController),
+);
+router.delete(
+  '/upload',
+  authMiddleware,
+  circleController.deleteUploads.bind(circleController),
 );
 
 // 发布动态
@@ -73,11 +86,23 @@ router.post(
   circleController.createMoment.bind(circleController),
 );
 
+router.delete(
+  '/:id',
+  authMiddleware,
+  circleController.deleteMoment.bind(circleController),
+);
+
 // 点赞
 router.post(
   '/:id/like',
   authMiddleware,
   circleController.likeMoment.bind(circleController),
+);
+
+router.delete(
+  '/:id/comments/:commentId',
+  authMiddleware,
+  circleController.deleteComment.bind(circleController),
 );
 
 // 取消点赞

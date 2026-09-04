@@ -12,11 +12,13 @@ export const usePlanManagement = () => {
   const [isManaging, setIsManaging] = useState(false);
   const [selectedPlans, setSelectedPlans] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const loadPlans = useCallback(
     async (userId?: string, silent = false) => {
       if (!userId && !currentUserId) {
         setPlans([]);
+        setError('');
         return;
       }
 
@@ -27,9 +29,13 @@ export const usePlanManagement = () => {
         const response = await planService.getPlans();
         if (response.success && response.data) {
           setPlans(response.data);
+          setError('');
+        } else {
+          setError(response.error || '计划加载失败，请重试');
         }
-      } catch (error) {
-        console.error('Failed to load plans:', error);
+      } catch (caught) {
+        console.error('Failed to load plans:', caught);
+        setError('计划加载失败，请重试');
       } finally {
         if (!silent) {
           setLoading(false);
@@ -136,6 +142,21 @@ export const usePlanManagement = () => {
     [currentUserId, loadPlans],
   );
 
+  const handleRemoveCheckIn = useCallback(
+    async (id: string, date: string): Promise<ApiResponse<Plan>> => {
+      if (!currentUserId) {
+        return { success: false, error: '当前用户未登录' };
+      }
+
+      const response = await planService.removeCheckIn(id, date);
+      if (response.success) {
+        await loadPlans(currentUserId);
+      }
+      return response;
+    },
+    [currentUserId, loadPlans],
+  );
+
   const handleReorderPlans = useCallback(
     async (newOrder: Plan[]) => {
       setPlans(newOrder);
@@ -170,6 +191,7 @@ export const usePlanManagement = () => {
   return {
     plans,
     loading,
+    error,
     isManaging,
     selectedPlans,
     handleCreatePlan,
@@ -181,5 +203,6 @@ export const usePlanManagement = () => {
     togglePlanSelection,
     refreshPlans: loadPlans,
     handleCheckIn,
+    handleRemoveCheckIn,
   };
 };

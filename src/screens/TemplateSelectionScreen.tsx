@@ -13,7 +13,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize, BorderRadius } from '../constants/theme';
 import { TopAppBar, Card } from '../components';
 import { templateService } from '../services/templateService';
-import type { TemplateDetail } from '../data/templates';
+import type { TemplateDetail } from '../types/domain';
 
 type RootStackParamList = {
   CreatePlan: { templateId?: string } | undefined;
@@ -23,20 +23,22 @@ const TemplateSelectionScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const [templates, setTemplates] = useState<TemplateDetail[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  const fetchTemplates = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const data = await templateService.getAllTemplates();
+      setTemplates(data);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : '模板加载失败');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchTemplates = async () => {
-      try {
-        setLoading(true);
-        const data = await templateService.getAllTemplates();
-        setTemplates(data);
-      } catch (error) {
-        console.error('Failed to fetch templates:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchTemplates();
   }, []);
 
@@ -80,54 +82,67 @@ const TemplateSelectionScreen: React.FC = () => {
           </Text>
         </View>
 
-        <View style={styles.templatesGrid}>
-          {templates.map(template => (
+        {error ? (
+          <View style={styles.errorState}>
+            <MaterialIcons name="cloud-off" size={48} color={Colors.outline} />
+            <Text style={styles.errorText}>{error}</Text>
             <TouchableOpacity
-              key={template.id}
-              style={styles.templateCard}
-              onPress={() => handleTemplateSelect(template.id)}
-              activeOpacity={0.7}
+              style={styles.retryButton}
+              onPress={fetchTemplates}
             >
-              <Card style={styles.cardInner}>
-                <View
-                  style={[
-                    styles.templateIcon,
-                    { backgroundColor: template.color },
-                  ]}
-                >
-                  <MaterialIcons
-                    name={template.icon as any}
-                    size={32}
-                    color={Colors.primary}
-                  />
-                </View>
-                <View style={styles.templateContent}>
-                  <View style={styles.templateHeader}>
-                    <Text style={styles.templateTitle}>{template.title}</Text>
-                    <View style={styles.categoryBadge}>
-                      <Text style={styles.categoryText}>
-                        {template.category}
+              <Text style={styles.retryText}>重新加载</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={styles.templatesGrid}>
+            {templates.map(template => (
+              <TouchableOpacity
+                key={template.id}
+                style={styles.templateCard}
+                onPress={() => handleTemplateSelect(template.id)}
+                activeOpacity={0.7}
+              >
+                <Card style={styles.cardInner}>
+                  <View
+                    style={[
+                      styles.templateIcon,
+                      { backgroundColor: template.color },
+                    ]}
+                  >
+                    <MaterialIcons
+                      name={template.icon as any}
+                      size={32}
+                      color={Colors.primary}
+                    />
+                  </View>
+                  <View style={styles.templateContent}>
+                    <View style={styles.templateHeader}>
+                      <Text style={styles.templateTitle}>{template.title}</Text>
+                      <View style={styles.categoryBadge}>
+                        <Text style={styles.categoryText}>
+                          {template.category}
+                        </Text>
+                      </View>
+                    </View>
+                    <Text style={styles.templateSubtitle}>
+                      {template.subtitle}
+                    </Text>
+                    <View style={styles.templateFooter}>
+                      <MaterialIcons
+                        name="schedule"
+                        size={16}
+                        color={Colors.onSurfaceVariant}
+                      />
+                      <Text style={styles.templateDuration}>
+                        {template.duration}天
                       </Text>
                     </View>
                   </View>
-                  <Text style={styles.templateSubtitle}>
-                    {template.subtitle}
-                  </Text>
-                  <View style={styles.templateFooter}>
-                    <MaterialIcons
-                      name="schedule"
-                      size={16}
-                      color={Colors.onSurfaceVariant}
-                    />
-                    <Text style={styles.templateDuration}>
-                      {template.duration}天
-                    </Text>
-                  </View>
-                </View>
-              </Card>
-            </TouchableOpacity>
-          ))}
-        </View>
+                </Card>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
 
         <TouchableOpacity
           style={styles.customButton}
@@ -254,6 +269,25 @@ const styles = StyleSheet.create({
   },
   customButton: {
     marginTop: Spacing.md,
+  },
+  errorState: {
+    alignItems: 'center',
+    paddingVertical: Spacing.xl,
+  },
+  errorText: {
+    color: Colors.onSurfaceVariant,
+    marginTop: Spacing.sm,
+  },
+  retryButton: {
+    marginTop: Spacing.md,
+    backgroundColor: Colors.primaryContainer,
+    borderRadius: BorderRadius.full,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+  },
+  retryText: {
+    color: Colors.onPrimaryContainer,
+    fontWeight: '600',
   },
   customCard: {
     flexDirection: 'row',

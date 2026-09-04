@@ -58,27 +58,13 @@ export function useGeolocation() {
           const city = address.city || address.region || '';
           const district = address.district || '';
 
-          // 根据真实城市动态生成“附近”地点推荐
-          const spots = [
-            {
-              name: `${city} · ${district} (当前位置)`,
-              sub: `${address.street || ''}${address.name || ''}`,
-              id: 'current',
-            },
-            {
-              name: `${district}中心广场`,
-              sub: `${address.street || ''}108号`,
-              id: 'p1',
-            },
-            { name: `${city}市民公园`, sub: '近绿化路', id: 'p2' },
-            { name: `${district}创意园区`, sub: '文化路22号', id: 'p3' },
-            { name: `星巴克 (${district}店)`, sub: '近地铁站', id: 'p4' },
-            { name: `${city}图书馆`, sub: '文渊北路', id: 'p5' },
-          ];
-
-          setNearbyLocations(spots);
-
-          return `${city}${district}${address.street || ''}`;
+          const name = [city, district, address.street, address.name]
+            .filter(Boolean)
+            .join('');
+          if (name) {
+            setNearbyLocations([{ name, sub: '设备定位结果', id: 'current' }]);
+            return name;
+          }
         }
       }
     } catch (error: any) {

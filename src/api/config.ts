@@ -1,52 +1,54 @@
-// API Configuration
-const devApiUrl =
-  process.env.EXPO_PUBLIC_API_URL || 'http://192.168.0.101:3000/api';
-const devServerUrl = devApiUrl.endsWith('/api')
-  ? devApiUrl.slice(0, -4)
-  : devApiUrl;
+import { Platform } from 'react-native';
+
+const configuredApiUrl = process.env.EXPO_PUBLIC_API_URL?.replace(/\/$/, '');
+const webApiUrl = (() => {
+  const location = (
+    globalThis as typeof globalThis & {
+      location?: { protocol: string; hostname: string };
+    }
+  ).location;
+  if (!location) return 'http://localhost:3000/api';
+  return `${location.protocol}//${location.hostname}:3000/api`;
+})();
+const baseUrl = configuredApiUrl || (Platform.OS === 'web' ? webApiUrl : '');
 
 export const API_CONFIG = {
-  BASE_URL: __DEV__ ? devApiUrl : 'https://api.puddingplan.com',
-  SERVER_URL: __DEV__ ? devServerUrl : 'https://api.puddingplan.com',
+  BASE_URL: baseUrl,
+  SERVER_URL: baseUrl.endsWith('/api') ? baseUrl.slice(0, -4) : baseUrl,
   TIMEOUT: 10000,
   RETRY_ATTEMPTS: 3,
 };
 
-// API Endpoints
 export const API_ENDPOINTS = {
-  // Plans
   PLANS: '/plans',
   PLAN_DETAIL: (id: string) => `/plans/${id}`,
   PLAN_CHECK_IN: (id: string) => `/plans/${id}/check-in`,
+  PLAN_CHECK_IN_DATE: (id: string, date: string) =>
+    `/plans/${id}/check-ins/${date}`,
   PLAN_REORDER: '/plans/reorder',
-
-  // Templates
   TEMPLATES: '/templates',
   TEMPLATE_DETAIL: (id: string) => `/templates/${id}`,
   TEMPLATES_BY_CATEGORY: (category: string) =>
     `/templates/category/${category}`,
-
-  // Circles
   CIRCLES: '/circles',
   CIRCLE_DETAIL: (id: string) => `/circles/${id}`,
-  CIRCLE_JOIN: (id: string) => `/circles/${id}/join`,
   BUDDIES: '/buddies',
-
-  // Calendar & Habits
+  BUDDY_RECOMMENDATIONS: '/buddies/recommendations',
+  BUDDY_REQUESTS: '/buddies/requests',
+  BLOCKS: '/blocks',
+  REPORTS: '/reports',
   CALENDAR: '/calendar',
   CALENDAR_QUOTE: '/calendar/quote',
   HABITS: '/habits',
-  HABIT_TOGGLE: (id: string) => `/habits/${id}/toggle`,
-
-  // Notifications & Badges
+  HABIT_DETAIL: (id: string) => `/habits/${id}`,
+  HABIT_CHECK_IN: (id: string, date: string) =>
+    `/habits/${id}/check-ins/${date}`,
+  HABIT_REORDER: '/habits/reorder',
+  ACTIVITY_HISTORY: '/activity/history',
   NOTIFICATIONS: '/notifications',
   BADGES: '/badges',
-
-  // User settings
   SETTINGS: '/settings',
   FEEDBACK: '/feedback',
-
-  // Rhythm Data
   RHYTHM_WEEK: '/rhythm/week',
   RHYTHM_MONTH: '/rhythm/month',
 };

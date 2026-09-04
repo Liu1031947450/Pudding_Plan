@@ -61,7 +61,11 @@ const CreatePlanScreen: React.FC = () => {
           const data = await templateService.getTemplateById(templateId);
           setTemplateData(data);
         } catch (error) {
-          console.error('Failed to fetch template:', error);
+          setToastType('error');
+          setToastMessage(
+            error instanceof Error ? error.message : '模板加载失败',
+          );
+          setToastVisible(true);
         }
       };
       fetchTemplateDetail();
@@ -202,7 +206,7 @@ const CreatePlanScreen: React.FC = () => {
       const newPlanData: Omit<Plan, 'id'> = {
         title: planName,
         totalDays: days,
-        // completedDate 是唯一事实源：编辑模式继承原有打卡记录，新建时为空数组
+        // completedDate 仅为服务端打卡记录投影；提交时由 API 层剔除
         completedDate: existingPlan?.completedDate ?? [],
         type: checkInMethod,
         remindSetting: reminders.map(r => ({

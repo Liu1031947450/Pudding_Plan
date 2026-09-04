@@ -1,9 +1,9 @@
 import React from 'react';
-import { View, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator, Platform, StyleSheet } from 'react-native';
 import {
-  DarkTheme,
   DefaultTheme,
   NavigationContainer,
+  createNavigationContainerRef,
 } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -22,8 +22,10 @@ import {
   MyCollectionsScreen,
   NotificationsScreen,
   CircleDetailScreen,
+  BuddyCenterScreen,
+  BlockedUsersScreen,
 } from '../screens';
-import { useAppSettings, useAuth } from '../contexts';
+import { useAuth } from '../contexts';
 import { Colors } from '../constants/theme';
 
 export type RootStackParamList = {
@@ -31,13 +33,15 @@ export type RootStackParamList = {
   Main: undefined;
   Settings: undefined;
   TemplateSelection: undefined;
-  CreatePlan: { templateId?: string } | undefined;
+  CreatePlan: { templateId?: string; planId?: string } | undefined;
   PostMoment: undefined;
   Badges: undefined;
   CheckInRecords: undefined;
   MyCollections: undefined;
   Notifications: undefined;
   CircleDetail: { circleId: string };
+  BuddyCenter: undefined;
+  BlockedUsers: undefined;
 };
 
 export type MainTabParamList = {
@@ -49,6 +53,7 @@ export type MainTabParamList = {
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
+const navigationRef = createNavigationContainerRef<RootStackParamList>();
 
 const MainNavigator: React.FC = () => {
   return (
@@ -69,25 +74,47 @@ const MainNavigator: React.FC = () => {
 
 const AppNavigator: React.FC = () => {
   const { user, isLoading } = useAuth();
-  const { isDark } = useAppSettings();
+
+  React.useEffect(() => {
+    if (Platform.OS === 'web') return;
+    let subscription: { remove: () => void } | undefined;
+    try {
+      const Notifications = require('expo-notifications');
+      const openTarget = (response: any) => {
+        const data = response?.notification?.request?.content?.data || {};
+        const navigate = () => {
+          if (!navigationRef.isReady()) return;
+          if (data.planId) {
+            navigationRef.navigate('CreatePlan', {
+              planId: String(data.planId),
+            });
+          } else if (data.habitId) {
+            (navigationRef as any).navigate('Main', { screen: 'Calendar' });
+          }
+        };
+        setTimeout(navigate, 300);
+      };
+      subscription =
+        Notifications.addNotificationResponseReceivedListener(openTarget);
+      Notifications.getLastNotificationResponseAsync().then((response: any) => {
+        if (response) openTarget(response);
+      });
+    } catch (error) {
+      console.warn('[Notification] 无法注册通知点击处理:', error);
+    }
+    return () => subscription?.remove();
+  }, []);
 
   if (isLoading) {
     return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: Colors.background,
-        }}
-      >
+      <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={Colors.primary} />
       </View>
     );
   }
 
   return (
-    <NavigationContainer theme={isDark ? DarkTheme : DefaultTheme}>
+    <NavigationContainer ref={navigationRef} theme={DefaultTheme}>
       <Stack.Navigator
         screenOptions={{
           headerShown: false,
@@ -159,9 +186,20 @@ const AppNavigator: React.FC = () => {
             presentation: 'card',
           }}
         />
+        <Stack.Screen name="BuddyCenter" component={BuddyCenterScreen} />
+        <Stack.Screen name="BlockedUsers" component={BlockedUsersScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
 };
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: Colors.background,
+  },
+});
 
 export default AppNavigator;

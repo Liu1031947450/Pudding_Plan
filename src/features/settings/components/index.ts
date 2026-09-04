@@ -7,3 +7,4 @@ export * from './FeedbackSheet';
 export * from './LegalDocSheet';
 export * from './NotificationSheet';
 export * from './ProfileEditSheet';
+export * from './PasswordSheet';

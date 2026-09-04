@@ -33,8 +33,8 @@ const UserSetting = sequelize.define(
     theme: {
       type: DataTypes.STRING(10),
       allowNull: false,
-      defaultValue: 'system',
-      validate: { isIn: [['light', 'dark', 'system']] },
+      defaultValue: 'light',
+      validate: { isIn: [['light']] },
     },
     fontSize: {
       type: DataTypes.STRING(10),

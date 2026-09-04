@@ -1,26 +1,16 @@
 import type { Plan } from '../types/domain';
+import { formatLocalDate, addLocalDays, parseLocalDate } from './date';
 
 // ─────────────────────────────────────────────
 //  内部辅助：把日期字符串统一为 'YYYY-MM-DD'
 // ─────────────────────────────────────────────
-const toDateStr = (date: Date): string => {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-};
-
-const yesterday = (dateStr: string): string => {
-  const d = new Date(dateStr);
-  d.setDate(d.getDate() - 1);
-  return toDateStr(d);
-};
+const yesterday = (dateStr: string): string => addLocalDays(dateStr, -1);
 
 // ─────────────────────────────────────────────
 //  基础查询
 // ─────────────────────────────────────────────
 
-/** 获取已打卡总天数（以 completedDate 为唯一事实源） */
+/** 获取已打卡总天数（completedDate 为服务端打卡记录的兼容投影） */
 export const getCompletedDays = (plan: Plan): number =>
   plan.completedDate.length;
 
@@ -34,7 +24,7 @@ export const hasCheckedIn = (plan: Plan, dateStr: string): boolean =>
 
 /** 是否今日已打卡 */
 export const hasCheckedInToday = (plan: Plan): boolean =>
-  hasCheckedIn(plan, toDateStr(new Date()));
+  hasCheckedIn(plan, formatLocalDate(new Date()));
 
 // ─────────────────────────────────────────────
 //  连续天数计算
@@ -48,7 +38,7 @@ export const getCurrentStreak = (plan: Plan): number => {
   if (plan.completedDate.length === 0) return 0;
 
   const sorted = [...plan.completedDate].sort().reverse(); // 最新在前
-  const todayStr = toDateStr(new Date());
+  const todayStr = formatLocalDate(new Date());
   const yesterdayStr = yesterday(todayStr);
 
   // 若今日和昨日都没打卡，则连续已中断，返回 0
@@ -77,8 +67,8 @@ export const getLongestStreak = (plan: Plan): number => {
   let current = 1;
 
   for (let i = 1; i < sorted.length; i++) {
-    const prev = new Date(sorted[i - 1]);
-    const curr = new Date(sorted[i]);
+    const prev = parseLocalDate(sorted[i - 1]);
+    const curr = parseLocalDate(sorted[i]);
     const diffDays = (curr.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24);
 
     if (diffDays === 1) {
@@ -101,7 +91,7 @@ export const getLongestStreak = (plan: Plan): number => {
  */
 export const isStreakBroken = (plan: Plan): boolean => {
   if (plan.completedDate.length === 0) return false;
-  const todayStr = toDateStr(new Date());
+  const todayStr = formatLocalDate(new Date());
   const yesterdayStr = yesterday(todayStr);
   return (
     !plan.completedDate.includes(todayStr) &&

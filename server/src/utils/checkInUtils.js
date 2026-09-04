@@ -12,6 +12,26 @@ const addDays = (dateString, amount) => {
   return toDateString(date);
 };
 
+const daysBetween = (from, to) => {
+  const fromDate = new Date(`${from}T12:00:00`);
+  const toDate = new Date(`${to}T12:00:00`);
+  return Math.round((toDate - fromDate) / 86400000);
+};
+
+const getCheckInDateError = (dateString, today = new Date()) => {
+  if (!isValidDateString(dateString)) return '打卡日期格式无效';
+  const difference = daysBetween(dateString, toDateString(today));
+  if (difference < 0) return '不能为未来日期打卡';
+  if (difference > 6) return '仅支持今天及过去6个自然日内补签或修改';
+  return null;
+};
+
+const isHabitScheduledForDate = (habit, dateString) => {
+  if (!habit.isActive || dateString < String(habit.startDate)) return false;
+  const weekday = new Date(`${dateString}T12:00:00`).getDay();
+  return Array.isArray(habit.weekdays) && habit.weekdays.includes(weekday);
+};
+
 const calculateCurrentStreak = (dates, today = new Date()) => {
   const uniqueDates = new Set(dates.map(String));
   if (uniqueDates.size === 0) return 0;
@@ -26,6 +46,42 @@ const calculateCurrentStreak = (dates, today = new Date()) => {
     cursor = addDays(cursor, -1);
   }
 
+  return streak;
+};
+
+const calculateHabitStreak = (habit, dates, today = new Date()) => {
+  if (
+    !habit?.isActive ||
+    !Array.isArray(habit.weekdays) ||
+    !habit.weekdays.length
+  ) {
+    return 0;
+  }
+  const completed = new Set(dates.map(String));
+  const startDate = String(habit.startDate);
+  let cursor = toDateString(today);
+
+  const previousScheduledDate = value => {
+    let candidate = value;
+    while (candidate >= startDate) {
+      const weekday = new Date(`${candidate}T12:00:00`).getDay();
+      if (habit.weekdays.includes(weekday)) return candidate;
+      candidate = addDays(candidate, -1);
+    }
+    return null;
+  };
+
+  cursor = previousScheduledDate(cursor);
+  if (!cursor) return 0;
+  if (cursor === toDateString(today) && !completed.has(cursor)) {
+    cursor = previousScheduledDate(addDays(cursor, -1));
+  }
+
+  let streak = 0;
+  while (cursor && completed.has(cursor)) {
+    streak += 1;
+    cursor = previousScheduledDate(addDays(cursor, -1));
+  }
   return streak;
 };
 
@@ -55,6 +111,9 @@ const validateCheckInDetails = (planType, { numericValue, note }) => {
 
 module.exports = {
   calculateCurrentStreak,
+  calculateHabitStreak,
+  getCheckInDateError,
+  isHabitScheduledForDate,
   isValidDateString,
   toDateString,
   validateCheckInDetails,

@@ -1,31 +1,24 @@
 import type { Buddy } from '../types/domain';
 import type { CircleListItem } from '../features/circle/types';
 import { circlesApi, buddiesApi } from '../api';
+import type { ApiResponse } from '../api/client';
 
 // Circle Service - handles circle and buddy operations
 class CircleService {
   // Get all buddies
-  async getBuddies(): Promise<Buddy[]> {
-    const response = await buddiesApi.getAll();
-    return response.data || [];
+  async getBuddies(): Promise<ApiResponse<Buddy[]>> {
+    return buddiesApi.getRecommendations();
   }
 
   // Get all circles
-  async getCircles(): Promise<CircleListItem[]> {
-    const response = await circlesApi.getAll();
-    return response.data || [];
+  async getCircles(): Promise<ApiResponse<CircleListItem[]>> {
+    return circlesApi.getAll();
   }
 
   // Get circle by ID
   async getCircleById(id: string): Promise<CircleListItem | undefined> {
     const response = await circlesApi.getById(id);
     return response.data;
-  }
-
-  // Join circle
-  async joinCircle(circleId: string): Promise<boolean> {
-    const response = await circlesApi.join(circleId);
-    return response.success;
   }
 
   // Toggle like status

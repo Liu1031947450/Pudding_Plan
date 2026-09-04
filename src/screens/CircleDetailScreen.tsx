@@ -23,7 +23,12 @@ const CircleDetailScreen: React.FC = () => {
         showBackButton
         onBackPress={() => navigation.goBack()}
       />
-      {circleId && <CircleDetailContent circleId={circleId} />}
+      {circleId && (
+        <CircleDetailContent
+          circleId={circleId}
+          onClose={() => navigation.goBack()}
+        />
+      )}
     </SafeAreaView>
   );
 };

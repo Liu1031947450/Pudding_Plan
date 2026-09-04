@@ -1,19 +1,20 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { AppText as Text } from '../../../components/common/AppText';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, FontSize } from '../../../constants/theme';
 import { Card } from '../../../components/common/Card';
 import { Button } from '../../../components/common/Button';
-import type { Plan, DayData } from '../../../types/domain';
+import type { Plan } from '../../../types/domain';
 
 interface TodayFocusSectionProps {
   plans: Plan[];
   selectedDay: number;
   month: number;
   year: number;
-  calendarDays: DayData[];
+  canEditDate: boolean;
   onCheckIn: (planId: string) => void;
+  onRemoveCheckIn: (planId: string) => void;
 }
 
 export const TodayFocusSection: React.FC<TodayFocusSectionProps> = ({
@@ -21,14 +22,16 @@ export const TodayFocusSection: React.FC<TodayFocusSectionProps> = ({
   selectedDay,
   month,
   year,
-  calendarDays,
+  canEditDate,
   onCheckIn,
+  onRemoveCheckIn,
 }) => {
-  const now = new Date();
-  const isTodaySelected =
-    selectedDay === now.getDate() &&
-    month === now.getMonth() + 1 &&
-    year === now.getFullYear();
+  const activePlans = plans.filter(
+    plan => (plan.status || 'active') === 'active',
+  );
+  const selectedDate = `${year}-${String(month).padStart(2, '0')}-${String(
+    selectedDay,
+  ).padStart(2, '0')}`;
 
   return (
     <View style={styles.habitsSection}>
@@ -46,15 +49,11 @@ export const TodayFocusSection: React.FC<TodayFocusSectionProps> = ({
       </View>
 
       <View style={styles.habitsList}>
-        {plans.map(plan => {
-          const selectedDayObj = calendarDays.find(d => d.day === selectedDay);
-          const isCompleted = selectedDayObj?.completedPlanIds
-            ? selectedDayObj.completedPlanIds.includes(plan.id)
-            : false;
-          const selectedDate = `${year}-${String(month).padStart(
-            2,
-            '0',
-          )}-${String(selectedDay).padStart(2, '0')}`;
+        {activePlans.length === 0 && (
+          <Text style={styles.emptyText}>暂无进行中的计划</Text>
+        )}
+        {activePlans.map(plan => {
+          const isCompleted = plan.completedDate.includes(selectedDate);
           const record = plan.checkInRecords?.find(
             item => item.date === selectedDate,
           );
@@ -73,13 +72,13 @@ export const TodayFocusSection: React.FC<TodayFocusSectionProps> = ({
               : '点击盖章';
           if (isCompleted) {
             buttonTitle =
-              isTodaySelected && plan.type === 1
+              canEditDate && plan.type === 1
                 ? '编辑数值'
-                : isTodaySelected && plan.type === 2
+                : canEditDate && plan.type === 2
                 ? '编辑日记'
-                : '已完成';
-          } else if (!isTodaySelected) {
-            buttonTitle = '非今日';
+                : '撤销打卡';
+          } else if (!canEditDate) {
+            buttonTitle = '不可补签';
           }
 
           return (
@@ -115,19 +114,30 @@ export const TodayFocusSection: React.FC<TodayFocusSectionProps> = ({
                   </Text>
                 </View>
               </View>
-              <Button
-                title={buttonTitle}
-                onPress={() => onCheckIn(plan.id)}
-                variant={
-                  isCompleted
-                    ? 'outline'
-                    : isTodaySelected
-                    ? 'primary'
-                    : 'outline'
-                }
-                size="small"
-                disabled={!isTodaySelected || (isCompleted && plan.type === 0)}
-              />
+              <View style={styles.actionGroup}>
+                <Button
+                  title={buttonTitle}
+                  onPress={() =>
+                    isCompleted && plan.type === 0
+                      ? onRemoveCheckIn(plan.id)
+                      : onCheckIn(plan.id)
+                  }
+                  variant={
+                    isCompleted
+                      ? 'outline'
+                      : canEditDate
+                      ? 'primary'
+                      : 'outline'
+                  }
+                  size="small"
+                  disabled={!canEditDate}
+                />
+                {isCompleted && plan.type !== 0 && canEditDate && (
+                  <TouchableOpacity onPress={() => onRemoveCheckIn(plan.id)}>
+                    <Text style={styles.undoText}>撤销</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
             </Card>
           );
         })}
@@ -198,5 +208,18 @@ const styles = StyleSheet.create({
   habitSubtitle: {
     fontSize: FontSize.xs,
     color: Colors.onSurfaceVariant,
+  },
+  actionGroup: {
+    alignItems: 'center',
+    gap: 4,
+  },
+  undoText: {
+    fontSize: FontSize.xs,
+    color: Colors.error,
+  },
+  emptyText: {
+    paddingVertical: Spacing.md,
+    color: Colors.onSurfaceVariant,
+    textAlign: 'center',
   },
 });

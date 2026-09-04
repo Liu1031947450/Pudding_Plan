@@ -87,4 +87,5 @@ dist/
 .env.*
 !.env.example
 server/.env
-
+server/uploads/*
+!server/uploads/.gitkeep

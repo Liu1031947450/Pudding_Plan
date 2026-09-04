@@ -57,31 +57,11 @@ export const useCalendarData = () => {
     [currentUserId, loadData],
   );
 
-  const updateDayActivity = useCallback(
-    async (
-      day: number,
-      hasActivity: boolean,
-      activityType?: 'primary' | 'secondary' | 'tertiary',
-    ) => {
-      const response = await calendarService.updateDayActivity(
-        day,
-        hasActivity,
-        activityType,
-      );
-      if (response.success) {
-        await loadData();
-      }
-      return response.success;
-    },
-    [loadData],
-  );
-
   return {
     calendarData,
     habits,
     loading,
     toggleHabit,
-    updateDayActivity,
     refreshData: loadData,
   };
 };

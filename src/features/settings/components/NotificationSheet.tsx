@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   Switch,
   FlatList,
+  Platform,
 } from 'react-native';
 import { AppText as Text } from '../../../components/common/AppText';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -57,6 +58,18 @@ export const NotificationSheet: React.FC<NotificationSheetProps> = ({
   return (
     <View style={styles.container}>
       <View style={styles.content}>
+        {Platform.OS === 'web' && (
+          <View style={styles.webNotice}>
+            <MaterialIcons
+              name="info-outline"
+              size={20}
+              color={Colors.primary}
+            />
+            <Text style={styles.webNoticeText}>
+              Web 演示版不支持系统通知，请在移动端配置提醒。
+            </Text>
+          </View>
+        )}
         <View style={styles.row}>
           <View style={styles.rowInfo}>
             <Text style={styles.rowTitle}>开启每日提醒</Text>
@@ -67,6 +80,7 @@ export const NotificationSheet: React.FC<NotificationSheetProps> = ({
           <Switch
             value={enabled}
             onValueChange={setEnabled}
+            disabled={Platform.OS === 'web'}
             trackColor={{ false: Colors.outlineVariant, true: Colors.primary }}
             thumbColor={Colors.white}
           />
@@ -125,7 +139,7 @@ export const NotificationSheet: React.FC<NotificationSheetProps> = ({
         )}
 
         <Button
-          title="保存设置"
+          title={Platform.OS === 'web' ? 'Web 端不可用' : '保存设置'}
           onPress={() =>
             onSave(
               enabled,
@@ -135,6 +149,7 @@ export const NotificationSheet: React.FC<NotificationSheetProps> = ({
             )
           }
           style={styles.saveButton}
+          disabled={Platform.OS === 'web'}
         />
       </View>
     </View>
@@ -147,6 +162,20 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: Spacing.xl,
+  },
+  webNotice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    padding: Spacing.md,
+    borderRadius: BorderRadius.md,
+    backgroundColor: Colors.primaryContainer,
+    marginBottom: Spacing.md,
+  },
+  webNoticeText: {
+    flex: 1,
+    fontSize: FontSize.sm,
+    color: Colors.onPrimaryContainer,
   },
   row: {
     flexDirection: 'row',

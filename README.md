@@ -1,126 +1,189 @@
-# PuddingPlan (布丁计划)
+# 布丁计划 / PuddingPlan
 
-一个使用 [**React Native**](https://reactnative.dev) + [**Expo**](https://expo.dev) 构建的跨平台移动应用，专注于习惯养成和自律打卡，配备完整的后端 API 与实时通知服务。
+布丁计划是一个面向本地演示的全栈习惯养成产品。当前 `1.0.0` 以 Web 为主要验收端，提供真实 PostgreSQL 持久化、计划与习惯打卡、社区互动、成长搭子、通知、内容治理和账号管理。
 
-## ✨ 功能特性
+> 当前定位是“可完整操作的本地全栈演示版”，不是已上线的生产服务。Android/iOS 代码继续保留，但本轮不声明真机、安装包或应用商店验证结果。
 
-- **计划管理**: 创建、编辑、删除习惯打卡计划，支持多种模板
-- **多种打卡方式**: 支持盖章打卡、数值记录、文字日记三种打卡模式
-- **里程碑奖励**: 设置阶段性目标和奖励，激励持续打卡
-- **成就系统**: 解锁成就徽章，记录成长历程
-- **日历视图**: 直观查看打卡历史和活动记录，支持每日金句展示
-- **节奏图表**: 可视化展示打卡频率和坚持情况
-- **圈子与社区**: 类似社交平台的瀑布流动态展示，支持发布图文、关注伙伴
-- **社交互动**: 完整的点赞、收藏、评论及回复功能
-- **实时通知**: 集成 Socket.io，实现即时接收社交互动通知（点赞、评论等）
-- **个人中心**: 管理个人资料、成就记录及我的收藏（支持长按取消收藏）
-- **后端架构**: 使用 Sequelize ORM (PostgreSQL/SQLite) 实现持久化存储，支持 WebSocket 通信
+## 已实现能力
 
-## 📁 项目结构
+- 计划：创建、编辑、排序、删除、暂停、恢复、归档，以及盖章、数值、日记三种打卡。
+- 习惯：创建、编辑、停用、删除、排序、按星期重复、提醒时间、补签与撤销。
+- 成长：本地自然日统计、最近 7 个自然日打卡窗口、月历、节奏图、连续天数、活动历史和徽章。
+- 社区：图文动态、公开/仅搭子/仅自己可见、点赞、收藏、评论、回复、关注和地点输入。
+- 搭子：标签推荐、请求、接受、拒绝、取消、解除关系和限频鼓励。
+- 治理：举报后立即隐藏、拉黑后双向隔离、作者删除内容，以及命令行举报处理。
+- 账号：注册协议确认、一键演示登录、资料与头像、修改密码、清除业务数据和注销账号。
+- 通知：站内通知与 Socket.io 实时更新；移动端保留本地提醒能力，Web 明确不提供系统通知。
 
-```
-Pudding_Plan/
-├── android/                    # Android 原生代码
-├── ios/                        # iOS 原生代码
-├── server/                     # 后端 API 服务
-│   ├── src/                    # 后端源代码
-│   │   ├── models/             # Sequelize 数据库模型
-│   │   ├── routes/             # API 业务路由
-│   │   ├── middleware/         # JWT 与权限中间件
-│   │   ├── utils/              # Socket.io、文件上传、DB 初始化工具
-│   │   └── index.js            # 服务入口 (Express + WebSocket)
-│   ├── uploads/                # 用户图片存储目录
-│   ├── package.json            # 后端依赖配置
-│   └── README.md               # 后端说明文档
-├── src/                        # 前端源代码目录
-│   ├── api/                    # 接口封装与全局配置
-│   ├── components/             # 通用基础 UI 组件
-│   ├── features/               # 领域业务模块 (Plan, Calendar, Circle, Settings)
-│   ├── hooks/                  # 全局共享自定义 Hooks
-│   ├── navigation/             # AppNavigator 路由栈配置
-│   ├── screens/                # 业务页面组件 (首页, 详情页, 收藏页, 发布页等)
-│   ├── services/               # 业务逻辑与数据转换服务
-│   ├── types/                  # 全局 TypeScript 类型声明
-│   └── utils/                  # 统计工具、URL 处理、日期转换
-├── App.tsx                     # 应用入口
-├── index.js                    # React Native 入口
-└── package.json                # 前端配置说明文件
-```
+## 技术栈
 
-## 🚀 快速开始
+- 前端：React 19、React Native 0.83、Expo 55、React Navigation、React Native Web、Webpack。
+- 后端：Node.js、Express、Sequelize、PostgreSQL、Socket.io、JWT、Multer。
+- 测试：Jest、Node.js Test Runner、ESLint、Prettier、TypeScript。
 
-> **注意**: 在开始之前，请确保已安装 Node.js (>= 22.11.0) 和 npm/yarn。
+## 环境要求
 
-### 第一步：安装依赖
+- Node.js `>= 20`
+- npm
+- PostgreSQL 18（仓库中的数据库启动命令按本机 macOS 安装路径配置）
 
-#### 前端依赖
+## 首次启动
 
-在项目根目录运行：
+### 1. 安装依赖
 
-```sh
+```bash
 npm install
+npm install --prefix server
 ```
 
-#### 后端依赖
+### 2. 配置后端
 
-在 `server` 目录运行：
-
-```sh
-cd server && npm install && cd ..
+```bash
+cp server/.env.example server/.env
 ```
 
-### 第二步：启动服务
+本地演示配置：
 
-#### 启动后端 API 服务
-
-在 `server` 目录运行：
-
-```sh
-cd server && npm run dev
+```dotenv
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=pudding_plan_demo
+DB_USER=postgres
+DB_PASSWORD=postgres123
+JWT_SECRET=请替换为本机随机长字符串
+JWT_EXPIRES_IN=7d
+PORT=3000
+NODE_ENV=development
+CORS_ORIGINS=http://localhost:8080
 ```
 
-后端服务默认运行在 `http://0.0.0.0:3000` (API 路径为 `/api`)。
+生成 JWT 密钥：
 
-#### 启动前端 Expo 服务
-
-在项目根目录运行：
-
-```sh
-npm start
+```bash
+node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
 ```
 
-### 第三步：在设备上运行
+`server/.env` 已被 Git 忽略，不要提交真实密码或密钥。
 
-1. **Expo Go**: 在手机上安装 Expo Go App，扫描终端二维码。
-2. **模拟器**: 在终端按 `a` (Android) 或 `i` (iOS) 启动。
+### 3. 启动 PostgreSQL
 
-## 🔧 技术栈
+```bash
+npm run db:start
+```
 
-### 前端
+该命令会调用：
 
-- **框架**: React Native + Expo
-- **状态管理**: React Hooks + Context API
-- **路由**: React Navigation (Stack & Tabs)
-- **实时通信**: Socket.io-client
-- **UI 组件**: Material Design 3 风格，Lucide Icons, Expo Linear Gradient
+```bash
+sudo -u postgres /Library/PostgreSQL/18/bin/pg_ctl -D /Library/PostgreSQL/18/data start
+```
 
-### 后端
+首次执行需要输入 macOS 的 `sudo` 密码。可用 `npm run db:status` 和 `npm run db:stop` 查看状态或停止服务。
 
-- **引擎**: Node.js + Express
-- **数据库**: Sequelize ORM (PostgreSQL / SQLite)
-- **实时性**: Socket.io (WebSocket)
-- **认证**: JWT (jsonwebtoken)
-- **存储**: Multer (本地磁盘上传)
+### 4. 初始化演示库
 
-## 📊 重大更新记录
+```bash
+npm run demo:reset
+npm run demo:seed
+```
 
-### 2026-04-15 全面社交化与持久化升级
+- `demo:reset` 会删除并重建演示库。
+- 安全保护要求数据库名必须精确为 `pudding_plan_demo`。
+- 原有 `pudding_plan` 数据库不会被这些脚本操作。
+- `demo:seed` 会执行迁移并写入确定性演示数据。
 
-- **数据库迁移**: 从内存数据库全量迁移至 Sequelize ORM 架构。
-- **动态详情页**: 实现了完整的动态阅读、点赞、收藏及瀑布流展示 logic。
-- **实时系统**: 引入 Socket.io 共享管理器，实现评论与点赞的即时通知推送。
-- **收藏管理**: 升级“我的收藏”为瀑布流布局，并支持长按取消收藏。
+### 5. 启动后端与 Web
 
----
+分别打开两个终端：
 
-© 2026 PuddingPlan (布丁计划)
+```bash
+npm run server
+```
+
+```bash
+npm run web
+```
+
+访问 `http://localhost:8080`。Web 默认连接当前页面主机的 `3000` 端口。
+
+也可以使用以下命令重建演示库并同时启动前后端：
+
+```bash
+npm run demo
+```
+
+## 演示账号
+
+登录页提供一键填充入口，三个账号密码相同。
+
+| 用户   | 手机号        | 密码         | 用途                                   |
+| ------ | ------------- | ------------ | -------------------------------------- |
+| 小布丁 | `13800000001` | `Pudding123` | 主要验收账号，含计划、习惯、搭子和通知 |
+| 晨光   | `13800000002` | `Pudding123` | 社区作者与已接受搭子                   |
+| 松露   | `13800000003` | `Pudding123` | 待处理搭子请求与私密内容               |
+
+## API 地址
+
+- Web：未配置时自动使用 `http://当前页面主机:3000/api`。
+- iOS/Android：必须设置 `EXPO_PUBLIC_API_URL`，地址应使用设备可访问的开发机局域网 IP。
+- 后端静态图片地址：`http://后端主机:3000/uploads/...`。
+
+示例：
+
+```bash
+EXPO_PUBLIC_API_URL=http://<开发机局域网IP>:3000/api npm start
+```
+
+## 常用命令
+
+| 命令                                        | 说明                               |
+| ------------------------------------------- | ---------------------------------- |
+| `npm run demo:reset`                        | 安全重建 `pudding_plan_demo`       |
+| `npm run demo:seed`                         | 执行迁移并写入演示数据             |
+| `npm run demo`                              | 重建演示库并启动 API 与 Web        |
+| `npm run server`                            | 启动后端，默认端口 `3000`          |
+| `npm run web`                               | 启动 Web，默认端口 `8080`          |
+| `npm run typecheck`                         | TypeScript 检查                    |
+| `npm test -- --runInBand`                   | 前端测试                           |
+| `npm run lint`                              | ESLint 检查                        |
+| `npm run format:check`                      | Prettier 检查                      |
+| `npm run web:build`                         | Web 生产构建                       |
+| `npm run --prefix server test`              | 后端单元测试                       |
+| `npm run --prefix server db:migrate:status` | 查看迁移状态                       |
+| `npm run --prefix server db:verify`         | 校验表、字段、索引、约束和外键孤儿 |
+| `npm run --prefix server test:api`          | 对已启动的后端执行多账号 API 冒烟  |
+| `npm run --prefix server moderate -- list`  | 查看举报记录                       |
+| `npm run verify`                            | 执行前端检查、构建和后端验证       |
+
+## 内容治理命令
+
+```bash
+npm run --prefix server moderate -- list
+npm run --prefix server moderate -- reject <reportId>
+npm run --prefix server moderate -- delete <reportId>
+```
+
+治理脚本同样只允许连接 `pudding_plan_demo`。删除动态时会清理本地图片；删除评论时会同步修正评论计数。
+
+## 仓库结构
+
+```text
+Pudding_Plan/
+├── src/                 # React Native / Web 共享前端
+├── server/              # Express、Sequelize、迁移、种子和测试
+├── android/             # Android 原生工程（仅保持兼容）
+├── ios/                 # iOS 原生工程（仅保持兼容）
+├── public/              # Web HTML 模板
+├── README.md            # 本地演示说明
+├── PROJECT_CONTEXT.md   # 架构、模型、约束和生产限制
+└── API_DOCS.md          # 当前真实 API 文档
+```
+
+## 当前边界
+
+- 不包含短信验证码、AI、会员、支付、私聊、桌面小组件或公开部署。
+- 图片保存在本地磁盘，不是对象存储；举报由命令行处理，不是管理后台。
+- 登录限频与 WebSocket 在线状态保存在单进程内存中，不适用于多实例生产环境。
+- 定位依赖浏览器/设备授权，也可手工输入；Web 不提供系统通知。
+- Android/iOS 原生构建和商店合规仍需在后续发布阶段单独验证。
+
+更多实现细节见 `PROJECT_CONTEXT.md`，接口定义见 `API_DOCS.md`。

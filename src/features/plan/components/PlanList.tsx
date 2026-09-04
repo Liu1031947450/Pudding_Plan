@@ -7,6 +7,7 @@ import { PlanCard } from './PlanCard';
 import type { Plan } from '../../../types/domain';
 
 interface PlanListProps {
+  title?: string;
   plans: Plan[];
   isManaging: boolean;
   selectedPlans: Set<string>;
@@ -16,9 +17,16 @@ interface PlanListProps {
   onMovePlan: (fromIndex: number, toIndex: number) => void;
   onCreatePlan: () => void;
   onPlanPress?: (plan: Plan) => void;
+  onStatusChange?: (
+    plan: Plan,
+    status: 'active' | 'paused' | 'archived',
+  ) => void;
+  showManagement?: boolean;
+  showCreate?: boolean;
 }
 
 export const PlanList: React.FC<PlanListProps> = ({
+  title = '正在进行',
   plans,
   isManaging,
   selectedPlans,
@@ -28,16 +36,21 @@ export const PlanList: React.FC<PlanListProps> = ({
   onMovePlan,
   onCreatePlan,
   onPlanPress,
+  onStatusChange,
+  showManagement = true,
+  showCreate = true,
 }) => {
   return (
     <View style={styles.section}>
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>正在进行</Text>
-        <TouchableOpacity onPress={onToggleManage}>
-          <Text style={styles.manageText}>
-            {isManaging ? '完成' : '管理计划'}
-          </Text>
-        </TouchableOpacity>
+        <Text style={styles.sectionTitle}>{title}</Text>
+        {showManagement && (
+          <TouchableOpacity onPress={onToggleManage}>
+            <Text style={styles.manageText}>
+              {isManaging ? '完成' : '管理计划'}
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       {isManaging && selectedPlans.size > 0 && (
@@ -65,15 +78,18 @@ export const PlanList: React.FC<PlanListProps> = ({
             canMoveUp={index > 0}
             canMoveDown={index < plans.length - 1}
             onPress={() => onPlanPress?.(plan)}
+            onStatusChange={status => onStatusChange?.(plan, status)}
           />
         ))}
 
-        <TouchableOpacity style={styles.addPlanCard} onPress={onCreatePlan}>
-          <View style={styles.addIconWrapper}>
-            <MaterialIcons name="add" size={24} color={Colors.outline} />
-          </View>
-          <Text style={styles.addText}>开启新计划</Text>
-        </TouchableOpacity>
+        {showCreate && (
+          <TouchableOpacity style={styles.addPlanCard} onPress={onCreatePlan}>
+            <View style={styles.addIconWrapper}>
+              <MaterialIcons name="add" size={24} color={Colors.outline} />
+            </View>
+            <Text style={styles.addText}>开启新计划</Text>
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );
